@@ -1,1 +1,5 @@
-export function someGetter(/* state */) {}
+export default {
+  isAuthenticated(state) {
+    return state.authenticated;
+  }
+}

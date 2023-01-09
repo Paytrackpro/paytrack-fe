@@ -28,7 +28,7 @@
                     lazy-rules
                     stack-label
                   />
-                  <q-btn label="Sign in" to="/" type="button" color="primary" class="full-width" />
+                  <q-btn label="Sign in" to="/" type="submit" color="primary" class="full-width" @click="login" />
                 </q-form>
               </q-card-section>
             </q-card>
@@ -43,25 +43,35 @@
 </template>
 
 <script>
-import { defineComponent } from "vue"
-import { ref } from "vue"
-
-export default defineComponent({
-  setup() {
+export default {
+  data() {
     return {
-      username: ref(""),
-      password: ref(""),
+      username: "",
+      password: "",
     }
   },
-})
+  computed: {
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn
+    },
+  },
+  methods: {
+    login() {
+      this.$store.dispatch("auth/login", {
+        username: this.username,
+        password: this.password,
+      })
+    },
+  },
+}
 </script>
 
 <style lang="scss">
-  .link {
-    text-decoration: none;
+.link {
+  text-decoration: none;
 
-    &:hover {
-      text-decoration: underline;
-    }
+  &:hover {
+    text-decoration: underline;
   }
+}
 </style>
