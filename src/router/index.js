@@ -23,9 +23,9 @@ router.beforeEach((to, from, next) => {
 
   if (authRequired && !isAuthenticated) {
     next({ name: 'Login' });
-  } else {
-    next();
   }
+
+  next();
 });
 
 export default router;

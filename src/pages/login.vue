@@ -2,7 +2,7 @@
   <q-layout>
     <q-page-container>
       <q-page>
-        <div v-bind:style="{ maxWidth: '28rem' }" class="flex flex-center q-mx-auto">
+        <div v-bind:style="{ maxWidth: '28rem' }" class="flex flex-center q-mx-auto window-height">
           <div class="column justify-center q-pa-xl col-grow">
             <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
               <img v-bind:style="{ height: '2em' }" src="~assets/team_raedah.svg" />
