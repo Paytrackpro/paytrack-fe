@@ -11,23 +11,31 @@
             <q-card class="col" flat bordered>
               <q-card-section class="q-pa-lg">
                 <q-form class="q-gutter-y-md">
-                  <q-input
-                    filled
-                    v-model="username"
-                    label="Username"
-                    placeholder="Your user name"
-                    lazy-rules
-                    stack-label
-                  />
-                  <q-input
-                    type="password"
-                    filled
-                    v-model="password"
-                    label="Password"
-                    placeholder="Password"
-                    lazy-rules
-                    stack-label
-                  />
+                  <div>
+                    <p class="q-mt-none q-mb-xs text-weight-medium">User name</p>
+                    <q-input v-model="username" placeholder="Your user name" outlined dense lazy-rules stack-label>
+                    </q-input>
+                  </div>
+                  <div>
+                    <p class="q-mt-none q-mb-xs text-weight-medium">Password</p>
+                    <q-input
+                      :type="isPwd ? 'password' : 'text'"
+                      v-model="password"
+                      outlined
+                      dense
+                      placeholder="Password"
+                      lazy-rules
+                      stack-label
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          :name="isPwd ? 'visibility_off' : 'visibility'"
+                          class="cursor-pointer"
+                          @click="isPwd = !isPwd"
+                        />
+                      </template>
+                    </q-input>
+                  </div>
                   <q-btn label="Sign in" to="/" type="submit" color="primary" class="full-width" @click="login" />
                 </q-form>
               </q-card-section>
@@ -48,6 +56,7 @@ export default {
     return {
       username: "",
       password: "",
+      isPwd: true,
     }
   },
   computed: {
