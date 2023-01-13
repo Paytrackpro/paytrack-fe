@@ -16,6 +16,7 @@
     * Payment requests that the receiver has marked as paid can not be edited.
     * All users will have a view to see all incoming payment requests for them to pay.
     * Users submit a payment txid when marking a payment request as payed.
+    * Use block explorer on back-end to verify that the payment was actually received. Re-use Bonzai/instantswap code for this.
 
 ## Payment Reminders (iou)
 
@@ -36,4 +37,16 @@
     * Passkeys for login
     * Support non cryptos for payment? Cash, Gold, Paypal, CashApp, Venmo.
     * Bulk payment feature like mgmt.
-    * Ability to assign other users to approve invoice line items for invoices from other specific users, like mgmt.
+    * Ability to assign other user(s) to approve invoices for invoices from other specific users, like mgmt.
+
+## Default User Info
+    * Username
+    * Display Name [optional]
+    * Password w/ verification
+    * email address [optional] *note stating that email would be required for pw recovery
+
+## User Preferences
+    * Default Payment Address & Coin Type (BTC, LTC, DCR) [optional not required]
+    In the future:
+    * TOTP support (recovery codes) w/ code generator (no sms)
+    * Passkey support (may replace TOTP)
