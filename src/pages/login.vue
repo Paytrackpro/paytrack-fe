@@ -59,16 +59,18 @@ export default {
       isPwd: true,
     }
   },
-  computed: {
-    loggedIn() {
-      return this.$store.state.auth.status.loggedIn
-    },
-  },
   methods: {
     login() {
       this.$store.dispatch("auth/login", {
         username: this.username,
         password: this.password,
+      }).catch((err) => {
+        this.$q.notify({
+          message: 'Login fail',
+          color:    'negative',
+          icon:     'warning',
+          caption:  err.response.data.message,
+        })
       })
     },
   },
