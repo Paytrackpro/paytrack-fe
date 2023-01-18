@@ -10,7 +10,9 @@
 
     * Payment requests can be sent to ANY user.
     * Payment request feature would be more basic than mgmt. This would be a more generic type of invoice. Lets look at standard invoice templates as a model for this. Should allow for a very simple payment request, or for it to be more professional. This should be very simple to begin with.
-      * Date, From, To, Line Items (date,description, hours, amount), total, payment options and addresses.
+    * Basic View:
+      - Date, From, To, Amount, payment options and addresses.
+      - **Show More** reveals: Hourly Rate, (converts Description and Amount into first item), Line Items (multiple expanding, always one empty row). An item is a description and hours OR cost. If hours is filled in, cost is auto calculated based on rate. Total at bottom auto calculated
     * All final details will be saved in invoice data so that it is immutable. (such as if a user later modifies their default payment addresses)
     * Users can still edit payment requests that have not been payed. Maintain version history of edited payment requests?
     * Payment requests that the receiver has marked as paid can not be edited.
