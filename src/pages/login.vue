@@ -1,40 +1,81 @@
 <template>
   <q-layout>
     <q-page-container>
-      <q-page class="flex bg-image flex-center">
-        <q-card v-bind:style="{ width: '30%' }">
-          <q-card-section>
-            <div class="text-center q-pt-lg">
-              <div class="col text-h6 ellipsis">Log in</div>
+      <q-page>
+        <div v-bind:style="{ maxWidth: '28rem' }" class="flex flex-center q-mx-auto window-height">
+          <div class="column justify-center q-pa-xl col-grow">
+            <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
+              <img v-bind:style="{ height: '2em' }" src="~assets/team_raedah.svg" />
+              <span class="text-bold">MGMT</span>
             </div>
-          </q-card-section>
-          <q-card-section>
-            <q-form class="q-gutter-md">
-              <q-input filled v-model="username" label="Username" lazy-rules />
-
-              <q-input type="password" filled v-model="password" label="Password" lazy-rules />
-
-              <div>
-                <q-btn label="Login" to="/" type="button" color="primary" />
-              </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
+            <q-card class="col" flat bordered>
+              <q-card-section class="q-pa-lg">
+                <q-form class="q-gutter-y-md">
+                  <div>
+                    <p class="q-mt-none q-mb-xs text-weight-medium">User name</p>
+                    <q-input v-model="username" placeholder="Your user name" outlined dense lazy-rules stack-label>
+                    </q-input>
+                  </div>
+                  <div>
+                    <p class="q-mt-none q-mb-xs text-weight-medium">Password</p>
+                    <q-input
+                      :type="isPwd ? 'password' : 'text'"
+                      v-model="password"
+                      outlined
+                      dense
+                      placeholder="Password"
+                      lazy-rules
+                      stack-label
+                    >
+                      <template v-slot:append>
+                        <q-icon
+                          :name="isPwd ? 'visibility_off' : 'visibility'"
+                          class="cursor-pointer"
+                          @click="isPwd = !isPwd"
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                  <q-btn label="Sign in" to="/" type="submit" color="primary" class="full-width" @click="login" />
+                </q-form>
+              </q-card-section>
+            </q-card>
+            <div class="text-center text-grey-6 q-mt-md">
+              Don't have account yet? <a class="link text-light-blue-6" href="/apply">Apply now</a>
+            </div>
+          </div>
+        </div>
       </q-page>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import { defineComponent } from "vue"
-import { ref } from "vue"
-
-export default defineComponent({
-  setup() {
+export default {
+  data() {
     return {
-      username: ref("admin"),
-      password: ref("12345"),
+      username: "",
+      password: "",
+      isPwd: true,
     }
   },
-})
+  methods: {
+    login() {
+      this.$store.dispatch("auth/login", {
+        username: this.username,
+        password: this.password,
+      })
+    },
+  },
+}
 </script>
+
+<style lang="scss">
+.link {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+</style>
