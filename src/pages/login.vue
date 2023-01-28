@@ -64,13 +64,6 @@ export default {
       this.$store.dispatch("auth/login", {
         username: this.username,
         password: this.password,
-      }).catch((err) => {
-        this.$q.notify({
-          message: 'Login fail',
-          color:    'negative',
-          icon:     'warning',
-          caption:  err.response.data.message,
-        })
       })
     },
   },

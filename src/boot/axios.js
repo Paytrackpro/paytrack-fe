@@ -1,5 +1,7 @@
-import Vue from 'vue'
 import axios from 'axios'
+import { Notify } from 'quasar'
+import Vue from 'vue'
+
 
 Vue.prototype.$axios = axios
 // ^ ^ ^ this will allow you to use this.$axios
@@ -13,6 +15,11 @@ Vue.prototype.$api = api
 api.interceptors.response.use(
   response  => {},
   error     => {
+    Notify.create({
+      message: error.response ? error.response.data.message : error.message,
+      color: "negative",
+      icon: "warning",
+    })
     return Promise.reject(error);
   }
 );
