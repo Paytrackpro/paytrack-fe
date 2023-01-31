@@ -7,6 +7,11 @@ const routes = [
     path: "/login",
     component: () => import("pages/login.vue"),
   },
+
+  {
+    path: "/user",
+    component: () => import("pages/UserPage.vue"),
+  },
 ]
 
 export default routes
