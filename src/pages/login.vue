@@ -54,7 +54,7 @@
                 </q-card-section>
               </q-card>
               <div class="text-center text-grey-6 q-mt-md">
-                Don't have account yet? <a class="link text-light-blue-6" href="/apply">Apply now</a>
+                Don't have account yet? <a class="link text-light-blue-6" href="/register">Apply now</a>
               </div>
             </div>
           </div>
@@ -87,7 +87,6 @@ export default {
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message
         })
-
     },
   },
 }
