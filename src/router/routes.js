@@ -1,8 +1,25 @@
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: () => import("pages/home.vue"),
+    component: () => import("layouts/main.vue"),
+    children: [
+      {
+        path: "/",
+        name: "Home",
+        component: () => import("pages/home.vue"),
+        meta: {
+          title: 'Home'
+        },
+      },
+      {
+        path: "/users",
+        name: "UserList",
+        component: () => import("pages/users/list.vue"),
+        meta: {
+          title: 'User Management'
+        }
+      },
+    ],
   },
   {
     path: "/login",
