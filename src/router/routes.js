@@ -11,8 +11,9 @@ const routes = [
   },
 
   {
-    path: "/user",
-    component: () => import("pages/UserPage.vue"),
+    path: "/userinfo",
+    name: "UserInfo",
+    component: () => import("pages/UserInfoPage.vue"),
   },
 ]
 

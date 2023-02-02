@@ -13,7 +13,9 @@ Vue.prototype.$api = api
 //       so you can easily perform requests against your app's API
 
 api.interceptors.response.use(
-  response  => {},
+  response  => {
+    return Promise.resolve(response)
+  },
   error     => {
     Notify.create({
       message: error.response ? error.response.data.message : error.message,
