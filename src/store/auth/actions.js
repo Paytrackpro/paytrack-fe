@@ -17,8 +17,9 @@ export default {
         commit('setUserInfo', res.data);
     })
   },
-  async updateUserInfo({ commit }, form)  {
-    api.post('/user/info', form).then(function (res) {
+  async updateUserInfo({ commit }, userData)  {
+    api.defaults.headers.common['Authorization'] = 'Bearer ' + userData.token
+    api.post('/user/info', userData.form).then(function (res) {
       Notify.create({
         message: res.data.message,
         color: "positive",
