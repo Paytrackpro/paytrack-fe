@@ -55,7 +55,6 @@ export default {
         { name: "paymentType", align: "center", label: "Payment Type", field: "paymentType" },
         { name: "createdAt", align: "center", label: "Created At", field: "createdAt" },
         { name: "lastSeen", align: "center", label: "Last Seen", field: "lastSeen" },
-        { name: "online", align: "center", label: "Online", field: "online" },
       ],
       rows: [
         {
@@ -65,7 +64,6 @@ export default {
           paymentType: "BTC",
           createdAt: "26/11/2016",
           lastSeen: "23/08/2015",
-          online: true,
         },
         {
           userName: "Jamie Knox",
@@ -74,7 +72,6 @@ export default {
           paymentType: "BTC",
           createdAt: "13/09/2014",
           lastSeen: "30/08/2014",
-          online: true,
         },
         {
           userName: "Cummings Raymond",
@@ -83,7 +80,6 @@ export default {
           paymentType: "BTC",
           createdAt: "29/08/2014",
           lastSeen: "01/05/2018",
-          online: true,
         },
         {
           userName: "Ashlee Travis",
@@ -92,7 +88,6 @@ export default {
           paymentType: "BTC",
           createdAt: "10/10/2018",
           lastSeen: "23/02/2017",
-          online: true,
         },
         {
           userName: "Barton Bryan",
@@ -101,7 +96,6 @@ export default {
           paymentType: "BTC",
           createdAt: "06/06/2016",
           lastSeen: "24/04/2017",
-          online: true,
         },
         {
           userName: "Leanna Wells",
@@ -110,7 +104,6 @@ export default {
           paymentType: "BTC",
           createdAt: "01/07/2020",
           lastSeen: "25/11/2018",
-          online: true,
         },
         {
           userName: "Long Rogers",
@@ -119,7 +112,6 @@ export default {
           paymentType: "BTC",
           createdAt: "23/10/2019",
           lastSeen: "28/09/2018",
-          online: true,
         },
         {
           userName: "Pearl Vargas",
@@ -128,7 +120,6 @@ export default {
           paymentType: "BTC",
           createdAt: "14/09/2022",
           lastSeen: "19/08/2016",
-          online: true,
         },
         {
           userName: "Pacheco Richards",
@@ -137,7 +128,6 @@ export default {
           paymentType: "BTC",
           createdAt: "10/12/2019",
           lastSeen: "25/05/2014",
-          online: true,
         },
         {
           userName: "Mullins Wolf",
@@ -146,7 +136,6 @@ export default {
           paymentType: "BTC",
           createdAt: "18/12/2014",
           lastSeen: "16/03/2019",
-          online: true,
         },
         {
           userName: "Ewing Mcfarland",
@@ -155,7 +144,6 @@ export default {
           paymentType: "BTC",
           createdAt: "25/12/2020",
           lastSeen: "13/01/2023",
-          online: true,
         },
         {
           userName: "Cooper Mcpherson",
@@ -164,7 +152,6 @@ export default {
           paymentType: "BTC",
           createdAt: "31/01/2021",
           lastSeen: "17/12/2019",
-          online: true,
         },
         {
           userName: "Cleveland Garza",
@@ -173,7 +160,6 @@ export default {
           paymentType: "BTC",
           createdAt: "07/08/2019",
           lastSeen: "13/02/2015",
-          online: true,
         },
         {
           userName: "Montoya Riley",
@@ -182,7 +168,6 @@ export default {
           paymentType: "BTC",
           createdAt: "30/12/2016",
           lastSeen: "16/05/2021",
-          online: true,
         },
         {
           userName: "Hope Greene",
@@ -191,7 +176,6 @@ export default {
           paymentType: "BTC",
           createdAt: "12/01/2018",
           lastSeen: "11/09/2020",
-          online: true,
         },
         {
           userName: "Arline Francis",
@@ -200,7 +184,6 @@ export default {
           paymentType: "BTC",
           createdAt: "12/04/2017",
           lastSeen: "03/03/2021",
-          online: true,
         },
         {
           userName: "Ronda Sharp",
@@ -209,7 +192,6 @@ export default {
           paymentType: "BTC",
           createdAt: "27/09/2020",
           lastSeen: "22/08/2021",
-          online: true,
         },
         {
           userName: "Keller Bray",
@@ -218,7 +200,6 @@ export default {
           paymentType: "BTC",
           createdAt: "27/07/2019",
           lastSeen: "17/05/2018",
-          online: true,
         },
         {
           userName: "Arnold Erickson",
@@ -227,7 +208,6 @@ export default {
           paymentType: "BTC",
           createdAt: "19/08/2015",
           lastSeen: "23/02/2020",
-          online: true,
         },
         {
           userName: "Shannon Dorsey",
@@ -236,7 +216,6 @@ export default {
           paymentType: "BTC",
           createdAt: "12/08/2021",
           lastSeen: "29/06/2014",
-          online: true,
         },
       ],
     }
