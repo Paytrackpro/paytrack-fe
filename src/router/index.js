@@ -13,7 +13,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages       = ['Login'];
+  const publicPages       = ['Login', 'Register'];
   const authRequired      = !publicPages.includes(to.name);
   const isAuthenticated   = store.getters['auth/isAuthenticated'];
 

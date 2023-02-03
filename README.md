@@ -1,5 +1,7 @@
 # MGMT-FE
 
+# System Info
+
 ## Users
 
     * Can use same user login system as mgmt. Sign up is very basic, u/p.
@@ -42,13 +44,31 @@
     * Ability to assign other user(s) to approve invoices for invoices from other specific users, like mgmt.
 
 ## Default User Info
+
     * Username
     * Display Name [optional]
     * Password w/ verification
     * email address [optional] *note stating that email would be required for pw recovery
 
 ## User Preferences
+
     * Default Payment Address & Coin Type (BTC, LTC, DCR) [optional not required]
     In the future:
     * TOTP support (recovery codes) w/ code generator (no sms)
     * Passkey support (may replace TOTP)
+
+# Run Project
+
+### Config ENV
+
+add `.env` file and update `.env` file with BASE_URL=[server url]
+
+### Run Project
+
+**install dependencies:**
+
+`npm install`
+
+**run project:**
+
+`npm run dev`

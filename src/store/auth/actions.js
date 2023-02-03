@@ -3,10 +3,10 @@ import { Notify } from 'quasar'
 
 export default {
   async login({ commit }, user) {
-    api.post('/auth/login', user)
+    return api.post('/auth/login', user)
       .then(function (res) {
-        localStorage.setItem('user', JSON.stringify(res.data));
-        commit('setUser', res.data);
+        localStorage.setItem('user', JSON.stringify(res.data.data));
+        commit('setUser', res.data.data);
         commit('setAuthenticated', true);
       })
   },
@@ -27,5 +27,8 @@ export default {
       })
     })
   },
+  async register({ commit }, user) {
+    return api.post('/auth/register', user)
+  }
 }
 
