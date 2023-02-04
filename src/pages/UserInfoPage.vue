@@ -71,12 +71,11 @@
         }
       },
       mounted: function(){
-        this.setdata();
+        this.setData();
       },
       methods : {
-        setdata(){
-          let token = this.$store.getters['auth/getToken'];
-          this.$store.dispatch("auth/getUserInfo",token);
+        setData(){
+          this.$store.dispatch("auth/getUserInfo");
           let user =  this.$store.getters['auth/getUserInfo'];
           this.user.userId = user.Id;
           this.user.userName = user.UserName;
@@ -86,18 +85,14 @@
           this.user.paymentAddress = Number(user.PaymentAddress);
         },
         submit(){
-          let token =  this.$store.getters['auth/getToken'];
-          let userData = {
-            token,
-            form : {
+          let form = {
               Id : this.user.userId,
               UserName : this.user.userName,
               Email : this.user.email,
               PaymentAddress : this.user.paymentAddress,
               paymentType : this.user.paymentType,
-            }
           }
-          this.$store.dispatch("auth/updateUserInfo", userData);
+          this.$store.dispatch("auth/updateUserInfo", form);
         },
       }
   })

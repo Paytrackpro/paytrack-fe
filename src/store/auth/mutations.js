@@ -2,12 +2,10 @@ export default {
   setUser(state, user) {
     state.user = user;
   },
-
   setAuthenticated(state, authenticated) {
     state.authenticated = authenticated;
   },
-
-  setUserInfo(state, userInfor) {
-    state.user.data.userInfo = userInfor.data;
+  setUserInfo(state, userInfo) {
+    state.user.userInfo = userInfo
   }
 }

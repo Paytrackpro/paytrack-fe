@@ -15,11 +15,7 @@ Vue.prototype.$api = api
 
 api.interceptors.response.use(
   response  => {
-<<<<<<< HEAD
     return Promise.resolve(response)
-=======
-    return response;
->>>>>>> 3cc8165f8a151c4ed028b33740951cf121b0823a
   },
   error     => {
     return Promise.reject(error);

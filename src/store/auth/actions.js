@@ -8,18 +8,17 @@ export default {
         localStorage.setItem('user', JSON.stringify(res.data.data));
         commit('setUser', res.data.data);
         commit('setAuthenticated', true);
+        api.defaults.headers.common['Authorization'] = 'Bearer ' + res.data.data.token
       })
   },
-  async getUserInfo({commit},token){
-    api.defaults.headers.common['Authorization'] = 'Bearer ' + token
+  async getUserInfo({commit}){
     api.get('/user/info')
       .then(function (res) {
-        commit('setUserInfo', res.data);
+        commit('setUserInfo', res.data.data);
     })
   },
   async updateUserInfo({ commit }, userData)  {
-    api.defaults.headers.common['Authorization'] = 'Bearer ' + userData.token
-    api.post('/user/info', userData.form).then(function (res) {
+    api.post('/user/info', userData).then(function (res) {
       Notify.create({
         message: res.data.message,
         color: "positive",

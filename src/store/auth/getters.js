@@ -3,9 +3,6 @@ export default {
     return state.authenticated;
   },
   getUserInfo(state){
-    return state.user.data.userInfo;
-  },
-  getToken(state){
-    return state.user.data.token;
+    return state.user.userInfo;
   },
 }
