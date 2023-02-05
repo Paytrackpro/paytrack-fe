@@ -13,6 +13,18 @@ Vue.prototype.$api = api
 // ^ ^ ^ this will allow you to use this.$api
 //       so you can easily perform requests against your app's API
 
+api.interceptors.request.use(function (config) {
+  const user = localStorage.getItem('user');
+
+  if (user) {
+    const token = JSON.parse(user).token;
+
+    config.headers['Authorization'] = 'Bearer ' + token;
+  }
+
+  return config;
+});
+
 api.interceptors.response.use(
   response  => {
     return response;
