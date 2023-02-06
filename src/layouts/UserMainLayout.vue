@@ -19,8 +19,13 @@
                  @click="$q.fullscreen.toggle()"
                  v-if="$q.screen.gt.sm">
           </q-btn>
-          <q-btn to = "/profile">
-            <label for="">{{ getFullNameUser }}</label>
+          <q-btn v-if="this.isShowAvatar === true" round flat to = "/profile">
+            <q-avatar size="26px">
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+            </q-avatar>
+          </q-btn>
+          <q-btn v-if="this.isShowAvatar === false" to = "/profile">
+            <label for="">{{ this.$store.state.user.userInfo.DisplayName }}</label>
           </q-btn>
         </div>
       </q-toolbar>
@@ -71,23 +76,34 @@ import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'UserMainLayout',
-  components: {
-  },
-  computed : {
-    getFullNameUser(){
-      return this.$store.state.user.userInfo.DisplayName;
+  data : function(){
+    return {
+      isShowAvatar : true,
     }
   },
-
+  mounted: function(){
+        this.setDisplayAvartar();
+  },
   setup () {
     const leftDrawerOpen = ref(false)
-
     return {
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
       },
-
+    }
+  },
+  methods : {
+    setDisplayAvartar(){
+      if(!this.empty(this.$store.state.user.userInfo.DisplayName)){
+        this.isShowAvatar = false;
+      }
+    },
+    empty(str){
+      if (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "")
+          return true;
+      else
+          return false;
     }
   }
 })
