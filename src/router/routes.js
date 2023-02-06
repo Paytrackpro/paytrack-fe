@@ -9,17 +9,17 @@ const routes = [
     name: "Login",
     component: () => import("pages/login.vue"),
   },
-
-  {
-    path: "/userinfo",
-    name: "UserInfo",
-    component: () => import("pages/UserInfoPage.vue"),
-
-  },
   {
     path: "/register",
     name: "Register",
     component: () => import("pages/register.vue"),
+  },
+  {
+    path: '/user',
+    component: () => import('layouts/UserMainLayout.vue'),
+    children: [
+      {path: '/profile', component: () => import('pages/user/profile/userProfile.vue')},
+    ]
   },
 ]
 

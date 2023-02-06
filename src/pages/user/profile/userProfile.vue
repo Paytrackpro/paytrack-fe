@@ -1,21 +1,21 @@
 <template>
   <q-layout>
-    <q-page-container>
-      <q-page class="flex  flex-center">
-        <q-card v-bind:style="{ width: '30%' }">
+    <q-page-container class="wrapper" style = "height: 100%;">
+      <q-page>
+        <q-card>
           <q-card-section>
             <div class="text-center q-pt-lg">
-              <div class="col text-h6 ellipsis">Profile Info</div>
+              <div class="col text-h2 ellipsis">Profile</div>
             </div>
           </q-card-section>
           <q-card-section>
-            <q-form class="q-gutter-md">
+            <q-form class="q-gutter-md pad">
               <input v-model="user.userId" type="hidden">
-              <q-input filled v-model="user.displayName" label="Full Name" lazy-rules />
-              <q-input filled v-model="user.userName" label="Username" disable lazy-rules />
-              <q-input filled v-model="user.email" label="Email" lazy-rules />
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.displayName" label="Full Name"/>
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space  v-model="user.userName" label="Username" disable/>
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space  v-model="user.email" label="Email"/>
               <q-select
-                filled
+                outlined dense lazy-rules stack-label hide-bottom-space
                 :options="paymentAddressOptions"
                 label="Select payment address"
                 v-model="user.paymentAddress"
@@ -23,7 +23,7 @@
                 map-options
               />
               <q-select
-                filled
+                outlined dense lazy-rules stack-label hide-bottom-space
                 :options="paymentAddressOptions"
                 label="Select payment type"
                 v-model="user.paymentType"
@@ -44,6 +44,7 @@
 <script>
   import { defineComponent } from "vue";
   export default defineComponent({
+      name: 'userProfile',
       data :function(){
         return {
           user : {
@@ -75,8 +76,9 @@
       },
       methods : {
         setData(){
-          this.$store.dispatch("auth/getUserInfo");
-          let user =  this.$store.getters['auth/getUserInfo'];
+          let token = this.$store.getters['auth/getToken']
+          this.$store.dispatch("user/getUserInfo",token);
+          let user =  this.$store.getters['user/getUserProfile'];
           this.user.userId = user.Id;
           this.user.userName = user.UserName;
           this.user.email = user.Email;
@@ -85,19 +87,29 @@
           this.user.paymentAddress = Number(user.PaymentAddress);
         },
         submit(){
-          let form = {
+          let token = this.$store.getters['auth/getToken']
+          let userData = {
+            token,
+            form : {
               Id : this.user.userId,
               UserName : this.user.userName,
               Email : this.user.email,
               PaymentAddress : this.user.paymentAddress,
               paymentType : this.user.paymentType,
+            }
           }
-          this.$store.dispatch("auth/updateUserInfo", form);
+          this.$store.dispatch("auth/updateUserInfo", userData);
         },
       }
   })
 </script>
 
 <style lang="scss" scoped>
-
+  .pad{
+    padding-left: 20%;
+    padding-right: 20%;
+  }
+  .wrapper{
+    height: 100vh;
+  }
 </style>
