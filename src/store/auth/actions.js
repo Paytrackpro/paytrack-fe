@@ -9,6 +9,7 @@ export default {
         commit('setAuthenticated', true);
         commit('setToken', res.data.data.token);
         commit('setUserProfile', res.data.data.userInfo);
+        commit('setRole', res.data.data.userInfo.Role);
       })
   },
 

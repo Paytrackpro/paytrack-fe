@@ -19,10 +19,8 @@
                  @click="$q.fullscreen.toggle()"
                  v-if="$q.screen.gt.sm">
           </q-btn>
-          <q-btn round flat to = "/profile">
-            <q-avatar size="26px">
-              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
-            </q-avatar>
+          <q-btn to = "/profile">
+            <label for="">{{ getFullNameUser }}</label>
           </q-btn>
         </div>
       </q-toolbar>
@@ -68,13 +66,17 @@
 </template>
 
 <script>
-import EssentialLink from 'components/user/EssentialLink.vue'
 
 import { defineComponent, ref } from 'vue'
 
 export default defineComponent({
   name: 'UserMainLayout',
   components: {
+  },
+  computed : {
+    getFullNameUser(){
+      return this.$store.state.user.userInfo.DisplayName;
+    }
   },
 
   setup () {
@@ -84,7 +86,8 @@ export default defineComponent({
       leftDrawerOpen,
       toggleLeftDrawer () {
         leftDrawerOpen.value = !leftDrawerOpen.value
-      }
+      },
+
     }
   }
 })

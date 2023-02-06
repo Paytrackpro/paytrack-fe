@@ -4,4 +4,5 @@ export default {
   authenticated: user != null,
   user: user,
   token: '',
+  role:'',
 }

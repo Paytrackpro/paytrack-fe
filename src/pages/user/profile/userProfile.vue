@@ -5,31 +5,52 @@
         <q-card>
           <q-card-section>
             <div class="text-center q-pt-lg">
-              <div class="col text-h2 ellipsis">Profile</div>
+              <div class="col text-h3">Profile</div>
             </div>
           </q-card-section>
           <q-card-section>
             <q-form class="q-gutter-md pad">
               <input v-model="user.userId" type="hidden">
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.displayName" label="Full Name"/>
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space  v-model="user.userName" label="Username" disable/>
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space  v-model="user.email" label="Email"/>
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.displayName" disable>
+                <template v-slot:before>
+                  <label for="" class = "font-weight width-label">Full Name :</label>
+                </template>
+              </q-input>
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.userName" disable>
+                <template v-slot:before>
+                  <label for="" class = "font-weight width-label">Username :</label>
+                </template>
+              </q-input>
+              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.email" >
+                <template v-slot:before>
+                  <label for="" class = "font-weight width-label">Email :</label>
+                </template>
+              </q-input>
               <q-select
                 outlined dense lazy-rules stack-label hide-bottom-space
                 :options="paymentAddressOptions"
-                label="Select payment address"
                 v-model="user.paymentAddress"
                 emit-value
                 map-options
-              />
+                disable
+              >
+                <template v-slot:before>
+                  <label for="" class = "font-weight  width-label">Select payment address :</label>
+                </template>
+              </q-select>
               <q-select
                 outlined dense lazy-rules stack-label hide-bottom-space
                 :options="paymentAddressOptions"
-                label="Select payment type"
+                label=""
                 v-model="user.paymentType"
                 emit-value
                 map-options
-              />
+                disable
+              >
+                <template v-slot:before>
+                  <label for="" class = "font-weight  width-label">Select payment type :</label>
+                </template>
+              </q-select>
               <div>
                 <q-btn label="Update Profile" type="button" color="primary" @click="submit"/>
               </div>
@@ -109,7 +130,11 @@
     padding-left: 20%;
     padding-right: 20%;
   }
-  .wrapper{
-    height: 100vh;
+  .font-weight{
+    font-size: 16px;
+    color: black;
+  }
+  .width-label{
+    width: 200px;
   }
 </style>

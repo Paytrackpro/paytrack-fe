@@ -10,5 +10,8 @@ export default {
   },
   setUserProfile(state, userProfile){
     this.state.user.userInfo = userProfile;
+  },
+  setRole(state, roleId){
+    state.role = roleId;
   }
 }

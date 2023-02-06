@@ -16,6 +16,7 @@ const routes = [
   },
   {
     path: '/user',
+    name:'User',
     component: () => import('layouts/UserMainLayout.vue'),
     children: [
       {path: '/profile', component: () => import('pages/user/profile/userProfile.vue')},
