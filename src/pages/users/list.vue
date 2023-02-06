@@ -9,6 +9,7 @@
       hide-pagination
       flat
       bordered
+      @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
         <q-input outlined dense debounce="300" v-model="filter" placeholder="Search">
@@ -97,6 +98,9 @@ export default {
       this.$api.get("/admin/user/list").then((res) => {
         this.rows = res.data.data
       })
+    },
+    goToDetail(id) {
+      this.$router.push({ name: "UserDetail", params: { id } })
     },
   },
 }
