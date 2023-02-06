@@ -8,7 +8,7 @@ const routes = [
         name: "Home",
         component: () => import("pages/home.vue"),
         meta: {
-          title: 'Home'
+          title: "Home",
         },
       },
       {
@@ -16,8 +16,16 @@ const routes = [
         name: "UserList",
         component: () => import("pages/users/list.vue"),
         meta: {
-          title: 'User Management'
-        }
+          title: "User Management",
+        },
+      },
+      {
+        path: "/users/:id",
+        name: "UserDetail",
+        component: () => import("pages/users/detail.vue"),
+        meta: {
+          title: "User Detail",
+        },
       },
     ],
   },
