@@ -11,21 +11,17 @@
           aria-label="Menu"
         />
         <q-toolbar-title>
-          MGMT App
+          MGMT
         </q-toolbar-title>
         <q-space/>
         <div class="q-gutter-sm row items-center no-wrap">
-          <q-btn round dense flat color="white" :icon="$q.fullscreen.isActive ? 'fullscreen_exit' : 'fullscreen'"
-                 @click="$q.fullscreen.toggle()"
-                 v-if="$q.screen.gt.sm">
-          </q-btn>
           <q-btn v-if="this.isShowAvatar === true" round flat to = "/profile">
             <q-avatar size="26px">
               <img src="https://cdn.quasar.dev/img/boy-avatar.png">
             </q-avatar>
           </q-btn>
           <q-btn v-if="this.isShowAvatar === false" to = "/profile">
-            <label for="">{{ this.$store.state.user.userInfo.DisplayName }}</label>
+            <label for="">{{ this.$store.state.user.userInfo.user_name }}</label>
           </q-btn>
         </div>
       </q-toolbar>
@@ -95,7 +91,7 @@ export default defineComponent({
   },
   methods : {
     setDisplayAvartar(){
-      if(!this.empty(this.$store.state.user.userInfo.DisplayName)){
+      if(!this.empty(this.$store.state.user.userInfo.user_name)){
         this.isShowAvatar = false;
       }
     },

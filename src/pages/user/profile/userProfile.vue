@@ -1,65 +1,51 @@
 <template>
-  <q-layout>
-    <q-page-container class="wrapper" style = "height: 100%;">
-      <q-page>
-        <q-card>
-          <q-card-section>
-            <div class="text-center q-pt-lg">
-              <div class="col text-h3">Profile</div>
-            </div>
-          </q-card-section>
-          <q-card-section>
-            <q-form class="q-gutter-md pad">
-              <input v-model="user.userId" type="hidden">
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.displayName" disable>
-                <template v-slot:before>
-                  <label for="" class = "font-weight width-label">Full Name :</label>
-                </template>
-              </q-input>
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.userName" disable>
-                <template v-slot:before>
-                  <label for="" class = "font-weight width-label">Username :</label>
-                </template>
-              </q-input>
-              <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.email" >
-                <template v-slot:before>
-                  <label for="" class = "font-weight width-label">Email :</label>
-                </template>
-              </q-input>
-              <q-select
-                outlined dense lazy-rules stack-label hide-bottom-space
-                :options="paymentAddressOptions"
-                v-model="user.paymentAddress"
-                emit-value
-                map-options
-                disable
-              >
-                <template v-slot:before>
-                  <label for="" class = "font-weight  width-label">Select payment address :</label>
-                </template>
-              </q-select>
-              <q-select
-                outlined dense lazy-rules stack-label hide-bottom-space
-                :options="paymentAddressOptions"
-                label=""
-                v-model="user.paymentType"
-                emit-value
-                map-options
-                disable
-              >
-                <template v-slot:before>
-                  <label for="" class = "font-weight  width-label">Select payment type :</label>
-                </template>
-              </q-select>
-              <div>
-                <q-btn label="Update Profile" type="button" color="primary" @click="submit"/>
-              </div>
-            </q-form>
-          </q-card-section>
-        </q-card>
-      </q-page>
-    </q-page-container>
-  </q-layout>
+  <q-page>
+    <q-card>
+      <q-card-section>
+        <q-form class="q-gutter-md pad">
+          <div class="q-pt-lg">
+            <div class="col text-h4">Profile</div>
+          </div>
+          <input v-model="user.userId" type="hidden">
+          <input v-model="user.userName" type="hidden">
+          <div class="user-flex">
+            <q-item-section top class="gt-sm user-info-label user-col">
+              <q-item-label class="">Username :</q-item-label>
+            </q-item-section>
+            <q-item-section top>
+              <q-item-label lines="1">
+                <span class="text-grey-8">{{ user.userName }}</span>
+              </q-item-label>
+            </q-item-section>
+          </div>
+          <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.email" >
+            <template v-slot:before>
+              <label for="" class = "font-weight user-info-label">Email :</label>
+            </template>
+          </q-input>
+          <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.paymentAddress">
+            <template v-slot:before>
+              <label for="" class = "font-weight user-info-label">payment address :</label>
+            </template>
+          </q-input>
+          <q-select
+            outlined dense lazy-rules stack-label hide-bottom-space
+            :options="paymentAddressOptions"
+            v-model="user.paymentType"
+            emit-value
+            map-options
+            >
+            <template v-slot:before>
+              <label for="" class = "font-weight  user-info-label">Payment type :</label>
+            </template>
+          </q-select>
+          <div class="text-right">
+            <q-btn label="Update Profile"  type="button" color="primary" @click="submit"/>
+          </div>
+        </q-form>
+      </q-card-section>
+    </q-card>
+  </q-page>
 </template>
 
 <script>
@@ -80,15 +66,15 @@
           paymentAddressOptions : [
           {
             label: 'BTC',
-            value: 1
+            value: 'btc'
           },
           {
             label: 'DCR',
-            value: 2
+            value: 'dcr'
           },
           {
             label: 'LTC',
-            value: 3
+            value: 'ltc'
           }],
         }
       },
@@ -100,26 +86,25 @@
           let token = this.$store.getters['auth/getToken']
           this.$store.dispatch("user/getUserInfo",token);
           let user =  this.$store.getters['user/getUserProfile'];
-          this.user.userId = user.Id;
-          this.user.userName = user.UserName;
-          this.user.email = user.Email;
-          this.user.displayName = user.DisplayName;
-          this.user.paymentType = Number(user.PaymentType);
-          this.user.paymentAddress = Number(user.PaymentAddress);
+          this.user.userId = user.id;
+          this.user.userName = user.user_name;
+          this.user.email = user.email;
+          this.user.paymentType = user.payment_type;
+          this.user.paymentAddress = user.payment_address;
         },
         submit(){
           let token = this.$store.getters['auth/getToken']
           let userData = {
             token,
             form : {
-              Id : this.user.userId,
-              UserName : this.user.userName,
-              Email : this.user.email,
-              PaymentAddress : this.user.paymentAddress,
-              paymentType : this.user.paymentType,
+              id : this.user.userId,
+              user_name : this.user.userName,
+              email : this.user.email,
+              payment_address : this.user.paymentAddress,
+              payment_type : this.user.paymentType,
             }
           }
-          this.$store.dispatch("auth/updateUserInfo", userData);
+          this.$store.dispatch("user/updateUserProfile", userData);
         },
       }
   })
@@ -130,11 +115,16 @@
     padding-left: 20%;
     padding-right: 20%;
   }
-  .font-weight{
+  .user-info-label{
+    width: 200px;
     font-size: 16px;
     color: black;
   }
-  .width-label{
-    width: 200px;
+  .user-col{
+    flex: 0 0 auto;
+  }
+  .user-flex{
+    padding-bottom: 15px;
+    display: flex;
   }
 </style>
