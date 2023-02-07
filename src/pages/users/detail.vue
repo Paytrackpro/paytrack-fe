@@ -72,12 +72,20 @@ import paymentTypeConsts from "../../consts/paymentType"
 export default {
   data() {
     return {
-      paymentTypeOptions: Object.entries(paymentTypeConsts).map(([key, value]) => {
-        return {
-          value: value,
-          label: key,
-        }
-      }),
+      paymentTypeOptions: [
+        {
+          label: "BTC",
+          value: "btc"
+        },
+        {
+          label: "LTC",
+          value: "ltc"
+        },
+        {
+          label: "DCR",
+          value: "dcr"
+        },
+      ],
       userName: "",
       email: "",
       displayName: "",
