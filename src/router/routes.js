@@ -6,7 +6,7 @@ const routes = [
       {
         path: "/",
         name: "Home",
-        component: () => import("pages/home.vue"),
+        component: () => import("src/pages/admin/home.vue"),
         meta: {
           title: "Home",
         },
@@ -14,7 +14,7 @@ const routes = [
       {
         path: "/users",
         name: "UserList",
-        component: () => import("pages/users/list.vue"),
+        component: () => import("pages/admin/users/list.vue"),
         meta: {
           title: "User Management",
         },
@@ -22,7 +22,7 @@ const routes = [
       {
         path: "/users/:id",
         name: "UserDetail",
-        component: () => import("pages/users/detail.vue"),
+        component: () => import("pages/admin/users/detail.vue"),
         meta: {
           title: "User Detail",
         },
