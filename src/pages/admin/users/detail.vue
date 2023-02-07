@@ -67,25 +67,12 @@
 </template>
 
 <script>
-import paymentTypeConsts from "../../consts/paymentType"
+import { PAYMENT_TYPE_OPTIONS } from "../../../consts/paymentType"
 
 export default {
   data() {
     return {
-      paymentTypeOptions: [
-        {
-          label: "BTC",
-          value: "btc"
-        },
-        {
-          label: "LTC",
-          value: "ltc"
-        },
-        {
-          label: "DCR",
-          value: "dcr"
-        },
-      ],
+      paymentTypeOptions: PAYMENT_TYPE_OPTIONS,
       userName: "",
       email: "",
       displayName: "",
@@ -96,11 +83,6 @@ export default {
   computed: {},
   created: function () {
     this.getUserInfo()
-  },
-  watch: {
-    paymentType() {
-      console.log(this.paymentType)
-    },
   },
   methods: {
     getUserInfo() {

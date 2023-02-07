@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import paymentType from "../../consts/paymentType"
+import { PAYMENT_TYPES } from "../../../consts/paymentType"
 import { date } from "quasar"
 
 export default {
@@ -62,9 +62,9 @@ export default {
           label: "Payment Type",
           field: "payment_type",
           format: (val) => {
-            if (val == paymentType.BTC) return "BTC"
-            if (val == paymentType.LTC) return "LTC"
-            if (val == paymentType.DCR) return "DCR"
+            if (val == PAYMENT_TYPES.BTC) return "BTC"
+            if (val == PAYMENT_TYPES.LTC) return "LTC"
+            if (val == PAYMENT_TYPES.DCR) return "DCR"
           },
         },
         {
