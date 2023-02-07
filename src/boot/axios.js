@@ -1,25 +1,36 @@
-import axios from 'axios'
-import Vue from 'vue'
-
+import axios from "axios"
+import Vue from "vue"
 
 Vue.prototype.$axios = axios
 // ^ ^ ^ this will allow you to use this.$axios
 //       so you won't necessarily have to import axios in each vue file
 
-require('dotenv').config()
+require("dotenv").config()
 const api = axios.create({ baseURL: process.env.BASE_URL })
 
 Vue.prototype.$api = api
 // ^ ^ ^ this will allow you to use this.$api
 //       so you can easily perform requests against your app's API
 
-api.interceptors.response.use(
-  response  => {
-    return response;
-  },
-  error     => {
-    return Promise.reject(error);
+api.interceptors.request.use(function (config) {
+  const user = localStorage.getItem("user")
+
+  if (user) {
+    const token = JSON.parse(user).token
+
+    config.headers["Authorization"] = "Bearer " + token
   }
-);
+
+  return config
+})
+
+api.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 export { axios, api }
