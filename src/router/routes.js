@@ -55,6 +55,22 @@ const routes = [
     name: "Register",
     component: () => import("pages/register.vue"),
   },
+  {
+    path:"/payment",
+    name:"Payment",
+    component: () => import("pages/payments/layout.vue"),
+    children: [
+      {
+        path:"/",
+        name:"payment.list",
+        component: () => import("pages/payments/listPayments.vue"),
+      },{
+        path:"create",
+        name:"payment.create",
+        component: () => import("pages/payments/createPayment.vue"),
+      }
+    ]
+  }
 ]
 
 export default routes
