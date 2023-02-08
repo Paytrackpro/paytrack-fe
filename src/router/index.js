@@ -1,31 +1,30 @@
-
 import routes from "./routes"
 import store from "../store"
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import Vue from "vue"
+import VueRouter from "vue-router"
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 const router = new VueRouter({
   scrollBehavior: () => ({ left: 0, top: 0 }),
-  mode: 'history',
-  routes
+  mode: "history",
+  routes,
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages       = ['Login', 'Register'];
-  const authRequired      = !publicPages.includes(to.name);
-  const isAuthenticated   = store.getters['auth/isAuthenticated'];
+  const publicPages = ["Login", "Register"]
+  const authRequired = !publicPages.includes(to.name)
+  const isAuthenticated = store.getters["auth/isAuthenticated"]
 
-  if (isAuthenticated && to.name === 'Login') {
-    next({ name: 'Home'});
+  if (isAuthenticated && to.name === "Login") {
+    next({ name: "Home" })
   }
 
   if (authRequired && !isAuthenticated) {
-    next({ name: 'Login' });
+    next({ name: "Login" })
   }
 
-  next();
-});
+  next()
+})
 
-export default router;
+export default router
