@@ -82,7 +82,12 @@ export default {
           password: this.password,
         })
         .then((res) => {
-          this.$router.push({ name: "Home" })
+          let roleId = this.$store.getters['auth/getRole'];
+          if (typeof(roleId) == 'number' && roleId == 0) {
+            this.$router.push({ name: "User" });
+          } else {
+            this.$router.push({ name: "Home" });
+          }
         })
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message

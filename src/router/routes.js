@@ -39,6 +39,14 @@ const routes = [
     name: "Register",
     component: () => import("pages/register.vue"),
   },
+  {
+    path: '/user',
+    name:'User',
+    component: () => import('layouts/UserMainLayout.vue'),
+    children: [
+      {path: '/profile', component: () => import('pages/user/profile/userProfile.vue')},
+    ]
+  },
 ]
 
 export default routes

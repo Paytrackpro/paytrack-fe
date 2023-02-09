@@ -4,5 +4,14 @@ export default {
   },
   setAuthenticated(state, authenticated) {
     state.authenticated = authenticated;
+  },
+  setToken(state, token){
+    state.token = token;
+  },
+  setUserProfile(state, userProfile){
+    this.state.user.userInfo = userProfile;
+  },
+  setRole(state, roleId){
+    state.role = roleId;
   }
 }
