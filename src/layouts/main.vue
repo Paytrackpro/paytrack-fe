@@ -72,6 +72,7 @@ export default {
         {
           icon: "credit_card",
           label: "Payment",
+          to: this.$router.resolve({ name: "payment.list" }).href,
           separator: false,
         },
         {
