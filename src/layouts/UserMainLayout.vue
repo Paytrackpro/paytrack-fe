@@ -21,7 +21,7 @@
             </q-avatar>
           </q-btn>
           <q-btn v-if="this.isShowAvatar === false" to = "/profile">
-            <label for="">{{ this.$store.state.user.userInfo.user_name }}</label>
+            <label for="">{{ this.$store.state.user.userInfo.userName }}</label>
           </q-btn>
         </div>
       </q-toolbar>
@@ -91,15 +91,12 @@ export default defineComponent({
   },
   methods : {
     setDisplayAvartar(){
-      if(!this.empty(this.$store.state.user.userInfo.user_name)){
+      if(!this.empty(this.$store.state.user.userInfo.userName)){
         this.isShowAvatar = false;
       }
     },
     empty(str){
-      if (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "")
-          return true;
-      else
-          return false;
+      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
     }
   }
 })
