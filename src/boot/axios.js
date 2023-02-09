@@ -7,7 +7,7 @@ Vue.prototype.$axios = axios
 //       so you won't necessarily have to import axios in each vue file
 
 require('dotenv').config()
-const api = axios.create({ baseURL: 'http://localhost:6789/api' })
+const api = axios.create({ baseURL: process.env.BASE_URL })
 Vue.prototype.$api = api
 // ^ ^ ^ this will allow you to use this.$api
 //       so you can easily perform requests against your app's API
