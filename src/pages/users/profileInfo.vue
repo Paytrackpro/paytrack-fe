@@ -29,7 +29,7 @@
       <div class="col-4">
         <q-field label="Default Payment Type" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">{{ user.paymentType }}</div>
+            <div class="self-center full-width no-outline" style = 'text-transform: uppercase;' tabindex="0">{{ user.paymentType }}</div>
           </template>
         </q-field>
       </div>
