@@ -4,37 +4,23 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="left = !left" />
         <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
-        <q-btn color="primary">
-          <label for="">sssssss</label>
+        <div>
+          <q-avatar size="26px" v-if="this.isShowAvartar === true">
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+          </q-avatar>
+          <label v-else class="profile-label"><span >{{ this.user.userName }}</span></label>
           <q-menu>
             <q-list style="min-width: 100px">
-              <q-item clickable>
-                <q-item-section>New tab</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>New incognito tab</q-item-section>
+              <q-item clickable to="/profile">
+                <q-item-section>Profile</q-item-section>
               </q-item>
               <q-separator />
-              <q-item clickable>
-                <q-item-section>Recent tabs</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>History</q-item-section>
-              </q-item>
-              <q-item clickable>
-                <q-item-section>Downloads</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable>
-                <q-item-section>Settings</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable>
-                <q-item-section>Help &amp; Feedback</q-item-section>
+              <q-item clickable @click='logout'>
+                <q-item-section>Logout</q-item-section>
               </q-item>
             </q-list>
           </q-menu>
-        </q-btn>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -68,6 +54,8 @@
 export default {
   data() {
     return {
+      user : '',
+      isShowAvartar : true,
       left: false,
       drawer: false,
       menuList: [
@@ -104,5 +92,34 @@ export default {
       ],
     }
   },
+  mounted :function(){
+    this.setUserName();
+  },
+  methods : {
+    setUserName(){
+      let userProfile = this.$store.getters['user/getUserProfile'];
+      if(!this.empty(userProfile.userName)){
+        this.isShowAvartar = false;
+        this.user = userProfile;
+      }
+    },
+    logout(){
+      this.$store
+        .dispatch('auth/logOut')
+    },
+    empty(str){
+      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
+    }
+  }
 }
 </script>
+<style lang="scss">
+.profile-label{
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.profile-label:hover{
+  cursor: pointer;
+  text-decoration:underline;
+}
+</style>

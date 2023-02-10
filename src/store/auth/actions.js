@@ -15,4 +15,11 @@ export default {
   async register({ commit }, user) {
     return api.post("/auth/register", user)
   },
+
+  async logOut({ commit }, user) {
+    localStorage.clear()
+    commit("setUser", '')
+    commit("setAuthenticated", false)
+    this.$router.push({ name: "Login" })
+  },
 }
