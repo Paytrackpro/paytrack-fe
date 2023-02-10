@@ -4,7 +4,8 @@
 
 <script>
 // mgmt Date component, will show all the date item in mgmt system
-import { prettyDate } from "src/helper/date"
+import {MDateFormat} from "src/consts/common";
+import { date } from "quasar"
 export default {
   name: "mDate",
   props: {
@@ -13,10 +14,10 @@ export default {
   computed: {
     dateView() {
       const d = new Date(this.date)
-      if (d.getFullYear() > 10) {
-        return `${d.getFullYear()}-${prettyDate(d.getMonth() + 1)}-${prettyDate(d.getDate())}`
+      if (d.getTime() <= 0) {
+        return
       }
-      return ""
+      return date.formatDate(this.date, MDateFormat)
     }
   }
 }

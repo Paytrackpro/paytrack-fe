@@ -1,6 +1,9 @@
 <template>
   <div class="q-pa-md">
-    <p>payment</p>
+    <q-breadcrumbs>
+      <q-breadcrumbs-el label="Home" to="/"/>
+      <q-breadcrumbs-el label="Payment" to="/payment"/>
+    </q-breadcrumbs>
     <router-view/>
   </div>
 </template>

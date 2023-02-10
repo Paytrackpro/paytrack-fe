@@ -5,25 +5,21 @@
   </q-card-section>
   <q-separator inset />
   <payment-detail
-    v-show="!loading && !isError && (!forming || processable)"
+    v-show="!loading && !isError && !editing"
     :payment="payment"
-    :processable="processable"
+    :user="user"
+    @edit="editing=true"
+    @update="saved"
   />
   <payment-form
-    v-if="forming && editable"
+    v-if="editing"
     :payment="payment"
     @saved="saved"
-    @cancel="forming = false"
+    @cancel="editing = false"
   />
   <q-card-section v-show="isError">
     <div class="text-h6">{{ errorText }}</div>
   </q-card-section>
-
-  <div v-show="!loading && !forming" class="row justify-end">
-    <q-btn v-if="processable" label="Process Payment" type="button" color="primary" @click="forming = true"></q-btn>
-    <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="forming = true"/>
-    <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$router.push({ name: 'payment.list' })"/>
-  </div>
 
   <q-inner-loading :showing="loading">
     <q-spinner-gears size="50px" color="primary" class="q-mt-lg"/>
@@ -39,15 +35,16 @@ export default {
   components: {MDate, PaymentForm, PaymentDetail},
   data() {
     let user = localStorage.getItem("user")
-    if (user !== undefined && user.length > 0) {
+    if (typeof(user) == "string" && user.length > 0) {
       user = JSON.parse(user)
     } else {
       user = {}
     }
+    console.log(user)
     return {
       user,
       loading: false,
-      forming: false,
+      editing: false,
       isForbidden: false,
       isNotfound: false,
       isUnknownError: false,
@@ -94,8 +91,7 @@ export default {
         })
     },
     saved(data) {
-      this.payment = data.payment
-      this.forming = false
+      this.payment = data
     }
   },
   computed: {
@@ -110,12 +106,6 @@ export default {
         return "Payment not found"
       }
       return "Unknown error. Please contact the admin"
-    },
-    editable() {
-      return this.payment.status === "created" && this.payment.requesterId === this.user.id;
-    },
-    processable() {
-      return this.payment.status === "created" && (this.payment.senderId === this.user.id || this.$route.query.token)
     }
   }
 }

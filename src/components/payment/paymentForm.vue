@@ -118,6 +118,15 @@ export default {
   props: {
     payment: Object,
   },
+  watch: {
+    payment: {
+      immediate: true,
+      handler(newPayment) {
+        this.destination.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
+        console.log(newPayment, this.destination.value)
+      }
+    }
+  },
   methods: {
     checkingDestination: function ($e) {
       this.destination.status = DESTINATION_CHECK_NONE;
@@ -171,7 +180,7 @@ export default {
             icon: "check",
           })
           this.submitting = false
-          this.$emit('saved', res.data.data)
+          this.$emit('saved', res.data.data.payment)
         })
         .catch((err) => {
           this.submitting = false
