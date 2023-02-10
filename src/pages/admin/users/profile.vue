@@ -21,11 +21,6 @@
             </q-input>
           </div>
           <div>
-            <p class="q-mt-none q-mb-xs text-weight-medium">Default Payment Address (Optional)</p>
-            <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.paymentAddress" placeholder="Payment Address">
-            </q-input>
-          </div>
-          <div>
             <p class ="q-mt-none q-mb-xs text-weight-medium">Default Payment Type</p>
             <q-select
             outlined dense lazy-rules stack-label hide-bottom-space
@@ -36,7 +31,11 @@
             >
             </q-select>
           </div>
-
+          <div>
+            <p class="q-mt-none q-mb-xs text-weight-medium">Default Payment Address</p>
+            <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.paymentAddress" placeholder="Payment Address">
+            </q-input>
+          </div>
           <div class="text-right">
             <q-btn label="Update Profile"  type="button" color="primary" @click="submit"/>
           </div>
@@ -47,6 +46,7 @@
 </template>
 
 <script>
+  import { PAYMENT_TYPE_OPTIONS } from "../../../consts/paymentType"
   import { defineComponent } from "vue";
   export default defineComponent({
       name: 'Profile',
@@ -61,19 +61,7 @@
             displayName : '',
             role : '',
           },
-          paymentAddressOptions : [
-          {
-            label: 'BTC',
-            value: 'btc'
-          },
-          {
-            label: 'DCR',
-            value: 'dcr'
-          },
-          {
-            label: 'LTC',
-            value: 'ltc'
-          }],
+          paymentAddressOptions : PAYMENT_TYPE_OPTIONS,
         }
       },
       mounted: function(){
