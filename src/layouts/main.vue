@@ -4,9 +4,37 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="left = !left" />
         <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
-        <q-avatar>
-          <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg" />
-        </q-avatar>
+        <q-btn color="primary">
+          <label for="">sssssss</label>
+          <q-menu>
+            <q-list style="min-width: 100px">
+              <q-item clickable>
+                <q-item-section>New tab</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>New incognito tab</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable>
+                <q-item-section>Recent tabs</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>History</q-item-section>
+              </q-item>
+              <q-item clickable>
+                <q-item-section>Downloads</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable>
+                <q-item-section>Settings</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable>
+                <q-item-section>Help &amp; Feedback</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -65,7 +93,7 @@ export default {
         },
         {
           icon: "settings",
-          label: "---",
+          label: "Setting",
           separator: false,
         },
         {

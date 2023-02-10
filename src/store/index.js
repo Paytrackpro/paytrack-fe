@@ -3,12 +3,13 @@ import Vuex from 'vuex'
 
 // we first import the module
 import auth from './auth'
-
+import user from './user'
 Vue.use(Vuex)
 
 const Store = new Vuex.Store({
   modules: {
-    auth
+    auth,
+    user
   },
 
   // enable strict mode (adds overhead!)
