@@ -30,9 +30,9 @@ const routes = [
       {
         path: "/profile",
         name: "Profile",
-        component: () => import("pages/admin/users/profile.vue"),
+        component: () => import("pages/users/profile.vue"),
         meta: {
-          title: "profile User",
+          title: "profile",
         },
       },
     ],
