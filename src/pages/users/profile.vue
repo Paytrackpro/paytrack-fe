@@ -16,8 +16,21 @@
             </div>
           </div>
           <div>
+            <p class="q-mt-none q-mb-xs text-weight-medium">Display name </p>
+            <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.displayName" placeholder="Your display name">
+            </q-input>
+          </div>
+          <div>
             <p class="q-mt-none q-mb-xs text-weight-medium">Email </p>
-            <q-input outlined dense lazy-rules stack-label hide-bottom-space v-model="user.email" placeholder="Email">
+            <q-input
+            outlined
+            dense
+            lazy-rules
+            stack-label
+            hide-bottom-space
+            v-model="user.email"
+            placeholder="Email"
+            :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address',]">
             </q-input>
           </div>
           <div>
@@ -88,6 +101,8 @@
           this.user.email = user.email;
           this.user.paymentType = user.paymentType;
           this.user.paymentAddress = user.paymentAddress;
+          this.user.displayName = user.displayName;
+
         },
         submit(){
           let userData = {
@@ -96,6 +111,7 @@
             email : this.user.email,
             paymentAddress : this.user.paymentAddress,
             paymentType : this.user.paymentType,
+            displayName : this.user.displayName
           }
           this.$store.dispatch("user/updateUserProfile", userData);
         },

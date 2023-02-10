@@ -8,10 +8,10 @@
           <q-avatar size="26px" v-if="this.isShowAvartar === true">
               <img src="https://cdn.quasar.dev/img/boy-avatar.png">
           </q-avatar>
-          <label v-else class="profile-label"><span >{{ this.user.userName }}</span></label>
+          <label v-else class="profile-label"><span >{{ getUser }}</span></label>
           <q-menu>
             <q-list style="min-width: 100px">
-              <q-item clickable to="/profile">
+              <q-item clickable to="profileinfo">
                 <q-item-section>Profile</q-item-section>
               </q-item>
               <q-separator />
@@ -92,6 +92,11 @@ export default {
       ],
     }
   },
+  computed : {
+    getUser(){
+       return (this.empty(this.user.displayName))? this.user.userName : this.user.displayName;
+    }
+  },
   mounted :function(){
     this.setUserName();
   },
@@ -114,12 +119,12 @@ export default {
 }
 </script>
 <style lang="scss">
-.profile-label{
-  font-weight: bold;
-  text-transform: uppercase;
-}
-.profile-label:hover{
-  cursor: pointer;
-  text-decoration:underline;
-}
+  .profile-label{
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .profile-label:hover{
+    cursor: pointer;
+    text-decoration:underline;
+  }
 </style>
