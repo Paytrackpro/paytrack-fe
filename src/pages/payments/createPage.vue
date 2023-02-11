@@ -20,6 +20,12 @@ export default {
     PaymentForm
   },
   data() {
+    let user = localStorage.getItem("user")
+    if (typeof(user) == "string" && user.length > 0) {
+      user = JSON.parse(user)
+    } else {
+      user = {}
+    }
     return {
       payment: {
         contactMethod: "internal",
@@ -28,8 +34,8 @@ export default {
         senderEmail: "",
         description: "",
         txId: "",
-        paymentMethod: "",
-        paymentAddress: ""
+        paymentMethod: user.paymentType || "",
+        paymentAddress: user.paymentAddress || ""
       },
     }
   },

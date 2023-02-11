@@ -40,7 +40,6 @@ export default {
     } else {
       user = {}
     }
-    console.log(user)
     return {
       user,
       loading: false,
