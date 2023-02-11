@@ -89,20 +89,23 @@
           ],
         }
       },
-      mounted: function(){
-        this.setData();
+      created: function () {
+        this.getDataApi();
       },
       methods : {
-        setData(){
-          this.$store.dispatch("user/getUserInfo");
-          let user =  this.$store.getters['user/getUserProfile'];
+        async getDataApi(){
+          this.$api.get("/user/info").then((res) => {
+            localStorage.setItem('profile' ,JSON.stringify(res.data.data))
+            this.setData(res.data.data);
+          })
+        },
+        setData(user){
           this.user.userId = user.id;
           this.user.userName = user.userName;
           this.user.email = user.email;
           this.user.paymentType = user.paymentType;
           this.user.paymentAddress = user.paymentAddress;
           this.user.displayName = user.displayName;
-
         },
         submit(){
           let userData = {

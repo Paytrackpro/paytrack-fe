@@ -103,6 +103,7 @@ export default {
   methods : {
     setUserName(){
       let userProfile = this.$store.getters['user/getUserProfile'];
+      userProfile = JSON.parse(userProfile)
       if(!this.empty(userProfile.userName)){
         this.isShowAvartar = false;
         this.user = userProfile;
