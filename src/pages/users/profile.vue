@@ -95,7 +95,7 @@
       methods : {
         async getDataApi(){
           this.$api.get("/user/info").then((res) => {
-            localStorage.setItem('profile' ,JSON.stringify(res.data.data))
+            localStorage.setItem('user' ,JSON.stringify(res.data.data))
             this.setData(res.data.data);
           })
         },

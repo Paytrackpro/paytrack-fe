@@ -8,7 +8,7 @@ export default {
       localStorage.setItem("token", responseData.token)
       commit("setUser", res.data.data.userInfo)
       commit("setAuthenticated", true)
-      commit('setUserProfile', res.data.data.userInfo)
+      commit('setUserProfile', JSON.stringify(responseData.userInfo))
     })
   },
 
