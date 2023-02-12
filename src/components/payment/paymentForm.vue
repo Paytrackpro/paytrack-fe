@@ -123,7 +123,6 @@ export default {
       immediate: true,
       handler(newPayment) {
         this.destination.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
-        console.log(newPayment, this.destination.value)
       }
     }
   },
