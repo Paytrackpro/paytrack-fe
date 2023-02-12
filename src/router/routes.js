@@ -27,6 +27,22 @@ const routes = [
           title: "User Detail",
         },
       },
+      {
+        path: "/profile",
+        name: "Profile",
+        component: () => import("pages/users/profile.vue"),
+        meta: {
+          title: "profile",
+        },
+      },
+      {
+        path: "/profileinfo",
+        name: "ProfileInfo",
+        component: () => import("pages/users/profileInfo.vue"),
+        meta: {
+          title: "profile",
+        },
+      },
     ],
   },
   {

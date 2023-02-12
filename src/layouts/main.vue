@@ -4,9 +4,23 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="left = !left" />
         <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
-        <q-avatar>
-          <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg" />
-        </q-avatar>
+        <div>
+          <q-avatar size="26px" v-if="this.isShowAvartar === true">
+              <img src="https://cdn.quasar.dev/img/boy-avatar.png">
+          </q-avatar>
+          <label v-else class="profile-label"><span >{{ getUser }}</span></label>
+          <q-menu>
+            <q-list style="min-width: 100px">
+              <q-item clickable to="profileinfo">
+                <q-item-section>Profile</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable @click='logout'>
+                <q-item-section>Logout</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -40,6 +54,8 @@
 export default {
   data() {
     return {
+      user : '',
+      isShowAvartar : true,
       left: false,
       drawer: false,
       menuList: [
@@ -65,7 +81,7 @@ export default {
         },
         {
           icon: "settings",
-          label: "---",
+          label: "Setting",
           separator: false,
         },
         {
@@ -76,5 +92,40 @@ export default {
       ],
     }
   },
+  computed : {
+    getUser(){
+       return (this.empty(this.user.displayName))? this.user.userName : this.user.displayName;
+    }
+  },
+  mounted :function(){
+    this.setUserName();
+  },
+  methods : {
+    setUserName(){
+      let userProfile = this.$store.getters['user/getUserProfile'];
+      userProfile = JSON.parse(userProfile)
+      if(!this.empty(userProfile.userName)){
+        this.isShowAvartar = false;
+        this.user = userProfile;
+      }
+    },
+    logout(){
+      this.$store
+        .dispatch('auth/logOut')
+    },
+    empty(str){
+      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
+    }
+  }
 }
 </script>
+<style lang="scss">
+  .profile-label{
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  .profile-label:hover{
+    cursor: pointer;
+    text-decoration:underline;
+  }
+</style>
