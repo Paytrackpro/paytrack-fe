@@ -59,6 +59,7 @@
 </template>
 
 <script>
+  import { PAYMENT_TYPE_OPTIONS } from "../../consts/paymentType"
   import { defineComponent } from "vue";
   export default defineComponent({
       name: 'Profile',
@@ -73,20 +74,7 @@
             displayName : '',
             role : '',
           },
-          paymentAddressOptions : [
-            {
-              label: "BTC",
-              value: "btc",
-            },
-            {
-              label: "LTC",
-              value: "ltc",
-            },
-            {
-              label: "DCR",
-              value: "dcr",
-            },
-          ],
+          paymentAddressOptions : PAYMENT_TYPE_OPTIONS,
         }
       },
       created: function () {
