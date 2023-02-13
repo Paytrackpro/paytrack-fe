@@ -5,13 +5,27 @@ function checkValidToken() {
     const token = localStorage.getItem("token")
     const decoded = jwt_decode(token)
 
-    return localStorage.getItem("token") && Date.now() < decoded.Expire * 1000
+    if (Date.now() >= decoded.Expire * 1000) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return false;
+    }
+
+    return true
   } catch (e) {
     return false
   }
 }
 
+function setUser() {
+  try {
+    return JSON.parse(localStorage.getItem("user"));
+  } catch (e) {
+    return null
+  }
+}
+
 export default {
   authenticated: checkValidToken(),
-  user: localStorage.getItem("user"),
+  user: setUser(),
 }
