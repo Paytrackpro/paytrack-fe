@@ -1,18 +1,24 @@
+import ROLE from "../consts/role"
+
 const routes = [
   {
-    path: "/",
-    component: () => import("layouts/main.vue"),
+    path: "/admin",
+    component: () => import("src/layouts/AdminLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: [ROLE.ADMIN],
+    },
     children: [
       {
-        path: "/",
+        path: "",
         name: "Home",
-        component: () => import("src/pages/admin/home.vue"),
+        component: () => import("src/pages/users/home.vue"),
         meta: {
           title: "Home",
         },
       },
       {
-        path: "/users",
+        path: "users",
         name: "UserList",
         component: () => import("pages/admin/users/list.vue"),
         meta: {
@@ -20,7 +26,7 @@ const routes = [
         },
       },
       {
-        path: "/users/:id",
+        path: "users/:id",
         name: "UserDetail",
         component: () => import("pages/admin/users/detail.vue"),
         meta: {
@@ -66,6 +72,20 @@ const routes = [
         ],
       },
     ],
+  },
+  {
+    path: "/",
+    component: () => import("src/pages/users/home.vue"),
+    name: "User Home",
+    meta: {
+      requiresAuth: true,
+      roles: [ROLE.USER],
+    },
+  },
+  {
+    path: "/404",
+    name: "404",
+    component: () => import("pages/404.vue"),
   },
   {
     path: "/login",
