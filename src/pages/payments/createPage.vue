@@ -4,24 +4,20 @@
       <div class="text-h6">Create payment request</div>
     </q-card-section>
     <q-separator inset />
-    <payment-form
-      :payment="payment"
-      @saved="saved"
-      @cancel="$router.push({ name: 'payment.list' })"
-    />
+    <payment-form :payment="payment" @saved="saved" @cancel="$router.push({ name: 'payment.list' })" />
   </q-card>
 </template>
 
 <script>
-import {PaymentForm} from "components/payment";
+import { PaymentForm } from "components/payment"
 export default {
   name: "createPayment",
   components: {
-    PaymentForm
+    PaymentForm,
   },
   data() {
     let user = localStorage.getItem("user")
-    if (typeof(user) == "string" && user.length > 0) {
+    if (typeof user == "string" && user.length > 0) {
       user = JSON.parse(user)
     } else {
       user = {}
@@ -35,18 +31,16 @@ export default {
         description: "",
         txId: "",
         paymentMethod: user.paymentType || "",
-        paymentAddress: user.paymentAddress || ""
+        paymentAddress: user.paymentAddress || "",
       },
     }
   },
   methods: {
     saved(data) {
-      this.$router.push({ name: "payment.detail", params: {id: data.id} })
-    }
-  }
+      this.$router.push({ name: "payment.detail", params: { id: data.id } })
+    },
+  },
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

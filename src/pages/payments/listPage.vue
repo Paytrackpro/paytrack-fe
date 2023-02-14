@@ -12,7 +12,7 @@
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-right>
-        <q-btn outline color="secondary" label="Create payment" to="/payment/create"/>
+        <q-btn outline color="secondary" label="Create payment" to="payment/create" />
       </template>
       <template v-slot:body-cell-online="props">
         <q-td :props="props">
@@ -28,7 +28,7 @@
 
 <script>
 import { date } from "quasar"
-import {MDateFormat} from "src/consts/common";
+import { MDateFormat } from "src/consts/common"
 
 export default {
   name: "listPayments",
@@ -51,12 +51,18 @@ export default {
           format: (val) => `${val}`,
           sortable: true,
         },
-        { name: "senderName", align: "center", label: "sender", field: (row) => {
-          if (row.contactMethod === "email") {
-            return row.senderEmail
-          }
-          return row.senderName
-        }, sortable: true },
+        {
+          name: "senderName",
+          align: "center",
+          label: "sender",
+          field: (row) => {
+            if (row.contactMethod === "email") {
+              return row.senderEmail
+            }
+            return row.senderName
+          },
+          sortable: true,
+        },
         { name: "status", align: "center", label: "status", field: "status", sortable: true },
         {
           name: "amount",

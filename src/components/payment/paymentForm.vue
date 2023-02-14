@@ -12,7 +12,7 @@
           stack-label
           hide-bottom-space
           @blur="checkingDestination"
-          :rules="[ val => !!val || 'Destination is required' ]"
+          :rules="[(val) => !!val || 'Destination is required']"
           :error="destinationError"
           :error-message="destination.error"
           hint="expect an user name on mgmt or an email address"
@@ -26,7 +26,7 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">The amount you want to received(USD)</p>
         <q-input
           v-model="payment.amount"
-          :rules="[ val => val > 0 || 'Amount must be greater than 0'  ]"
+          :rules="[(val) => val > 0 || 'Amount must be greater than 0']"
           placeholder="Amount"
           type="number"
           outlined
@@ -44,7 +44,7 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">Currency you want to receive</p>
         <q-select
           v-model="payment.paymentMethod"
-          :rules="[ val => !!val || 'Currency is required'  ]"
+          :rules="[(val) => !!val || 'Currency is required']"
           :options="paymentMethods"
           placeholder="Payment Type"
           option-value="value"
@@ -61,7 +61,7 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">Your currency address</p>
         <q-input
           v-model="payment.paymentAddress"
-          :rules="[ val => !!val || 'Address is required'  ]"
+          :rules="[(val) => !!val || 'Address is required']"
           placeholder="payment address"
           outlined
           dense
@@ -70,11 +70,11 @@
           hide-bottom-space
         />
       </div>
-      <div class="col-12 ">
+      <div class="col-12">
         <p class="q-mt-none q-mb-xs text-weight-medium">Tell more about your payment request</p>
         <q-input
           v-model="payment.description"
-          :rules="[ val => !!val || 'Description is required'  ]"
+          :rules="[(val) => !!val || 'Description is required']"
           type="textarea"
           placeholder="description"
           outlined
@@ -87,19 +87,19 @@
     </div>
     <div class="row justify-end">
       <q-btn :label="payment.id > 0 ? 'Update' : 'Send'" type="submit" color="primary" />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')"/>
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')" />
     </div>
   </q-form>
 </template>
 
 <script>
-import {PAYMENT_TYPE_OPTIONS} from "src/consts/paymentType";
-import {emailPattern} from "src/helper/validations";
+import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
+import { emailPattern } from "src/helper/validations"
 
-const DESTINATION_CHECK_NONE = 0;
-const DESTINATION_CHECK_CHECKING = 1;
-const DESTINATION_CHECK_FAIL = 2;
-const DESTINATION_CHECK_DONE = 3;
+const DESTINATION_CHECK_NONE = 0
+const DESTINATION_CHECK_CHECKING = 1
+const DESTINATION_CHECK_FAIL = 2
+const DESTINATION_CHECK_DONE = 3
 
 export default {
   name: "paymentForm",
@@ -122,41 +122,43 @@ export default {
     payment: {
       immediate: true,
       handler(newPayment) {
-        this.destination.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
-      }
-    }
+        this.destination.value =
+          newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
+      },
+    },
   },
   methods: {
     checkingDestination: function ($e) {
-      this.destination.status = DESTINATION_CHECK_NONE;
+      this.destination.status = DESTINATION_CHECK_NONE
       this.destination.error = ""
-      if(this.destination.value.length === 0) {
+      if (this.destination.value.length === 0) {
         return
       }
-      if(emailPattern.test(this.destination.value)) {
-        this.destination.status = DESTINATION_CHECK_DONE;
+      if (emailPattern.test(this.destination.value)) {
+        this.destination.status = DESTINATION_CHECK_DONE
         this.payment.contactMethod = "email"
         this.payment.senderEmail = this.destination.value
       } else {
-        this.destination.status = DESTINATION_CHECK_CHECKING;
-        this.$api.get(`/user/exist-checking?userName=${this.destination.value}`)
+        this.destination.status = DESTINATION_CHECK_CHECKING
+        this.$api
+          .get(`/user/exist-checking?userName=${this.destination.value}`)
           .then((res) => {
             if (res.data.data.found) {
-              this.destination.status = DESTINATION_CHECK_DONE;
-              this.payment.senderId = res.data.data.id;
+              this.destination.status = DESTINATION_CHECK_DONE
+              this.payment.senderId = res.data.data.id
               this.payment.contactMethod = "internal"
             } else {
-              this.destination.status = DESTINATION_CHECK_FAIL;
+              this.destination.status = DESTINATION_CHECK_FAIL
               this.destination.error = res.data.data.message
             }
           })
           .catch(() => {
-            this.destination.status = DESTINATION_CHECK_FAIL;
+            this.destination.status = DESTINATION_CHECK_FAIL
             this.destination.error = "the user name is not found"
           })
       }
     },
-    submit:function () {
+    submit: function () {
       if (this.submitting) {
         return
       }
@@ -179,7 +181,7 @@ export default {
             icon: "check",
           })
           this.submitting = false
-          this.$emit('saved', res.data.data.payment)
+          this.$emit("saved", res.data.data.payment)
         })
         .catch((err) => {
           this.submitting = false
@@ -189,16 +191,14 @@ export default {
             icon: "alert",
           })
         })
-    }
+    },
   },
   computed: {
     destinationError: function () {
-      return this.destination.status === DESTINATION_CHECK_FAIL;
-    }
-  }
+      return this.destination.status === DESTINATION_CHECK_FAIL
+    },
+  },
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
