@@ -10,7 +10,7 @@
           </q-avatar>
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
-              <q-item to="/admin/profileinfo" clickable v-close-popup>
+              <q-item to="/profileinfo" clickable v-close-popup>
                 <q-item-section>Edit profile</q-item-section>
               </q-item>
               <q-separator />
@@ -57,35 +57,9 @@ export default {
       drawer: false,
       menuList: [
         {
-          icon: "people",
-          label: "User Management",
-          to: "/admin/users",
-        },
-        {
-          icon: "book",
-          label: "Worklog",
-          separator: false,
-        },
-        {
-          icon: "credit_card",
-          label: "Payment",
-          separator: false,
-          to: "/admin/payment",
-        },
-        {
-          icon: "error",
-          label: "---",
-          separator: false,
-        },
-        {
-          icon: "settings",
-          label: "---",
-          separator: false,
-        },
-        {
-          icon: "feedback",
-          label: "---",
-          separator: false,
+          icon: "home",
+          label: "Home",
+          to: "/",
         },
       ],
     }
