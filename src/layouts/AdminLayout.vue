@@ -4,13 +4,11 @@
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="left = !left" />
         <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
-        <q-btn round>
-          <q-avatar>
-            <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg" />
-          </q-avatar>
+        <q-btn flat>
+          {{ user.userName }}
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
-              <q-item to="/admin/profileinfo" clickable v-close-popup>
+              <q-item to="/admin/profile/edit" clickable v-close-popup>
                 <q-item-section>Edit profile</q-item-section>
               </q-item>
               <q-separator />
@@ -50,6 +48,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
@@ -89,6 +88,11 @@ export default {
         },
       ],
     }
+  },
+  computed: {
+    ...mapGetters({
+      user: "auth/getUser",
+    }),
   },
   methods: {
     logOut() {

@@ -100,7 +100,7 @@ export default {
       })
     },
     goToDetail(id) {
-      this.$router.push({ name: "UserDetail", params: { id } })
+      this.$router.push({ name: "admin.user.detail", params: { id } })
     },
   },
 }

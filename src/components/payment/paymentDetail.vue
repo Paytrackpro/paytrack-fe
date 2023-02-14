@@ -4,7 +4,7 @@
       <div class="col-4">
         <q-field label="The receiver" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">{{payment.requesterName}}</div>
+            <div class="self-center full-width no-outline" tabindex="0">{{ payment.requesterName }}</div>
           </template>
         </q-field>
       </div>
@@ -12,7 +12,7 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.contactMethod === "internal" ? payment.senderName : payment.senderEmail}}
+              {{ payment.contactMethod === "internal" ? payment.senderName : payment.senderEmail }}
             </div>
           </template>
         </q-field>
@@ -21,7 +21,7 @@
         <q-field label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.status}}
+              {{ payment.status }}
             </div>
           </template>
         </q-field>
@@ -33,7 +33,7 @@
           </template>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.amount}}
+              {{ payment.amount }}
             </div>
           </template>
         </q-field>
@@ -42,7 +42,7 @@
         <q-field label="Convert Rate" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.convertRate}}
+              {{ payment.convertRate }}
             </div>
           </template>
         </q-field>
@@ -51,7 +51,7 @@
         <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.expectedAmount}}
+              {{ payment.expectedAmount }}
             </div>
           </template>
         </q-field>
@@ -60,17 +60,17 @@
         <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.paymentAddress}}
+              {{ payment.paymentAddress }}
             </div>
           </template>
         </q-field>
       </div>
       <div class="col-12">
-        <q-input v-if="processing" v-model="txId" label="Transaction id" ref="txId"/>
+        <q-input v-if="processing" v-model="txId" label="Transaction id" ref="txId" />
         <q-field v-if="!processing" label="Transaction id" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.txId}}
+              {{ payment.txId }}
             </div>
           </template>
         </q-field>
@@ -96,7 +96,7 @@
       <div class="col-12">
         <div class="text-h6">Description</div>
         <div>
-          {{payment.description}}
+          {{ payment.description }}
         </div>
       </div>
     </div>
@@ -112,7 +112,8 @@
       />
       <q-btn
         v-if="processable && processing"
-        label="Mark as paid" type="button"
+        label="Mark as paid"
+        type="button"
         color="primary"
         @click="markAsPaid"
         :disable="fetchingRate || paying"
@@ -126,17 +127,23 @@
         @click="processPayment"
         class="q-mr-sm"
       />
-      <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="$emit('edit')"/>
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$router.push({ name: 'payment.list' })"/>
+      <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="$emit('edit')" />
+      <q-btn
+        label="Cancel"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="$router.push({ name: 'payment.list' })"
+      />
     </div>
   </q-form>
 </template>
 
 <script>
-import MDate from "components/common/mDate";
+import MDate from "components/common/mDate"
 export default {
   name: "paymentDetail",
-  components: {MDate},
+  components: { MDate },
   data() {
     return {
       processing: false,
@@ -157,12 +164,13 @@ export default {
         token,
       }
       this.fetchingRate = true
-      this.$api.post("/payment/request-rate", reqData)
-        .then(res => {
+      this.$api
+        .post("/payment/request-rate", reqData)
+        .then((res) => {
           this.fetchingRate = false
           this.$emit("update", res.data.data)
         })
-        .catch(err => {
+        .catch((err) => {
           this.fetchingRate = false
         })
     },
@@ -172,34 +180,39 @@ export default {
     },
     markAsPaid() {
       const txId = this.txId.trim()
-      if (txId.length === 0 &&
-        !confirm("Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier")) {
+      if (
+        txId.length === 0 &&
+        !confirm(
+          "Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier"
+        )
+      ) {
         this.$refs.txId.$el.focus()
         return
       }
       const reqData = {
         id: this.payment.id,
         txId: txId,
-        token: this.$route.query.token || ""
+        token: this.$route.query.token || "",
       }
-      this.$api.post("/payment/process", reqData)
-        .then(res => {
+      this.$api
+        .post("/payment/process", reqData)
+        .then((res) => {
           this.paying = false
           this.$emit("update", res.data.data)
         })
-        .catch(err => {
+        .catch((err) => {
           this.paying = false
         })
-    }
+    },
   },
   watch: {
     payment(newPayment) {
       this.txId = newPayment.txId
-    }
+    },
   },
   computed: {
     editable() {
-      return this.payment.status === "created" && this.payment.requesterId === this.user.id;
+      return this.payment.status === "created" && this.payment.requesterId === this.user.id
     },
     processable() {
       return this.payment.status === "created" && (this.payment.senderId === this.user.id || this.$route.query.token)
@@ -209,11 +222,9 @@ export default {
         return "Fetching Rate"
       }
       return "Re-fetch rate"
-    }
-  }
+    },
+  },
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

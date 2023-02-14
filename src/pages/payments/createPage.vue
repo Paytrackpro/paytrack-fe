@@ -4,12 +4,13 @@
       <div class="text-h6">Create payment request</div>
     </q-card-section>
     <q-separator inset />
-    <payment-form :payment="payment" @saved="saved" @cancel="$router.push({ name: 'payment.list' })" />
+    <payment-form :payment="payment" @saved="saved" @cancel="$router.push({ name: `${role}.payment.list` })" />
   </q-card>
 </template>
 
 <script>
 import { PaymentForm } from "components/payment"
+import { mapGetters } from "vuex"
 export default {
   name: "createPayment",
   components: {
@@ -34,6 +35,11 @@ export default {
         paymentAddress: user.paymentAddress || "",
       },
     }
+  },
+  computed: {
+    ...mapGetters({
+      role: "auth/getRole",
+    }),
   },
   methods: {
     saved(data) {

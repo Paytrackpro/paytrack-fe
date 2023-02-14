@@ -92,7 +92,7 @@ export default {
           if (this.user.role === ROLE.ADMIN) {
             this.$router.push({ name: "Home" })
           } else {
-            this.$router.push({ name: "User Home" })
+            this.$router.push({ name: "user.home" })
           }
         })
         .catch((error) => {
