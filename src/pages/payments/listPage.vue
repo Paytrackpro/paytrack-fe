@@ -29,6 +29,7 @@
 <script>
 import { date } from "quasar"
 import { MDateFormat } from "src/consts/common"
+import { mapGetters } from 'vuex'
 
 export default {
   name: "listPayments",
@@ -85,6 +86,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      role: "auth/getRole"
+    }),
     pagesNumber() {
       return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
     },
@@ -99,7 +103,7 @@ export default {
       })
     },
     goToDetail(id) {
-      this.$router.push({ name: "payment.detail", params: { id } })
+      this.$router.push({ name: `${this.role}.payment.detail`, params: { id } })
     },
   },
 }

@@ -128,19 +128,14 @@
         class="q-mr-sm"
       />
       <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="$emit('edit')" />
-      <q-btn
-        label="Cancel"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="$router.push({ name: 'payment.list' })"
-      />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="goToList" />
     </div>
   </q-form>
 </template>
 
 <script>
 import MDate from "components/common/mDate"
+import { mapGetters } from "vuex"
 export default {
   name: "paymentDetail",
   components: { MDate },
@@ -157,6 +152,9 @@ export default {
     user: Object,
   },
   methods: {
+    goToList() {
+      this.$router.push({ name: `${this.role}.payment.list` })
+    },
     queryRate() {
       const token = this.$route.query.token || ""
       const reqData = {
@@ -211,6 +209,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      role: "auth/getRole",
+    }),
     editable() {
       return this.payment.status === "created" && this.payment.requesterId === this.user.id
     },
