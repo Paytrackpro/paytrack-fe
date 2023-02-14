@@ -34,53 +34,81 @@ const routes = [
         },
       },
       {
-        path: "/profile",
-        name: "Profile",
+        path: "profile",
+        name: "AdminProfile",
         component: () => import("pages/users/profile.vue"),
         meta: {
           title: "profile",
         },
       },
       {
-        path: "/profileinfo",
-        name: "ProfileInfo",
+        path: "profileinfo",
+        name: "AdminProfileInfo",
         component: () => import("pages/users/profileInfo.vue"),
         meta: {
           title: "profile",
         },
       },
       {
-        path: "/payment",
-        name: "Payment",
-        component: () => import("pages/payments/layout.vue"),
-        children: [
-          {
-            path: "/",
-            name: "payment.list",
-            component: () => import("pages/payments/listPage.vue"),
-          },
-          {
-            path: "create",
-            name: "payment.create",
-            component: () => import("pages/payments/createPage.vue"),
-          },
-          {
-            path: ":id(\\d+)",
-            name: "payment.detail",
-            component: () => import("pages/payments/detailPage.vue"),
-          },
-        ],
+        path: "payment",
+        name: "payment.list",
+        component: () => import("pages/payments/listPage.vue"),
+        meta: {
+          title: "Payment List",
+        },
+      },
+      {
+        path: "payment/create",
+        name: "payment.create",
+        component: () => import("pages/payments/createPage.vue"),
+        meta: {
+          title: "Payment Create",
+        },
+      },
+      {
+        path: "payment/:id(\\d+)",
+        name: "payment.detail",
+        component: () => import("pages/payments/detailPage.vue"),
+        meta: {
+          title: "Payment Detail",
+        },
       },
     ],
   },
   {
     path: "/",
-    component: () => import("src/pages/users/home.vue"),
+    component: () => import("src/layouts/UserLayout.vue"),
     name: "User Home",
     meta: {
       requiresAuth: true,
       roles: [ROLE.USER],
     },
+    children: [
+      {
+        path: "",
+        name: "Home",
+        component: () => import("src/pages/users/home.vue"),
+        meta: {
+          title: "Home",
+        },
+      },
+      {
+        path: "profileinfo",
+        name: "UserProfileInfo",
+        component: () => import("pages/users/profileInfo.vue"),
+        meta: {
+          title: "profile",
+        },
+      },
+      {
+        path: "profile",
+        name: "UserProfile",
+        component: () => import("pages/users/profile.vue"),
+        meta: {
+          title: "profile",
+        },
+      },
+    ],
   },
   {
     path: "/404",

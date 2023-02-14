@@ -35,10 +35,14 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  if (to.matched.some((record) => record.meta.roles && record.meta.roles.includes(role)) || !authRequired) {
-    next()
+  if (authRequired) {
+    if (to.matched.some((record) => record.meta.roles && record.meta.roles.includes(role))) {
+      next()
+    } else {
+      next({ name: "404" })
+    }
   } else {
-    next({ name: "404" })
+    next()
   }
 })
 
