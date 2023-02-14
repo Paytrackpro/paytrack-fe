@@ -19,7 +19,7 @@ const routes = [
       },
       {
         path: "users",
-        name: "UserList",
+        name: "admin.user.list",
         component: () => import("pages/admin/users/list.vue"),
         meta: {
           title: "User Management",
@@ -27,23 +27,23 @@ const routes = [
       },
       {
         path: "users/:id",
-        name: "UserDetail",
+        name: "admin.user.detail",
         component: () => import("pages/admin/users/detail.vue"),
         meta: {
           title: "User Detail",
         },
       },
       {
-        path: "profile",
-        name: "AdminProfile",
+        path: "profile/edit",
+        name: "admin.profile",
         component: () => import("pages/users/profile.vue"),
         meta: {
           title: "profile",
         },
       },
       {
-        path: "profileinfo",
-        name: "AdminProfileInfo",
+        path: "profile",
+        name: "admin.profile.edit",
         component: () => import("pages/users/profileInfo.vue"),
         meta: {
           title: "profile",
@@ -51,7 +51,7 @@ const routes = [
       },
       {
         path: "payment",
-        name: "payment.list",
+        name: "admin.payment.list",
         component: () => import("pages/payments/listPage.vue"),
         meta: {
           title: "Payment List",
@@ -59,7 +59,7 @@ const routes = [
       },
       {
         path: "payment/create",
-        name: "payment.create",
+        name: "admin.payment.create",
         component: () => import("pages/payments/createPage.vue"),
         meta: {
           title: "Payment Create",
@@ -67,7 +67,7 @@ const routes = [
       },
       {
         path: "payment/:id(\\d+)",
-        name: "payment.detail",
+        name: "admin.payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
           title: "Payment Detail",
@@ -78,7 +78,6 @@ const routes = [
   {
     path: "/",
     component: () => import("src/layouts/UserLayout.vue"),
-    name: "User Home",
     meta: {
       requiresAuth: true,
       roles: [ROLE.USER],
@@ -86,26 +85,50 @@ const routes = [
     children: [
       {
         path: "",
-        name: "Home",
+        name: "user.home",
         component: () => import("src/pages/users/home.vue"),
         meta: {
           title: "Home",
         },
       },
       {
-        path: "profileinfo",
-        name: "UserProfileInfo",
+        path: "profile",
+        name: "user.profile",
         component: () => import("pages/users/profileInfo.vue"),
         meta: {
-          title: "profile",
+          title: "Profile",
         },
       },
       {
-        path: "profile",
-        name: "UserProfile",
+        path: "profile/edit",
+        name: "user.profile.edit",
         component: () => import("pages/users/profile.vue"),
         meta: {
-          title: "profile",
+          title: "Profile Edit",
+        },
+      },
+      {
+        path: "payment",
+        name: "user.payment.list",
+        component: () => import("pages/payments/listPage.vue"),
+        meta: {
+          title: "Payment List",
+        },
+      },
+      {
+        path: "payment/create",
+        name: "user.payment.create",
+        component: () => import("pages/payments/createPage.vue"),
+        meta: {
+          title: "Payment Create",
+        },
+      },
+      {
+        path: "payment/:id(\\d+)",
+        name: "user.payment.detail",
+        component: () => import("pages/payments/detailPage.vue"),
+        meta: {
+          title: "Payment Detail",
         },
       },
     ],

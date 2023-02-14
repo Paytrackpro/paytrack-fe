@@ -20,7 +20,7 @@ router.beforeEach((to, from, next) => {
 
   if (isAuthenticated && publicPages.includes(to.name)) {
     if (role === ROLE.USER) {
-      next({ name: "User Home" })
+      next({ name: "user.home" })
     } else if (role === ROLE.ADMIN) {
       next({ name: "Home" })
     } else {
