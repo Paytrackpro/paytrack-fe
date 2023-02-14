@@ -28,4 +28,5 @@ function setUser() {
 export default {
   authenticated: checkValidToken(),
   user: setUser(),
+  role: null
 }
