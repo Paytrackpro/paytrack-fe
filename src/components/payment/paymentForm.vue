@@ -1,20 +1,48 @@
 <template>
-  <q-form @submit="submit" class="q-ma-md">
+  <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-12">
-        <p class="q-mt-none q-mb-xs text-weight-medium">The destination you want to send</p>
-        <q-input
-          v-model="destination.value"
-          placeholder="Destination"
+      <div class="col-4">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Do you want to?</p>
+        <q-radio v-model="paymentType" val="request" label="Request"/>
+        <q-radio v-model="paymentType" val="reminder" label="Reminder"/>
+      </div>
+      <div class="col-4">
+        <p class="q-mt-none q-mb-xs text-weight-medium">
+          Sender
+          <q-icon name="info">
+            <q-tooltip>
+              The sender is person who will pay for the payment
+            </q-tooltip>
+          </q-icon>
+        </p>
+        <q-input v-if="paymentType === 'reminder'"
+          v-model="user.userName"
+          placeholder="Sender"
+          readonly
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
+         :error="false"
+         error-message=""
+        >
+          <template v-slot:prepend>
+            <q-icon name="person" />
+          </template>
+        </q-input>
+        <q-input v-else
+          v-model="partner.value"
+          placeholder="Sender"
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
           @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Destination is required']"
-          :error="destinationError"
-          :error-message="destination.error"
+          :rules="[ val => !!val || 'Sender is required' ]"
+          :error="partnerError"
+          :error-message="partner.error"
           hint="expect an user name on mgmt or an email address"
         >
           <template v-slot:prepend>
@@ -22,11 +50,53 @@
           </template>
         </q-input>
       </div>
-      <div class="col-12">
-        <p class="q-mt-none q-mb-xs text-weight-medium">The amount you want to received(USD)</p>
+      <div class="col-4">
+        <p class="q-mt-none q-mb-xs text-weight-medium">
+          Receiver
+          <q-icon name="info">
+            <q-tooltip>
+              The receiver is person who will receive the payment
+            </q-tooltip>
+          </q-icon>
+        </p>
+        <q-input v-if="paymentType === 'request'"
+         v-model="user.userName"
+         placeholder="Sender"
+         readonly
+         outlined
+         dense
+         lazy-rules
+         stack-label
+         hide-bottom-space
+        >
+          <template v-slot:prepend>
+            <q-icon name="person" />
+          </template>
+        </q-input>
+        <q-input v-else
+          v-model="partner.value"
+          placeholder="Receiver"
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
+          @blur="checkingDestination"
+          :rules="[ val => !!val || 'Receiver is required' ]"
+          :error="partnerError"
+          :error-message="partner.error"
+          hint="expect an user name on mgmt or an email address"
+        >
+          <template v-slot:prepend>
+            <q-icon name="person_add" />
+          </template>
+        </q-input>
+      </div>
+      <div class="col-4">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           v-model="payment.amount"
-          :rules="[(val) => val > 0 || 'Amount must be greater than 0']"
+          :rules="[ val => val > 0 || 'Amount must be greater than 0' ]"
           placeholder="Amount"
           type="number"
           outlined
@@ -40,6 +110,7 @@
           </template>
         </q-input>
       </div>
+      <div class="col-8"/>
       <div class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">Currency you want to receive</p>
         <q-select
@@ -71,18 +142,13 @@
         />
       </div>
       <div class="col-12">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Tell more about your payment request</p>
-        <q-input
-          v-model="payment.description"
-          :rules="[(val) => !!val || 'Description is required']"
-          type="textarea"
-          placeholder="description"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-        />
+        <q-expansion-item
+          v-model="expanded"
+          label="Payment invoices"
+          caption="Expanded"
+        >
+          <invoices v-model="payment.details"></invoices>
+        </q-expansion-item>
       </div>
     </div>
     <div class="row justify-end">
@@ -95,6 +161,7 @@
 <script>
 import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
 import { emailPattern } from "src/helper/validations"
+import Invoices from "components/payment/invoices"
 
 const DESTINATION_CHECK_NONE = 0
 const DESTINATION_CHECK_CHECKING = 1
@@ -103,20 +170,23 @@ const DESTINATION_CHECK_DONE = 3
 
 export default {
   name: "paymentForm",
+  components: {Invoices},
   data() {
     return {
-      destination: {
+      paymentType: "request",
+      expanded: false,
+      partner: {
         value: "",
         status: DESTINATION_CHECK_NONE,
         error: "",
       },
-      userCheck: DESTINATION_CHECK_NONE,
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
     }
   },
   props: {
     payment: Object,
+    user: Object,
   },
   watch: {
     payment: {
@@ -129,32 +199,31 @@ export default {
   },
   methods: {
     checkingDestination: function ($e) {
-      this.destination.status = DESTINATION_CHECK_NONE
-      this.destination.error = ""
-      if (this.destination.value.length === 0) {
+      this.partner.status = DESTINATION_CHECK_NONE;
+      this.partner.error = ""
+      if(!this.partner.value) {
         return
       }
-      if (emailPattern.test(this.destination.value)) {
-        this.destination.status = DESTINATION_CHECK_DONE
+      if(emailPattern.test(this.partner.value)) {
+        this.partner.status = DESTINATION_CHECK_DONE;
         this.payment.contactMethod = "email"
-        this.payment.senderEmail = this.destination.value
+        this.payment.senderEmail = this.partner.value
       } else {
-        this.destination.status = DESTINATION_CHECK_CHECKING
-        this.$api
-          .get(`/user/exist-checking?userName=${this.destination.value}`)
+        this.partner.status = DESTINATION_CHECK_CHECKING;
+        this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
           .then((res) => {
             if (res.data.data.found) {
-              this.destination.status = DESTINATION_CHECK_DONE
-              this.payment.senderId = res.data.data.id
+              this.partner.status = DESTINATION_CHECK_DONE;
+              this.payment.senderId = res.data.data.id;
               this.payment.contactMethod = "internal"
             } else {
-              this.destination.status = DESTINATION_CHECK_FAIL
-              this.destination.error = res.data.data.message
+              this.partner.status = DESTINATION_CHECK_FAIL;
+              this.partner.error = res.data.data.message
             }
           })
           .catch(() => {
-            this.destination.status = DESTINATION_CHECK_FAIL
-            this.destination.error = "the user name is not found"
+            this.partner.status = DESTINATION_CHECK_FAIL;
+            this.partner.error = "the user name is not found"
           })
       }
     },
@@ -194,10 +263,10 @@ export default {
     },
   },
   computed: {
-    destinationError: function () {
-      return this.destination.status === DESTINATION_CHECK_FAIL
-    },
-  },
+    partnerError: function () {
+      return this.partner.status === DESTINATION_CHECK_FAIL;
+    }
+  }
 }
 </script>
 

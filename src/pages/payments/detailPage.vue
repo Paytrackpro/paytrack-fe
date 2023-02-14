@@ -14,6 +14,7 @@
   <payment-form
     v-if="editing"
     :payment="payment"
+    :user="user"
     @saved="saved"
     @cancel="editing = false"
   />

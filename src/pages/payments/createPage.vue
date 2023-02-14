@@ -4,7 +4,16 @@
       <div class="text-h6">Create payment request</div>
     </q-card-section>
     <q-separator inset />
+<<<<<<< HEAD
     <payment-form :payment="payment" @saved="saved" @cancel="$router.push({ name: `${role}.payment.list` })" />
+=======
+    <payment-form
+      :payment="payment"
+      :user="user"
+      @saved="saved"
+      @cancel="$router.push({ name: 'payment.list' })"
+    />
+>>>>>>> 5d05860 (support payment for reminder)
   </q-card>
 </template>
 
@@ -23,7 +32,18 @@ export default {
     } else {
       user = {}
     }
+    let paymentSetting = {}
+    if (user.paymentSetting && Array.isArray(user.paymentSetting)) {
+      paymentSetting = user.paymentSetting[0]
+      for (let s in user.paymentSetting) {
+        if (s.isDefault) {
+          paymentSetting = s
+          break
+        }
+      }
+    }
     return {
+      user: user,
       payment: {
         contactMethod: "internal",
         senderId: 0,
@@ -31,8 +51,9 @@ export default {
         senderEmail: "",
         description: "",
         txId: "",
-        paymentMethod: user.paymentType || "",
-        paymentAddress: user.paymentAddress || "",
+        paymentMethod: paymentSetting.type || "",
+        paymentAddress: paymentSetting.address || "",
+        details: []
       },
     }
   },
