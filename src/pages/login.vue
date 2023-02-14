@@ -65,6 +65,8 @@
 </template>
 
 <script>
+import ROLE from "src/consts/role"
+import { mapGetters } from "vuex"
 export default {
   data() {
     return {
@@ -74,6 +76,11 @@ export default {
       isPwd: true,
     }
   },
+  computed: {
+    ...mapGetters({
+      user: "auth/getUser",
+    }),
+  },
   methods: {
     login() {
       this.$store
@@ -82,7 +89,11 @@ export default {
           password: this.password,
         })
         .then((res) => {
-          this.$router.push({ name: "Home" })
+          if (this.user.role === ROLE.ADMIN) {
+            this.$router.push({ name: "Home" })
+          } else {
+            this.$router.push({ name: "User Home" })
+          }
         })
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message
