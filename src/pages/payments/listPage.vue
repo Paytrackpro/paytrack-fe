@@ -11,7 +11,7 @@
       bordered
       @row-click="(_, row) => goToDetail(row.id)"
     >
-      <template v-slot:top-right>
+      <template v-if="isUser" v-slot:top-right>
         <q-btn outline color="secondary" label="Create payment" to="payment/create" />
       </template>
       <template v-slot:body-cell-online="props">
@@ -29,7 +29,8 @@
 <script>
 import { date } from "quasar"
 import { MDateFormat } from "src/consts/common"
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex"
+import role from "src/consts/role"
 
 export default {
   name: "listPayments",
@@ -87,8 +88,11 @@ export default {
   },
   computed: {
     ...mapGetters({
-      role: "auth/getRole"
+      user: "auth/getUser",
     }),
+    isUser() {
+      return this.user.role === role.USER
+    },
     pagesNumber() {
       return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
     },
@@ -103,7 +107,9 @@ export default {
       })
     },
     goToDetail(id) {
-      this.$router.push({ name: `${this.role}.payment.detail`, params: { id } })
+      if (this.isUser) {
+        this.$router.push({ name: `user.payment.detail`, params: { id } })
+      }
     },
   },
 }

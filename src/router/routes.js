@@ -57,22 +57,6 @@ const routes = [
           title: "Payment List",
         },
       },
-      {
-        path: "payment/create",
-        name: "admin.payment.create",
-        component: () => import("pages/payments/createPage.vue"),
-        meta: {
-          title: "Payment Create",
-        },
-      },
-      {
-        path: "payment/:id(\\d+)",
-        name: "admin.payment.detail",
-        component: () => import("pages/payments/detailPage.vue"),
-        meta: {
-          title: "Payment Detail",
-        },
-      },
     ],
   },
   {
