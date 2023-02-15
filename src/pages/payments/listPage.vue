@@ -108,7 +108,7 @@ export default {
     },
     goToDetail(id) {
       if (this.isUser) {
-        this.$router.push({ name: `user.payment.detail`, params: { id } })
+        this.$router.push({ name: `payment.detail`, params: { id } })
       }
     },
   },

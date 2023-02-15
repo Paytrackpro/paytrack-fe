@@ -101,7 +101,7 @@ const routes = [
       },
       {
         path: "payment/create",
-        name: "user.payment.create",
+        name: "payment.create",
         component: () => import("pages/payments/createPage.vue"),
         meta: {
           title: "Payment Create",
@@ -109,7 +109,7 @@ const routes = [
       },
       {
         path: "payment/:id(\\d+)",
-        name: "user.payment.detail",
+        name: "payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
           title: "Payment Detail",

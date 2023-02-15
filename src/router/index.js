@@ -13,7 +13,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ["Login", "Register", "payment.detail"]
+  const publicPages = ["Login", "Register"]
   const authRequired = to.matched.some((record) => record.meta.requiresAuth)
   const isAuthenticated = store.getters["auth/isAuthenticated"]
   const role = store.getters["auth/getUser"] ? store.getters["auth/getUser"].role : null

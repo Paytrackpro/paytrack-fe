@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     saved(data) {
-      this.$router.push({ name: `${this.role}.payment.detail`, params: { id: data.id } })
+      this.$router.push({ name: `payment.detail`, params: { id: data.id } })
     },
   },
 }

@@ -8,7 +8,7 @@
           {{ user.userName }}
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
-              <q-item to="/admin/profile/edit" clickable v-close-popup>
+              <q-item to="/admin/profile" clickable v-close-popup>
                 <q-item-section>Edit profile</q-item-section>
               </q-item>
               <q-separator />
