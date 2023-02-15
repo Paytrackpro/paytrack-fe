@@ -24,8 +24,8 @@
           lazy-rules
           stack-label
           hide-bottom-space
-         :error="false"
-         error-message=""
+          :error="false"
+          error-message=""
         >
           <template v-slot:prepend>
             <q-icon name="person" />
@@ -95,15 +95,16 @@
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
-          v-model="payment.amount"
-          :rules="[ val => val > 0 || 'Amount must be greater than 0' ]"
+          v-model="amount"
           placeholder="Amount"
           type="number"
+          readonly
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
+          :rules="[ val => val >0 || 'Amount > 0. Please fill up the invoices and hourly rate' ]"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
@@ -145,15 +146,42 @@
         <q-expansion-item
           v-model="expanded"
           label="Payment invoices"
-          caption="Expanded"
+          caption="Click to expand"
         >
-          <invoices v-model="payment.details"></invoices>
+          <div class="q-py-md">
+            <q-input style="max-width: 200px"
+              label="Hourly rate(USD)"
+              dense
+              lazy-rules
+              stack-label
+              outlined
+              hide-bottom-space
+              type="number"
+              v-model="payment.hourlyRate"
+              hint="Used to calculate cost from hours on invoices"
+            />
+          </div>
+          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)"></invoices>
         </q-expansion-item>
       </div>
     </div>
     <div class="row justify-end">
+<<<<<<< HEAD
       <q-btn :label="payment.id > 0 ? 'Update' : 'Send'" type="submit" color="primary" />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')" />
+=======
+      <q-btn label="Mark as draft" type="button" color="primary" @click="submit(true)" :disable="handling">
+        <q-tooltip>
+          'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver"}}
+        </q-tooltip>
+      </q-btn>
+      <q-btn label="Send" type="submit" color="primary" :disable="handling">
+        <q-tooltip>
+          'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver"}}
+        </q-tooltip>
+      </q-btn>
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')"/>
+>>>>>>> 2f17807 (complete invoices for payment form)
     </div>
   </q-form>
 </template>
@@ -176,6 +204,7 @@ export default {
       paymentType: "request",
       expanded: false,
       partner: {
+        id: 0,
         value: "",
         status: DESTINATION_CHECK_NONE,
         error: "",
@@ -192,15 +221,26 @@ export default {
     payment: {
       immediate: true,
       handler(newPayment) {
-        this.destination.value =
-          newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
-      },
+        console.log(newPayment)
+        if (newPayment.receiverId === this.user.id) {
+          this.paymentType = "request"
+        } else {
+          this.paymentType = "reminder"
+        }
+        if (newPayment.contactMethod === "email") {
+          this.partner.id = 0
+          this.partner.value = newPayment.externalEmail
+          return
+        }
+        this.partner.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
+      }
     },
   },
   methods: {
-    checkingDestination: function ($e) {
+    checkingDestination($e) {
       this.partner.status = DESTINATION_CHECK_NONE;
       this.partner.error = ""
+      this.partner.id = 0
       if(!this.partner.value) {
         return
       }
@@ -214,7 +254,7 @@ export default {
           .then((res) => {
             if (res.data.data.found) {
               this.partner.status = DESTINATION_CHECK_DONE;
-              this.payment.senderId = res.data.data.id;
+              this.partner.id = res.data.data.id;
               this.payment.contactMethod = "internal"
             } else {
               this.partner.status = DESTINATION_CHECK_FAIL;
@@ -227,12 +267,21 @@ export default {
           })
       }
     },
-    submit: function () {
+    submit(isDraft) {
       if (this.submitting) {
         return
       }
       const payment = this.payment
-      payment.amount = Number(this.payment.amount)
+      payment.hourlyRate = Number(payment.hourlyRate)
+      payment.isDraft = !!isDraft
+      payment.externalEmail = this.partner.value
+      if (this.paymentType === "request") {
+        payment.senderId = this.partner.id
+        payment.receiverId = this.user.id
+      } else {
+        payment.senderId = this.user.id
+        payment.receiverId = this.partner.id
+      }
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"
@@ -263,8 +312,24 @@ export default {
     },
   },
   computed: {
+    handling() {
+      if (this.submitting) {
+        return true
+      }
+      return this.partner.status === DESTINATION_CHECK_CHECKING;
+    },
     partnerError: function () {
       return this.partner.status === DESTINATION_CHECK_FAIL;
+    },
+    amount: function () {
+      if (!this.payment.details) {
+        return 0
+      }
+      let amount = 0
+      for (let invoice of this.payment.details) {
+        amount += Number(invoice.cost)
+      }
+      return amount
     }
   }
 }

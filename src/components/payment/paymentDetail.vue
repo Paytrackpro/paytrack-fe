@@ -213,7 +213,7 @@ export default {
       role: "auth/getRole",
     }),
     editable() {
-      return this.payment.status === "created" && this.payment.requesterId === this.user.id
+      return (this.payment.status === "created" || this.payment.status === "sent") && (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id);
     },
     processable() {
       return this.payment.status === "created" && (this.payment.senderId === this.user.id || this.$route.query.token)

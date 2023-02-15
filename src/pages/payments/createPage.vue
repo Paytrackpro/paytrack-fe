@@ -46,10 +46,10 @@ export default {
       user: user,
       payment: {
         contactMethod: "internal",
+        receiverId: user.id,
         senderId: 0,
-        amount: "",
+        hourlyRate: 0,
         senderEmail: "",
-        description: "",
         txId: "",
         paymentMethod: paymentSetting.type || "",
         paymentAddress: paymentSetting.address || "",

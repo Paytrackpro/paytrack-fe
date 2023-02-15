@@ -1,1 +1,9 @@
 /* app global css */
+
+.event-txt {
+  cursor: pointer;
+}
+
+.event-txt:hover {
+  text-decoration: underline;
+}
