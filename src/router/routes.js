@@ -3,7 +3,7 @@ import ROLE from "../consts/role"
 const routes = [
   {
     path: "/admin",
-    component: () => import("src/layouts/AdminLayout.vue"),
+    component: () => import("src/layouts/MainLayout.vue"),
     meta: {
       requiresAuth: true,
       roles: [ROLE.ADMIN],
@@ -61,7 +61,7 @@ const routes = [
   },
   {
     path: "/",
-    component: () => import("src/layouts/UserLayout.vue"),
+    component: () => import("src/layouts/MainLayout.vue"),
     meta: {
       requiresAuth: true,
       roles: [ROLE.USER],
@@ -107,8 +107,14 @@ const routes = [
           title: "Payment Create",
         },
       },
+    ],
+  },
+  {
+    path: "/",
+    component: () => import("src/layouts/MainLayout.vue"),
+    children: [
       {
-        path: "payment/:id(\\d+)",
+        path: "/payment/:id(\\d+)",
         name: "payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
