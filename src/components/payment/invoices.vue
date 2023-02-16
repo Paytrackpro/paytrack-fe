@@ -6,12 +6,18 @@
         <th class="text-right" style="width: 100px">Hours</th>
         <th class="text-right" style="width: 120px">Costs(USD)</th>
         <th class="text-right" >Description</th>
-        <th style="width: 100px">#</th>
+        <th style="width: 100px" v-if="!readonly">#</th>
       </tr>
       </thead>
       <tbody>
-      <invoice v-for="(invoice, i) of value" v-model="value[i]" :key="i" :i="i" :hourly-rate="hourlyRate" @delete="deleteInvoice"/>
-      <new-invoice @save="newInvoice" :hourly-rate="hourlyRate"/>
+      <invoice v-for="(invoice, i) of value"
+        v-model="value[i]"
+        :key="i" :i="i"
+        :hourly-rate="hourlyRate"
+        @delete="deleteInvoice"
+        :readonly="readonly"
+      />
+      <new-invoice v-if="!readonly" @save="newInvoice" :hourly-rate="hourlyRate"/>
       </tbody>
     </table>
   </q-markup-table>
@@ -25,7 +31,8 @@ export default {
   components: {NewInvoice, Invoice},
   props: {
     value: Array,
-    hourlyRate: [Number, String]
+    hourlyRate: [Number, String],
+    readonly: Boolean
   },
   emits: ['update:invoices', 'update:hourlyRate'],
   data() {

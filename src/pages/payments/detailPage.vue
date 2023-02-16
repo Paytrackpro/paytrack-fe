@@ -32,7 +32,7 @@
 import {PaymentForm, PaymentDetail} from "components/payment";
 import MDate from "components/common/mDate";
 export default {
-  name: "detailPayment",
+  name: "detailPaymentPage",
   components: {MDate, PaymentForm, PaymentDetail},
   data() {
     let user = localStorage.getItem("user")

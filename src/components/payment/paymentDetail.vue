@@ -4,7 +4,13 @@
       <div class="col-4">
         <q-field label="The receiver" stack-label>
           <template v-slot:control>
+<<<<<<< HEAD
             <div class="self-center full-width no-outline" tabindex="0">{{ payment.requesterName }}</div>
+=======
+            <div class="self-center full-width no-outline" tabindex="0">
+              {{payment.receiverName || payment.externalEmail}}
+            </div>
+>>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
           </template>
         </q-field>
       </div>
@@ -12,7 +18,11 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
+<<<<<<< HEAD
               {{ payment.contactMethod === "internal" ? payment.senderName : payment.senderEmail }}
+=======
+              {{payment.senderName || payment.externalEmail}}
+>>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
             </div>
           </template>
         </q-field>
@@ -56,7 +66,22 @@
           </template>
         </q-field>
       </div>
-      <div class="col-12">
+      <div class="col-4">
+        <q-select v-if="processing"
+          v-model="payment.paymentMethod"
+          :options="methods"
+          label="Payment method"
+          @input="methodChange"
+        />
+        <q-field v-else label="Payment method" stack-label>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+              {{payment.paymentMethod}}
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-8">
         <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -94,10 +119,31 @@
         </q-field>
       </div>
       <div class="col-12">
+<<<<<<< HEAD
         <div class="text-h6">Description</div>
         <div>
           {{ payment.description }}
         </div>
+=======
+        <q-expansion-item
+          v-model="expanded"
+          label="Payment invoices"
+          caption="Click to expand"
+        >
+          <div class="row">
+            <div class="col-3">
+              <q-input style=""
+                label="Hourly rate(USD)"
+                readonly
+                type="number"
+                v-model="payment.hourlyRate"
+                hint="Used to calculate cost from hours on invoices"
+              />
+            </div>
+          </div>
+          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
+        </q-expansion-item>
+>>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -134,15 +180,19 @@
 </template>
 
 <script>
-import MDate from "components/common/mDate"
 import { mapGetters } from "vuex"
+import MDate from "components/common/mDate"
+import Invoices from "components/payment/invoices"
 export default {
   name: "paymentDetail",
-  components: { MDate },
+  components: { MDate, Invoices },
   data() {
     return {
-      processing: false,
       txId: "",
+      pMethod: "",
+      methods: [],
+      expanded: false,
+      processing: false,
       fetchingRate: false,
       paying: false,
     }
@@ -159,6 +209,8 @@ export default {
       const token = this.$route.query.token || ""
       const reqData = {
         id: this.payment.id,
+        paymentMethod: this.payment.paymentMethod,
+        paymentAddress: this.payment.paymentAddress,
         token,
       }
       this.fetchingRate = true
@@ -197,6 +249,11 @@ export default {
         .then((res) => {
           this.paying = false
           this.$emit("update", res.data.data)
+          this.$q.notify({
+            message: "payment has been payed",
+            color: "positive",
+            icon: "check",
+          })
         })
         .catch((err) => {
           this.paying = false
@@ -204,19 +261,35 @@ export default {
     },
   },
   watch: {
-    payment(newPayment) {
-      this.txId = newPayment.txId
+    payment: {
+      immediate: true,
+      handler(newPayment) {
+        this.txId = newPayment.txId
+        this.pMethod = newPayment.paymentMethod
+        let settings = newPayment.paymentSetting || []
+        this.methods = settings.map(s => s.type)
+      }
     },
+    methodChange(method) {
+      const settings = this.payment.paymentSetting || []
+      const setting = settings.find(s => s.type === method)
+      if (setting) {
+        this.payment.paymentAddress = setting.address
+      }
+      this.queryRate()
+    }
   },
   computed: {
     ...mapGetters({
       role: "auth/getRole",
     }),
     editable() {
-      return (this.payment.status === "created" || this.payment.status === "sent") && (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id);
+      return (this.payment.status === "created" || this.payment.status === "sent") &&
+        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id);
     },
     processable() {
-      return this.payment.status === "created" && (this.payment.senderId === this.user.id || this.$route.query.token)
+      return (this.payment.status === "created" || this.payment.status === "sent") &&
+        (this.payment.senderId === this.user.id || this.$route.query.token)
     },
     fetchRateLabel() {
       if (this.fetchingRate) {

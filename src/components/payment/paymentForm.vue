@@ -1,7 +1,7 @@
 <template>
   <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
+      <div class="col-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">Do you want to?</p>
         <q-radio v-model="paymentType" val="request" label="Request"/>
         <q-radio v-model="paymentType" val="reminder" label="Reminder"/>
@@ -92,7 +92,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-4">
+      <div class="col-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           v-model="amount"
@@ -112,28 +112,29 @@
         </q-input>
       </div>
       <div class="col-8"/>
-      <div class="col-4 col-md-3">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Currency you want to receive</p>
+      <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Choose payment method</p>
         <q-select
-          v-model="payment.paymentMethod"
-          :rules="[(val) => !!val || 'Currency is required']"
-          :options="paymentMethods"
+          v-model="setting.type"
+          :rules="[ val => !!val || 'Currency is required'  ]"
+          :options="payment.paymentSetting"
           placeholder="Payment Type"
-          option-value="value"
-          option-label="label"
+          :option-label="v => v.type"
+          :option-value="v => v.type"
           emit-value
           map-options
           outlined
           dense
           stack-label
           hide-bottom-space
+          @input="changePaymentMethod"
         />
       </div>
-      <div class="col-8 col-md-9">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Your currency address</p>
+      <div v-if="paymentType === 'reminder'" class="col-8 col-md-9">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Currency address</p>
         <q-input
-          v-model="payment.paymentAddress"
-          :rules="[(val) => !!val || 'Address is required']"
+          v-model="setting.address"
+          :rules="[ val => !!val || 'Address is required'  ]"
           placeholder="payment address"
           outlined
           dense
@@ -142,34 +143,35 @@
           hide-bottom-space
         />
       </div>
+      <div v-if="paymentType === 'request'" class="col-12">
+        <payment-setting v-model="payment.paymentSetting"/>
+      </div>
       <div class="col-12">
         <q-expansion-item
           v-model="expanded"
           label="Payment invoices"
           caption="Click to expand"
         >
-          <div class="q-py-md">
-            <q-input style="max-width: 200px"
-              label="Hourly rate(USD)"
-              dense
-              lazy-rules
-              stack-label
-              outlined
-              hide-bottom-space
-              type="number"
-              v-model="payment.hourlyRate"
-              hint="Used to calculate cost from hours on invoices"
-            />
+          <div class="row">
+            <div class="col-3">
+              <q-input style=""
+               label="Hourly rate(USD)"
+               dense
+               lazy-rules
+               stack-label
+               outlined
+               hide-bottom-space
+               type="number"
+               v-model="payment.hourlyRate"
+               hint="Used to calculate cost from hours on invoices"
+              />
+            </div>
           </div>
           <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)"></invoices>
         </q-expansion-item>
       </div>
     </div>
     <div class="row justify-end">
-<<<<<<< HEAD
-      <q-btn :label="payment.id > 0 ? 'Update' : 'Send'" type="submit" color="primary" />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')" />
-=======
       <q-btn label="Mark as draft" type="button" color="primary" @click="submit(true)" :disable="handling">
         <q-tooltip>
           'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver"}}
@@ -181,7 +183,6 @@
         </q-tooltip>
       </q-btn>
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')"/>
->>>>>>> 2f17807 (complete invoices for payment form)
     </div>
   </q-form>
 </template>
@@ -190,6 +191,7 @@
 import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
 import { emailPattern } from "src/helper/validations"
 import Invoices from "components/payment/invoices"
+import PaymentSetting from "components/payment/paymentSetting";
 
 const DESTINATION_CHECK_NONE = 0
 const DESTINATION_CHECK_CHECKING = 1
@@ -198,11 +200,15 @@ const DESTINATION_CHECK_DONE = 3
 
 export default {
   name: "paymentForm",
-  components: {Invoices},
+  components: {Invoices, PaymentSetting},
   data() {
     return {
       paymentType: "request",
       expanded: false,
+      setting: {
+        type: "",
+        address: ""
+      },
       partner: {
         id: 0,
         value: "",
@@ -221,7 +227,7 @@ export default {
     payment: {
       immediate: true,
       handler(newPayment) {
-        console.log(newPayment)
+        // setup correct sender and receiver view
         if (newPayment.receiverId === this.user.id) {
           this.paymentType = "request"
         } else {
@@ -230,11 +236,41 @@ export default {
         if (newPayment.contactMethod === "email") {
           this.partner.id = 0
           this.partner.value = newPayment.externalEmail
-          return
+        } else {
+          this.partner.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
         }
-        this.partner.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
+        // setup correct payment setting
+        if (newPayment.paymentMethod && newPayment.paymentAddress) {
+          this.setting = {
+            type: newPayment.paymentMethod,
+            address: newPayment.paymentAddress
+          }
+          return;
+        }
+        const settings = newPayment.paymentSetting || []
+        let filled = true
+        for (let setting of settings) {
+          if (setting.isDefault) {
+            this.setting = setting
+            return;
+          }
+        }
+        if (!filled && settings.length > 0) {
+          this.setting = settings[0]
+        }
       }
     },
+    paymentType: {
+      immediate: true,
+      handler(pType) {
+        if (this.$refs.paymentForm) {
+          this.$refs.paymentForm.reset();
+        }
+        if (pType === "request") {
+
+        }
+      }
+    }
   },
   methods: {
     checkingDestination($e) {
@@ -273,7 +309,7 @@ export default {
       }
       const payment = this.payment
       payment.hourlyRate = Number(payment.hourlyRate)
-      payment.isDraft = !!isDraft
+      payment.isDraft = isDraft === true
       payment.externalEmail = this.partner.value
       if (this.paymentType === "request") {
         payment.senderId = this.partner.id
@@ -289,7 +325,6 @@ export default {
         url = `/payment/${payment.id}`
         successNotify = "Payment updated"
       }
-
       this.$api
         .post(url, payment)
         .then((res) => {
@@ -310,6 +345,9 @@ export default {
           })
         })
     },
+    changePaymentMethod(val) {
+
+    }
   },
   computed: {
     handling() {
