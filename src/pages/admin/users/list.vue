@@ -50,17 +50,17 @@ export default {
           required: true,
           label: "User Name",
           align: "center",
-          field: (row) => row.user_name,
+          field: (row) => row.userName,
           format: (val) => `${val}`,
           sortable: true,
         },
-        { name: "display_name", align: "center", label: "Dislay Name", field: "display_name", sortable: true },
+        { name: "display_name", align: "center", label: "Dislay Name", field: "displayName", sortable: true },
         { name: "email", align: "center", label: "Email", field: "email", sortable: true },
         {
           name: "payment_type",
           align: "center",
           label: "Payment Type",
-          field: "payment_type",
+          field: "paymentType",
           format: (val) => {
             if (val == PAYMENT_TYPES.BTC) return "BTC"
             if (val == PAYMENT_TYPES.LTC) return "LTC"
@@ -71,14 +71,14 @@ export default {
           name: "created_at",
           align: "center",
           label: "Created At",
-          field: "created_at",
+          field: "createdAt",
           format: (val) => date.formatDate(val, "DD/MM/YYYY"),
         },
         {
           name: "last_seen",
           align: "center",
           label: "Last Seen",
-          field: "last_seen",
+          field: "lastSeen",
           format: (val) => date.formatDate(val, "DD/MM/YYYY"),
         },
       ],
@@ -100,7 +100,7 @@ export default {
       })
     },
     goToDetail(id) {
-      this.$router.push({ name: "UserDetail", params: { id } })
+      this.$router.push({ name: "admin.user.detail", params: { id } })
     },
   },
 }

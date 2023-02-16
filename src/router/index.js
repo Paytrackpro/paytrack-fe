@@ -2,6 +2,7 @@ import routes from "./routes"
 import store from "../store"
 import Vue from "vue"
 import VueRouter from "vue-router"
+import ROLE from "../consts/role"
 
 Vue.use(VueRouter)
 
@@ -12,19 +13,37 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPages = ["Login", "Register", "payment.detail"]
-  const authRequired = !publicPages.includes(to.name)
+  const publicPages = ["Login", "Register"]
+  const authRequired = to.matched.some((record) => record.meta.requiresAuth)
   const isAuthenticated = store.getters["auth/isAuthenticated"]
+  const role = store.getters["auth/getUser"] ? store.getters["auth/getUser"].role : null
 
-  if (isAuthenticated && to.name === "Login") {
-    next({ name: "Home" })
+  if (isAuthenticated && publicPages.includes(to.name)) {
+    if (role === ROLE.USER) {
+      next({ name: "user.home" })
+    } else if (role === ROLE.ADMIN) {
+      next({ name: "Home" })
+    } else {
+      next({ name: "404" })
+    }
+
+    return
   }
 
-  if (authRequired && !isAuthenticated) {
+  if (!isAuthenticated && authRequired) {
     next({ name: "Login" })
+    return
   }
 
-  next()
+  if (authRequired) {
+    if (to.matched.some((record) => record.meta.roles && record.meta.roles.includes(role))) {
+      next()
+    } else {
+      next({ name: "404" })
+    }
+  } else {
+    next()
+  }
 })
 
 export default router
