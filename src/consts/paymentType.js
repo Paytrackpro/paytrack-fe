@@ -8,14 +8,17 @@ const PAYMENT_TYPE_OPTIONS = [
   {
     label: "BTC",
     value: "btc",
+    isChecked : false
   },
   {
     label: "LTC",
     value: "ltc",
+    isChecked : false
   },
   {
     label: "DCR",
     value: "dcr",
+    isChecked : false
   },
 ]
 

@@ -20,6 +20,7 @@ export default {
     localStorage.clear()
     commit("setUser", '')
     commit("setAuthenticated", false)
+    commit('setUserProfile', '')
     this.$router.push({ name: "Login" })
   },
 }
