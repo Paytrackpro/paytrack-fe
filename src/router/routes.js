@@ -138,6 +138,11 @@ const routes = [
     name: "Register",
     component: () => import("pages/register.vue"),
   },
+  {
+    path: "/otp",
+    name: "OTP",
+    component: () => import("pages/otp.vue"),
+  },
 ]
 
 export default routes
