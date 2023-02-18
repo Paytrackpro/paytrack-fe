@@ -1,49 +1,132 @@
+import ROLE from "../consts/role"
+
 const routes = [
   {
-    path: "/",
-    component: () => import("layouts/main.vue"),
+    path: "/admin",
+    component: () => import("src/layouts/MainLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: [ROLE.ADMIN],
+    },
     children: [
       {
-        path: "/",
+        path: "",
         name: "Home",
-        component: () => import("src/pages/admin/home.vue"),
+        component: () => import("src/pages/users/home.vue"),
         meta: {
           title: "Home",
         },
       },
       {
-        path: "/users",
-        name: "UserList",
+        path: "users",
+        name: "admin.user.list",
         component: () => import("pages/admin/users/list.vue"),
         meta: {
           title: "User Management",
         },
       },
       {
-        path: "/users/:id",
-        name: "UserDetail",
+        path: "users/:id",
+        name: "admin.user.detail",
         component: () => import("pages/admin/users/detail.vue"),
         meta: {
           title: "User Detail",
         },
       },
       {
-        path: "/profile",
-        name: "Profile",
+        path: "profile/edit",
+        name: "admin.profile",
         component: () => import("pages/users/profile.vue"),
         meta: {
           title: "profile",
         },
       },
       {
-        path: "/profileinfo",
-        name: "ProfileInfo",
+        path: "profile",
+        name: "admin.profile.edit",
         component: () => import("pages/users/profileInfo.vue"),
         meta: {
           title: "profile",
         },
       },
+      {
+        path: "payment",
+        name: "admin.payment.list",
+        component: () => import("pages/payments/listPage.vue"),
+        meta: {
+          title: "Payment List",
+        },
+      },
     ],
+  },
+  {
+    path: "/",
+    component: () => import("src/layouts/MainLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: [ROLE.USER],
+    },
+    children: [
+      {
+        path: "",
+        name: "user.home",
+        component: () => import("src/pages/users/home.vue"),
+        meta: {
+          title: "Home",
+        },
+      },
+      {
+        path: "profile",
+        name: "user.profile",
+        component: () => import("pages/users/profileInfo.vue"),
+        meta: {
+          title: "Profile",
+        },
+      },
+      {
+        path: "profile/edit",
+        name: "user.profile.edit",
+        component: () => import("pages/users/profile.vue"),
+        meta: {
+          title: "Profile Edit",
+        },
+      },
+      {
+        path: "payment",
+        name: "user.payment.list",
+        component: () => import("pages/payments/listPage.vue"),
+        meta: {
+          title: "Payment List",
+        },
+      },
+      {
+        path: "payment/create",
+        name: "payment.create",
+        component: () => import("pages/payments/createPage.vue"),
+        meta: {
+          title: "Payment Create",
+        },
+      },
+    ],
+  },
+  {
+    path: "/",
+    component: () => import("src/layouts/MainLayout.vue"),
+    children: [
+      {
+        path: "/payment/:id(\\d+)",
+        name: "payment.detail",
+        component: () => import("pages/payments/detailPage.vue"),
+        meta: {
+          title: "Payment Detail",
+        },
+      },
+    ],
+  },
+  {
+    path: "/404",
+    name: "404",
+    component: () => import("pages/404.vue"),
   },
   {
     path: "/login",

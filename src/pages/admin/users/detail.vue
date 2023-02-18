@@ -90,19 +90,21 @@ export default {
       this.$api.get(`/admin/user/info/${id}`).then((res) => {
         const result = res.data.data
         this.email = result.email
-        this.paymentAddress = result.payment_address
-        this.paymentType = result.payment_type
-        this.userName = result.user_name
-        this.displayName = result.display_name
+        this.paymentAddress = result.paymentAddress
+        this.paymentType = result.paymenType
+        this.userName = result.userName
+        this.displayName = result.displayName
       })
     },
     updateUserInfo() {
       this.$api
-        .put(`/admin/user/info`, {
-          userId: parseInt(this.$route.params.id),
+        .put(`user/info`, {
+          id: parseInt(this.$route.params.id),
           email: this.email,
           paymentAddress: this.paymentAddress,
           paymentType: this.paymentType,
+          userName: this.userName,
+          displayName: this.displayName,
         })
         .then(() => {
           this.$q.notify({
@@ -110,7 +112,7 @@ export default {
             color: "positive",
             icon: "check",
           })
-          this.$router.push({ name: "UserList" })
+          this.$router.push({ name: "admin.user.list" })
         })
         .catch(() => {
           this.$q.notify({

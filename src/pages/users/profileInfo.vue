@@ -28,7 +28,7 @@
       </div>
     </div>
     <div class="text-right">
-      <q-btn color="primary" label="Edit" to='profile'/>
+      <q-btn color="primary" label="Edit" to='profile/edit'/>
     </div>
   </q-card>
 </template>

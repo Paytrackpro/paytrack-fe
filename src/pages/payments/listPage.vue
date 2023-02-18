@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-md">
     <q-table
-      title="Treats"
+      title="Payments"
       :data="rows"
       :columns="columns"
       row-key="name"
@@ -11,12 +11,8 @@
       bordered
       @row-click="(_, row) => goToDetail(row.id)"
     >
-      <template v-slot:top-left>
-        <q-input outlined dense debounce="300" v-model="filter" placeholder="Search">
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
+      <template v-if="isUser" v-slot:top-right>
+        <q-btn outline color="secondary" label="Create payment" to="payment/create" />
       </template>
       <template v-slot:body-cell-online="props">
         <q-td :props="props">
@@ -31,10 +27,13 @@
 </template>
 
 <script>
-import { PAYMENT_TYPES } from "../../../consts/paymentType"
 import { date } from "quasar"
+import { MDateFormat } from "src/consts/common"
+import { mapGetters } from "vuex"
+import role from "src/consts/role"
 
 export default {
+  name: "listPayments",
   data() {
     return {
       filter: "",
@@ -46,61 +45,71 @@ export default {
       },
       columns: [
         {
-          name: "user_name",
+          name: "requesterName",
           required: true,
-          label: "User Name",
+          label: "requester",
           align: "center",
-          field: (row) => row.userName,
+          field: (row) => row.requesterName,
           format: (val) => `${val}`,
           sortable: true,
         },
-        { name: "display_name", align: "center", label: "Dislay Name", field: "displayName", sortable: true },
-        { name: "email", align: "center", label: "Email", field: "email", sortable: true },
         {
-          name: "payment_type",
+          name: "senderName",
           align: "center",
-          label: "Payment Type",
-          field: "paymentType",
+          label: "sender",
+          field: (row) => {
+            if (row.contactMethod === "email") {
+              return row.senderEmail
+            }
+            return row.senderName
+          },
+          sortable: true,
+        },
+        { name: "status", align: "center", label: "status", field: "status", sortable: true },
+        {
+          name: "amount",
+          align: "center",
+          label: "amount(USD)",
+          field: "amount",
           format: (val) => {
-            if (val == PAYMENT_TYPES.BTC) return "BTC"
-            if (val == PAYMENT_TYPES.LTC) return "LTC"
-            if (val == PAYMENT_TYPES.DCR) return "DCR"
+            return val
           },
         },
         {
-          name: "created_at",
+          name: "createdAt",
           align: "center",
           label: "Created At",
           field: "createdAt",
-          format: (val) => date.formatDate(val, "DD/MM/YYYY"),
-        },
-        {
-          name: "last_seen",
-          align: "center",
-          label: "Last Seen",
-          field: "lastSeen",
-          format: (val) => date.formatDate(val, "DD/MM/YYYY"),
+          format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
       rows: [],
     }
   },
   computed: {
+    ...mapGetters({
+      user: "auth/getUser",
+    }),
+    isUser() {
+      return this.user.role === role.USER
+    },
     pagesNumber() {
       return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
     },
   },
   created: function () {
-    this.getUserList()
+    this.getPayments()
   },
   methods: {
-    async getUserList() {
-      this.$api.get("/admin/user/list").then((res) => {
+    async getPayments() {
+      this.$api.get("/payment/list").then((res) => {
         this.rows = res.data.data
       })
     },
     goToDetail(id) {
-      this.$router.push({ name: "admin.user.detail", params: { id } })
+      if (this.isUser) {
+        this.$router.push({ name: `payment.detail`, params: { id } })
+      }
     },
   },
 }
