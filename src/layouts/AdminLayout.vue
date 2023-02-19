@@ -58,7 +58,7 @@ export default {
         {
           icon: "people",
           label: "User Management",
-          to: "/admin/users",
+          to: "/admin/users?page=1",
         },
         {
           icon: "book",

@@ -5,10 +5,10 @@
       :data="rows"
       :columns="columns"
       row-key="name"
-      :pagination.sync="pagination"
       hide-pagination
       flat
       bordered
+      :loading="loading"
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
@@ -25,7 +25,7 @@
       </template>
     </q-table>
     <div class="row justify-end q-mt-md">
-      <q-pagination v-model="pagination.page" color="grey-8" :max="pagesNumber" size="md" direction-links />
+      <q-pagination v-model="pagination.currentPage" color="grey-8" :max="pagination.pages" size="md"  @input="getUserList"/>
     </div>
   </div>
 </template>
@@ -38,11 +38,13 @@ export default {
   data() {
     return {
       filter: "",
+      loading : false,
       pagination: {
         sortBy: "desc",
         descending: false,
-        page: 1,
-        rowsPerPage: 10,
+        currentPage: 1,
+        rowsPerPage: 5,
+        pages:0
       },
       columns: [
         {
@@ -85,20 +87,27 @@ export default {
       rows: [],
     }
   },
-  computed: {
-    pagesNumber() {
-      return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
-    },
-  },
+
   created: function () {
-    this.getUserList()
+    let urlParams = new URLSearchParams(window.location.search)
+    let page = parseInt(urlParams.get('page')) || 1
+    this.pagination.currentPage = page
+    this.getUserList();
   },
+
   methods: {
     async getUserList() {
-      this.$api.get("/admin/user/list").then((res) => {
-        this.rows = res.data.data
+      this.loading = true;
+      this.$api.get(`/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`).then((res) => {
+        this.rows = res.data.data.user;
+        this.pagination.pages = Math.ceil(res.data.data.total / this.pagination.rowsPerPage);
       })
+      let urlParams = new URLSearchParams(window.location.search)
+      urlParams.set('page', this.pagination.currentPage)
+      window.history.replaceState({}, '', `${window.location.pathname}?${urlParams}`)
+      this.loading = false;
     },
+
     goToDetail(id) {
       this.$router.push({ name: "admin.user.detail", params: { id } })
     },
