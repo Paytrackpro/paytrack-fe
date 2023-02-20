@@ -4,16 +4,12 @@
       <div class="text-h6">Create payment request</div>
     </q-card-section>
     <q-separator inset />
-<<<<<<< HEAD
-    <payment-form :payment="payment" @saved="saved" @cancel="$router.push({ name: `${role}.payment.list` })" />
-=======
     <payment-form
       :payment="payment"
       :user="user"
       @saved="saved"
       @cancel="$router.push({ name: 'payment.list' })"
     />
->>>>>>> 5d05860 (support payment for reminder)
   </q-card>
 </template>
 
@@ -42,17 +38,20 @@ export default {
         }
       }
     }
+    console.log(user.paymentSettings )
     return {
       user: user,
       payment: {
         contactMethod: "internal",
         receiverId: user.id,
+        creatorId: user.id,
         senderId: 0,
         hourlyRate: 0,
         senderEmail: "",
         txId: "",
         paymentMethod: paymentSetting.type || "",
         paymentAddress: paymentSetting.address || "",
+        paymentSettings: user.paymentSettings || [],
         details: []
       },
     }

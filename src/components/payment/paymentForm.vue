@@ -3,8 +3,8 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">Do you want to?</p>
-        <q-radio v-model="paymentType" val="request" label="Request"/>
-        <q-radio v-model="paymentType" val="reminder" label="Reminder"/>
+        <q-radio v-model="paymentType" val="request" label="Request" :disable="user.id !== payment.creatorId"/>
+        <q-radio v-model="paymentType" val="reminder" label="Reminder" :disable="user.id !== payment.creatorId"/>
       </div>
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
@@ -34,6 +34,7 @@
         <q-input v-else
           v-model="partner.value"
           placeholder="Sender"
+          :readonly="user.id !== payment.creatorId"
           outlined
           dense
           lazy-rules
@@ -76,6 +77,7 @@
         <q-input v-else
           v-model="partner.value"
           placeholder="Receiver"
+          :readonly="user.id !== payment.creatorId"
           outlined
           dense
           lazy-rules
@@ -117,10 +119,10 @@
         <q-select
           v-model="setting.type"
           :rules="[ val => !!val || 'Currency is required'  ]"
-          :options="payment.paymentSetting"
+          :options="paymentMethods"
           placeholder="Payment Type"
-          :option-label="v => v.type"
-          :option-value="v => v.type"
+          :option-label="v => v.label"
+          :option-value="v => v.value"
           emit-value
           map-options
           outlined
@@ -144,7 +146,7 @@
         />
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting v-model="payment.paymentSetting"/>
+        <payment-setting v-model="payment.paymentSettings" />
       </div>
       <div class="col-12">
         <q-expansion-item
@@ -174,12 +176,12 @@
     <div class="row justify-end">
       <q-btn label="Mark as draft" type="button" color="primary" @click="submit(true)" :disable="handling">
         <q-tooltip>
-          'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver"}}
+          'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
       <q-btn label="Send" type="submit" color="primary" :disable="handling">
         <q-tooltip>
-          'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver"}}
+          'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')"/>
@@ -188,10 +190,10 @@
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
+import { PAYMENT_TYPE_OPTIONS, PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType"
 import { emailPattern } from "src/helper/validations"
 import Invoices from "components/payment/invoices"
-import PaymentSetting from "components/payment/paymentSetting";
+import PaymentSetting from "components/payment/paymentSetting"
 
 const DESTINATION_CHECK_NONE = 0
 const DESTINATION_CHECK_CHECKING = 1
@@ -214,6 +216,7 @@ export default {
         value: "",
         status: DESTINATION_CHECK_NONE,
         error: "",
+        paymentSettings: []
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
@@ -228,16 +231,25 @@ export default {
       immediate: true,
       handler(newPayment) {
         // setup correct sender and receiver view
-        if (newPayment.receiverId === this.user.id) {
-          this.paymentType = "request"
+        if (this.user.id) {
+          if (newPayment.receiverId === this.user.id) {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          } else {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          }
         } else {
-          this.paymentType = "reminder"
+          if (newPayment.senderId) {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          } else {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          }
         }
         if (newPayment.contactMethod === "email") {
           this.partner.id = 0
           this.partner.value = newPayment.externalEmail
         } else {
-          this.partner.value = newPayment.contactMethod === "internal" ? newPayment.senderName : newPayment.senderEmail
+          this.partner.value = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderName : newPayment.receiverName
+          this.partner.id = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderId : newPayment.receiverId
         }
         // setup correct payment setting
         if (newPayment.paymentMethod && newPayment.paymentAddress) {
@@ -245,60 +257,61 @@ export default {
             type: newPayment.paymentMethod,
             address: newPayment.paymentAddress
           }
-          return;
-        }
-        const settings = newPayment.paymentSetting || []
-        let filled = true
-        for (let setting of settings) {
-          if (setting.isDefault) {
-            this.setting = setting
-            return;
+        } else {
+          const settings = newPayment.paymentSettings || []
+          let filled = true
+          for (let setting of settings) {
+            if (setting.isDefault) {
+              this.setting = setting
+              return
+            }
           }
-        }
-        if (!filled && settings.length > 0) {
-          this.setting = settings[0]
+          if (!filled && settings.length > 0) {
+            this.setting = settings[0]
+          }
         }
       }
     },
     paymentType: {
-      immediate: true,
+      //immediate: true,
       handler(pType) {
+        console.log(pType)
         if (this.$refs.paymentForm) {
-          this.$refs.paymentForm.reset();
+          this.$refs.paymentForm.reset()
         }
-        if (pType === "request") {
-
-        }
+        this.updateSettings(pType)
       }
     }
   },
   methods: {
     checkingDestination($e) {
-      this.partner.status = DESTINATION_CHECK_NONE;
+      this.partner.status = DESTINATION_CHECK_NONE
       this.partner.error = ""
       this.partner.id = 0
       if(!this.partner.value) {
         return
       }
       if(emailPattern.test(this.partner.value)) {
-        this.partner.status = DESTINATION_CHECK_DONE;
+        this.partner.status = DESTINATION_CHECK_DONE
         this.payment.contactMethod = "email"
         this.payment.senderEmail = this.partner.value
       } else {
-        this.partner.status = DESTINATION_CHECK_CHECKING;
+        this.partner.status = DESTINATION_CHECK_CHECKING
         this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
           .then((res) => {
             if (res.data.data.found) {
-              this.partner.status = DESTINATION_CHECK_DONE;
-              this.partner.id = res.data.data.id;
+              this.partner.status = DESTINATION_CHECK_DONE
+              this.partner.id = res.data.data.id
+              this.partner.paymentSettings = res.data.data.paymentSettings || []
               this.payment.contactMethod = "internal"
+              this.updateSettings()
             } else {
-              this.partner.status = DESTINATION_CHECK_FAIL;
+              this.partner.status = DESTINATION_CHECK_FAIL
               this.partner.error = res.data.data.message
             }
           })
           .catch(() => {
-            this.partner.status = DESTINATION_CHECK_FAIL;
+            this.partner.status = DESTINATION_CHECK_FAIL
             this.partner.error = "the user name is not found"
           })
       }
@@ -307,10 +320,14 @@ export default {
       if (this.submitting) {
         return
       }
-      const payment = this.payment
+      const payment = { ...this.payment }
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.isDraft = isDraft === true
-      payment.externalEmail = this.partner.value
+      if (payment.contactMethod === "email") {
+        payment.externalEmail = this.partner.value
+      }
+      payment.paymentMethod = this.setting.type
+      payment.paymentAddress = this.setting.address
       if (this.paymentType === "request") {
         payment.senderId = this.partner.id
         payment.receiverId = this.user.id
@@ -318,6 +335,7 @@ export default {
         payment.senderId = this.user.id
         payment.receiverId = this.partner.id
       }
+      console.log(payment)
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"
@@ -346,7 +364,38 @@ export default {
         })
     },
     changePaymentMethod(val) {
-
+      const settings = this.payment.paymentSettings || []
+      this.setting.address = ""
+      for (let setting of settings) {
+        if (setting.type === this.setting.type) {
+          this.setting.address = setting.address
+        }
+      }
+    },
+    updateSettings(pType) {
+      pType = pType || this.paymentType
+      if (pType === PAYMENT_OBJECT_REQUEST) {
+        this.payment.paymentSettings = this.user.paymentSettings || []
+      }
+      if (pType === PAYMENT_OBJECT_REMINDER) {
+        this.payment.paymentSettings = this.partner.paymentSettings || []
+      }
+      let isSet = false
+      for (let setting of this.payment.paymentSettings) {
+        if (setting.isDefault) {
+          isSet = true
+          this.setting.type = setting.type
+          this.setting.address = setting.address
+        }
+      }
+      if (!isSet && this.payment.paymentSettings.length > 0) {
+        const setting = this.payment.paymentSettings[0]
+        this.setting.type = setting.type
+        this.setting.address = setting.address
+      } else {
+        this.setting.type = ""
+        this.setting.address = ""
+      }
     }
   },
   computed: {
@@ -354,10 +403,10 @@ export default {
       if (this.submitting) {
         return true
       }
-      return this.partner.status === DESTINATION_CHECK_CHECKING;
+      return this.partner.status === DESTINATION_CHECK_CHECKING
     },
     partnerError: function () {
-      return this.partner.status === DESTINATION_CHECK_FAIL;
+      return this.partner.status === DESTINATION_CHECK_FAIL
     },
     amount: function () {
       if (!this.payment.details) {

@@ -51,12 +51,10 @@
 export default {
   name: "paymentSetting",
   props: {
-    value: Array,
-    readonly: Boolean
+    value: Array
   },
   data() {
     return {
-      abc: "",
       coins: ["btc", "ltc", "dcr"],
       selectedCoins: [],
       isDefault: ""

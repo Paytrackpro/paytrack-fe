@@ -4,13 +4,9 @@
       <div class="col-4">
         <q-field label="The receiver" stack-label>
           <template v-slot:control>
-<<<<<<< HEAD
-            <div class="self-center full-width no-outline" tabindex="0">{{ payment.requesterName }}</div>
-=======
             <div class="self-center full-width no-outline" tabindex="0">
               {{payment.receiverName || payment.externalEmail}}
             </div>
->>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
           </template>
         </q-field>
       </div>
@@ -18,11 +14,7 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-<<<<<<< HEAD
-              {{ payment.contactMethod === "internal" ? payment.senderName : payment.senderEmail }}
-=======
               {{payment.senderName || payment.externalEmail}}
->>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
             </div>
           </template>
         </q-field>
@@ -119,12 +111,6 @@
         </q-field>
       </div>
       <div class="col-12">
-<<<<<<< HEAD
-        <div class="text-h6">Description</div>
-        <div>
-          {{ payment.description }}
-        </div>
-=======
         <q-expansion-item
           v-model="expanded"
           label="Payment invoices"
@@ -143,7 +129,6 @@
           </div>
           <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
         </q-expansion-item>
->>>>>>> 5ffb617 (payment setting support for multi coin setting, update view payment)
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -243,6 +228,8 @@ export default {
         id: this.payment.id,
         txId: txId,
         token: this.$route.query.token || "",
+        paymentMethod: this.payment.paymentMethod,
+        paymentAddress: this.payment.paymentAddress
       }
       this.$api
         .post("/payment/process", reqData)
@@ -259,6 +246,14 @@ export default {
           this.paying = false
         })
     },
+    methodChange(method) {
+      const settings = this.payment.paymentSettings || []
+      const setting = settings.find(s => s.type === method)
+      if (setting) {
+        this.payment.paymentAddress = setting.address
+      }
+      this.queryRate()
+    }
   },
   watch: {
     payment: {
@@ -266,17 +261,10 @@ export default {
       handler(newPayment) {
         this.txId = newPayment.txId
         this.pMethod = newPayment.paymentMethod
-        let settings = newPayment.paymentSetting || []
+        let settings = newPayment.paymentSettings || []
         this.methods = settings.map(s => s.type)
+        console.log(this.methods)
       }
-    },
-    methodChange(method) {
-      const settings = this.payment.paymentSetting || []
-      const setting = settings.find(s => s.type === method)
-      if (setting) {
-        this.payment.paymentAddress = setting.address
-      }
-      this.queryRate()
     }
   },
   computed: {

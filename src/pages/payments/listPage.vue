@@ -102,7 +102,7 @@ export default {
   methods: {
     async getPayments() {
       this.$api.get("/payment/list").then((res) => {
-        this.rows = res.data.data
+        this.rows = res.data.data.payments
       })
     },
     goToDetail(id) {
