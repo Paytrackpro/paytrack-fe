@@ -108,8 +108,8 @@ export default {
     async getUserList() {
       this.loading = true;
       this.$api.get(`/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`).then((res) => {
-        this.rows = res.data.data.user;
-        this.pagination.pages = Math.ceil(res.data.data.total / this.pagination.rowsPerPage);
+        this.rows = res.data.data.users;
+        this.pagination.pages = Math.ceil(res.data.data.count / this.pagination.rowsPerPage);
       });
       this.loading = false;
     },
