@@ -98,7 +98,7 @@ export default {
     let currentPage = this.getParamUrl([
         'page',
     ]);
-    this.pagination.currentPage = (currentPage.page > 1)? currentPage.page : this.pagination.currentPage
+    this.pagination.currentPage = (currentPage.page > 1)? parseInt(currentPage.page) : this.pagination.currentPage
     this.setParamUrls({
       'page': this.pagination.currentPage
     });
@@ -116,6 +116,7 @@ export default {
     goToDetail(id) {
       this.$router.push({ name: "admin.user.detail", params: { id } })
     },
+
     setParamUrls(Object){
       let urlParams = new URLSearchParams(window.location.search)
       for (let key in Object) {
