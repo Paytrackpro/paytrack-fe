@@ -8,6 +8,7 @@
       :pagination.sync="pagination"
       hide-pagination
       flat
+      :pagination.sync="pagination"
       bordered
       @row-click="(_, row) => goToDetail(row.id)"
     >
@@ -25,7 +26,7 @@
       </template>
     </q-table>
     <div class="row justify-end q-mt-md">
-      <q-pagination v-model="pagination.page" color="grey-8" :max="pagesNumber" size="md" direction-links />
+      <q-pagination v-model="pagination.currentPage" color="grey-8" :max="pagination.pages" size="md" />
     </div>
   </div>
 </template>
@@ -85,23 +86,55 @@ export default {
       rows: [],
     }
   },
-  computed: {
-    pagesNumber() {
-      return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
-    },
+  watch: {
+    "pagination.currentPage": function(){
+        this.getUserList();
+    }
   },
-  created: function () {
-    this.getUserList()
+  mounted: function(){
+    this.setParamUrls({
+      'page':''
+    });
+    this.getUserList();
   },
   methods: {
     async getUserList() {
-      this.$api.get("/admin/user/list").then((res) => {
-        this.rows = res.data.data
+      let currentPage = this.getParamUrl([
+      'page',
+      ])
+      console.log(currentPage.page)
+      this.loading = true;
+      this.$api.get(`/admin/user/list?page=${currentPage.page}&size=${this.pagination.rowsPerPage}`).then((res) => {
+        this.rows = res.data.data.user;
+        this.pagination.pages = Math.ceil(res.data.data.total / this.pagination.rowsPerPage);
       })
+      this.setParamUrls({
+        'page' : this.pagination.currentPage
+      })
+      this.loading = false;
     },
     goToDetail(id) {
       this.$router.push({ name: "admin.user.detail", params: { id } })
     },
+    setParamUrls(Object){
+      let urlParams = new URLSearchParams(window.location.search)
+      for (let key in Object) {
+        console.log(Object[key]);
+        let newParam = (Object[key])? Object[key] : 1;
+        urlParams.set(key, newParam)
+      }
+      let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
+      window.history.pushState({}, '', newUrl);
+    },
+
+    getParamUrl(params){
+      let reuslt = {};
+      let urlParams = new URLSearchParams(window.location.search)
+      params.map(function(value){
+        reuslt[value] = urlParams.get(value);
+      })
+      return reuslt;
+    }
   },
 }
 </script>
