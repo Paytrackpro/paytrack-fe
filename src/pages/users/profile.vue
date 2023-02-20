@@ -116,17 +116,18 @@
       },
       created: function () {
         this.getDataApi();
-
       },
       methods : {
         setCheckbox(data, dataApi){
-          data.map((obj, i) => {
-            dataApi.map((objApi, i)=>{
-              if(obj.value === objApi.type){
-                obj.isChecked = true;
-              }
-            })
-          });
+          if(typeof dataApi !== 'undefined'){
+            data.map((obj, i) => {
+              dataApi.map((objApi, i)=>{
+                if(obj.value === objApi.type){
+                  obj.isChecked = true;
+                }
+              })
+            });
+          }
           return data;
         },
         addPaymentSetting(value,isChecked){
@@ -156,12 +157,9 @@
           this.user.paymentType = user.paymentType;
           this.user.paymentAddress = user.paymentAddress;
           this.user.displayName = user.displayName;
-          if(user.paymentSetting != null){
-            this.user.paymentSettings = user.paymentSetting;
-          }
+          this.user.paymentSettings = (typeof user.paymentSetting !== 'undefined')? this.user.paymentSettings = user.paymentSetting : [];
         },
         submit(){
-          console.log(this.user.paymentSettings)
           let userData = {
             id : this.user.userId,
             userName : this.user.userName,
@@ -185,12 +183,5 @@
   .user_hr{
     border: 1px rgb(244, 237, 237) solid;
     margin: 20px 0px;
-  }
-  .profile-payment{
-    list-style: none;
-    margin-bottom: 30px;
-  }
-  ul {
-    padding: 0;
   }
 </style>
