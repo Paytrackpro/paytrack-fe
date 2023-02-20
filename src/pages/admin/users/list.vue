@@ -88,29 +88,29 @@ export default {
   },
   watch: {
     "pagination.currentPage": function(){
-        this.getUserList();
+      this.setParamUrls({
+        'page': this.pagination.currentPage
+      });
+      this.getUserList();
     }
   },
-  mounted: function(){
+  created: function(){
+    let currentPage = this.getParamUrl([
+        'page',
+    ]);
+    this.pagination.currentPage = (currentPage.page > 1)? currentPage.page : this.pagination.currentPage
     this.setParamUrls({
-      'page':''
+      'page': this.pagination.currentPage
     });
     this.getUserList();
   },
   methods: {
     async getUserList() {
-      let currentPage = this.getParamUrl([
-      'page',
-      ])
-      console.log(currentPage.page)
       this.loading = true;
-      this.$api.get(`/admin/user/list?page=${currentPage.page}&size=${this.pagination.rowsPerPage}`).then((res) => {
+      this.$api.get(`/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`).then((res) => {
         this.rows = res.data.data.user;
         this.pagination.pages = Math.ceil(res.data.data.total / this.pagination.rowsPerPage);
-      })
-      this.setParamUrls({
-        'page' : this.pagination.currentPage
-      })
+      });
       this.loading = false;
     },
     goToDetail(id) {
