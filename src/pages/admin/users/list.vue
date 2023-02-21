@@ -13,11 +13,28 @@
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
-        <q-input outlined dense debounce="300" v-model="filter" placeholder="Search">
+        <q-input outlined dense debounce="300" v-model="filter" placeholder="Search" >
           <template v-slot:prepend>
-            <q-icon name="search" />
+            <q-icon name="search" @click="searching()"/>
           </template>
         </q-input>
+      </template>
+      <template v-slot:header>
+        <q-tr>
+          <q-th
+            v-for="col in columns"
+            :key="col.name"
+            :sortable="col.sortable"
+            @click="sortBy(col.name)"
+          >
+            {{ col.label }}
+            <q-icon
+              v-if="col.sortable"
+              :name="getSortIcon(col.name)"
+              size="15px"
+            />
+          </q-th>
+        </q-tr>
       </template>
       <template v-slot:body-cell-online="props">
         <q-td :props="props">
@@ -45,9 +62,12 @@ export default {
         page: 1,
         rowsPerPage: 10,
       },
+      sort:{
+        field: ''
+      },
       columns: [
         {
-          name: "user_name",
+          name: "userName",
           required: true,
           label: "User Name",
           align: "center",
@@ -55,10 +75,10 @@ export default {
           format: (val) => `${val}`,
           sortable: true,
         },
-        { name: "display_name", align: "center", label: "Dislay Name", field: "displayName", sortable: true },
+        { name: "displayName", align: "center", label: "Dislay Name", field: "displayName", sortable: true },
         { name: "email", align: "center", label: "Email", field: "email", sortable: true },
         {
-          name: "payment_type",
+          name: "paymentType",
           align: "center",
           label: "Payment Type",
           field: "paymentType",
@@ -69,14 +89,14 @@ export default {
           },
         },
         {
-          name: "created_at",
+          name: "createdAt",
           align: "center",
           label: "Created At",
           field: "createdAt",
           format: (val) => date.formatDate(val, "DD/MM/YYYY"),
         },
         {
-          name: "last_seen",
+          name: "lastSeen",
           align: "center",
           label: "Last Seen",
           field: "lastSeen",
@@ -87,6 +107,14 @@ export default {
     }
   },
   watch: {
+    filter:function(){
+      if(this.filter == '' || this.filter){
+          this.unSetParamUrls([
+            'KeySearch',
+          ]);
+      }
+      this.searching();
+    },
     "pagination.currentPage": function(){
       this.setParamUrls({
         'page': this.pagination.currentPage
@@ -97,17 +125,30 @@ export default {
   created: function(){
     let currentPage = this.getParamUrl([
         'page',
+        'order',
+        'KeySearch'
     ]);
-    this.pagination.currentPage = (currentPage.page > 1)? parseInt(currentPage.page) : this.pagination.currentPage
+    this.pagination.currentPage = (currentPage.page > 1)? parseInt(currentPage.page) : this.pagination.currentPage;
+    this.sort.field = (currentPage.order)? currentPage.order : this.sort.field;
+    this.filter =  (currentPage.order)? currentPage.KeySearch : this.filter;
     this.setParamUrls({
-      'page': this.pagination.currentPage
+      'page': this.pagination.currentPage,
+      'order' : this.sort.field,
+      'KeySearch' : this.filter
     });
     this.getUserList();
   },
   methods: {
     async getUserList() {
       this.loading = true;
-      this.$api.get(`/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`).then((res) => {
+      let url = `/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`;
+      if(this.sort.field != ''){
+          url += `&order=${this.sort.field}`
+      }
+      if(this.filter){
+          url += `&KeySearch=${this.filter}`
+      }
+      this.$api.get(url).then((res) => {
         this.rows = res.data.data.users;
         this.pagination.pages = Math.ceil(res.data.data.count / this.pagination.rowsPerPage);
       });
@@ -120,10 +161,16 @@ export default {
     setParamUrls(Object){
       let urlParams = new URLSearchParams(window.location.search)
       for (let key in Object) {
-        console.log(Object[key]);
-        let newParam = (Object[key])? Object[key] : 1;
-        urlParams.set(key, newParam)
+         (Object[key])? urlParams.set(key, Object[key])  : '';
       }
+      let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
+      window.history.pushState({}, '', newUrl);
+    },
+    unSetParamUrls(params){
+      let urlParams = new URLSearchParams(window.location.search)
+      params.map(function(value){
+        urlParams.delete(value)
+      })
       let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
       window.history.pushState({}, '', newUrl);
     },
@@ -132,9 +179,43 @@ export default {
       let reuslt = {};
       let urlParams = new URLSearchParams(window.location.search)
       params.map(function(value){
-        reuslt[value] = urlParams.get(value);
+        if(urlParams.get(value)){
+          reuslt[value] = urlParams.get(value);
+        }
       })
       return reuslt;
+    },
+    sortBy(column) {
+      this.sort.field = column
+      this.pagination.sortBy
+      this.setParamUrls({
+        'page': this.pagination.currentPage,
+        'order' : this.sort.field
+      });
+      this.getUserList();
+    },
+    searching(){
+      let param = this.getParamUrl([
+        'page',
+        'order',
+      ])
+      if(param.page){
+        this.pagination.currentPage = parseInt(param.page);
+      }
+      if(param.order){
+        this.sort.field = param.order;
+      }
+      this.setParamUrls({
+        'KeySearch' : this.filter,
+      });
+      this.getUserList();
+    },
+    getSortIcon(column) {
+      if (column !== this.sort.column) {
+        return 'arrow_downward'
+      }
+
+      return 'arrow_upward'
     }
   },
 }
