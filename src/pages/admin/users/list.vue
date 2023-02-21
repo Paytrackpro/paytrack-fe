@@ -25,7 +25,7 @@
             v-for="col in columns"
             :key="col.name"
             :sortable="col.sortable"
-            @click="sortBy(col.name)"
+            @click="() => sortBy(col.name)"
           >
             {{ col.label }}
             <q-icon
@@ -55,6 +55,7 @@ import { date } from "quasar"
 export default {
   data() {
     return {
+      count:1,
       filter: "",
       pagination: {
         sortBy: "desc",
@@ -82,6 +83,7 @@ export default {
           align: "center",
           label: "Payment Type",
           field: "paymentType",
+          sortable: false,
           format: (val) => {
             if (val == PAYMENT_TYPES.BTC) return "BTC"
             if (val == PAYMENT_TYPES.LTC) return "LTC"
@@ -93,6 +95,7 @@ export default {
           align: "center",
           label: "Created At",
           field: "createdAt",
+          sortable: false,
           format: (val) => date.formatDate(val, "DD/MM/YYYY"),
         },
         {
@@ -100,6 +103,7 @@ export default {
           align: "center",
           label: "Last Seen",
           field: "lastSeen",
+          sortable: false,
           format: (val) => date.formatDate(val, "DD/MM/YYYY"),
         },
       ],
@@ -108,7 +112,7 @@ export default {
   },
   watch: {
     filter:function(){
-      if(this.filter == '' || this.filter){
+      if(this.filter == ''){
           this.unSetParamUrls([
             'KeySearch',
           ]);
@@ -143,7 +147,7 @@ export default {
       this.loading = true;
       let url = `/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`;
       if(this.sort.field != ''){
-          url += `&order=${this.sort.field}`
+          url += `&order=${this.sort.field} ${this.pagination.sortBy}`
       }
       if(this.filter){
           url += `&KeySearch=${this.filter}`
@@ -185,15 +189,21 @@ export default {
       })
       return reuslt;
     },
+
     sortBy(column) {
-      this.sort.field = column
-      this.pagination.sortBy
+      if(this.sort.field != column){
+        this.sort.field = column;
+        this.count = 0;
+      }
       this.setParamUrls({
         'page': this.pagination.currentPage,
         'order' : this.sort.field
       });
+      this.pagination.sortBy = (this.count % 2)? "asc" : "desc";
       this.getUserList();
+      this.count++;
     },
+
     searching(){
       let param = this.getParamUrl([
         'page',
@@ -210,12 +220,8 @@ export default {
       });
       this.getUserList();
     },
-    getSortIcon(column) {
-      if (column !== this.sort.column) {
-        return 'arrow_downward'
-      }
-
-      return 'arrow_upward'
+    getSortIcon() {
+      return (this.count % 2)? "arrow_downward" : "arrow_upward";
     }
   },
 }
