@@ -150,7 +150,7 @@
           })
         },
         setData(user){
-          this.paymentAddressOptions = this.setCheckbox(this.paymentAddressOptions ,user.paymentSetting)
+          this.paymentAddressOptions = this.setCheckbox(this.paymentAddressOptions ,user.paymentSettings)
           this.user.userId = user.id;
           this.user.userName = user.userName;
           this.user.email = user.email;
