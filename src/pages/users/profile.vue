@@ -98,7 +98,7 @@
             </q-card>
           </div>
           <div class="text-right">
-            <q-btn label="Update Profile"  type="button" color="primary" @click="submit"/>
+            <q-btn label="Update Profile" class="q-mr-xs" type="button" color="primary" @click="submit"/> <q-btn label="Cancel"  type="button" color="primary" to = "/admin/profile"/>
           </div>
         </q-form>
       </q-card-section>
