@@ -157,7 +157,7 @@
           this.user.paymentType = user.paymentType;
           this.user.paymentAddress = user.paymentAddress;
           this.user.displayName = user.displayName;
-          this.user.paymentSettings = (typeof user.paymentSetting !== 'undefined')? this.user.paymentSettings = user.paymentSetting : [];
+          this.user.paymentSettings = (typeof user.paymentSettings !== 'undefined')? this.user.paymentSettings = user.paymentSettings : [];
         },
         submit(){
           let userData = {
