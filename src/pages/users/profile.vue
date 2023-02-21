@@ -48,35 +48,51 @@
               <q-card-section>
                 <div class="text-h6 text-center q-pb-sm">Payment settings</div>
                 <div class="text-subtitle3">
-                  <div class="row">
-                    <div class="col-12 q-pr-sm">
-                        <q-checkbox
-                          v-for=" paymentAddressOption in paymentAddressOptions"
-                          :label = 'paymentAddressOption.label'
-                          v-model="paymentAddressOption.isChecked"
-                          @click.native = "addPaymentSetting(paymentAddressOption.value , paymentAddressOption.isChecked)"
-                          class = "q-pa-sm"
-                          :key="paymentAddressOption.value"
-                        />
-                    </div>
-                    <div class="col-12">
-                      <div v-for="payment in user.paymentSettings"  class="row">
-                        <div class="col-12">
-                          <input v-model="payment.type" type="hidden"/>
-                          <p class="q-mt-none q-mb-xs text-weight-medium">Payment Address <span class="text-uppercase"> {{ payment.type }} </span></p>
-                          <q-input
-                            outlined
-                            dense
-                            lazy-rules
-                            stack-label
-                            hide-bottom-space
-                            v-model="payment.address"
-                            placeholder="Payment Address"
+                    <div class="row">
+                      <div class="col-12 q-pr-sm">
+                          <q-checkbox
+                            v-for=" paymentAddressOption in paymentAddressOptions"
+                            :label = 'paymentAddressOption.label'
+                            v-model="paymentAddressOption.isChecked"
+                            @click.native = "addPaymentSetting(paymentAddressOption.value , paymentAddressOption.isChecked)"
+                            class = "q-pa-sm"
+                            :key="paymentAddressOption.value"
                           />
+                      </div>
+                      <div class="col-12" v-if="!this.isShowPayment">
+                        <div class="row" >
+                          <div class="col-12">
+                            <p class="q-mt-none q-mb-xs text-weight-medium">Payment Address</p>
+                            <q-input
+                              outlined
+                              dense
+                              lazy-rules
+                              stack-label
+                              hide-bottom-space
+                              placeholder="Payment Address"
+                              disable
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                </div>
+                      <div class="col-12" v-else>
+                        <div v-for="payment in user.paymentSettings"  class="row" >
+                          <div class="col-12">
+                            <input v-model="payment.type" type="hidden"/>
+                            <p class="q-mt-none q-mb-xs text-weight-medium">Payment Address <span class="text-uppercase"> {{ payment.type }} </span></p>
+                            <q-input
+                              outlined
+                              dense
+                              lazy-rules
+                              stack-label
+                              hide-bottom-space
+                              v-model="payment.address"
+                              placeholder="Payment Address"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                  </div>
                 </div>
               </q-card-section>
             </q-card>
@@ -93,6 +109,7 @@
 <script>
   import { PAYMENT_TYPE_OPTIONS } from "../../consts/paymentType"
   import { defineComponent } from "vue";
+  import { Notify } from 'quasar'
   export default defineComponent({
       name: 'Profile',
       data :function(){
@@ -112,6 +129,12 @@
             }],
           },
           paymentAddressOptions : PAYMENT_TYPE_OPTIONS,
+          isShowPayment : false
+        }
+      },
+      watch: {
+        'user.paymentSettings' : function(){
+          (this.user.paymentSettings.length > 0)? this.isShowPayment = true : this.isShowPayment = false;
         }
       },
       created: function () {
@@ -119,7 +142,7 @@
       },
       methods : {
         setCheckbox(data, dataApi){
-          if(typeof dataApi !== 'undefined'){
+          if(typeof dataApi !== 'undefined' && dataApi != null){
             data.map((obj, i) => {
               dataApi.map((objApi, i)=>{
                 if(obj.value === objApi.type){
@@ -157,7 +180,7 @@
           this.user.paymentType = user.paymentType;
           this.user.paymentAddress = user.paymentAddress;
           this.user.displayName = user.displayName;
-          this.user.paymentSettings = (typeof user.paymentSettings !== 'undefined')? this.user.paymentSettings = user.paymentSettings : [];
+          this.user.paymentSettings = (typeof user.paymentSettings !== 'undefined' && user.paymentSettings)? this.user.paymentSettings = user.paymentSettings : [];
         },
         submit(){
           let userData = {
@@ -169,7 +192,16 @@
             displayName : this.user.displayName,
             paymentSettings : this.user.paymentSettings
           }
-          this.$store.dispatch("user/updateUserProfile", userData);
+          this.$store.dispatch("user/updateUserProfile", userData).then(function (res) {
+            Notify.create({
+              message: 'your information is updated',
+              color: "positive",
+              icon: "done",
+            })
+          });
+          setTimeout(() => {
+            this.$router.push({ name: "admin.profile.edit" });
+          }, 1000);
         },
       }
   })

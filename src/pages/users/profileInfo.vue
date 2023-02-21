@@ -26,9 +26,19 @@
           </template>
         </q-field>
       </div>
+      <div v-for="payment in user.paymentSettings" class="col-4" >
+        <div class="row">
+          <q-field stack-label class="col-12">
+              <template v-slot:control class = "col-12">
+                <p class=" text-size q-mb-none">payment Address <span class="text-uppercase"> {{ payment.type }} </span></p>
+                <div class="self-center full-width no-outline" tabindex="0">{{ payment.address }}</div>
+              </template>
+          </q-field>
+        </div>
+      </div>
     </div>
     <div class="text-right">
-      <q-btn color="primary" label="Edit" to='profile/edit'/>
+      <q-btn color="primary" label="Edit" to='/admin/profile/edit'/>
     </div>
   </q-card>
 </template>
@@ -38,14 +48,8 @@ export default {
   name: "ProfileInfo",
   components: {},
   data() {
-    let user = localStorage.getItem("user")
-    if (typeof(user) == "string" && user.length > 0) {
-      user = JSON.parse(user)
-    } else {
-      user = {}
-    }
     return {
-      user,
+      user:{},
       loading: false,
       editing: false,
       isForbidden: false,
@@ -54,6 +58,16 @@ export default {
       payment: {}
     }
   },
+  methods:{
+    async getDataApi(){
+      this.$api.get("/user/info").then((res) => {
+        this.user = res.data.data;
+      })
+    },
+  },
+  created : function(){
+    this.getDataApi();
+  }
 }
 </script>
 
@@ -64,5 +78,9 @@ export default {
  .profile-title{
   text-transform: uppercase;
   font-weight: bold;
+ }
+ .text-size{
+  font-size: 12px;
+  color: #ababab;
  }
 </style>
