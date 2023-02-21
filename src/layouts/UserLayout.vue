@@ -66,6 +66,12 @@ export default {
           separator: false,
           to: "/payment",
         },
+        {
+          icon: "settings",
+          label: "Settings",
+          separator: false,
+          to: "/settings",
+        },
       ],
     }
   },

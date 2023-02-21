@@ -78,8 +78,9 @@ export default {
         },
         {
           icon: "settings",
-          label: "---",
+          label: "Settings",
           separator: false,
+          to: "/admin/settings",
         },
         {
           icon: "feedback",
