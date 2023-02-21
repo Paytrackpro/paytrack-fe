@@ -11,7 +11,7 @@
               </div>
               <q-card class="col" flat bordered>
                 <q-card-section class="q-pa-lg">
-                  <q-form class="q-gutter-y-md" @submit="login">
+                  <q-form class="q-gutter-y-md" @submit="verifyOtp">
                     <div>
                       <p class="q-mt-none q-mb-xs text-weight-medium">OTP</p>
                       <q-input
@@ -39,12 +39,14 @@
 </template>
 
 <script>
+import role from 'src/consts/role'
 import { mapGetters } from "vuex"
 export default {
   data() {
     return {
       otp: "",
       error: null,
+      tempUser: JSON.parse(localStorage.getItem("tempUser"))
     }
   },
   computed: {
@@ -52,7 +54,26 @@ export default {
       user: "auth/getUser",
     }),
   },
+  created() {
+    if (!this.tempUser) {
+      this.$router.push({ name: 'Login' })
+    }
+  },
   methods: {
+    verifyOtp() {
+      this.$store
+        .dispatch("auth/verifyOtp", {
+          otp: this.otp,
+          userId: `${this.tempUser.userId}`,
+        })
+        .then(() => {
+          if (this.user.role === role.ADMIN) {
+            this.$router.push({ name: "Home" })
+          } else {
+            this.$router.push({ name: "user.home" })
+          }
+        })
+    },
   },
 }
 </script>
