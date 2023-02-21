@@ -129,16 +129,15 @@ export default {
   created: function(){
     let currentPage = this.getParamUrl([
         'page',
-        'order',
-        'KeySearch'
+        'KeySearch',
+        'order'
     ]);
-    this.pagination.currentPage = (currentPage.page > 1)? parseInt(currentPage.page) : this.pagination.currentPage;
-    this.sort.field = (currentPage.order)? currentPage.order : this.sort.field;
-    this.filter =  (currentPage.order)? currentPage.KeySearch : this.filter;
+    this.pagination.currentPage = (parseInt(currentPage.page) > 1)? parseInt(currentPage.page) : this.pagination.currentPage;
+    this.filter = (!this.isEmpty(currentPage.KeySearch))? currentPage.KeySearch : this.filter;
+    this.sort.field = (!this.isEmpty(currentPage.order))? currentPage.order : this.sort.field;
+
     this.setParamUrls({
       'page': this.pagination.currentPage,
-      'order' : this.sort.field,
-      'KeySearch' : this.filter
     });
     this.getUserList();
   },
@@ -147,7 +146,7 @@ export default {
       this.loading = true;
       let url = `/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`;
       if(this.sort.field != ''){
-          url += `&order=${this.sort.field} ${this.pagination.sortBy}`
+          url += `&order=${this.sort.field}`
       }
       if(this.filter){
           url += `&KeySearch=${this.filter}`
@@ -191,15 +190,14 @@ export default {
     },
 
     sortBy(column) {
-      if(this.sort.field != column){
-        this.sort.field = column;
-        this.count = 0;
-      }
+      this.sort.field = column;
+      this.pagination.sortBy = (this.count % 2)? "asc" : "desc";
+      console.log(this.count);
+      this.sort.field = this.sort.field +" "+ this.pagination.sortBy;
       this.setParamUrls({
         'page': this.pagination.currentPage,
         'order' : this.sort.field
       });
-      this.pagination.sortBy = (this.count % 2)? "asc" : "desc";
       this.getUserList();
       this.count++;
     },
@@ -222,6 +220,9 @@ export default {
     },
     getSortIcon() {
       return (this.count % 2)? "arrow_downward" : "arrow_upward";
+    },
+    isEmpty(str){
+      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
     }
   },
 }
