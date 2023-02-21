@@ -57,6 +57,22 @@ const routes = [
           title: "Payment List",
         },
       },
+      {
+        path: "settings",
+        name: "admin.settings",
+        component: () => import("pages/users/settings.vue"),
+        meta: {
+          title: "Settings",
+        },
+      },
+      {
+        path: "settings/2fa",
+        name: "admin.settings.2fa",
+        component: () => import("pages/users/2fa.vue"),
+        meta: {
+          title: "2FA",
+        },
+      },
     ],
   },
   {
@@ -105,6 +121,22 @@ const routes = [
         component: () => import("pages/payments/createPage.vue"),
         meta: {
           title: "Payment Create",
+        },
+      },
+      {
+        path: "settings",
+        name: "user.settings",
+        component: () => import("pages/users/settings.vue"),
+        meta: {
+          title: "Settings",
+        },
+      },
+      {
+        path: "settings/2fa",
+        name: "user.settings.2fa",
+        component: () => import("pages/users/2fa.vue"),
+        meta: {
+          title: "2FA",
         },
       },
     ],
