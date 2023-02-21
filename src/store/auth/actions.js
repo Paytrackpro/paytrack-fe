@@ -9,9 +9,8 @@ export default {
         return
       }
 
-      localStorage.setItem("user", JSON.stringify(responseData.userInfo))
       localStorage.setItem("token", responseData.token)
-      commit("setUser", res.data.data.userInfo)
+      commit("setUser", responseData.userInfo)
       commit("setAuthenticated", true)
       commit("setUserProfile", JSON.stringify(responseData.userInfo))
     })
@@ -40,7 +39,6 @@ export default {
         localStorage.removeItem("tempUser")
 
         const responseData = res.data.data
-        localStorage.setItem("user", JSON.stringify(responseData.userInfo))
         localStorage.setItem("token", responseData.token)
         commit("setUser",responseData.userInfo)
         commit("setAuthenticated", true)
