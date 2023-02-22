@@ -38,13 +38,15 @@
       </div>
     </div>
     <div class="text-right">
-      <q-btn color="primary" label="Edit" to='/admin/profile/edit'/>
+      <q-btn color="primary" label="Edit" @click="redirctUrl"/>
     </div>
   </q-card>
 </template>
 
 <script>
-export default {
+import ROLE from "src/consts/role"
+import { defineComponent } from "vue";
+export default defineComponent ({
   name: "ProfileInfo",
   components: {},
   data() {
@@ -64,11 +66,22 @@ export default {
         this.user = res.data.data;
       })
     },
+    redirctUrl(){
+      if(this.user.role == ROLE.ADMIN){
+        setTimeout(() => {
+          this.$router.push("/admin/profile/edit");
+        }, 1000)
+      }else{
+        setTimeout(() => {
+          this.$router.push("/profile/edit");
+        }, 1000)
+      }
+    }
   },
   created : function(){
     this.getDataApi();
   }
-}
+})
 </script>
 
 <style scoped>

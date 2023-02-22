@@ -98,7 +98,8 @@
             </q-card>
           </div>
           <div class="text-right">
-            <q-btn label="Update Profile" class="q-mr-xs" type="button" color="primary" @click="submit"/> <q-btn label="Cancel"  type="button" color="primary" to = "/admin/profile"/>
+            <q-btn label="Update Profile" class="q-mr-xs" type="button" color="primary" @click="submit"/>
+            <q-btn label="Cancel"  type="button" color="primary" @click="redirctUrl"/>
           </div>
         </q-form>
       </q-card-section>
@@ -110,6 +111,9 @@
   import { PAYMENT_TYPE_OPTIONS } from "../../consts/paymentType"
   import { defineComponent } from "vue";
   import { Notify } from 'quasar'
+  import ROLE from "src/consts/role"
+import { TLSSocket } from "tls";
+
   export default defineComponent({
       name: 'Profile',
       data :function(){
@@ -125,7 +129,7 @@
             paymentSettings: [{
               type : '',
               address : '',
-              checked : true ,
+              checked : false ,
             }],
           },
           paymentAddressOptions : PAYMENT_TYPE_OPTIONS,
@@ -141,12 +145,24 @@
         this.getDataApi();
       },
       methods : {
+        redirctUrl(){
+          if(this.user.role == ROLE.ADMIN){
+            setTimeout(() => {
+              this.$router.push("/admin/profile");
+            }, 1000)
+          }else{
+            setTimeout(() => {
+              this.$router.push("/profile");
+            }, 1000)
+          }
+        },
         setCheckbox(data, dataApi){
           if(typeof dataApi !== 'undefined' && dataApi != null){
-            data.map((obj, i) => {
-              dataApi.map((objApi, i)=>{
+            data.map((obj) => {
+              dataApi.map((objApi)=>{
                 if(obj.value === objApi.type){
                   obj.isChecked = true;
+                  return;
                 }
               })
             });
@@ -181,6 +197,7 @@
           this.user.paymentAddress = user.paymentAddress;
           this.user.displayName = user.displayName;
           this.user.paymentSettings = (typeof user.paymentSettings !== 'undefined' && user.paymentSettings)? this.user.paymentSettings = user.paymentSettings : [];
+          this.user.role = user.role;
         },
         submit(){
           let userData = {
@@ -200,7 +217,7 @@
             })
           });
           setTimeout(() => {
-            this.$router.push({ name: "admin.profile.edit" });
+            this.redirctUrl();
           }, 1000);
         },
       }
