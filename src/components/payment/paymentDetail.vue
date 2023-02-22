@@ -82,6 +82,9 @@
           </template>
         </q-field>
       </div>
+      <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
+        <payment-setting :value="payment.paymentSettings" readonly label="Accepted payment settings"/>
+      </div>
       <div class="col-12">
         <q-input v-if="processing" v-model="txId" label="Transaction id" ref="txId" />
         <q-field v-if="!processing" label="Transaction id" stack-label>
@@ -168,9 +171,10 @@
 import { mapGetters } from "vuex"
 import MDate from "components/common/mDate"
 import Invoices from "components/payment/invoices"
+import PaymentSetting from "components/payment/paymentSetting";
 export default {
   name: "paymentDetail",
-  components: { MDate, Invoices },
+  components: { MDate, Invoices, PaymentSetting },
   data() {
     return {
       txId: "",

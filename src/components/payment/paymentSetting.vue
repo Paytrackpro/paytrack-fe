@@ -1,9 +1,9 @@
 <template>
   <div class="row q-mb-md q-col-gutter-md">
-    <div class="col-12">
-      <p class="q-mt-none q-mb-xs text-weight-medium">Payment setting</p>
+    <div v-if="label" class="col-12">
+      <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
     </div>
-    <div class="col-3">
+    <div v-if="!readonly" class="col-3">
       <q-select
         filled
         v-model="selectedCoins"
@@ -17,7 +17,7 @@
     </div>
     <div class="col">
       <q-markup-table v-if="value && value.length">
-        <thead>
+        <thead v-if="!readonly">
         <tr>
           <td style="width: 80px">Default</td>
           <td>Address</td>
@@ -26,13 +26,15 @@
         <tbody>
         <tr v-for="(setting, i) of value" :key="i">
           <td>
-            <q-radio v-model="isDefault" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" :val="setting.type"
+            <span v-if="readonly">{{setting.type}}</span>
+            <q-radio v-else v-model="isDefault" checked-icon="task_alt" unchecked-icon="panorama_fish_eye" :val="setting.type"
              :label="setting.type" @input="changeDefault" />
           </td>
           <td>
             <q-input
               v-model="setting.address"
               :label="`${setting.type} address`"
+              :readonly="readonly"
               outlined
               dense
               lazy-rules
@@ -51,7 +53,9 @@
 export default {
   name: "paymentSetting",
   props: {
-    value: Array
+    value: Array,
+    readonly: Boolean,
+    label: String
   },
   data() {
     return {

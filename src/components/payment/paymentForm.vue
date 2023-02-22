@@ -146,7 +146,7 @@
         />
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting v-model="payment.paymentSettings" />
+        <payment-setting v-model="payment.paymentSettings" label="Payment setting"/>
       </div>
       <div class="col-12">
         <q-expansion-item
