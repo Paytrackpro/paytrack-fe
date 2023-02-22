@@ -267,7 +267,6 @@ export default {
         this.pMethod = newPayment.paymentMethod
         let settings = newPayment.paymentSettings || []
         this.methods = settings.map(s => s.type)
-        console.log(this.methods)
       }
     }
   },

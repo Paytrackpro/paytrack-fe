@@ -273,9 +273,8 @@ export default {
       }
     },
     paymentType: {
-      //immediate: true,
+      immediate: false,
       handler(pType) {
-        console.log(pType)
         if (this.$refs.paymentForm) {
           this.$refs.paymentForm.reset()
         }
@@ -335,7 +334,6 @@ export default {
         payment.senderId = this.user.id
         payment.receiverId = this.partner.id
       }
-      console.log(payment)
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"
