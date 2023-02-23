@@ -98,8 +98,8 @@
             </q-card>
           </div>
           <div class="text-right">
-            <q-btn label="Update Profile" class="q-mr-xs" type="button" color="primary" @click="submit"/>
-            <q-btn label="Cancel"  type="button" color="primary" @click="redirctUrl"/>
+            <q-btn label="Update Profile" class="q-mr-xs" :disable="loading"   type="button" color="primary" @click="submit"/>
+            <q-btn label="Cancel"  type="button" :disable="loading" color="primary" @click="redirctUrl"/>
           </div>
         </q-form>
       </q-card-section>
@@ -112,12 +112,13 @@
   import { defineComponent } from "vue";
   import { Notify } from 'quasar'
   import ROLE from "src/consts/role"
-import { TLSSocket } from "tls";
 
   export default defineComponent({
       name: 'Profile',
       data :function(){
         return {
+          error : '',
+          loading : false,
           user : {
             userId : '',
             userName : '',
@@ -200,6 +201,7 @@ import { TLSSocket } from "tls";
           this.user.role = user.role;
         },
         submit(){
+          this.loading = true
           let userData = {
             id : this.user.userId,
             userName : this.user.userName,
@@ -209,16 +211,22 @@ import { TLSSocket } from "tls";
             displayName : this.user.displayName,
             paymentSettings : this.user.paymentSettings
           }
-          this.$store.dispatch("user/updateUserProfile", userData).then(function (res) {
+          this.$store.dispatch("user/updateUserProfilesss", userData).then((res)=> {
+            this.loading = false;
             Notify.create({
               message: 'your information is updated',
               color: "positive",
               icon: "done",
             })
-          });
-          setTimeout(() => {
             this.redirctUrl();
-          }, 1000);
+          }).catch(err => {
+            this.loading = false;
+            Notify.create({
+              message: error.response.data.message,
+              color: "warning",
+              icon: "warning",
+            })
+          });
         },
       }
   })
