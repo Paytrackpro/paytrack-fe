@@ -98,8 +98,8 @@
             </q-card>
           </div>
           <div class="text-right">
-            <q-btn label="Update Profile" class="q-mr-xs" :disable="loading"   type="button" color="primary" @click="submit"/>
-            <q-btn label="Cancel"  type="button" :disable="loading" color="primary" @click="redirctUrl"/>
+            <q-btn label="Update Profile" class="q-mr-xs" :disable="loading"  type="button" color="primary" @click="submit"/>
+            <q-btn label="Cancel"  type="button" :disable="loading" color="primary" @click="redirectUrl"/>
           </div>
         </q-form>
       </q-card-section>
@@ -146,7 +146,7 @@
         this.getDataApi();
       },
       methods : {
-        redirctUrl(){
+        redirectUrl(){
           if(this.user.role == ROLE.ADMIN){
             setTimeout(() => {
               this.$router.push("/admin/profile");
@@ -211,18 +211,18 @@
             displayName : this.user.displayName,
             paymentSettings : this.user.paymentSettings
           }
-          this.$store.dispatch("user/updateUserProfilesss", userData).then((res)=> {
+          this.$store.dispatch("user/updateUserProfile", userData).then((res)=> {
             this.loading = false;
             Notify.create({
               message: 'your information is updated',
               color: "positive",
               icon: "done",
             })
-            this.redirctUrl();
+            this.redirectUrl();
           }).catch(err => {
             this.loading = false;
             Notify.create({
-              message: err.response.data.message,
+              message: err.data.message,
               color: "warning",
               icon: "warning",
             })

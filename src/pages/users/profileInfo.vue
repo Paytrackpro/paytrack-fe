@@ -38,7 +38,7 @@
       </div>
     </div>
     <div class="text-right">
-      <q-btn color="primary" label="Edit" @click="redirctUrl"/>
+      <q-btn color="primary" label="Edit" @click="redirectUrl"/>
     </div>
   </q-card>
 </template>
@@ -66,15 +66,11 @@ export default defineComponent ({
         this.user = res.data.data;
       })
     },
-    redirctUrl(){
+    redirectUrl(){
       if(this.user.role == ROLE.ADMIN){
-        setTimeout(() => {
-          this.$router.push("/admin/profile/edit");
-        }, 1000)
+        this.$router.push("/admin/profile/edit");
       }else{
-        setTimeout(() => {
-          this.$router.push("/profile/edit");
-        }, 1000)
+        this.$router.push("/profile/edit");
       }
     }
   },
