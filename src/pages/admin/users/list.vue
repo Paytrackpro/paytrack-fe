@@ -8,8 +8,8 @@
       :pagination.sync="pagination"
       hide-pagination
       flat
-      :pagination.sync="pagination"
       bordered
+      :loading="loading"
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
@@ -18,23 +18,6 @@
             <q-icon name="search" @click="searching()"/>
           </template>
         </q-input>
-      </template>
-      <template v-slot:header>
-        <q-tr>
-          <q-th
-            v-for="col in columns"
-            :key="col.name"
-            :sortable="col.sortable"
-            @click="() => sortBy(col.name)"
-          >
-            {{ col.label }}
-            <q-icon
-              v-if="col.sortable"
-              :name="getSortIcon(col.name)"
-              size="15px"
-            />
-          </q-th>
-        </q-tr>
       </template>
       <template v-slot:body-cell-online="props">
         <q-td :props="props">
@@ -53,18 +36,21 @@ import { PAYMENT_TYPES } from "../../../consts/paymentType"
 import { date } from "quasar"
 
 export default {
+  beforeRouteUpdate (to, from, next) {
+    this.getUserList();
+    next();
+  },
   data() {
     return {
       count:1,
-      filter: "",
+      filter: null,
+      loading : false,
       pagination: {
         sortBy: "desc",
         descending: false,
-        page: 1,
-        rowsPerPage: 10,
-      },
-      sort:{
-        field: ''
+        currentPage: 1,
+        rowsPerPage: 5,
+        pages: 0
       },
       columns: [
         {
@@ -108,50 +94,61 @@ export default {
         },
       ],
       rows: [],
+      orderby : '',
+      tableOptions: {
+        sortBy: 'userName',
+        descending: false,
+      },
     }
   },
   watch: {
-    filter:function(){
-      if(this.filter == ''){
-          this.unSetParamUrls([
-            'KeySearch',
-          ]);
+    filter : function(){
+      let param = {};
+      if(this.pagination.currentPage != 1){
+        param.page = this.pagination.currentPage;
       }
-      this.searching();
-    },
-    "pagination.currentPage": function(){
-      this.setParamUrls({
-        'page': this.pagination.currentPage
-      });
-      this.getUserList();
-    }
-  },
-  created: function(){
-    let currentPage = this.getParamUrl([
-        'page',
-        'KeySearch',
-        'order'
-    ]);
-    this.pagination.currentPage = (parseInt(currentPage.page) > 1)? parseInt(currentPage.page) : this.pagination.currentPage;
-    this.filter = (!this.isEmpty(currentPage.KeySearch))? currentPage.KeySearch : this.filter;
-    this.sort.field = (!this.isEmpty(currentPage.order))? currentPage.order : this.sort.field;
+      if(!this.isEmpty(this.filter)){
+        param.KeySearch = this.filter;
+      }
 
-    this.setParamUrls({
-      'page': this.pagination.currentPage,
-    });
-    this.getUserList();
+      this.$router.push({ query: param})
+    },
+    "pagination.currentPage" : function(){
+      let param = {};
+      if(this.pagination.currentPage != 1){
+        param.page = this.pagination.currentPage;
+      }
+      if(!this.isEmpty(this.filter)){
+        param.KeySearch = this.filter;
+      }
+      this.$router.push({ query: param})
+    },
+  },
+
+  created: function(){
+    let param =  this.getParamUrl([
+      'page',
+      'KeySearch'
+    ]);
+    this.pagination.currentPage = (!this.isEmpty(param.page))? param.page : this.pagination.currentPage;
+    this.filter = (!this.isEmpty(param.KeySearch))? param.KeySearch :  this.filter;
+    this.getUserList()
   },
   methods: {
     async getUserList() {
       this.loading = true;
-      let url = `/admin/user/list?page=${this.pagination.currentPage}&size=${this.pagination.rowsPerPage}`;
-      if(this.sort.field != ''){
-          url += `&order=${this.sort.field}`
+      let newOrder = ''
+      if(!this.isEmpty(this.orderby)){
+        newOrder = this.orderby + ` ${this.pagination.sortBy}`
       }
-      if(this.filter){
-          url += `&KeySearch=${this.filter}`
-      }
-      this.$api.get(url).then((res) => {
+      this.$api.get('/admin/user/list',{
+        params: {
+          page: this.pagination.currentPage,
+          size: this.pagination.rowsPerPage,
+          KeySearch : this.filter,
+          order : newOrder
+        }
+      }).then((res) => {
         this.rows = res.data.data.users;
         this.pagination.pages = Math.ceil(res.data.data.count / this.pagination.rowsPerPage);
       });
@@ -160,24 +157,6 @@ export default {
     goToDetail(id) {
       this.$router.push({ name: "admin.user.detail", params: { id } })
     },
-
-    setParamUrls(Object){
-      let urlParams = new URLSearchParams(window.location.search)
-      for (let key in Object) {
-         (Object[key])? urlParams.set(key, Object[key])  : '';
-      }
-      let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
-      window.history.pushState({}, '', newUrl);
-    },
-    unSetParamUrls(params){
-      let urlParams = new URLSearchParams(window.location.search)
-      params.map(function(value){
-        urlParams.delete(value)
-      })
-      let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + urlParams.toString();
-      window.history.pushState({}, '', newUrl);
-    },
-
     getParamUrl(params){
       let reuslt = {};
       let urlParams = new URLSearchParams(window.location.search)
@@ -189,41 +168,26 @@ export default {
       return reuslt;
     },
 
-    sortBy(column) {
-      this.sort.field = column;
-      this.pagination.sortBy = (this.count % 2)? "asc" : "desc";
-      console.log(this.count);
-      this.sort.field = this.sort.field +" "+ this.pagination.sortBy;
-      this.setParamUrls({
-        'page': this.pagination.currentPage,
-        'order' : this.sort.field
-      });
-      this.getUserList();
-      this.count++;
-    },
-
-    searching(){
-      let param = this.getParamUrl([
-        'page',
-        'order',
-      ])
-      if(param.page){
-        this.pagination.currentPage = parseInt(param.page);
-      }
-      if(param.order){
-        this.sort.field = param.order;
-      }
-      this.setParamUrls({
-        'KeySearch' : this.filter,
-      });
-      this.getUserList();
-    },
     getSortIcon() {
       return (this.count % 2)? "arrow_downward" : "arrow_upward";
     },
     isEmpty(str){
       return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
+    },
+    sortBy(data){
+      this.orderby = data;
+      console.log("doctor")
     }
   },
 }
 </script>
+<style lang="scss">
+  .list-user-header .list-user-icon-sort{
+    display: flex;
+    width: 100px;
+  }
+  .list-user-header:hover .list-user-icon-sort{
+    display: block;
+  }
+</style>
+
