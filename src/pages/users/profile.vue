@@ -148,13 +148,9 @@
       methods : {
         redirectUrl(){
           if(this.user.role == ROLE.ADMIN){
-            setTimeout(() => {
               this.$router.push("/admin/profile");
-            }, 1000)
           }else{
-            setTimeout(() => {
               this.$router.push("/profile");
-            }, 1000)
           }
         },
         setCheckbox(data, dataApi){
