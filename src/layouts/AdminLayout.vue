@@ -77,12 +77,6 @@ export default {
           separator: false,
         },
         {
-          icon: "settings",
-          label: "Settings",
-          separator: false,
-          to: "/admin/settings",
-        },
-        {
           icon: "feedback",
           label: "---",
           separator: false,
@@ -106,7 +100,7 @@ export default {
         }
       }
     },
-    logout(){
+    logOut(){
       this.$store
         .dispatch('auth/logOut')
     },
