@@ -1,13 +1,11 @@
 <template>
-  <div>
-    <q-card flat>
-      <q-toggle v-model="use2FA" color="green" label="Use two-factor authentication" />
-    </q-card>
+  <q-card flat>
+    <q-toggle v-model="use2FA" color="green" label="Use two-factor authentication" />
     <q-dialog v-model="dialog">
       <q-card>
         <q-form @submit="login">
           <q-card-section>
-            <div class="text-h6">Confirm</div>
+            <div class="text-h6">Please confirm your password to active two-factor authentication</div>
             <q-input v-model="password" type="password" />
           </q-card-section>
 
@@ -17,7 +15,7 @@
         </q-form>
       </q-card>
     </q-dialog>
-  </div>
+  </q-card>
 </template>
 
 <script>
