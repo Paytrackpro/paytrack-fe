@@ -14,6 +14,7 @@
   <payment-form
     v-if="editing"
     :payment="payment"
+    :user="user"
     @saved="saved"
     @cancel="editing = false"
   />
@@ -31,7 +32,7 @@
 import {PaymentForm, PaymentDetail} from "components/payment";
 import MDate from "components/common/mDate";
 export default {
-  name: "detailPayment",
+  name: "detailPaymentPage",
   components: {MDate, PaymentForm, PaymentDetail},
   data() {
     let user = localStorage.getItem("user")

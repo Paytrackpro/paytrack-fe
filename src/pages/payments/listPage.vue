@@ -45,26 +45,25 @@ export default {
       },
       columns: [
         {
-          name: "requesterName",
+          name: "receiverName",
           required: true,
-          label: "requester",
+          label: "receiver",
           align: "center",
-          field: (row) => row.requesterName,
+          field: (row) => {
+            if (row.creatorId === row.receiverId || row.contactMethod === "internal") {
+              return row.receiverName
+            }
+            return row.externalEmail
+          },
           format: (val) => `${val}`,
           sortable: true,
         },
-        {
-          name: "senderName",
-          align: "center",
-          label: "sender",
-          field: (row) => {
-            if (row.contactMethod === "email") {
-              return row.senderEmail
-            }
+        { name: "senderName", align: "center", label: "sender", field: (row) => {
+          if (row.creatorId === row.senderId || row.contactMethod === "internal") {
             return row.senderName
-          },
-          sortable: true,
-        },
+          }
+          return row.externalEmail
+        }, sortable: true },
         { name: "status", align: "center", label: "status", field: "status", sortable: true },
         {
           name: "amount",
@@ -103,7 +102,7 @@ export default {
   methods: {
     async getPayments() {
       this.$api.get("/payment/list").then((res) => {
-        this.rows = res.data.data
+        this.rows = res.data.data.payments
       })
     },
     goToDetail(id) {

@@ -94,10 +94,24 @@ export default {
       user: "auth/getUser",
     }),
   },
-  methods: {
-    logOut() {
-      this.$store.dispatch("auth/logOut")
+  methods : {
+    setUserName(){
+      let user = this.$store.getters['user/getUserProfile'];
+      if (user) {
+        user = JSON.parse(user)
+        if(!this.empty(user.userName)){
+          this.isShowAvartar = false;
+          this.user = user;
+        }
+      }
     },
-  },
+    logout(){
+      this.$store
+        .dispatch('auth/logOut')
+    },
+    empty(str){
+      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
+    }
+  }
 }
 </script>
