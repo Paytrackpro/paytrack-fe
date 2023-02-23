@@ -6,11 +6,5 @@ export async function getUserInfo ({commit}) {
 };
 
 export async function updateUserProfile ({commit} , userData) {
-  api.put('/user/info', userData).then(function (res) {
-    Notify.create({
-      message: 'your information is updated',
-      color: "positive",
-      icon: "done",
-    })
-  })
+  return api.put('/user/info', userData)
 }
