@@ -225,6 +225,7 @@ export default {
   props: {
     payment: Object,
     user: Object,
+    token: String
   },
   watch: {
     payment: {
@@ -334,6 +335,7 @@ export default {
         payment.senderId = this.user.id
         payment.receiverId = this.partner.id
       }
+      payment.token = this.token
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"

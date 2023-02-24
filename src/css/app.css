@@ -2,8 +2,13 @@
 
 .event-txt {
   cursor: pointer;
+  text-decoration: none;
 }
 
 .event-txt:hover {
-  text-decoration: underline;
+  text-decoration: none;
+}
+
+.text-shadow {
+  color: #BCBCBC;
 }

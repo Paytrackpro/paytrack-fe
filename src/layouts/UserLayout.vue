@@ -40,7 +40,7 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="q-pa-md">
+      <q-page class="q-px-xl q-py-md">
         <router-view />
       </q-page>
     </q-page-container>
@@ -57,14 +57,24 @@ export default {
       menuList: [
         {
           icon: "home",
-          label: "Home",
+          label: "Dashboard",
           to: "/",
         },
         {
-          icon: "credit_card",
-          label: "Payment",
+          icon: "call_received",
+          label: "Get Pay",
           separator: false,
-          to: "/payment",
+          to: "/payment/get-pay",
+        },{
+          icon: "arrow_outward",
+          label: "Pay",
+          separator: false,
+          to: "/payment/pay",
+        },{
+          icon: "settings",
+          label: "Settings",
+          separator: false,
+          to: "/profile",
         },
       ],
     }

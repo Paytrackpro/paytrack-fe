@@ -7,6 +7,7 @@
   <payment-detail
     v-show="!loading && !isError && !editing"
     :payment="payment"
+    :token="token"
     :user="user"
     @edit="editing=true"
     @update="saved"
@@ -15,6 +16,7 @@
     v-if="editing"
     :payment="payment"
     :user="user"
+    :token="token"
     @saved="saved"
     @cancel="editing = false"
   />
@@ -48,13 +50,15 @@ export default {
       isForbidden: false,
       isNotfound: false,
       isUnknownError: false,
-      payment: {}
+      payment: {},
+      token: ""
     }
   },
   created() {
     this.$watch(
       () => this.$route.params,
       () => {
+        this.token = this.$route.params.token || ""
         this.fetchData()
       },
       // fetch the data when the view is created and the data is
@@ -64,7 +68,7 @@ export default {
   },
   methods: {
     fetchData() {
-      const token = this.$route.query.token || ""
+      const token = this.$route.params.token || ""
       this.loading = true
       this.$api.get(`/payment/${this.$route.params.id}?token=${token}`, )
         .then(res => {

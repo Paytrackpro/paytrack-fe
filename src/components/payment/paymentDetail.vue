@@ -189,18 +189,18 @@ export default {
   props: {
     payment: Object,
     user: Object,
+    token: String
   },
   methods: {
     goToList() {
       this.$router.push({ name: `${this.role}.payment.list` })
     },
     queryRate() {
-      const token = this.$route.query.token || ""
       const reqData = {
         id: this.payment.id,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
-        token,
+        token: this.token,
       }
       this.fetchingRate = true
       this.$api
@@ -231,7 +231,7 @@ export default {
       const reqData = {
         id: this.payment.id,
         txId: txId,
-        token: this.$route.query.token || "",
+        token: this.token,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress
       }
