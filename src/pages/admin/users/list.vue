@@ -5,17 +5,18 @@
       :data="rows"
       :columns="columns"
       row-key="name"
-      :pagination.sync="pagination"
-      hide-pagination
       flat
       bordered
+      :pagination.sync="pagination"
       :loading="loading"
+      :filter="KeySearch"
+      @request="onRequest"
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
-        <q-input outlined dense debounce="300" v-model="filter" placeholder="Search" >
+        <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search" >
           <template v-slot:prepend>
-            <q-icon name="search" @click="searching()"/>
+            <q-icon name="search" />
           </template>
         </q-input>
       </template>
@@ -25,33 +26,23 @@
         </q-td>
       </template>
     </q-table>
-    <div class="row justify-end q-mt-md">
-      <q-pagination v-model="pagination.currentPage" color="grey-8" :max="pagination.pages" size="md" />
-    </div>
   </div>
 </template>
 
 <script>
+import { pathParamsToPaging, pagingToPathParams, defaultPaging } from "src/helper/paging"
 import { PAYMENT_TYPES } from "../../../consts/paymentType"
 import { date } from "quasar"
 
 export default {
-  beforeRouteUpdate (to, from, next) {
-    this.getUserList();
-    next();
+  props: {
+    type: String,
   },
   data() {
     return {
-      count:1,
-      filter: null,
-      loading : false,
-      pagination: {
-        sortBy: "desc",
-        descending: false,
-        currentPage: 1,
-        rowsPerPage: 5,
-        pages: 0
-      },
+      loading: false,
+      KeySearch: '',
+      pagination: {...defaultPaging },
       columns: [
         {
           name: "userName",
@@ -94,90 +85,48 @@ export default {
         },
       ],
       rows: [],
-      orderby : '',
-      tableOptions: {
-        sortBy: 'userName',
-        descending: false,
-      },
     }
   },
   watch: {
-    filter : function(){
-      let param = {};
-      if(this.pagination.currentPage != 1){
-        param.page = this.pagination.currentPage;
+    $route: {
+      immediate: true,
+      handler(to) {
+        const filter = pathParamsToPaging(to, this.pagination)
+        filter.KeySearch = this.KeySearch
+        this.getUserList({
+          ...filter,
+          requestType: this.type
+        })
       }
-      if(!this.isEmpty(this.filter)){
-        param.KeySearch = this.filter;
-      }
-
-      this.$router.push({ query: param})
-    },
-    "pagination.currentPage" : function(){
-      let param = {};
-      if(this.pagination.currentPage != 1){
-        param.page = this.pagination.currentPage;
-      }
-      if(!this.isEmpty(this.filter)){
-        param.KeySearch = this.filter;
-      }
-      this.$router.push({ query: param})
     },
   },
-
   created: function(){
-    let param =  this.getParamUrl([
-      'page',
-      'KeySearch'
-    ]);
-    this.pagination.currentPage = (!this.isEmpty(param.page))? param.page : this.pagination.currentPage;
-    this.filter = (!this.isEmpty(param.KeySearch))? param.KeySearch :  this.filter;
     this.getUserList()
   },
   methods: {
-    async getUserList() {
+    async getUserList(f) {
       this.loading = true;
-      let newOrder = ''
-      if(!this.isEmpty(this.orderby)){
-        newOrder = this.orderby + ` ${this.pagination.sortBy}`
-      }
       this.$api.get('/admin/user/list',{
-        params: {
-          page: this.pagination.currentPage,
-          size: this.pagination.rowsPerPage,
-          KeySearch : this.filter,
-          order : newOrder
-        }
+        params: f
       }).then((res) => {
         this.rows = res.data.data.users;
-        this.pagination.pages = Math.ceil(res.data.data.count / this.pagination.rowsPerPage);
+        this.pagination.rowsNumber = res.data.data.count;
+        this.loading = false;
+      }).catch(err => {
+        this.loading = false
       });
-      this.loading = false;
     },
     goToDetail(id) {
       this.$router.push({ name: "admin.user.detail", params: { id } })
     },
-    getParamUrl(params){
-      let reuslt = {};
-      let urlParams = new URLSearchParams(window.location.search)
-      params.map(function(value){
-        if(urlParams.get(value)){
-          reuslt[value] = urlParams.get(value);
-        }
+    onRequest(props) {
+      const query = pagingToPathParams(props)
+      query.s = props.filter;
+      this.$router.push({
+        path: this.$router.fullPath,
+        query,
       })
-      return reuslt;
     },
-
-    getSortIcon() {
-      return (this.count % 2)? "arrow_downward" : "arrow_upward";
-    },
-    isEmpty(str){
-      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
-    },
-    sortBy(data){
-      this.orderby = data;
-      console.log("doctor")
-    }
   },
 }
 </script>
