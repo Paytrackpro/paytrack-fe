@@ -1,8 +1,8 @@
 <template>
   <q-card>
     <q-tabs>
-      <q-route-tab to="profile/settings" label="Settings" exact />
-      <q-route-tab to="profile" label="Profile" />
+      <q-route-tab to="/profile/settings" label="Settings" exact />
+      <q-route-tab to="/profile" label="Profile" />
     </q-tabs>
     <router-view />
   </q-card>
@@ -13,31 +13,35 @@ export default {
   name: "profile",
   components: {},
   data() {
-    let user = localStorage.getItem("user")
+    let user = localStorage.getItem("user");
     if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user)
+      user = JSON.parse(user);
     } else {
-      user = {}
+      user = {};
     }
     return {
-      user,
+      user:{},
       loading: false,
       editing: false,
       isForbidden: false,
       isNotfound: false,
       isUnknownError: false,
       payment: {},
-    }
+    };
   },
+  methods:{
+    async getDataApi(){
+      this.$api.get("/user/info").then((res) => {
+        this.user = res.data.data;
+      })
+    },
+  },
+  created : function(){
+    this.getDataApi();
+  }
 }
 </script>
 
+
 <style scoped>
-.profile-padding {
-  padding: 20px 50px;
-}
-.profile-title {
-  text-transform: uppercase;
-  font-weight: bold;
-}
 </style>

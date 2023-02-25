@@ -12,7 +12,7 @@
     @request="onRequest"
   >
     <template v-if="isUser" v-slot:top-right>
-      <q-btn outline color="secondary" label="Create payment" to="payment/create" />
+      <q-btn outline color="secondary" label="Create payment" to="/payment/create" />
     </template>
     <template v-slot:body-cell-online="props">
       <q-td :props="props">
@@ -23,23 +23,18 @@
 </template>
 
 <script>
-import {date} from "quasar";
-import {MDateFormat} from "src/consts/common";
-import {mapGetters} from "vuex";
-import role from "src/consts/role";
+import { pathParamsToPaging, pagingToPathParams, defaultPaging } from "src/helper/paging"
+import { date } from "quasar"
+import { MDateFormat } from "src/consts/common"
+import { mapGetters } from "vuex"
+import role from "src/consts/role"
 
 export default {
   name: "list",
   data() {
     return {
       loading: false,
-      pagination: {
-        sortBy: "",
-        descending: false,
-        page: 1,
-        rowsPerPage: 2,
-        rowsNumber: 0
-      },
+      pagination: { ...defaultPaging },
       columns: [
         {
           name: "receiverName",
@@ -92,12 +87,6 @@ export default {
     isUser() {
       return this.user.role === role.USER
     },
-    pagesNumber() {
-      return Math.ceil(this.rows.length / this.pagination.rowsPerPage)
-    },
-  },
-  created: function () {
-    //this.getPayments()
   },
   methods: {
     async getPayments(f) {
@@ -105,7 +94,6 @@ export default {
       this.$api.get("/payment/list", {
         params: f
       }).then((res) => {
-        console.log("got data")
         this.loading = false
         this.rows = res.data.data.payments
         this.pagination.rowsNumber = res.data.data.count
@@ -119,16 +107,10 @@ export default {
       }
     },
     onRequest(props) {
-      const p = props.pagination
-      console.log(p)
+      const query = pagingToPathParams(props)
       this.$router.push({
         path: this.$router.fullPath,
-        query: {
-          sortBy: p.sortBy,
-          desc: p.descending,
-          page: p.page,
-          rows: p.rowsPerPage
-        },
+        query,
       })
     }
   },
@@ -136,20 +118,11 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
-        console.log(to)
-        const filter = to.query
-        this.pagination.sortBy = filter.sortBy
-        this.pagination.descending = filter.desc === "true"
-        this.pagination.page= Number(filter.page) || 1
-        this.pagination.rowsPerPage= Number(filter.rows) || 2
-        this.pagination.rowsNumber= 0
-        const f = {
-          requestType: this.type,
-          page: Number(filter.page) || 1,
-          size: Number(filter.rows) || 2,
-          order: filter.desc === "true" ? `${filter.sortBy} desc` : filter.sortBy
-        }
-        this.getPayments(f)
+        const filter = pathParamsToPaging(to, this.pagination)
+        this.getPayments({
+          ...filter,
+          requestType: this.type
+        })
       }
     }
   }
