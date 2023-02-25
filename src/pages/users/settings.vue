@@ -10,7 +10,7 @@
           </q-card-section>
 
           <q-card-actions align="right">
-            <q-btn flat label="Confirm" color="primary" type="submit" />
+            <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
           </q-card-actions>
         </q-form>
       </q-card>
@@ -27,6 +27,7 @@ export default {
       dialog: false,
       qrImage: null,
       password: "",
+      loading: false,
     }
   },
   computed: {
@@ -46,6 +47,7 @@ export default {
   },
   methods: {
     login() {
+      this.loading = true
       this.$api
         .post("/auth/login", {
           username: this.user.userName,
@@ -53,6 +55,9 @@ export default {
         })
         .then((res) => {
           this.$router.push("settings/2fa")
+        })
+        .finally(() => {
+          this.loading = false
         })
     },
     async updateOtp(val) {

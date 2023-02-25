@@ -12,7 +12,7 @@
         </p>
 
         <q-input v-model="otp" placeholder="Code" dense outlined></q-input>
-        <q-btn type="submit">Verify</q-btn>
+        <q-btn type="submit" :loading="loading" :disable="loading">Verify</q-btn>
       </div>
     </q-card>
   </q-form>
@@ -26,6 +26,7 @@ export default {
       dialog: false,
       qrImage: null,
       otp: null,
+      loading: false,
     }
   },
   created() {
@@ -34,7 +35,7 @@ export default {
   computed: {
     ...mapGetters({
       user: "auth/getUser",
-      role: "auth/getRole"
+      role: "auth/getRole",
     }),
   },
   methods: {
@@ -44,11 +45,12 @@ export default {
       })
     },
     verifyOtp() {
+      this.loading = true
       this.$store
         .dispatch("auth/verifyOtp", {
           otp: this.otp,
           userId: `${this.user.id}`,
-          firstTime: true
+          firstTime: true,
         })
         .then(() => {
           this.$store.commit("auth/setUser", {
@@ -61,6 +63,9 @@ export default {
             icon: "check",
           })
           this.$router.push({ name: `${this.role}.settings` })
+        })
+        .finally(() => {
+          this.loading = false
         })
     },
   },
