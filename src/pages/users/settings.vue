@@ -1,7 +1,7 @@
 <template>
   <q-card flat>
     <q-toggle v-model="use2FA" color="green" label="Use two-factor authentication" />
-    <q-dialog v-model="dialog" @hide="use2FA = !use2FA">
+    <q-dialog v-model="dialog" no-backdrop-dismiss no-esc-dismiss>
       <q-card>
         <q-form @submit="login">
           <q-card-section>
@@ -10,12 +10,13 @@
           </q-card-section>
 
           <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" type="button" @click="hideDialog" />
             <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
           </q-card-actions>
         </q-form>
       </q-card>
     </q-dialog>
-    <q-dialog v-model="otpDialog" @hide="use2FA = !use2FA">
+    <q-dialog v-model="otpDialog" no-backdrop-dismiss no-esc-dismiss>
       <q-card>
         <q-form @submit="disableOtp">
           <q-card-section>
@@ -24,6 +25,7 @@
           </q-card-section>
 
           <q-card-actions align="right">
+            <q-btn flat label="Cancel" color="primary" type="button" @click="hideOtpDialog" />
             <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
           </q-card-actions>
         </q-form>
@@ -79,10 +81,19 @@ export default {
       await this.$store.dispatch("user/disableOtp", {
         otp: this.otp,
       })
+      this.otpDialog = false
       this.$store.commit("auth/setUser", {
         ...this.user,
         otp: false,
       })
+    },
+    hideDialog() {
+      this.use2FA = !this.use2FA
+      this.dialog = false
+    },
+    hideOtpDialog() {
+      this.use2FA = !this.use2FA
+      this.otpDialog = false
     },
   },
 }
