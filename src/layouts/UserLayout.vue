@@ -64,12 +64,12 @@ export default {
           icon: "call_received",
           label: "Get Pay",
           separator: false,
-          to: "/payment/get-pay",
+          to: "/get-pay",
         },{
           icon: "arrow_outward",
           label: "Pay",
           separator: false,
-          to: "/payment/pay",
+          to: "/pay",
         },{
           icon: "settings",
           label: "Settings",

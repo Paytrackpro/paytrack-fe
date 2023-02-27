@@ -17,30 +17,27 @@
               <div class="q-gutter-md row items-start">
                 <img class="home-img"
                   src="~assets/home_user_info.png"
-                  style="width:50%"
                 />
               </div>
             </div>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-12">
-            <p class="event-txt">
+            <router-link class="event-txt" to="/pay/create">
               <span class="text-info home-title-number">2</span> <span class="text-black"> Invite your</span> <span class="text-shadow"> recipients</span>
-            </p>
+            </router-link>
             <div class="q-gutter-md row items-start">
               <img class="home-img"
                    src="~assets/home_invite.png"
-                   style="width:50%"
               />
             </div>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-12">
-            <router-link class="event-txt" to="/payment/create">
+            <router-link class="event-txt" to="/get-pay/create">
               <span class="text-info home-title-number">3</span> <span class="text-shadow"> Create</span> <span class="text-black"> invoices</span>
             </router-link>
             <div class="q-gutter-md row items-start">
               <img class="home-img"
                    src="~assets/home_invoice.png"
-                   style="width:50%"
               />
             </div>
           </div>
@@ -73,6 +70,7 @@ export default {
   display: block;
   margin-left: auto;
   margin-right: auto;
+  width: 50%;
 }
 .home-title-number {
   border: 1px solid #BCBCBC;

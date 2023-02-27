@@ -50,23 +50,47 @@ const userRouters = [
     ],
   },
   {
-    path: "payment",
+    path: "pay",
     name: "user.payment.list",
-    component: () => import("pages/payments/layout"),
+    component: () => import("pages/payments/layout.vue"),
     meta: {
-      title: "Payment",
+      title: "Pay",
     },
     children: [
       {
-        path: "pay",
+        path: "/",
         name: "payment.pay",
         component: () => import("pages/payments/payPage.vue"),
         meta: {
           title: "Payment/ Pay",
         },
       } , {
-        path: "get-pay",
-        name: "payment.getPay",
+        path: "create",
+        name: "payment.create",
+        component: () => import("pages/payments/createPage.vue"),
+        meta: {
+          title: "Payment Create",
+        },
+      } , {
+        path: ":id(\\d+)",
+        name: "payment.detail",
+        component: () => import("pages/payments/detailPage.vue"),
+        meta: {
+          title: "Payment",
+        },
+      }
+    ]
+  } , {
+    path: "get-pay",
+    name: "user.payment.list",
+    component: () => import("pages/payments/layout.vue"),
+    meta: {
+      title: "Get Pay",
+    },
+    children: [
+      {
+        path: "/",
+        name: "payment.get-pay",
         component: () => import("pages/payments/getPayPage.vue"),
         meta: {
           title: "Payment/ Get Pay",
@@ -78,16 +102,16 @@ const userRouters = [
         meta: {
           title: "Payment Create",
         },
-      }, {
+      } , {
         path: ":id(\\d+)",
         name: "payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
-          title: "Payment",
+          title: "Payment detail",
         },
       }
     ]
-  },
+  }
 ]
 
 export { userRouters }

@@ -7,6 +7,7 @@
   <payment-detail
     v-show="!loading && !isError && !editing"
     :payment="payment"
+    :payment-type="paymentType"
     :token="token"
     :user="user"
     @edit="editing=true"
@@ -15,6 +16,7 @@
   <payment-form
     v-if="editing"
     :payment="payment"
+    :payment-type="paymentType"
     :user="user"
     :token="token"
     @saved="saved"
@@ -33,6 +35,7 @@
 <script>
 import {PaymentForm, PaymentDetail} from "components/payment";
 import MDate from "components/common/mDate";
+import {PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 export default {
   name: "detailPaymentPage",
   components: {MDate, PaymentForm, PaymentDetail},
@@ -51,7 +54,8 @@ export default {
       isNotfound: false,
       isUnknownError: false,
       payment: {},
-      token: ""
+      token: "",
+      paymentType: PAYMENT_OBJECT_REQUEST
     }
   },
   created() {
@@ -110,6 +114,28 @@ export default {
         return "Payment not found"
       }
       return "Unknown error. Please contact the admin"
+    }
+  },
+  watch: {
+    payment: {
+      immediate: true,
+      handler(to) {
+        if (this.user && this.user.id) {
+          const userId = this.user.id
+          if (userId === to.senderId) {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          } else {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          }
+        } else {
+          if (to.creatorId === to.senderId) {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          }
+          if (to.creatorId === to.receiverId) {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          }
+        }
+      }
     }
   }
 }

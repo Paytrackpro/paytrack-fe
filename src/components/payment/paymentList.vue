@@ -12,7 +12,7 @@
     @request="onRequest"
   >
     <template v-if="isUser" v-slot:top-right>
-      <q-btn outline color="secondary" label="Create payment" to="/payment/create" />
+      <q-btn outline color="secondary" label="Create payment" :to="linkToCreate" />
     </template>
     <template v-slot:body-cell-online="props">
       <q-td :props="props">
@@ -28,13 +28,16 @@ import { date } from "quasar"
 import { MDateFormat } from "src/consts/common"
 import { mapGetters } from "vuex"
 import role from "src/consts/role"
+import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 
 export default {
   name: "list",
   data() {
     return {
       loading: false,
-      pagination: { ...defaultPaging },
+      pagination: {
+        ...defaultPaging,
+      },
       columns: [
         {
           name: "receiverName",
@@ -48,14 +51,14 @@ export default {
             return row.externalEmail
           },
           format: (val) => `${val}`,
-          sortable: true,
         },
         { name: "senderName", align: "center", label: "sender", field: (row) => {
             if (row.creatorId === row.senderId || row.contactMethod === "internal") {
               return row.senderName
             }
             return row.externalEmail
-          }, sortable: true },
+          }
+        },
         { name: "status", align: "center", label: "status", field: "status", sortable: true },
         {
           name: "amount",
@@ -71,6 +74,7 @@ export default {
           align: "center",
           label: "Created At",
           field: "createdAt",
+          sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
@@ -87,6 +91,12 @@ export default {
     isUser() {
       return this.user.role === role.USER
     },
+    linkToCreate() {
+      if (this.type === PAYMENT_OBJECT_REQUEST) {
+        return "/get-pay/create"
+      }
+      return "/pay/create"
+    }
   },
   methods: {
     async getPayments(f) {
@@ -103,7 +113,8 @@ export default {
     },
     goToDetail(id) {
       if (this.isUser) {
-        this.$router.push({ name: `payment.detail`, params: { id } })
+        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-pay" : "pay"
+        this.$router.push({ path: `/${path}/${id}` })
       }
     },
     onRequest(props) {
