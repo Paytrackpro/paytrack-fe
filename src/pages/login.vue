@@ -89,6 +89,11 @@ export default {
           password: this.password,
         })
         .then((res) => {
+          if (!this.user) {
+            this.$router.push({ name: "OTP" })
+            return;
+          }
+
           if (this.user.role === ROLE.ADMIN) {
             this.$router.push({ name: "Home" })
           } else {

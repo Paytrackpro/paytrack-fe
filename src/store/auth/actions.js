@@ -4,11 +4,15 @@ export default {
   async login({ commit }, user) {
     return api.post("/auth/login", user).then(function (res) {
       const responseData = res.data.data
-      localStorage.setItem("user", JSON.stringify(responseData.userInfo))
+      if (responseData.otp) {
+        localStorage.setItem("tempUser", JSON.stringify(responseData))
+        return
+      }
+
       localStorage.setItem("token", responseData.token)
-      commit("setUser", res.data.data.userInfo)
+      commit("setUser", responseData.userInfo)
       commit("setAuthenticated", true)
-      commit('setUserProfile', JSON.stringify(responseData.userInfo))
+      commit("setUserProfile", JSON.stringify(responseData.userInfo))
     })
   },
 
@@ -17,10 +21,28 @@ export default {
   },
 
   async logOut({ commit }, user) {
-    localStorage.clear()
-    commit("setUser", '')
+    commit("setUser", "")
     commit("setAuthenticated", false)
     commit('setUserProfile', '')
     this.$router.push({ name: "Login" })
+    localStorage.clear()
+  },
+
+  async verifyOtp({ commit }, payload) {
+    return api
+      .post("/auth/verify-otp", {
+        otp: payload.otp,
+        userId: payload.userId,
+        firstTime: payload.firstTime
+      })
+      .then((res) => {
+        localStorage.removeItem("tempUser")
+
+        const responseData = res.data.data
+        localStorage.setItem("token", responseData.token)
+        commit("setUser",responseData.userInfo)
+        commit("setAuthenticated", true)
+        commit("setUserProfile", JSON.stringify(responseData.userInfo))
+      })
   },
 }

@@ -34,20 +34,46 @@ const routes = [
         },
       },
       {
-        path: "profile/edit",
+        path: "profile/",
         name: "admin.profile",
-        component: () => import("pages/users/profile.vue"),
+        component: () => import("src/pages/users/profile.vue"),
         meta: {
-          title: "profile",
+          title: "Profile",
         },
-      },
-      {
-        path: "profile",
-        name: "admin.profile.edit",
-        component: () => import("pages/users/profileInfo.vue"),
-        meta: {
-          title: "profile",
-        },
+        children: [
+          {
+            path: "",
+            name: "admin.profile.info",
+            component: () => import("src/pages/users/info.vue"),
+            meta: {
+              title: "Profile Info",
+            },
+          },
+          {
+            path: "edit",
+            name: "admin.profile.edit",
+            component: () => import("src/pages/users/edit.vue"),
+            meta: {
+              title: "Profile Edit",
+            },
+          },
+          {
+            path: "settings",
+            name: "admin.settings",
+            component: () => import("pages/users/settings.vue"),
+            meta: {
+              title: "Settings",
+            },
+          },
+          {
+            path: "settings/2fa",
+            name: "admin.settings.2fa",
+            component: () => import("pages/users/2fa.vue"),
+            meta: {
+              title: "2FA",
+            },
+          },
+        ],
       },
       {
         path: "payment",
@@ -76,20 +102,46 @@ const routes = [
         },
       },
       {
-        path: "profile",
+        path: "profile/",
         name: "user.profile",
-        component: () => import("pages/users/profileInfo.vue"),
+        component: () => import("src/pages/users/profile.vue"),
         meta: {
           title: "Profile",
         },
-      },
-      {
-        path: "profile/edit",
-        name: "user.profile.edit",
-        component: () => import("pages/users/profile.vue"),
-        meta: {
-          title: "Profile Edit",
-        },
+        children: [
+          {
+            path: "",
+            name: "user.profile.info",
+            component: () => import("src/pages/users/info.vue"),
+            meta: {
+              title: "Profile Info",
+            },
+          },
+          {
+            path: "edit",
+            name: "user.profile.edit",
+            component: () => import("src/pages/users/edit.vue"),
+            meta: {
+              title: "Profile Edit",
+            },
+          },
+          {
+            path: "settings",
+            name: "user.settings",
+            component: () => import("pages/users/settings.vue"),
+            meta: {
+              title: "Settings",
+            },
+          },
+          {
+            path: "settings/2fa",
+            name: "user.settings.2fa",
+            component: () => import("pages/users/2fa.vue"),
+            meta: {
+              title: "2FA",
+            },
+          },
+        ],
       },
       {
         path: "payment",
@@ -137,6 +189,11 @@ const routes = [
     path: "/register",
     name: "Register",
     component: () => import("pages/register.vue"),
+  },
+  {
+    path: "/otp",
+    name: "OTP",
+    component: () => import("pages/otp.vue"),
   },
 ]
 
