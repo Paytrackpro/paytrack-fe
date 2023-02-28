@@ -348,9 +348,6 @@ export default {
         url = `/payment/${payment.id}`
         successNotify = "Payment updated"
       }
-      /*console.log(payment)
-      this.submitting = false
-      return;*/
       this.$api
         .post(url, payment)
         .then((res) => {
