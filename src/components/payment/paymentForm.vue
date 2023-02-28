@@ -168,12 +168,24 @@
       </div>
     </div>
     <div class="row justify-end">
-      <q-btn label="Mark as draft" type="button" color="primary" @click="submit(true)" :disable="handling">
-        <q-tooltip>
+      <q-btn
+        :label="payment.status === '' ? 'Mark as draft' : 'Update'"
+        type="button"
+        color="primary"
+        @click="submit(true)"
+        :disable="handling"
+      >
+        <q-tooltip v-if="payment.status === ''">
           'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
-      <q-btn label="Send" type="submit" color="primary" :disable="handling">
+      <q-btn
+        v-if="payment.status === 'created' || payment.status === ''"
+        label="Send"
+        type="submit"
+        color="primary"
+        :disable="handling"
+      >
         <q-tooltip>
           'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>

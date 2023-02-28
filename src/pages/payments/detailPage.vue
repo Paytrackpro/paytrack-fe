@@ -1,7 +1,7 @@
 <template>
 <q-card flat bordered class="q-pa-md">
   <q-card-section>
-    <div class="text-h6">Payment request</div>
+    <div class="text-h6">{{ mainTitle }}</div>
   </q-card-section>
   <q-separator inset />
   <payment-detail
@@ -114,6 +114,13 @@ export default {
         return "Payment not found"
       }
       return "Unknown error. Please contact the admin"
+    },
+    mainTitle() {
+      let status = this.payment.status
+      if (this.payment.status === "created") {
+        status = "draft"
+      }
+      return `Payment request (${status})`
     }
   },
   watch: {
