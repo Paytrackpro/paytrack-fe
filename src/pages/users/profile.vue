@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "profile",
+  name: "userProfile",
   components: {},
   data() {
     let user = localStorage.getItem("user");

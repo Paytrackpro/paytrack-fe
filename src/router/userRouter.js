@@ -8,7 +8,7 @@ const userRouters = [
     },
   },
   {
-    path: "profile/",
+    path: "/profile/",
     name: "user.profile",
     component: () => import("src/pages/users/profile.vue"),
     meta: {
@@ -50,38 +50,38 @@ const userRouters = [
     ],
   },
   {
-    path: "pay",
-    name: "user.payment.list",
+    path: "/pay",
+    name: "user.payment.pay",
     component: () => import("pages/payments/layout.vue"),
     meta: {
       title: "Pay",
     },
     children: [
       {
-        path: "/",
+        path: "",
         name: "payment.pay",
         component: () => import("pages/payments/payPage.vue"),
         meta: {
           title: "Payment/ Pay",
         },
-      } , {
+      }, {
         path: "create",
-        name: "payment.create",
+        name: "pay.payment.create",
         component: () => import("pages/payments/createPage.vue"),
         meta: {
           title: "Payment Create",
         },
-      } , {
+      }, {
         path: ":id(\\d+)",
-        name: "payment.detail",
+        name: "pay.payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
           title: "Payment",
         },
       }
     ]
-  } , {
-    path: "get-pay",
+  }, {
+    path: "/get-pay",
     name: "user.payment.list",
     component: () => import("pages/payments/layout.vue"),
     meta: {
@@ -89,22 +89,22 @@ const userRouters = [
     },
     children: [
       {
-        path: "/",
+        path: "",
         name: "payment.get-pay",
         component: () => import("pages/payments/getPayPage.vue"),
         meta: {
           title: "Payment/ Get Pay",
         },
-      } , {
+      }, {
         path: "create",
-        name: "payment.create",
+        name: "get-pay.payment.create",
         component: () => import("pages/payments/createPage.vue"),
         meta: {
           title: "Payment Create",
         },
-      } , {
+      }, {
         path: ":id(\\d+)",
-        name: "payment.detail",
+        name: "get-pay.payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
           title: "Payment detail",

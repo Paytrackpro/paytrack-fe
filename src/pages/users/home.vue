@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-12">
       <div class="q-py-lg">
-        <span class="text-info text-h3"><{{user.displayName || user.userName}}></span>
+        <span class="text-info text-h3">&lt;{{user.displayName || user.userName}}></span>
       </div>
     </div>
     <div class="col-12">
@@ -33,6 +33,7 @@
 <script>
 import { mapGetters } from 'vuex'
 export default {
+  name: "userHome",
   data() {
     return {}
   },

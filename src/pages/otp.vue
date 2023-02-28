@@ -42,6 +42,7 @@
 import role from 'src/consts/role'
 import { mapGetters } from "vuex"
 export default {
+  name: "pageOpt",
   data() {
     return {
       otp: "",

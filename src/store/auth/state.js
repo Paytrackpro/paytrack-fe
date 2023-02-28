@@ -1,19 +1,19 @@
-import jwt_decode from "jwt-decode"
+import jwt_decode from "jwt-decode";
 
 function checkValidToken() {
   try {
-    const token = localStorage.getItem("token")
-    const decoded = jwt_decode(token)
+    const token = localStorage.getItem("token");
+    const decoded = jwt_decode(token);
 
     if (Date.now() >= decoded.Expire * 1000) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       return false;
     }
 
-    return true
+    return true;
   } catch (e) {
-    return false
+    return false;
   }
 }
 
@@ -21,12 +21,12 @@ function setUser() {
   try {
     return JSON.parse(localStorage.getItem("user"));
   } catch (e) {
-    return null
+    return null;
   }
 }
 
 export default {
   authenticated: checkValidToken(),
   user: setUser(),
-  role: null
-}
+  role: null,
+};

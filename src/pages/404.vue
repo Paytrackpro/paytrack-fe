@@ -2,7 +2,11 @@
   <h1>404</h1>
 </template>
 
-<script></script>
+<script>
+export default {
+  name: "pageNotFound",
+};
+</script>
 
 <style lang="scss">
 .link {

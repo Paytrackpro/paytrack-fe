@@ -9,25 +9,26 @@
 </template>
 
 <script>
-import ROLE from "src/consts/role"
-import { mapGetters } from "vuex"
-import AdminLayout from "./AdminLayout.vue"
-import UserLayout from "./UserLayout.vue"
+import ROLE from "src/consts/role";
+import { mapGetters } from "vuex";
+import AdminLayout from "./AdminLayout.vue";
+import UserLayout from "./UserLayout.vue";
+
 export default {
   components: { AdminLayout, UserLayout },
   data() {
-    return {}
+    return {};
   },
   computed: {
     ...mapGetters({
       user: "auth/getUser",
     }),
     isAdmin() {
-      return this.user && this.user.role === ROLE.ADMIN
+      return this.user && this.user.role === ROLE.ADMIN;
     },
     isUser() {
-      return this.user && this.user.role === ROLE.USER
+      return this.user && this.user.role === ROLE.USER;
     },
-  }
-}
+  },
+};
 </script>

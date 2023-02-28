@@ -26,10 +26,10 @@
     <div class="text-h6">{{ errorText }}</div>
   </q-card-section>
 
-  <q-inner-loading :showing="loading">
-    <q-spinner-gears size="50px" color="primary" class="q-mt-lg"/>
-  </q-inner-loading>
-</q-card>
+    <q-inner-loading :showing="loading">
+      <q-spinner-gears size="50px" color="primary" class="q-mt-lg" />
+    </q-inner-loading>
+  </q-card>
 </template>
 
 <script>
@@ -38,13 +38,13 @@ import MDate from "components/common/mDate";
 import {PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 export default {
   name: "detailPaymentPage",
-  components: {MDate, PaymentForm, PaymentDetail},
+  components: { PaymentForm, PaymentDetail },
   data() {
-    let user = localStorage.getItem("user")
-    if (typeof(user) == "string" && user.length > 0) {
-      user = JSON.parse(user)
+    let user = localStorage.getItem("user");
+    if (typeof user == "string" && user.length > 0) {
+      user = JSON.parse(user);
     } else {
-      user = {}
+      user = {};
     }
     return {
       user,
@@ -59,16 +59,8 @@ export default {
     }
   },
   created() {
-    this.$watch(
-      () => this.$route.params,
-      () => {
-        this.token = this.$route.params.token || ""
-        this.fetchData()
-      },
-      // fetch the data when the view is created and the data is
-      // already being observed
-      { immediate: true }
-    )
+    this.token = this.$route.params.token || "";
+    this.fetchData();
   },
   methods: {
     fetchData() {
@@ -78,40 +70,40 @@ export default {
         .then(res => {
           this.loading = false
           if (res.data.success) {
-            this.payment = res.data.data
+            this.payment = res.data.data;
           } else {
             // handle error
           }
         })
-        .catch(err => {
-          this.loading = false
+        .catch((err) => {
+          this.loading = false;
           if (err.response) {
             switch (err.response.status) {
               case 403:
-                this.isForbidden = true
-                return
+                this.isForbidden = true;
+                return;
               case 404:
-                this.isNotfound = true
-                return
+                this.isNotfound = true;
+                return;
             }
-            this.isUnknownError = true
+            this.isUnknownError = true;
           }
-        })
+        });
     },
     saved(data) {
-      this.payment = data
-    }
+      this.payment = data;
+    },
   },
   computed: {
     isError: function () {
-      return this.isForbidden || this.isNotfound || this.isUnknownError
+      return this.isForbidden || this.isNotfound || this.isUnknownError;
     },
     errorText: function () {
       if (this.isForbidden) {
-        return "You do not have access right to this asset"
+        return "You do not have access right to this asset";
       }
       if (this.isNotfound) {
-        return "Payment not found"
+        return "Payment not found";
       }
       return "Unknown error. Please contact the admin"
     },
@@ -148,6 +140,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
