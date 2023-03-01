@@ -43,20 +43,20 @@
 </template>
 
 <script>
-import ROLE from "src/consts/role";
-import { defineComponent } from "vue";
+import ROLE from "src/consts/role"
+import { defineComponent } from "vue"
 import PaymentSetting from "components/payment/paymentSetting"
-export default defineComponent ({
+export default defineComponent({
   name: "ProfileInfo",
   components: {
-    PaymentSetting
+    PaymentSetting,
   },
   data() {
-    let user = localStorage.getItem("user");
+    let user = localStorage.getItem("user")
     if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user);
+      user = JSON.parse(user)
     } else {
-      user = {};
+      user = {}
     }
     return {
       user: {},
@@ -66,27 +66,19 @@ export default defineComponent ({
       isNotfound: false,
       isUnknownError: false,
       payment: {},
-    };
+    }
   },
   methods: {
     async getDataApi() {
       this.$api.get("/user/info").then((res) => {
-        this.user = res.data.data;
-        console.log(this.user)
+        this.user = res.data.data
       })
-    },
-    redirectUrl(){
-      if(this.user.role === ROLE.ADMIN){
-        this.$router.push("/admin/profile/edit")
-      }else{
-        this.$router.push("/profile/edit")
-      }
     },
   },
   created: function () {
-    this.getDataApi();
+    this.getDataApi()
   },
-});
+})
 </script>
 
 <style scoped>
@@ -96,5 +88,5 @@ export default defineComponent ({
 .profile-title {
   text-transform: uppercase;
   font-weight: bold;
- }
+}
 </style>

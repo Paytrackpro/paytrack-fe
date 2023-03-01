@@ -156,7 +156,7 @@ const routes = [
   },
   {
     path: "/",
-    component: () => import("src/layouts/MainLayout.vue"),
+    component: () => import("src/layouts/PublicLayout.vue"),
     children: [
       {
         path: "/payment/:id(\\d+)/:token",
