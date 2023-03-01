@@ -161,7 +161,7 @@
         @click="processPayment"
         class="q-mr-sm"
       />
-      <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="$emit('edit')" />
+      <q-btn v-if="editable && !processing" label="Edit" type="button" color="primary" @click="$emit('edit')" />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="goToList" />
     </div>
   </q-form>
