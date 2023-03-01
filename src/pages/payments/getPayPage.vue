@@ -1,5 +1,5 @@
 <template>
-  <payment-list type="request"/>
+  <payment-list type="request" label="Get pay"/>
 </template>
 
 <script>

@@ -10,36 +10,19 @@
       <q-card class="q-pa-md q-mt-lg home-card">
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-12">
-            <div>
-              <router-link class="event-txt" to="/profile">
-                <span class="text-info home-title-number">1</span> <span class="text-black"> Setup your</span> <span class="text-shadow"> profile</span>
-              </router-link>
-              <div class="q-gutter-md row items-start">
-                <img class="home-img"
-                  src="~assets/home_user_info.png"
-                />
-              </div>
-            </div>
+            <router-link class="event-txt" to="/profile">
+              <span class="text-info home-title-number">1</span> <span class="text-black"> Setup your</span> <span class="text-shadow"> profile</span>
+            </router-link>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-12">
             <router-link class="event-txt" to="/pay/create">
               <span class="text-info home-title-number">2</span> <span class="text-black"> Invite your</span> <span class="text-shadow"> recipients</span>
             </router-link>
-            <div class="q-gutter-md row items-start">
-              <img class="home-img"
-                   src="~assets/home_invite.png"
-              />
-            </div>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-12">
             <router-link class="event-txt" to="/get-pay/create">
               <span class="text-info home-title-number">3</span> <span class="text-shadow"> Create</span> <span class="text-black"> invoices</span>
             </router-link>
-            <div class="q-gutter-md row items-start">
-              <img class="home-img"
-                   src="~assets/home_invoice.png"
-              />
-            </div>
           </div>
         </div>
       </q-card>

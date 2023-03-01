@@ -1,6 +1,6 @@
 <template>
   <q-table
-    title="Payments"
+    :title="label || 'Payments'"
     :loading="loading"
     :data="rows"
     :columns="columns"
@@ -11,9 +11,6 @@
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
-    <template v-if="isUser" v-slot:top-right>
-      <q-btn outline color="secondary" label="Create payment" :to="linkToCreate" />
-    </template>
     <template v-slot:body-cell-online="props">
       <q-td :props="props">
         <q-badge rounded :color="props.value ? 'green' : 'grey'" />
@@ -83,6 +80,7 @@ export default {
   },
   props: {
     type: String,
+    label: String,
   },
   computed: {
     ...mapGetters({
@@ -90,12 +88,6 @@ export default {
     }),
     isUser() {
       return this.user.role === role.USER
-    },
-    linkToCreate() {
-      if (this.type === PAYMENT_OBJECT_REQUEST) {
-        return "/get-pay/create"
-      }
-      return "/pay/create"
     }
   },
   methods: {
