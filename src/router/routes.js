@@ -1,4 +1,5 @@
 import ROLE from "../consts/role"
+import { userRouters } from "src/router/userRouter"
 
 const routes = [
   {
@@ -92,81 +93,14 @@ const routes = [
       requiresAuth: true,
       roles: [ROLE.USER],
     },
-    children: [
-      {
-        path: "",
-        name: "user.home",
-        component: () => import("src/pages/users/home.vue"),
-        meta: {
-          title: "Home",
-        },
-      },
-      {
-        path: "profile/",
-        name: "user.profile",
-        component: () => import("src/pages/users/profile.vue"),
-        meta: {
-          title: "Profile",
-        },
-        children: [
-          {
-            path: "",
-            name: "user.profile.info",
-            component: () => import("src/pages/users/info.vue"),
-            meta: {
-              title: "Profile Info",
-            },
-          },
-          {
-            path: "edit",
-            name: "user.profile.edit",
-            component: () => import("src/pages/users/edit.vue"),
-            meta: {
-              title: "Profile Edit",
-            },
-          },
-          {
-            path: "settings",
-            name: "user.settings",
-            component: () => import("pages/users/settings.vue"),
-            meta: {
-              title: "Settings",
-            },
-          },
-          {
-            path: "settings/2fa",
-            name: "user.settings.2fa",
-            component: () => import("pages/users/2fa.vue"),
-            meta: {
-              title: "2FA",
-            },
-          },
-        ],
-      },
-      {
-        path: "payment",
-        name: "user.payment.list",
-        component: () => import("pages/payments/listPage.vue"),
-        meta: {
-          title: "Payment List",
-        },
-      },
-      {
-        path: "payment/create",
-        name: "payment.create",
-        component: () => import("pages/payments/createPage.vue"),
-        meta: {
-          title: "Payment Create",
-        },
-      },
-    ],
+    children: userRouters,
   },
   {
     path: "/",
     component: () => import("src/layouts/MainLayout.vue"),
     children: [
       {
-        path: "/payment/:id(\\d+)",
+        path: "/payment/:id(\\d+)/:token",
         name: "payment.detail",
         component: () => import("pages/payments/detailPage.vue"),
         meta: {
@@ -194,7 +128,10 @@ const routes = [
     path: "/otp",
     name: "OTP",
     component: () => import("pages/otp.vue"),
-  },
+  }, {
+    path: "*",
+    component: () => import("pages/404.vue"),
+  }
 ]
 
 export default routes
