@@ -101,8 +101,12 @@ export default defineComponent({
       this.$store.dispatch("user/updateUserProfile", userData).then(res => {
         this.redirectUrl()
       }).catch(err => {
+        let msg = "Error"
+        if (err.response && err.response.status === 400) {
+          msg = err.response.data.message
+        }
         this.$q.notify({
-          message: "Error",
+          message: msg,
           color: "negative",
           icon: "alert",
         })
