@@ -57,7 +57,7 @@ export default {
   },
   created() {
     if (!this.tempUser) {
-      this.$router.push({ name: 'Login' })
+      this.$router.push({ name: 'login' })
     }
   },
   methods: {
@@ -68,11 +68,7 @@ export default {
           userId: `${this.tempUser.userId}`,
         })
         .then(() => {
-          if (this.user.role === role.ADMIN) {
-            this.$router.push({ name: "Home" })
-          } else {
-            this.$router.push({ name: "user.home" })
-          }
+          this.$router.push({ name: "homse" })
         })
     },
   },

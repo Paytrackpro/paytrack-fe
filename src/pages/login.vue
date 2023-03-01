@@ -116,16 +116,11 @@ export default {
         })
         .then((res) => {
           if (!this.user) {
-            this.$router.push({ name: "OTP" })
+            this.$router.push({ name: "otp" })
             return;
           }
 
-          if (this.user.role === ROLE.ADMIN) {
-            this.$router.push({ name: "Home" });
-          }
-          else {
-            this.$router.push({ name: "user.home" });
-          }
+          this.$router.push({ name: "home" })
         })
         .catch((error) => {
           this.error = error.response

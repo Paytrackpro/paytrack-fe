@@ -164,8 +164,8 @@ export default {
               "Your account was registered. You will now be redirected to login page.",
             color: "positive",
             icon: "check",
-          });
-          this.$router.push({ name: "Login" });
+          })
+          this.$router.push({ name: "login" })
         })
         .catch((error) => {
           this.error = error.response
