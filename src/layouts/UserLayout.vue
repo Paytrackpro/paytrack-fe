@@ -74,7 +74,7 @@ export default {
           icon: "settings",
           label: "Settings",
           separator: false,
-          to: "/profile",
+          to: "/profile/settings",
         },
       ],
     }
