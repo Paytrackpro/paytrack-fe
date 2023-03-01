@@ -45,6 +45,7 @@ export default {
       user: user,
       payment: {
         contactMethod: "internal",
+        status: "",
         receiverId: 0,
         receiverName: "",
         creatorId: user.id,
@@ -78,8 +79,7 @@ export default {
   },
   methods: {
     cancel() {
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
-      this.$router.push({ path: `/${path}` })
+      this.$router.push({ path: `/` })
     },
     saved(data) {
       const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
