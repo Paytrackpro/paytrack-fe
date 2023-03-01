@@ -1,7 +1,7 @@
 <template>
   <q-card>
     <q-tabs>
-      <q-route-tab to="/profile/settings" label="Settings" exact />
+      <q-route-tab to="/profile/settings" label="Settings" />
       <q-route-tab to="/profile" label="Profile" />
     </q-tabs>
     <router-view />
