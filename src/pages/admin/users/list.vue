@@ -118,7 +118,7 @@ export default {
       });
     },
     goToDetail(id) {
-      this.$router.push({ name: "admin.user.detail", params: { id } });
+      this.$router.push({ name: "user.detail", params: { id } })
     },
     onRequest(props) {
       const query = pagingToPathParams(props)
