@@ -1,10 +1,10 @@
 <template>
   <q-card flat bordered class="q-pa-md">
-    <q-card-section>
-      <div class="text-h6 profile-title">User Profile</div>
-    </q-card-section>
-    <q-separator inset />
     <div class="row q-mb-md q-col-gutter-md profile-padding">
+      <div class="col-12">
+        <div class="text-h6 profile-title">User Profile</div>
+        <q-separator />
+      </div>
       <div class="col-4">
         <q-field label="User name" stack-label>
           <template v-slot:control>
@@ -32,27 +32,8 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
-        <q-field label="Default Payment Type" stack-label>
-          <template v-slot:control>
-            <div
-              class="self-center full-width no-outline"
-              style="text-transform: uppercase"
-              tabindex="0"
-            >
-              {{ user.paymentType }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-4">
-        <q-field label="Default Payment Address" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ user.paymentAddress }}
-            </div>
-          </template>
-        </q-field>
+      <div class="col-12">
+        <payment-setting v-model="user.paymentSettings" readonly label="Payment settings"></payment-setting>
       </div>
     </div>
     <div class="text-right">
@@ -62,9 +43,14 @@
 </template>
 
 <script>
-export default {
-  name: "profile",
-  components: {},
+import ROLE from "src/consts/role"
+import { defineComponent } from "vue";
+import PaymentSetting from "components/payment/paymentSetting"
+export default defineComponent ({
+  name: "ProfileInfo",
+  components: {
+    PaymentSetting
+  },
   data() {
     let user = localStorage.getItem("user");
     if (typeof user == "string" && user.length > 0) {
@@ -86,13 +72,21 @@ export default {
     async getDataApi(){
       this.$api.get("/user/info").then((res) => {
         this.user = res.data.data;
+        console.log(this.user)
       })
     },
+    redirectUrl(){
+      if(this.user.role === ROLE.ADMIN){
+        this.$router.push("/admin/profile/edit")
+      }else{
+        this.$router.push("/profile/edit")
+      }
+    }
   },
   created : function(){
     this.getDataApi();
   }
-}
+})
 </script>
 
 <style scoped>
@@ -102,9 +96,5 @@ export default {
 .profile-title {
   text-transform: uppercase;
   font-weight: bold;
- }
- .text-size{
-  font-size: 12px;
-  color: #ababab;
  }
 </style>

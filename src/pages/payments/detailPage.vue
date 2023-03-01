@@ -1,12 +1,14 @@
 <template>
 <q-card flat bordered class="q-pa-md">
   <q-card-section>
-    <div class="text-h6">Payment request</div>
+    <div class="text-h6">{{ mainTitle }}</div>
   </q-card-section>
   <q-separator inset />
   <payment-detail
     v-show="!loading && !isError && !editing"
     :payment="payment"
+    :payment-type="paymentType"
+    :token="token"
     :user="user"
     @edit="editing=true"
     @update="saved"
@@ -14,7 +16,9 @@
   <payment-form
     v-if="editing"
     :payment="payment"
+    :payment-type="paymentType"
     :user="user"
+    :token="token"
     @saved="saved"
     @cancel="editing = false"
   />
@@ -31,6 +35,7 @@
 <script>
 import {PaymentForm, PaymentDetail} from "components/payment";
 import MDate from "components/common/mDate";
+import {PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 export default {
   name: "detailPaymentPage",
   components: {MDate, PaymentForm, PaymentDetail},
@@ -48,13 +53,16 @@ export default {
       isForbidden: false,
       isNotfound: false,
       isUnknownError: false,
-      payment: {}
+      payment: {},
+      token: "",
+      paymentType: PAYMENT_OBJECT_REQUEST
     }
   },
   created() {
     this.$watch(
       () => this.$route.params,
       () => {
+        this.token = this.$route.params.token || ""
         this.fetchData()
       },
       // fetch the data when the view is created and the data is
@@ -64,7 +72,7 @@ export default {
   },
   methods: {
     fetchData() {
-      const token = this.$route.query.token || ""
+      const token = this.$route.params.token || ""
       this.loading = true
       this.$api.get(`/payment/${this.$route.params.id}?token=${token}`, )
         .then(res => {
@@ -106,6 +114,35 @@ export default {
         return "Payment not found"
       }
       return "Unknown error. Please contact the admin"
+    },
+    mainTitle() {
+      let status = this.payment.status
+      if (this.payment.status === "created") {
+        status = "draft"
+      }
+      return `Payment request (${status})`
+    }
+  },
+  watch: {
+    payment: {
+      immediate: true,
+      handler(to) {
+        if (this.user && this.user.id) {
+          const userId = this.user.id
+          if (userId === to.senderId) {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          } else {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          }
+        } else {
+          if (to.creatorId === to.senderId) {
+            this.paymentType = PAYMENT_OBJECT_REQUEST
+          }
+          if (to.creatorId === to.receiverId) {
+            this.paymentType = PAYMENT_OBJECT_REMINDER
+          }
+        }
+      }
     }
   }
 }

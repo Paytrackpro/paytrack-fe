@@ -1,11 +1,6 @@
 <template>
   <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-3">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Do you want to?</p>
-        <q-radio v-model="paymentType" val="request" label="Request" :disable="user.id !== payment.creatorId"/>
-        <q-radio v-model="paymentType" val="reminder" label="Reminder" :disable="user.id !== payment.creatorId"/>
-      </div>
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Sender
@@ -16,7 +11,7 @@
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'reminder'"
-          v-model="user.userName"
+          v-model="payment.senderName"
           placeholder="Sender"
           readonly
           outlined
@@ -61,8 +56,8 @@
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'request'"
-         v-model="user.userName"
-         placeholder="Sender"
+         v-model="payment.receiverName"
+         placeholder="Receiver"
          readonly
          outlined
          dense
@@ -94,7 +89,8 @@
           </template>
         </q-input>
       </div>
-      <div class="col-3">
+      <div class="col"></div>
+      <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           v-model="amount"
@@ -118,7 +114,6 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">Choose payment method</p>
         <q-select
           v-model="setting.type"
-          :rules="[ val => !!val || 'Currency is required'  ]"
           :options="paymentMethods"
           placeholder="Payment Type"
           :option-label="v => v.label"
@@ -136,7 +131,6 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">Currency address</p>
         <q-input
           v-model="setting.address"
-          :rules="[ val => !!val || 'Address is required'  ]"
           placeholder="payment address"
           outlined
           dense
@@ -174,12 +168,24 @@
       </div>
     </div>
     <div class="row justify-end">
-      <q-btn label="Mark as draft" type="button" color="primary" @click="submit(true)" :disable="handling">
-        <q-tooltip>
+      <q-btn
+        :label="payment.status === '' ? 'Mark as draft' : 'Update'"
+        type="button"
+        color="primary"
+        @click="submit(true)"
+        :disable="handling"
+      >
+        <q-tooltip v-if="payment.status === ''">
           'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
-      <q-btn label="Send" type="submit" color="primary" :disable="handling">
+      <q-btn
+        v-if="payment.status === 'created' || payment.status === ''"
+        label="Send"
+        type="submit"
+        color="primary"
+        :disable="handling"
+      >
         <q-tooltip>
           'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
@@ -205,7 +211,6 @@ export default {
   components: {Invoices, PaymentSetting},
   data() {
     return {
-      paymentType: "request",
       expanded: false,
       setting: {
         type: "",
@@ -225,28 +230,33 @@ export default {
   props: {
     payment: Object,
     user: Object,
+    token: String,
+    paymentType: String
   },
   watch: {
     payment: {
       immediate: true,
       handler(newPayment) {
-        // setup correct sender and receiver view
-        if (this.user.id) {
-          if (newPayment.receiverId === this.user.id) {
-            this.paymentType = PAYMENT_OBJECT_REQUEST
-          } else {
-            this.paymentType = PAYMENT_OBJECT_REMINDER
-          }
-        } else {
-          if (newPayment.senderId) {
-            this.paymentType = PAYMENT_OBJECT_REQUEST
-          } else {
-            this.paymentType = PAYMENT_OBJECT_REMINDER
-          }
-        }
         if (newPayment.contactMethod === "email") {
-          this.partner.id = 0
-          this.partner.value = newPayment.externalEmail
+          if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
+            if (this.payment.creatorId === this.user.id) {
+              this.partner.value = newPayment.externalEmail
+              this.partner.id = 0
+            } else {
+              this.partner.value = newPayment.senderName
+              this.partner.id = newPayment.senderId
+              newPayment.receiverName = newPayment.externalEmail
+            }
+          } else {
+            if (this.payment.creatorId === this.user.id) {
+              this.partner.value = newPayment.externalEmail
+              this.partner.id = 0
+            } else {
+              this.partner.value = newPayment.receiverName
+              this.partner.id = newPayment.receiverId
+              newPayment.senderName = newPayment.externalEmail
+            }
+          }
         } else {
           this.partner.value = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderName : newPayment.receiverName
           this.partner.id = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderId : newPayment.receiverId
@@ -272,15 +282,6 @@ export default {
         }
       }
     },
-    paymentType: {
-      immediate: false,
-      handler(pType) {
-        if (this.$refs.paymentForm) {
-          this.$refs.paymentForm.reset()
-        }
-        this.updateSettings(pType)
-      }
-    }
   },
   methods: {
     checkingDestination($e) {
@@ -319,11 +320,16 @@ export default {
       if (this.submitting) {
         return
       }
+      if (isDraft === true) {
+        this.$refs.paymentForm.reset()
+      }
       const payment = { ...this.payment }
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.isDraft = isDraft === true
       if (payment.contactMethod === "email") {
-        payment.externalEmail = this.partner.value
+        if (!payment.id || this.user.id === payment.creatorId) {
+          payment.externalEmail = this.partner.value
+        }
       }
       payment.paymentMethod = this.setting.type
       payment.paymentAddress = this.setting.address
@@ -334,6 +340,7 @@ export default {
         payment.senderId = this.user.id
         payment.receiverId = this.partner.id
       }
+      payment.token = this.token
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"

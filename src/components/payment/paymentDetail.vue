@@ -1,20 +1,20 @@
 <template>
-  <q-form class="q-ma-md">
+  <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
-        <q-field label="The receiver" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.receiverName || payment.externalEmail}}
-            </div>
-          </template>
-        </q-field>
-      </div>
       <div class="col-4">
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{payment.senderName || payment.externalEmail}}
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-4">
+        <q-field label="The receiver" stack-label>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+              {{payment.receiverName || payment.externalEmail}}
             </div>
           </template>
         </q-field>
@@ -64,6 +64,7 @@
           :options="methods"
           label="Payment method"
           @input="methodChange"
+          :rules="[ val => !!val || 'Payment method is required' ]"
         />
         <q-field v-else label="Payment method" stack-label>
           <template v-slot:control>
@@ -147,9 +148,8 @@
       <q-btn
         v-if="processable && processing"
         label="Mark as paid"
-        type="button"
+        type="submit"
         color="primary"
-        @click="markAsPaid"
         :disable="fetchingRate || paying"
         class="q-mr-sm"
       />
@@ -161,7 +161,7 @@
         @click="processPayment"
         class="q-mr-sm"
       />
-      <q-btn v-if="editable" label="Edit" type="button" color="primary" @click="$emit('edit')" />
+      <q-btn v-if="editable && !processing" label="Edit" type="button" color="primary" @click="$emit('edit')" />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="goToList" />
     </div>
   </q-form>
@@ -172,6 +172,7 @@ import { mapGetters } from "vuex"
 import MDate from "components/common/mDate"
 import Invoices from "components/payment/invoices"
 import PaymentSetting from "components/payment/paymentSetting";
+import {PAYMENT_OBJECT_REMINDER} from "src/consts/paymentType";
 export default {
   name: "paymentDetail",
   components: { MDate, Invoices, PaymentSetting },
@@ -189,18 +190,20 @@ export default {
   props: {
     payment: Object,
     user: Object,
+    token: String,
+    paymentType: String
   },
   methods: {
     goToList() {
-      this.$router.push({ name: `${this.role}.payment.list` })
+      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
+      this.$router.push({ path: `/${path}` })
     },
     queryRate() {
-      const token = this.$route.query.token || ""
       const reqData = {
         id: this.payment.id,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
-        token,
+        token: this.token,
       }
       this.fetchingRate = true
       this.$api
@@ -231,7 +234,7 @@ export default {
       const reqData = {
         id: this.payment.id,
         txId: txId,
-        token: this.$route.query.token || "",
+        token: this.token,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress
       }
@@ -276,11 +279,11 @@ export default {
     }),
     editable() {
       return (this.payment.status === "created" || this.payment.status === "sent") &&
-        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id);
+        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token);
     },
     processable() {
       return (this.payment.status === "created" || this.payment.status === "sent") &&
-        (this.payment.senderId === this.user.id || this.$route.query.token)
+        (this.payment.senderId === this.user.id || (this.token && this.payment.senderId === 0))
     },
     fetchRateLabel() {
       if (this.fetchingRate) {
