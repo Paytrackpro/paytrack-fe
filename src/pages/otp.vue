@@ -39,7 +39,6 @@
 </template>
 
 <script>
-import role from 'src/consts/role'
 import { mapGetters } from "vuex"
 export default {
   name: "pageOpt",
@@ -47,7 +46,7 @@ export default {
     return {
       otp: "",
       error: null,
-      tempUser: JSON.parse(localStorage.getItem("tempUser"))
+      tempUser: JSON.parse(localStorage.getItem("tempUser")),
     }
   },
   computed: {
@@ -57,7 +56,7 @@ export default {
   },
   created() {
     if (!this.tempUser) {
-      this.$router.push({ name: 'login' })
+      this.$router.push({ name: "login" })
     }
   },
   methods: {
@@ -68,7 +67,7 @@ export default {
           userId: `${this.tempUser.userId}`,
         })
         .then(() => {
-          this.$router.push({ name: "homse" })
+          this.$router.push({ name: "home" })
         })
     },
   },
