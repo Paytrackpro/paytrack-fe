@@ -1,49 +1,42 @@
-import routes from "./routes"
-import store from "../store"
-import Vue from "vue"
-import VueRouter from "vue-router"
-import ROLE from "../consts/role"
+import { route } from "quasar/wrappers";
+import {
+  createRouter,
+  createMemoryHistory,
+  createWebHistory,
+  createWebHashHistory,
+} from "vue-router";
+import routes from "./routes";
 
-Vue.use(VueRouter)
+/*
+ * If not building with SSR mode, you can
+ * directly export the Router instantiation;
+ *
+ * The function below can be async too; either use
+ * async/await or return a Promise which resolves
+ * with the Router instance.
+ */
 
-const router = new VueRouter({
-  scrollBehavior: () => ({ left: 0, top: 0 }),
-  mode: "history",
-  routes,
-})
+export default route(function (/* { store, ssrContext } */) {
+  const createHistory = process.env.SERVER
+    ? createMemoryHistory
+    : process.env.VUE_ROUTER_MODE === "history"
+      ? createWebHistory
+      : createWebHashHistory;
 
-router.beforeEach((to, from, next) => {
-  const publicPages = ["Login", "Register", "OTP"]
-  const authRequired = to.matched.some((record) => record.meta.requiresAuth)
-  const isAuthenticated = store.getters["auth/isAuthenticated"]
-  const role = store.getters["auth/getUser"] ? store.getters["auth/getUser"].role : null
+  const Router = createRouter({
+    scrollBehavior: () => ({ left: 0, top: 0 }),
+    routes: [
+      ...routes,
+      {
+        path: "/:catchAll(.*)*",
+        component: () => import("pages/404.vue"),
+      },
+    ],
 
-  if (isAuthenticated && publicPages.includes(to.name)) {
-    if (role === ROLE.USER) {
-      next({ name: "user.home" })
-    } else if (role === ROLE.ADMIN) {
-      next({ name: "Home" })
-    } else {
-      next({ name: "404" })
-    }
+    history: createHistory(
+      process.env.MODE === "ssr" ? void 0 : process.env.VUE_ROUTER_BASE
+    ),
+  });
 
-    return
-  }
-
-  if (!isAuthenticated && authRequired) {
-    next({ name: "Login" })
-    return
-  }
-
-  if (authRequired) {
-    if (to.matched.some((record) => record.meta.roles && record.meta.roles.includes(role))) {
-      next()
-    } else {
-      next({ name: "404" })
-    }
-  } else {
-    next()
-  }
-})
-
-export default router
+  return Router;
+});

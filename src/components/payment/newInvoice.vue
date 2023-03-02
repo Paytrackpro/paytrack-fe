@@ -1,7 +1,8 @@
 <template>
   <tr>
     <td class="text-right">
-      <q-input style="max-width: 200px"
+      <q-input
+        style="max-width: 200px"
         label="Hours"
         v-model="invoice.hours"
         dense
@@ -13,7 +14,8 @@
       />
     </td>
     <td class="text-right">
-      <q-input style="max-width: 200px"
+      <q-input
+        style="max-width: 200px"
         label="Cost"
         v-model="invoice.cost"
         :readonly="invoice.hours > 0"
@@ -55,48 +57,50 @@ export default {
       invoice: {
         hours: "",
         cost: "",
-        description: ""
-      }
-    }
+        description: "",
+      },
+    };
   },
   methods: {
     save() {
-      this.submitted = true
-      if (!this.invoice.description || this.invoice.cost <= 0 || this.invoice.hours < 0) {
-        return
+      this.submitted = true;
+      if (
+        !this.invoice.description ||
+        this.invoice.cost <= 0 ||
+        this.invoice.hours < 0
+      ) {
+        return;
       }
-      this.$emit('save', {
+      this.$emit("save", {
         hours: Number(this.invoice.hours),
         cost: Number(this.invoice.cost),
-        description: this.invoice.description
-      })
-      this.cancel()
+        description: this.invoice.description,
+      });
+      this.cancel();
     },
     cancel() {
-      this.submitted = false
+      this.submitted = false;
       this.invoice = {
         hours: "",
         cost: "",
-        description: ""
-      }
+        description: "",
+      };
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate
-    }
+      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate;
+    },
   },
   watch: {
     hourlyRate: {
       immediate: true,
       handler(newHR) {
         if (this.invoice.hours > 0) {
-          this.invoice.cost = Number(this.invoice.hours) * newHR
+          this.invoice.cost = Number(this.invoice.hours) * newHR;
         }
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

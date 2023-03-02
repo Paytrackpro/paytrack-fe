@@ -37,6 +37,7 @@
 <script>
 import { mapGetters } from "vuex"
 export default {
+  name: "userSetting",
   data() {
     return {
       use2FA: false,

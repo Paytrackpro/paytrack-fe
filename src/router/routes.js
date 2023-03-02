@@ -110,11 +110,6 @@ const routes = [
     ],
   },
   {
-    path: "/404",
-    name: "404",
-    component: () => import("pages/404.vue"),
-  },
-  {
     path: "/login",
     name: "Login",
     component: () => import("pages/login.vue"),
@@ -128,10 +123,7 @@ const routes = [
     path: "/otp",
     name: "OTP",
     component: () => import("pages/otp.vue"),
-  }, {
-    path: "*",
-    component: () => import("pages/404.vue"),
   }
 ]
 
-export default routes
+export default routes;

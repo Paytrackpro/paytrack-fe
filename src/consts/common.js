@@ -1,2 +1,2 @@
-const MDateFormat = "YYYY-MM-DD"
-export {MDateFormat}
+const MDateFormat = "YYYY-MM-DD";
+export { MDateFormat };

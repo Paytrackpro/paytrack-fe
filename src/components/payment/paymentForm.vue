@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
     <div class="row q-mb-md q-col-gutter-md">
@@ -26,7 +27,8 @@
             <q-icon name="person" />
           </template>
         </q-input>
-        <q-input v-else
+        <q-input
+          v-else
           v-model="partner.value"
           placeholder="Sender"
           :readonly="user.id !== payment.creatorId"
@@ -36,7 +38,7 @@
           stack-label
           hide-bottom-space
           @blur="checkingDestination"
-          :rules="[ val => !!val || 'Sender is required' ]"
+          :rules="[(val) => !!val || 'Sender is required']"
           :error="partnerError"
           :error-message="partner.error"
           hint="expect an user name on mgmt or an email address"
@@ -69,7 +71,8 @@
             <q-icon name="person" />
           </template>
         </q-input>
-        <q-input v-else
+        <q-input
+          v-else
           v-model="partner.value"
           placeholder="Receiver"
           :readonly="user.id !== payment.creatorId"
@@ -79,7 +82,7 @@
           stack-label
           hide-bottom-space
           @blur="checkingDestination"
-          :rules="[ val => !!val || 'Receiver is required' ]"
+          :rules="[(val) => !!val || 'Receiver is required']"
           :error="partnerError"
           :error-message="partner.error"
           hint="expect an user name on mgmt or an email address"
@@ -102,22 +105,28 @@
           lazy-rules
           stack-label
           hide-bottom-space
-          :rules="[ val => val >0 || 'Amount > 0. Please fill up the invoices and hourly rate' ]"
+          :rules="[
+            (val) =>
+              val > 0 ||
+              'Amount > 0. Please fill up the invoices and hourly rate',
+          ]"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
           </template>
         </q-input>
       </div>
-      <div class="col-8"/>
+      <div class="col-8" />
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Choose payment method</p>
+        <p class="q-mt-none q-mb-xs text-weight-medium">
+          Choose payment method
+        </p>
         <q-select
           v-model="setting.type"
           :options="paymentMethods"
           placeholder="Payment Type"
-          :option-label="v => v.label"
-          :option-value="v => v.value"
+          :option-label="(v) => v.label"
+          :option-value="(v) => v.value"
           emit-value
           map-options
           outlined
@@ -140,7 +149,10 @@
         />
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting v-model="payment.paymentSettings" label="Payment setting"/>
+        <payment-setting
+          v-model="payment.paymentSettings"
+          label="Payment setting"
+        />
       </div>
       <div class="col-12">
         <q-expansion-item
@@ -150,20 +162,24 @@
         >
           <div class="row">
             <div class="col-3">
-              <q-input style=""
-               label="Hourly rate(USD)"
-               dense
-               lazy-rules
-               stack-label
-               outlined
-               hide-bottom-space
-               type="number"
-               v-model="payment.hourlyRate"
-               hint="Used to calculate cost from hours on invoices"
+              <q-input
+                style=""
+                label="Hourly rate(USD)"
+                dense
+                lazy-rules
+                stack-label
+                outlined
+                hide-bottom-space
+                type="number"
+                v-model="payment.hourlyRate"
+                hint="Used to calculate cost from hours on invoices"
               />
             </div>
           </div>
-          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)"></invoices>
+          <invoices
+            v-model="payment.details"
+            :hourlyRate="Number(payment.hourlyRate)"
+          ></invoices>
         </q-expansion-item>
       </div>
     </div>
@@ -187,45 +203,56 @@
         :disable="handling"
       >
         <q-tooltip>
-          'Send' will notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
+          'Send' will notify the payment to the
+          {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')"/>
+      <q-btn
+        label="Cancel"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="$emit('cancel')"
+      />
     </div>
   </q-form>
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS, PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType"
-import { emailPattern } from "src/helper/validations"
-import Invoices from "components/payment/invoices"
-import PaymentSetting from "components/payment/paymentSetting"
+import {
+  PAYMENT_TYPE_OPTIONS,
+  PAYMENT_OBJECT_REMINDER,
+  PAYMENT_OBJECT_REQUEST,
+} from "src/consts/paymentType";
+import { emailPattern } from "src/helper/validations";
+import Invoices from "components/payment/invoices";
+import PaymentSetting from "components/payment/paymentSetting";
 
-const DESTINATION_CHECK_NONE = 0
-const DESTINATION_CHECK_CHECKING = 1
-const DESTINATION_CHECK_FAIL = 2
-const DESTINATION_CHECK_DONE = 3
+const DESTINATION_CHECK_NONE = 0;
+const DESTINATION_CHECK_CHECKING = 1;
+const DESTINATION_CHECK_FAIL = 2;
+const DESTINATION_CHECK_DONE = 3;
 
 export default {
   name: "paymentForm",
-  components: {Invoices, PaymentSetting},
+  components: { Invoices, PaymentSetting },
   data() {
     return {
       expanded: false,
       setting: {
         type: "",
-        address: ""
+        address: "",
       },
       partner: {
         id: 0,
         value: "",
         status: DESTINATION_CHECK_NONE,
         error: "",
-        paymentSettings: []
+        paymentSettings: [],
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
-    }
+    };
   },
   props: {
     payment: Object,
@@ -258,67 +285,78 @@ export default {
             }
           }
         } else {
-          this.partner.value = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderName : newPayment.receiverName
-          this.partner.id = this.paymentType === PAYMENT_OBJECT_REQUEST ? newPayment.senderId : newPayment.receiverId
+          this.partner.value =
+            this.paymentType === PAYMENT_OBJECT_REQUEST
+              ? newPayment.senderName
+              : newPayment.receiverName;
+          this.partner.id =
+            this.paymentType === PAYMENT_OBJECT_REQUEST
+              ? newPayment.senderId
+              : newPayment.receiverId;
         }
         // setup correct payment setting
         if (newPayment.paymentMethod && newPayment.paymentAddress) {
           this.setting = {
             type: newPayment.paymentMethod,
-            address: newPayment.paymentAddress
-          }
+            address: newPayment.paymentAddress,
+          };
         } else {
-          const settings = newPayment.paymentSettings || []
-          let filled = true
+          const settings = newPayment.paymentSettings || [];
+          let filled = true;
           for (let setting of settings) {
             if (setting.isDefault) {
-              this.setting = setting
-              return
+              this.setting = setting;
+              return;
             }
           }
           if (!filled && settings.length > 0) {
-            this.setting = settings[0]
+            this.setting = settings[0];
           }
         }
-      }
+      },
     },
   },
   methods: {
     checkingDestination($e) {
-      this.partner.status = DESTINATION_CHECK_NONE
-      this.partner.error = ""
-      this.partner.id = 0
-      if(!this.partner.value) {
-        return
+      this.partner.status = DESTINATION_CHECK_NONE;
+      this.partner.error = "";
+      this.partner.id = 0;
+      if (!this.partner.value) {
+        return;
       }
-      if(emailPattern.test(this.partner.value)) {
-        this.partner.status = DESTINATION_CHECK_DONE
-        this.payment.contactMethod = "email"
-        this.payment.senderEmail = this.partner.value
+      if (emailPattern.test(this.partner.value)) {
+        this.partner.status = DESTINATION_CHECK_DONE;
+        // eslint-disable-next-line vue/no-mutating-props
+        this.payment.contactMethod = "email";
+        // eslint-disable-next-line vue/no-mutating-props
+        this.payment.senderEmail = this.partner.value;
       } else {
-        this.partner.status = DESTINATION_CHECK_CHECKING
-        this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
+        this.partner.status = DESTINATION_CHECK_CHECKING;
+        this.$api
+          .get(`/user/exist-checking?userName=${this.partner.value}`)
           .then((res) => {
             if (res.data.data.found) {
-              this.partner.status = DESTINATION_CHECK_DONE
-              this.partner.id = res.data.data.id
-              this.partner.paymentSettings = res.data.data.paymentSettings || []
-              this.payment.contactMethod = "internal"
-              this.updateSettings()
+              this.partner.status = DESTINATION_CHECK_DONE;
+              this.partner.id = res.data.data.id;
+              this.partner.paymentSettings =
+                res.data.data.paymentSettings || [];
+              // eslint-disable-next-line vue/no-mutating-props
+              this.payment.contactMethod = "internal";
+              this.updateSettings();
             } else {
-              this.partner.status = DESTINATION_CHECK_FAIL
-              this.partner.error = res.data.data.message
+              this.partner.status = DESTINATION_CHECK_FAIL;
+              this.partner.error = res.data.data.message;
             }
           })
           .catch(() => {
-            this.partner.status = DESTINATION_CHECK_FAIL
-            this.partner.error = "the user name is not found"
-          })
+            this.partner.status = DESTINATION_CHECK_FAIL;
+            this.partner.error = "the user name is not found";
+          });
       }
     },
     submit(isDraft) {
       if (this.submitting) {
-        return
+        return;
       }
       if (isDraft === true) {
         this.$refs.paymentForm.reset()
@@ -331,22 +369,22 @@ export default {
           payment.externalEmail = this.partner.value
         }
       }
-      payment.paymentMethod = this.setting.type
-      payment.paymentAddress = this.setting.address
+      payment.paymentMethod = this.setting.type;
+      payment.paymentAddress = this.setting.address;
       if (this.paymentType === "request") {
-        payment.senderId = this.partner.id
-        payment.receiverId = this.user.id
+        payment.senderId = this.partner.id;
+        payment.receiverId = this.user.id;
       } else {
-        payment.senderId = this.user.id
-        payment.receiverId = this.partner.id
+        payment.senderId = this.user.id;
+        payment.receiverId = this.partner.id;
       }
       payment.token = this.token
       this.submitting = true
       let url = `/payment`
       let successNotify = "Payment sent"
       if (payment.id > 0) {
-        url = `/payment/${payment.id}`
-        successNotify = "Payment updated"
+        url = `/payment/${payment.id}`;
+        successNotify = "Payment updated";
       }
       this.$api
         .post(url, payment)
@@ -355,76 +393,78 @@ export default {
             message: successNotify,
             color: "positive",
             icon: "check",
-          })
-          this.submitting = false
-          this.$emit("saved", res.data.data.payment)
+          });
+          this.submitting = false;
+          this.$emit("saved", res.data.data.payment);
         })
         .catch((err) => {
-          this.submitting = false
+          this.submitting = false;
           this.$q.notify({
             message: "Error",
             color: "negative",
             icon: "alert",
-          })
-        })
+          });
+        });
     },
     changePaymentMethod(val) {
-      const settings = this.payment.paymentSettings || []
-      this.setting.address = ""
+      const settings = this.payment.paymentSettings || [];
+      this.setting.address = "";
       for (let setting of settings) {
         if (setting.type === this.setting.type) {
-          this.setting.address = setting.address
+          this.setting.address = setting.address;
         }
       }
     },
     updateSettings(pType) {
-      pType = pType || this.paymentType
+      pType = pType || this.paymentType;
       if (pType === PAYMENT_OBJECT_REQUEST) {
-        this.payment.paymentSettings = this.user.paymentSettings || []
+        // eslint-disable-next-line vue/no-mutating-props
+        this.payment.paymentSettings = this.user.paymentSettings || [];
       }
       if (pType === PAYMENT_OBJECT_REMINDER) {
-        this.payment.paymentSettings = this.partner.paymentSettings || []
+        // eslint-disable-next-line vue/no-mutating-props
+        this.payment.paymentSettings = this.partner.paymentSettings || [];
       }
-      let isSet = false
+      let isSet = false;
       for (let setting of this.payment.paymentSettings) {
         if (setting.isDefault) {
-          isSet = true
-          this.setting.type = setting.type
-          this.setting.address = setting.address
+          isSet = true;
+          this.setting.type = setting.type;
+          this.setting.address = setting.address;
         }
       }
       if (!isSet && this.payment.paymentSettings.length > 0) {
-        const setting = this.payment.paymentSettings[0]
-        this.setting.type = setting.type
-        this.setting.address = setting.address
+        const setting = this.payment.paymentSettings[0];
+        this.setting.type = setting.type;
+        this.setting.address = setting.address;
       } else {
-        this.setting.type = ""
-        this.setting.address = ""
+        this.setting.type = "";
+        this.setting.address = "";
       }
-    }
+    },
   },
   computed: {
     handling() {
       if (this.submitting) {
-        return true
+        return true;
       }
-      return this.partner.status === DESTINATION_CHECK_CHECKING
+      return this.partner.status === DESTINATION_CHECK_CHECKING;
     },
     partnerError: function () {
-      return this.partner.status === DESTINATION_CHECK_FAIL
+      return this.partner.status === DESTINATION_CHECK_FAIL;
     },
     amount: function () {
       if (!this.payment.details) {
-        return 0
+        return 0;
       }
-      let amount = 0
+      let amount = 0;
       for (let invoice of this.payment.details) {
-        amount += Number(invoice.cost)
+        amount += Number(invoice.cost);
       }
-      return amount
-    }
-  }
-}
+      return amount;
+    },
+  },
+};
 </script>
 
 <style scoped></style>

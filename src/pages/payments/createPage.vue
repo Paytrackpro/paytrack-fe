@@ -25,19 +25,19 @@ export default {
     PaymentForm,
   },
   data() {
-    let user = localStorage.getItem("user")
+    let user = localStorage.getItem("user");
     if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user)
+      user = JSON.parse(user);
     } else {
-      user = {}
+      user = {};
     }
-    let paymentSetting = {}
+    let paymentSetting = {};
     if (user.paymentSetting && Array.isArray(user.paymentSetting)) {
-      paymentSetting = user.paymentSetting[0]
+      paymentSetting = user.paymentSetting[0];
       for (let s in user.paymentSetting) {
         if (s.isDefault) {
-          paymentSetting = s
-          break
+          paymentSetting = s;
+          break;
         }
       }
     }
@@ -57,7 +57,7 @@ export default {
         paymentMethod: paymentSetting.type || "",
         paymentAddress: paymentSetting.address || "",
         paymentSettings: user.paymentSettings || [],
-        details: []
+        details: [],
       },
       paymentType: PAYMENT_OBJECT_REQUEST
     }

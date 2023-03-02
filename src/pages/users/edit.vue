@@ -54,7 +54,7 @@ import PaymentSetting from "components/payment/paymentSetting"
 import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
 import { defineComponent } from "vue";
 export default defineComponent({
-  name: 'Profile',
+  name: 'userProfileEdit',
   components: {
     PaymentSetting
   },

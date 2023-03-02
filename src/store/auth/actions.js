@@ -1,4 +1,4 @@
-import { api } from "boot/axios"
+import { api } from "boot/axios";
 
 export default {
   async login({ commit }, user) {
@@ -17,7 +17,7 @@ export default {
   },
 
   async register({ commit }, user) {
-    return api.post("/auth/register", user)
+    return api.post("/auth/register", user);
   },
 
   async logOut({ commit }, user) {
@@ -45,4 +45,4 @@ export default {
         commit("setUserProfile", JSON.stringify(responseData.userInfo))
       })
   },
-}
+};

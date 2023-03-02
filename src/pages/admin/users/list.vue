@@ -2,12 +2,12 @@
   <div class="q-pa-md">
     <q-table
       title="Treats"
-      :data="rows"
+      :rows="rows"
       :columns="columns"
       row-key="name"
       flat
       bordered
-      :pagination.sync="pagination"
+      v-model:pagination="pagination"
       :loading="loading"
       :filter="KeySearch"
       @request="onRequest"
@@ -35,6 +35,7 @@ import { PAYMENT_TYPES } from "../../../consts/paymentType"
 import { date } from "quasar"
 
 export default {
+  name: "adminUserList",
   props: {
     type: String,
   },
@@ -62,9 +63,9 @@ export default {
           field: "paymentType",
           sortable: false,
           format: (val) => {
-            if (val == PAYMENT_TYPES.BTC) return "BTC"
-            if (val == PAYMENT_TYPES.LTC) return "LTC"
-            if (val == PAYMENT_TYPES.DCR) return "DCR"
+            if (val == PAYMENT_TYPES.BTC) return "BTC";
+            if (val == PAYMENT_TYPES.LTC) return "LTC";
+            if (val == PAYMENT_TYPES.DCR) return "DCR";
           },
         },
         {
@@ -85,7 +86,7 @@ export default {
         },
       ],
       rows: [],
-    }
+    };
   },
   watch: {
     $route: {
@@ -117,7 +118,7 @@ export default {
       });
     },
     goToDetail(id) {
-      this.$router.push({ name: "admin.user.detail", params: { id } })
+      this.$router.push({ name: "admin.user.detail", params: { id } });
     },
     onRequest(props) {
       const query = pagingToPathParams(props)
@@ -128,7 +129,7 @@ export default {
       })
     },
   },
-}
+};
 </script>
 <style lang="scss">
   .list-user-header .list-user-icon-sort{

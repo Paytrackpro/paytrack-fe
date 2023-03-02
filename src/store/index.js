@@ -1,34 +1,18 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { createStore } from "vuex";
+import auth from "./auth";
+import user from "./user";
 
-// we first import the module
-import auth from './auth'
-import user from './user'
-Vue.use(Vuex)
+export default function (/* { ssrContext } */) {
+  const Store = createStore({
+    modules: {
+      auth,
+      user,
+    },
 
-const Store = new Vuex.Store({
-  modules: {
-    auth,
-    user
-  },
+    // enable strict mode (adds overhead!)
+    // for dev mode and --debug builds only
+    strict: process.env.DEV,
+  });
 
-  // enable strict mode (adds overhead!)
-  // for dev mode only
-  strict: process.env.DEV
-})
-
-/*
-  if we want some HMR magic for it, we handle
-  the hot update like below. Notice we guard this
-  code with "process.env.DEV" -- so this doesn't
-  get into our production build (and it shouldn't).
-*/
-
-// if (process.env.DEV && module.hot) {
-//   module.hot.accept(['./showcase'], () => {
-//     const newShowcase = require('./showcase').default
-//     Store.hotUpdate({ modules: { showcase: newShowcase } })
-//   })
-// }
-
-export default Store;
+  return Store;
+}

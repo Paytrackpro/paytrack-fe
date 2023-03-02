@@ -23,7 +23,15 @@
         </div>
         <div class="col-4 col-md-3">
           <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
-          <q-input v-model="email" placeholder="Email" outlined dense lazy-rules stack-label hide-bottom-space>
+          <q-input
+            v-model="email"
+            placeholder="Email"
+            outlined
+            dense
+            lazy-rules
+            stack-label
+            hide-bottom-space
+          >
           </q-input>
         </div>
         <div class="col-4 col-md-3">
@@ -67,9 +75,10 @@
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS } from "../../../consts/paymentType"
+import { PAYMENT_TYPE_OPTIONS } from "../../../consts/paymentType";
 
 export default {
+  name: "pageUserDetails",
   data() {
     return {
       paymentTypeOptions: PAYMENT_TYPE_OPTIONS,
@@ -78,23 +87,23 @@ export default {
       displayName: "",
       paymentType: null,
       paymentAddress: "",
-    }
+    };
   },
   computed: {},
   created: function () {
-    this.getUserInfo()
+    this.getUserInfo();
   },
   methods: {
     getUserInfo() {
-      const id = this.$route.params.id
+      const id = this.$route.params.id;
       this.$api.get(`/admin/user/info/${id}`).then((res) => {
-        const result = res.data.data
-        this.email = result.email
-        this.paymentAddress = result.paymentAddress
-        this.paymentType = result.paymenType
-        this.userName = result.userName
-        this.displayName = result.displayName
-      })
+        const result = res.data.data;
+        this.email = result.email;
+        this.paymentAddress = result.paymentAddress;
+        this.paymentType = result.paymenType;
+        this.userName = result.userName;
+        this.displayName = result.displayName;
+      });
     },
     updateUserInfo() {
       this.$api
@@ -111,17 +120,17 @@ export default {
             message: "User saved",
             color: "positive",
             icon: "check",
-          })
-          this.$router.push({ name: "admin.user.list" })
+          });
+          this.$router.push({ name: "admin.user.list" });
         })
         .catch(() => {
           this.$q.notify({
             message: "Error",
             color: "negative",
             icon: "alert",
-          })
-        })
+          });
+        });
     },
   },
-}
+};
 </script>

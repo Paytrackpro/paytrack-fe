@@ -1,23 +1,30 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-markup-table flat bordered separator="cell">
     <table class="q-table">
       <thead>
-      <tr>
-        <th class="text-right" style="width: 100px">Hours</th>
-        <th class="text-right" style="width: 120px">Costs(USD)</th>
-        <th class="text-right" >Description</th>
-        <th style="width: 100px" v-if="!readonly">#</th>
-      </tr>
+        <tr>
+          <th class="text-right" style="width: 100px">Hours</th>
+          <th class="text-right" style="width: 120px">Costs(USD)</th>
+          <th class="text-right">Description</th>
+          <th style="width: 100px" v-if="!readonly">#</th>
+        </tr>
       </thead>
       <tbody>
-      <invoice v-for="(invoice, i) of value"
-        v-model="value[i]"
-        :key="i" :i="i"
-        :hourly-rate="hourlyRate"
-        @delete="deleteInvoice"
-        :readonly="readonly"
-      />
-      <new-invoice v-if="!readonly" @save="newInvoice" :hourly-rate="hourlyRate"/>
+        <invoice
+          v-for="(invoice, i) of modelValue"
+          v-model="modelValue[i]"
+          :key="i"
+          :i="i"
+          :hourly-rate="hourlyRate"
+          @delete="deleteInvoice"
+          :readonly="readonly"
+        />
+        <new-invoice
+          v-if="!readonly"
+          @save="newInvoice"
+          :hourly-rate="hourlyRate"
+        />
       </tbody>
     </table>
   </q-markup-table>
@@ -27,32 +34,29 @@
 import NewInvoice from "components/payment/newInvoice";
 import Invoice from "components/payment/invoice";
 export default {
-  name: "invoices",
-  components: {NewInvoice, Invoice},
+  name: "InvoicesList",
+  components: { NewInvoice, Invoice },
   props: {
-    value: Array,
+    modelValue: [Array],
     hourlyRate: [Number, String],
-    readonly: Boolean
+    readonly: Boolean,
   },
-  emits: ['update:invoices', 'update:hourlyRate'],
+  emits: ["update:invoices", "update:hourlyRate"],
   data() {
-    return {
-    }
+    return {};
   },
   methods: {
     newInvoice(newInv) {
-      const invoices = [...this.value, newInv]
-      this.$emit("input", invoices)
+      const invoices = [...this.modelValue, newInv];
+      this.$emit("update:modelValue", invoices);
     },
     deleteInvoice(key) {
-      const invoices = [...this.value]
-      invoices.splice(key, 1)
-      this.$emit("input", invoices)
-    }
+      const invoices = [...this.modelValue];
+      invoices.splice(key, 1);
+      this.$emit("update:modelValue", invoices);
+    },
   },
-}
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
