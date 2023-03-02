@@ -23,13 +23,13 @@ export default {
       return redirect({ path: "/login" });
     }
 
+    if (authenticated && !currentRoute.meta.requiresAuth) {
+      return redirect({ path: "/"})
+    }
+
     const role = user?.role;
     if (currentRoute.meta.roles && !currentRoute.meta.roles.includes(role)) {
       return redirect({ path: "/" });
-    }
-
-    if (role === ROLE.ADMIN && urlPath === "/") {
-      return redirect({ path: "/admin" });
     }
 
     redirect({ path: urlPath });
