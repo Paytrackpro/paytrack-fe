@@ -381,10 +381,10 @@ export default {
       payment.token = this.token
       this.submitting = true
       let url = `/payment`
-      let successNotify = "Payment sent"
+      let successNotify = "Payment request sent"
       if (payment.id > 0) {
-        url = `/payment/${payment.id}`;
-        successNotify = "Payment updated";
+        url = `/payment/${payment.id}`
+        successNotify = "Payment request updated"
       }
       this.$api
         .post(url, payment)
