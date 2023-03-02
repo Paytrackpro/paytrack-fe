@@ -78,22 +78,22 @@ const routes = [
       },
       {
         path: "payment",
-        name: "payment.list",
+        name: "payment",
         component: () => import("pages/payments/listPage.vue"),
         meta: {
           title: "Payment List",
         },
       },
       {
-        path: "pay",
-        name: "user.payment.list",
+        path: "pay/",
+        name: "payment.list",
         component: () => import("pages/payments/layout.vue"),
         meta: {
           title: "Pay",
         },
         children: [
           {
-            path: "/",
+            path: "",
             name: "payment.pay",
             component: () => import("pages/payments/payPage.vue"),
             meta: {
@@ -119,16 +119,16 @@ const routes = [
         ],
       },
       {
-        path: "get-pay",
-        name: "user.payment.list",
+        path: "get-pay/",
+        name: "get-payment.list",
         component: () => import("pages/payments/layout.vue"),
         meta: {
           title: "Get Pay",
         },
         children: [
           {
-            path: "/",
-            name: "payment.get-pay",
+            path: "",
+            name: "get-payment.get-pay",
             component: () => import("pages/payments/getPayPage.vue"),
             meta: {
               title: "Payment/Get Pay",
@@ -136,7 +136,7 @@ const routes = [
           },
           {
             path: "create",
-            name: "payment.create",
+            name: "get-payment.create",
             component: () => import("pages/payments/createPage.vue"),
             meta: {
               title: "Payment Create",
@@ -144,7 +144,7 @@ const routes = [
           },
           {
             path: ":id(\\d+)",
-            name: "payment.detail",
+            name: "get-payment.detail",
             component: () => import("pages/payments/detailPage.vue"),
             meta: {
               title: "Payment detail",
@@ -182,10 +182,6 @@ const routes = [
     path: "/otp",
     name: "otp",
     component: () => import("pages/otp.vue"),
-  },
-  {
-    path: "*",
-    component: () => import("pages/404.vue"),
   },
 ]
 
