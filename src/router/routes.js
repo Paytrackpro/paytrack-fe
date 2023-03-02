@@ -1,18 +1,16 @@
 import ROLE from "../consts/role"
-import { userRouters } from "src/router/userRouter"
 
 const routes = [
   {
-    path: "/admin",
+    path: "/",
     component: () => import("src/layouts/MainLayout.vue"),
     meta: {
       requiresAuth: true,
-      roles: [ROLE.ADMIN],
     },
     children: [
       {
         path: "",
-        name: "Home",
+        name: "home",
         component: () => import("src/pages/users/home.vue"),
         meta: {
           title: "Home",
@@ -20,23 +18,25 @@ const routes = [
       },
       {
         path: "users",
-        name: "admin.user.list",
+        name: "user.list",
         component: () => import("pages/admin/users/list.vue"),
         meta: {
+          roles: [ROLE.ADMIN],
           title: "User Management",
         },
       },
       {
         path: "users/:id",
-        name: "admin.user.detail",
+        name: "user.detail",
         component: () => import("pages/admin/users/detail.vue"),
         meta: {
+          roles: [ROLE.ADMIN],
           title: "User Detail",
         },
       },
       {
         path: "profile/",
-        name: "admin.profile",
+        name: "profile",
         component: () => import("src/pages/users/profile.vue"),
         meta: {
           title: "Profile",
@@ -44,7 +44,7 @@ const routes = [
         children: [
           {
             path: "",
-            name: "admin.profile.info",
+            name: "profile.info",
             component: () => import("src/pages/users/info.vue"),
             meta: {
               title: "Profile Info",
@@ -52,7 +52,7 @@ const routes = [
           },
           {
             path: "edit",
-            name: "admin.profile.edit",
+            name: "profile.edit",
             component: () => import("src/pages/users/edit.vue"),
             meta: {
               title: "Profile Edit",
@@ -60,7 +60,7 @@ const routes = [
           },
           {
             path: "settings",
-            name: "admin.settings",
+            name: "settings",
             component: () => import("pages/users/settings.vue"),
             meta: {
               title: "Settings",
@@ -68,7 +68,7 @@ const routes = [
           },
           {
             path: "settings/2fa",
-            name: "admin.settings.2fa",
+            name: "settings.2fa",
             component: () => import("pages/users/2fa.vue"),
             meta: {
               title: "2FA",
@@ -78,26 +78,85 @@ const routes = [
       },
       {
         path: "payment",
-        name: "admin.payment.list",
+        name: "payment",
         component: () => import("pages/payments/listPage.vue"),
         meta: {
           title: "Payment List",
         },
       },
+      {
+        path: "pay/",
+        name: "payment.list",
+        component: () => import("pages/payments/layout.vue"),
+        meta: {
+          title: "Pay",
+        },
+        children: [
+          {
+            path: "",
+            name: "payment.pay",
+            component: () => import("pages/payments/payPage.vue"),
+            meta: {
+              title: "Payment/Pay",
+            },
+          },
+          {
+            path: "create",
+            name: "payment.create",
+            component: () => import("pages/payments/createPage.vue"),
+            meta: {
+              title: "Payment Create",
+            },
+          },
+          {
+            path: ":id(\\d+)",
+            name: "payment.detail",
+            component: () => import("pages/payments/detailPage.vue"),
+            meta: {
+              title: "Payment",
+            },
+          },
+        ],
+      },
+      {
+        path: "get-pay/",
+        name: "get-payment.list",
+        component: () => import("pages/payments/layout.vue"),
+        meta: {
+          title: "Get Pay",
+        },
+        children: [
+          {
+            path: "",
+            name: "get-payment.get-pay",
+            component: () => import("pages/payments/getPayPage.vue"),
+            meta: {
+              title: "Payment/Get Pay",
+            },
+          },
+          {
+            path: "create",
+            name: "get-payment.create",
+            component: () => import("pages/payments/createPage.vue"),
+            meta: {
+              title: "Payment Create",
+            },
+          },
+          {
+            path: ":id(\\d+)",
+            name: "get-payment.detail",
+            component: () => import("pages/payments/detailPage.vue"),
+            meta: {
+              title: "Payment detail",
+            },
+          },
+        ],
+      },
     ],
   },
   {
     path: "/",
-    component: () => import("src/layouts/MainLayout.vue"),
-    meta: {
-      requiresAuth: true,
-      roles: [ROLE.USER],
-    },
-    children: userRouters,
-  },
-  {
-    path: "/",
-    component: () => import("src/layouts/MainLayout.vue"),
+    component: () => import("src/layouts/PublicLayout.vue"),
     children: [
       {
         path: "/payment/:id(\\d+)/:token",
@@ -111,19 +170,19 @@ const routes = [
   },
   {
     path: "/login",
-    name: "Login",
+    name: "login",
     component: () => import("pages/login.vue"),
   },
   {
     path: "/register",
-    name: "Register",
+    name: "register",
     component: () => import("pages/register.vue"),
   },
   {
     path: "/otp",
-    name: "OTP",
+    name: "otp",
     component: () => import("pages/otp.vue"),
-  }
+  },
 ]
 
 export default routes;

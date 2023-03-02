@@ -121,7 +121,7 @@ export default {
             color: "positive",
             icon: "check",
           });
-          this.$router.push({ name: "admin.user.list" });
+          this.$router.push({ name: "user.list" });
         })
         .catch(() => {
           this.$q.notify({
