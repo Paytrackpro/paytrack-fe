@@ -224,9 +224,10 @@ import {
   PAYMENT_OBJECT_REMINDER,
   PAYMENT_OBJECT_REQUEST,
 } from "src/consts/paymentType";
-import { emailPattern } from "src/helper/validations";
-import Invoices from "components/payment/invoices";
-import PaymentSetting from "components/payment/paymentSetting";
+import { emailPattern } from "src/helper/validations"
+import Invoices from "components/payment/invoices"
+import PaymentSetting from "components/payment/paymentSetting"
+import {responseError} from "src/helper/error";
 
 const DESTINATION_CHECK_NONE = 0;
 const DESTINATION_CHECK_CHECKING = 1;
@@ -331,21 +332,19 @@ export default {
         // eslint-disable-next-line vue/no-mutating-props
         this.payment.senderEmail = this.partner.value;
       } else {
-        this.partner.status = DESTINATION_CHECK_CHECKING;
-        this.$api
-          .get(`/user/exist-checking?userName=${this.partner.value}`)
-          .then((res) => {
-            if (res.data.data.found) {
-              this.partner.status = DESTINATION_CHECK_DONE;
-              this.partner.id = res.data.data.id;
-              this.partner.paymentSettings =
-                res.data.data.paymentSettings || [];
+        this.partner.status = DESTINATION_CHECK_CHECKING
+        this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
+          .then((data) => {
+            if (data.found) {
+              this.partner.status = DESTINATION_CHECK_DONE
+              this.partner.id = data.id
+              this.partner.paymentSettings = data.paymentSettings || []
               // eslint-disable-next-line vue/no-mutating-props
-              this.payment.contactMethod = "internal";
-              this.updateSettings();
+              this.payment.contactMethod = "internal"
+              this.updateSettings()
             } else {
-              this.partner.status = DESTINATION_CHECK_FAIL;
-              this.partner.error = res.data.data.message;
+              this.partner.status = DESTINATION_CHECK_FAIL
+              this.partner.error = data.message
             }
           })
           .catch(() => {
@@ -388,23 +387,19 @@ export default {
       }
       this.$api
         .post(url, payment)
-        .then((res) => {
+        .then((data) => {
           this.$q.notify({
             message: successNotify,
             color: "positive",
             icon: "check",
           });
-          this.submitting = false;
-          this.$emit("saved", res.data.data.payment);
+          this.submitting = false
+          this.$emit("saved", data.payment)
         })
         .catch((err) => {
-          this.submitting = false;
-          this.$q.notify({
-            message: "Error",
-            color: "negative",
-            icon: "alert",
-          });
-        });
+          this.submitting = false
+          responseError(err)
+        })
     },
     changePaymentMethod(val) {
       const settings = this.payment.paymentSettings || [];

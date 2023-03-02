@@ -67,28 +67,23 @@ export default {
       const token = this.$route.params.token || ""
       this.loading = true
       this.$api.get(`/payment/${this.$route.params.id}?token=${token}`, )
-        .then(res => {
+        .then(data => {
           this.loading = false
-          if (res.data.success) {
-            this.payment = res.data.data;
-          } else {
-            // handle error
-          }
+          this.payment = data
         })
-        .catch((err) => {
-          this.loading = false;
-          if (err.response) {
-            switch (err.response.status) {
-              case 403:
-                this.isForbidden = true;
-                return;
-              case 404:
-                this.isNotfound = true;
-                return;
-            }
-            this.isUnknownError = true;
+        .catch(err => {
+          this.loading = false
+          console.log(err)
+          switch (err.status) {
+            case 403:
+              this.isForbidden = true
+              return
+            case 404:
+              this.isNotfound = true
+              return
           }
-        });
+          this.isUnknownError = true
+        })
     },
     saved(data) {
       this.payment = data;
@@ -112,7 +107,7 @@ export default {
       if (this.payment.status === "created") {
         status = "draft"
       }
-      return `Payment request (${status})`
+      return status ? `Payment request (${status})` : "Payment request"
     }
   },
   watch: {

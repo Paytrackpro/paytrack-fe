@@ -46,18 +46,13 @@
 import ROLE from "src/consts/role"
 import { defineComponent } from "vue"
 import PaymentSetting from "components/payment/paymentSetting"
-export default defineComponent({
+import {responseError} from "src/helper/error";
+export default defineComponent ({
   name: "ProfileInfo",
   components: {
     PaymentSetting,
   },
   data() {
-    let user = localStorage.getItem("user")
-    if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user)
-    } else {
-      user = {}
-    }
     return {
       user: {},
       loading: false,
@@ -66,14 +61,23 @@ export default defineComponent({
       isNotfound: false,
       isUnknownError: false,
       payment: {},
-    }
+    };
   },
-  methods: {
-    async getDataApi() {
-      this.$api.get("/user/info").then((res) => {
-        this.user = res.data.data
+  methods:{
+    async getDataApi(){
+      this.$api.get("/user/info").then((data) => {
+        this.user = data;
+      }).catch(err => {
+        responseError(err)
       })
     },
+    redirectUrl(){
+      if(this.user.role === ROLE.ADMIN){
+        this.$router.push("/admin/profile/edit")
+      }else{
+        this.$router.push("/profile/edit")
+      }
+    }
   },
   created: function () {
     this.getDataApi()

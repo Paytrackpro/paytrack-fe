@@ -130,9 +130,9 @@ export default {
   },
   methods: {
     async getPayments() {
-      this.$api.get("/payment/list").then((res) => {
-        this.rows = res.data.data.payments;
-      });
+      this.$api.get("/payment/list").then((data) => {
+        this.rows = data.payments
+      })
     },
     goToDetail(id) {
       if (this.isUser) {

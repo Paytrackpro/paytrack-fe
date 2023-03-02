@@ -53,6 +53,9 @@
 import PaymentSetting from "components/payment/paymentSetting"
 import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
 import { defineComponent } from "vue";
+import {responseError} from "src/helper/error";
+import {api} from "boot/axios";
+import {Notify} from "quasar";
 export default defineComponent({
   name: 'userProfileEdit',
   components: {
@@ -78,9 +81,11 @@ export default defineComponent({
   },
   methods : {
     async getDataApi(){
-      this.$api.get("/user/info").then((res) => {
-        localStorage.setItem('user' ,JSON.stringify(res.data.data))
-        this.setData(res.data.data);
+      this.$api.get("/user/info").then((data) => {
+        localStorage.setItem('user' ,JSON.stringify(data))
+        this.setData(data);
+      }).catch(err => {
+        responseError(err)
       })
     },
     setData(user){
@@ -91,26 +96,23 @@ export default defineComponent({
       this.user.paymentSettings = user.paymentSettings
     },
     submit(){
-      let userData = {
+      const userData = {
         id : this.user.userId,
         userName : this.user.userName,
         email : this.user.email,
         paymentSettings : this.user.paymentSettings,
         displayName : this.user.displayName
       }
-      this.$store.dispatch("user/updateUserProfile", userData).then(res => {
+      this.$api.put('/user/info', userData).then((res) => {
+        this.$q.notify({
+          message: 'your information is updated',
+          color: "positive",
+          icon: "done",
+        })
         this.redirectUrl()
       }).catch(err => {
-        let msg = "Error"
-        if (err.response && err.response.status === 400) {
-          msg = err.response.data.message
-        }
-        this.$q.notify({
-          message: msg,
-          color: "negative",
-          icon: "alert",
-        })
-      });
+        responseError(err)
+      })
     },
     redirectUrl() {
       this.$router.push({path: "/profile"})
