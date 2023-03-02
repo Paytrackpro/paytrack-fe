@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
@@ -5,7 +6,7 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.senderName || payment.externalEmail}}
+              {{ payment.senderName || payment.externalEmail }}
             </div>
           </template>
         </q-field>
@@ -50,7 +51,10 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
+        <q-field
+          :label="`Amount to send(${payment.paymentMethod})`"
+          stack-label
+        >
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.expectedAmount }}
@@ -59,7 +63,8 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-select v-if="processing"
+        <q-select
+          v-if="processing"
           v-model="payment.paymentMethod"
           :options="methods"
           label="Payment method"
@@ -69,13 +74,16 @@
         <q-field v-else label="Payment method" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.paymentMethod}}
+              {{ payment.paymentMethod }}
             </div>
           </template>
         </q-field>
       </div>
       <div class="col-8">
-        <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
+        <q-field
+          :label="`Payment address (${payment.paymentMethod})`"
+          stack-label
+        >
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.paymentAddress }}
@@ -83,11 +91,23 @@
           </template>
         </q-field>
       </div>
-      <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
-        <payment-setting :value="payment.paymentSettings" readonly label="Accepted payment settings"/>
+      <div
+        v-if="payment.paymentSettings && payment.paymentSettings.length"
+        class="col-12"
+      >
+        <payment-setting
+          :modelValue="payment.paymentSettings"
+          readonly
+          label="Accepted payment settings"
+        />
       </div>
       <div class="col-12">
-        <q-input v-if="processing" v-model="txId" label="Transaction id" ref="txId" />
+        <q-input
+          v-if="processing"
+          v-model="txId"
+          label="Transaction id"
+          ref="txId"
+        />
         <q-field v-if="!processing" label="Transaction id" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -122,7 +142,8 @@
         >
           <div class="row">
             <div class="col-3">
-              <q-input style=""
+              <q-input
+                style=""
                 label="Hourly rate(USD)"
                 readonly
                 type="number"
@@ -131,7 +152,11 @@
               />
             </div>
           </div>
-          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
+          <invoices
+            v-model="payment.details"
+            :hourlyRate="Number(payment.hourlyRate)"
+            readonly
+          ></invoices>
         </q-expansion-item>
       </div>
     </div>
@@ -168,9 +193,9 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex"
-import MDate from "components/common/mDate"
-import Invoices from "components/payment/invoices"
+import { mapGetters } from "vuex";
+import MDate from "components/common/mDate";
+import Invoices from "components/payment/invoices";
 import PaymentSetting from "components/payment/paymentSetting";
 import {PAYMENT_OBJECT_REMINDER} from "src/consts/paymentType";
 export default {
@@ -185,7 +210,7 @@ export default {
       processing: false,
       fetchingRate: false,
       paying: false,
-    }
+    };
   },
   props: {
     payment: Object,
@@ -209,69 +234,70 @@ export default {
       this.$api
         .post("/payment/request-rate", reqData)
         .then((res) => {
-          this.fetchingRate = false
-          this.$emit("update", res.data.data)
+          this.fetchingRate = false;
+          this.$emit("update", res.data.data);
         })
         .catch((err) => {
-          this.fetchingRate = false
-        })
+          this.fetchingRate = false;
+        });
     },
     processPayment() {
-      this.processing = true
-      this.queryRate()
+      this.processing = true;
+      this.queryRate();
     },
     markAsPaid() {
-      const txId = this.txId.trim()
+      const txId = this.txId.trim();
       if (
         txId.length === 0 &&
         !confirm(
           "Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier"
         )
       ) {
-        this.$refs.txId.$el.focus()
-        return
+        this.$refs.txId.$el.focus();
+        return;
       }
       const reqData = {
         id: this.payment.id,
         txId: txId,
         token: this.token,
         paymentMethod: this.payment.paymentMethod,
-        paymentAddress: this.payment.paymentAddress
-      }
+        paymentAddress: this.payment.paymentAddress,
+      };
       this.$api
         .post("/payment/process", reqData)
         .then((res) => {
-          this.paying = false
-          this.$emit("update", res.data.data)
+          this.paying = false;
+          this.$emit("update", res.data.data);
           this.$q.notify({
             message: "payment has been payed",
             color: "positive",
             icon: "check",
-          })
+          });
         })
         .catch((err) => {
-          this.paying = false
-        })
+          this.paying = false;
+        });
     },
     methodChange(method) {
-      const settings = this.payment.paymentSettings || []
-      const setting = settings.find(s => s.type === method)
+      const settings = this.payment.paymentSettings || [];
+      const setting = settings.find((s) => s.type === method);
       if (setting) {
-        this.payment.paymentAddress = setting.address
+        // eslint-disable-next-line vue/no-mutating-props
+        this.payment.paymentAddress = setting.address;
       }
-      this.queryRate()
-    }
+      this.queryRate();
+    },
   },
   watch: {
     payment: {
       immediate: true,
       handler(newPayment) {
-        this.txId = newPayment.txId
-        this.pMethod = newPayment.paymentMethod
-        let settings = newPayment.paymentSettings || []
-        this.methods = settings.map(s => s.type)
-      }
-    }
+        this.txId = newPayment.txId;
+        this.pMethod = newPayment.paymentMethod;
+        let settings = newPayment.paymentSettings || [];
+        this.methods = settings.map((s) => s.type);
+      },
+    },
   },
   computed: {
     ...mapGetters({
@@ -287,12 +313,12 @@ export default {
     },
     fetchRateLabel() {
       if (this.fetchingRate) {
-        return "Fetching Rate"
+        return "Fetching Rate";
       }
-      return "Re-fetch rate"
+      return "Re-fetch rate";
     },
   },
-}
+};
 </script>
 
 <style scoped></style>

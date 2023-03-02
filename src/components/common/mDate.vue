@@ -1,11 +1,11 @@
 <template>
-  <span>{{dateView}}</span>
+  <span>{{ dateView }}</span>
 </template>
 
 <script>
 // mgmt Date component, will show all the date item in mgmt system
-import {MDateFormat} from "src/consts/common";
-import { date } from "quasar"
+import { MDateFormat } from "src/consts/common";
+import { date } from "quasar";
 export default {
   name: "mDate",
   props: {
@@ -13,16 +13,14 @@ export default {
   },
   computed: {
     dateView() {
-      const d = new Date(this.date)
+      const d = new Date(this.date);
       if (d.getTime() <= 0) {
-        return
+        return;
       }
-      return date.formatDate(this.date, MDateFormat)
-    }
-  }
-}
+      return date.formatDate(this.date, MDateFormat);
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -21,6 +21,7 @@
 <script>
 import { mapGetters } from "vuex"
 export default {
+  name: "2faPage",
   data() {
     return {
       dialog: false,

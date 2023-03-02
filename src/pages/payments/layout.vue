@@ -10,10 +10,8 @@
 
 <script>
 export default {
-  name: "payment"
-}
+  name: "pagePayment",
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

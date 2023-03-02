@@ -1,34 +1,36 @@
-import axios from "axios"
-import Vue from "vue"
+import { boot } from "quasar/wrappers";
+import axios from "axios";
+const api = axios.create({ baseURL: process.env.BASE_URL });
 
-Vue.prototype.$axios = axios
-// ^ ^ ^ this will allow you to use this.$axios
-//       so you won't necessarily have to import axios in each vue file
+export default boot(({ app }) => {
+  // for use inside Vue files (Options API) through this.$axios and this.$api
 
-require("dotenv").config()
-const api = axios.create({ baseURL: process.env.BASE_URL })
+  app.config.globalProperties.$axios = axios;
+  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
+  //       so you won't necessarily have to import axios in each vue file
 
-Vue.prototype.$api = api
-// ^ ^ ^ this will allow you to use this.$api
-//       so you can easily perform requests against your app's API
+  app.config.globalProperties.$api = api;
+  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
+  //       so you can easily perform requests against your app's API
+});
 
 api.interceptors.request.use(function (config) {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
 
   if (token) {
-    config.headers["Authorization"] = "Bearer " + token
+    config.headers["Authorization"] = "Bearer " + token;
   }
 
-  return config
-})
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => {
-    return Promise.resolve(response)
+    return Promise.resolve(response);
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
-export { axios, api }
+export { axios, api };

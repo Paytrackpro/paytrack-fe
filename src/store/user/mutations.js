@@ -1,3 +1,3 @@
-export function setUserProfile(state, userProfile){
-    state.userInfo = userProfile;
+export function setUserProfile(state, userProfile) {
+  state.userInfo = userProfile;
 }

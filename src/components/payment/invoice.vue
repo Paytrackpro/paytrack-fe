@@ -1,7 +1,8 @@
 <template>
   <tr>
     <td class="text-right">
-      <q-input v-if="editing"
+      <q-input
+        v-if="editing"
         label="Hours"
         v-model="invoice.hours"
         dense
@@ -11,10 +12,11 @@
         :error="submitted && invoice.hours < 0"
         @input="calculateCost"
       />
-      <span v-else>{{value.hours || "_"}}</span>
+      <span v-else>{{ modelValue.hours || "_" }}</span>
     </td>
     <td class="text-right">
-      <q-input v-if="editing"
+      <q-input
+        v-if="editing"
         label="Cost"
         v-model="invoice.cost"
         :readonly="invoice.hours > 0"
@@ -24,10 +26,11 @@
         type="number"
         :error="submitted && invoice.cost <= 0"
       />
-      <span v-else>{{value.cost}}</span>
+      <span v-else>{{ modelValue.cost }}</span>
     </td>
     <td class="text-right">
-      <q-input v-if="editing"
+      <q-input
+        v-if="editing"
         label="Description"
         v-model="invoice.description"
         dense
@@ -37,25 +40,42 @@
         type="textarea"
         :error="submitted && !invoice.description"
       />
-      <span v-else>{{value.description}}</span>
+      <span v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
-      <span v-if="!editing" class="event-txt q-ma-xs text-secondary" @click="edit">Edit</span>
-      <span v-if="!editing" class="event-txt q-ma-xs text-red" @click="$emit('delete', i)">Delete</span>
-      <span v-if="editing" class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
-      <span v-if="editing" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
+      <span
+        v-if="!editing"
+        class="event-txt q-ma-xs text-secondary"
+        @click="edit"
+        >Edit</span
+      >
+      <span
+        v-if="!editing"
+        class="event-txt q-ma-xs text-red"
+        @click="$emit('delete', i)"
+        >Delete</span
+      >
+      <span
+        v-if="editing"
+        class="event-txt q-ma-xs text-secondary"
+        @click="save"
+        >Save</span
+      >
+      <span v-if="editing" class="event-txt q-ma-xs" @click="cancel"
+        >Cancel</span
+      >
     </td>
   </tr>
 </template>
 
 <script>
 export default {
-  name: "invoice",
+  name: "invoiceRow",
   props: {
     i: Number,
-    value: Object,
+    modelValue: Object,
     hourlyRate: Number,
-    readonly: Boolean
+    readonly: Boolean,
   },
   data() {
     return {
@@ -64,51 +84,53 @@ export default {
       invoice: {
         hours: "",
         cost: "",
-        description: ""
-      }
-    }
+        description: "",
+      },
+    };
   },
   methods: {
     edit: function () {
-      this.invoice = { ...this.value }
-      this.editing = true
+      this.invoice = { ...this.modelValue };
+      this.editing = true;
     },
     save: function () {
-      this.submitted = true
-      if (!this.invoice.description || this.invoice.cost <= 0 || this.invoice.hours < 0) {
-        return
+      this.submitted = true;
+      if (
+        !this.invoice.description ||
+        this.invoice.cost <= 0 ||
+        this.invoice.hours < 0
+      ) {
+        return;
       }
-      this.$emit("input", {
+      this.$emit("update:modelValue", {
         hours: Number(this.invoice.hours),
         cost: Number(this.invoice.cost),
-        description: this.invoice.description
-      })
-      this.editing = false
+        description: this.invoice.description,
+      });
+      this.editing = false;
     },
     cancel: function () {
-      this.editing = false
+      this.editing = false;
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate
-    }
+      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate;
+    },
   },
   watch: {
     hourlyRate: {
       immediate: true,
       handler(newHR) {
-        if (this.value.hours > 0) {
-          this.$emit("input", {
-            hours: Number(this.value.hours),
-            cost: Number(this.value.hours) * newHR,
-            description: this.value.description
-          })
+        if (this.modelValue.hours > 0) {
+          this.$emit("update:modelValue", {
+            hours: Number(this.modelValue.hours),
+            cost: Number(this.modelValue.hours) * newHR,
+            description: this.modelValue.description,
+          });
         }
-      }
-    }
-  }
-}
+      },
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

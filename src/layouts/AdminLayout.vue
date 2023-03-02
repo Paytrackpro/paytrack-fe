@@ -24,8 +24,13 @@
     <q-drawer show-if-above v-model="left" side="left" bordered>
       <q-scroll-area class="fit">
         <q-list>
-          <template v-for="(menuItem, index) in menuList">
-            <q-item :key="index" clickable :to="menuItem.to" active-class="bg-grey-3" v-ripple>
+          <template v-for="(menuItem, index) in menuList" :key="index">
+            <q-item
+              clickable
+              :to="menuItem.to"
+              active-class="bg-grey-3"
+              v-ripple
+            >
               <q-item-section avatar>
                 <q-icon :name="menuItem.icon" />
               </q-item-section>
@@ -48,7 +53,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
@@ -82,19 +87,19 @@ export default {
           separator: false,
         },
       ],
-    }
+    };
   },
   computed: {
     ...mapGetters({
       user: "auth/getUser",
     }),
   },
-  methods : {
-    setUserName(){
-      let user = this.$store.getters['user/getUserProfile'];
+  methods: {
+    setUserName() {
+      let user = this.$store.getters["user/getUserProfile"];
       if (user) {
-        user = JSON.parse(user)
-        if(!this.empty(user.userName)){
+        user = JSON.parse(user);
+        if (!this.empty(user.userName)) {
           this.isShowAvartar = false;
           this.user = user;
         }
@@ -104,9 +109,17 @@ export default {
       this.$store
         .dispatch('auth/logOut')
     },
-    empty(str){
-      return (typeof str == 'undefined' || !str || str.length === 0 || str === "" || !/[^\s]/.test(str) || /^\s*$/.test(str) || str.replace(/\s/g,"") === "");
-    }
-  }
-}
+    empty(str) {
+      return (
+        typeof str == "undefined" ||
+        !str ||
+        str.length === 0 ||
+        str === "" ||
+        !/[^\s]/.test(str) ||
+        /^\s*$/.test(str) ||
+        str.replace(/\s/g, "") === ""
+      );
+    },
+  },
+};
 </script>

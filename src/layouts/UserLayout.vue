@@ -24,8 +24,13 @@
     <q-drawer show-if-above v-model="left" side="left" bordered>
       <q-scroll-area class="fit">
         <q-list>
-          <template v-for="(menuItem, index) in menuList">
-            <q-item :key="index" clickable :to="menuItem.to" active-class="bg-grey-3" v-ripple>
+          <template v-for="(menuItem, index) in menuList" :key="index">
+            <q-item
+              clickable
+              :to="menuItem.to"
+              active-class="bg-grey-3"
+              v-ripple
+            >
               <q-item-section avatar>
                 <q-icon :name="menuItem.icon" />
               </q-item-section>
@@ -48,7 +53,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex"
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
@@ -77,7 +82,7 @@ export default {
           to: "/profile/settings",
         },
       ],
-    }
+    };
   },
   computed: {
     ...mapGetters({
@@ -86,8 +91,8 @@ export default {
   },
   methods: {
     logOut() {
-      this.$store.dispatch("auth/logOut")
+      this.$store.dispatch("auth/logOut");
     },
   },
-}
+};
 </script>

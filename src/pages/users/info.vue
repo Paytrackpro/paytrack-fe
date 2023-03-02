@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import ROLE from "src/consts/role"
+import ROLE from "src/consts/role";
 import { defineComponent } from "vue";
 import PaymentSetting from "components/payment/paymentSetting"
 export default defineComponent ({
@@ -59,7 +59,7 @@ export default defineComponent ({
       user = {};
     }
     return {
-      user:{},
+      user: {},
       loading: false,
       editing: false,
       isForbidden: false,
@@ -68,8 +68,8 @@ export default defineComponent ({
       payment: {},
     };
   },
-  methods:{
-    async getDataApi(){
+  methods: {
+    async getDataApi() {
       this.$api.get("/user/info").then((res) => {
         this.user = res.data.data;
         console.log(this.user)
@@ -81,12 +81,12 @@ export default defineComponent ({
       }else{
         this.$router.push("/profile/edit")
       }
-    }
+    },
   },
-  created : function(){
+  created: function () {
     this.getDataApi();
-  }
-})
+  },
+});
 </script>
 
 <style scoped>

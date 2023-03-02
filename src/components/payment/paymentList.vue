@@ -2,10 +2,10 @@
   <q-table
     :title="label || 'Payments'"
     :loading="loading"
-    :data="rows"
+    :rows="rows"
     :columns="columns"
     row-key="name"
-    :pagination.sync="pagination"
+    v-model:pagination="pagination"
     flat
     bordered
     @row-click="(_, row) => goToDetail(row.id)"
@@ -28,7 +28,7 @@ import role from "src/consts/role"
 import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 
 export default {
-  name: "list",
+  name: "paymentList",
   data() {
     return {
       loading: false,
@@ -50,11 +50,11 @@ export default {
           format: (val) => `${val}`,
         },
         { name: "senderName", align: "center", label: "sender", field: (row) => {
-            if (row.creatorId === row.senderId || row.contactMethod === "internal") {
-              return row.senderName
-            }
-            return row.externalEmail
+          if (row.creatorId === row.senderId || row.contactMethod === "internal") {
+            return row.senderName
           }
+          return row.externalEmail
+        }
         },
         { name: "status", align: "center", label: "status", field: "status", sortable: true },
         {
