@@ -26,6 +26,7 @@ import { MDateFormat } from "src/consts/common"
 import { mapGetters } from "vuex"
 import role from "src/consts/role"
 import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
+import {responseError} from "src/helper/error";
 
 export default {
   name: "paymentList",
@@ -97,9 +98,10 @@ export default {
         params: f
       }).then((res) => {
         this.loading = false
-        this.rows = res.data.data.payments
-        this.pagination.rowsNumber = res.data.data.count
+        this.rows = res.payments
+        this.pagination.rowsNumber = res.count
       }).catch(err => {
+        responseError(err)
         this.loading = false
       })
     },

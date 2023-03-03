@@ -123,10 +123,8 @@ export default {
           this.$router.push({ name: "home" })
         })
         .catch((error) => {
-          this.error = error.response
-            ? error.response.data.message
-            : error.message;
-        });
+          this.error = error.message
+        })
     },
   },
 };
