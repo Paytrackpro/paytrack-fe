@@ -102,7 +102,7 @@ const routes = [
           },
           {
             path: "create",
-            name: "payment.create",
+            name: "payment.pay.create",
             component: () => import("pages/payments/createPage.vue"),
             meta: {
               title: "Payment Create",
@@ -110,7 +110,7 @@ const routes = [
           },
           {
             path: ":id(\\d+)",
-            name: "payment.detail",
+            name: "payment.pay.detail",
             component: () => import("pages/payments/detailPage.vue"),
             meta: {
               title: "Payment",
@@ -128,7 +128,7 @@ const routes = [
         children: [
           {
             path: "",
-            name: "get-payment.get-pay",
+            name: "payment.get-pay",
             component: () => import("pages/payments/getPayPage.vue"),
             meta: {
               title: "Payment/Get Pay",
@@ -136,7 +136,7 @@ const routes = [
           },
           {
             path: "create",
-            name: "get-payment.create",
+            name: "payment.get-pay.create",
             component: () => import("pages/payments/createPage.vue"),
             meta: {
               title: "Payment Create",
@@ -144,7 +144,7 @@ const routes = [
           },
           {
             path: ":id(\\d+)",
-            name: "get-payment.detail",
+            name: "payment.get-pay.detail",
             component: () => import("pages/payments/detailPage.vue"),
             meta: {
               title: "Payment detail",
