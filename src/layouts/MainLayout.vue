@@ -100,18 +100,9 @@ export default {
     shouldDisplayRoute(menuItem) {
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
-    setUserName() {
-      let user = this.$store.getters["user/getUserProfile"]
-      if (user) {
-        user = JSON.parse(user)
-        if (!this.empty(user.userName)) {
-          this.isShowAvartar = false
-          this.user = user
-        }
-      }
-    },
     logOut() {
-      this.$store.dispatch("auth/logOut")
+      this.$store.dispatch("auth/logOut");
+      this.$router.push({ name: "login" })
     },
     empty(str) {
       return (

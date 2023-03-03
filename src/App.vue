@@ -5,8 +5,6 @@
 </template>
 
 <script>
-import ROLE from "src/consts/role";
-
 export default {
   name: "App",
   preFetch({
@@ -24,7 +22,7 @@ export default {
     }
 
     if (authenticated && !currentRoute.meta.requiresAuth) {
-      return redirect({ path: "/"})
+      return redirect({ path: "/" });
     }
 
     const role = user?.role;
