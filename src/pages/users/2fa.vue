@@ -20,6 +20,7 @@
 
 <script>
 import { mapGetters } from "vuex"
+import {responseError} from "src/helper/error";
 export default {
   name: "2faPage",
   data() {
@@ -41,8 +42,8 @@ export default {
   },
   methods: {
     enable2FA() {
-      this.$api.get("/user/generate-otp").then((res) => {
-        this.qrImage = res.data.data.mfa_qr_image
+      this.$api.get("/user/generate-otp").then((data) => {
+        this.qrImage = data.mfa_qr_image
       })
     },
     verifyOtp() {
@@ -64,6 +65,9 @@ export default {
             icon: "check",
           })
           this.$router.push({ name: `${this.role}.settings` })
+        })
+        .catch(err => {
+          responseError(err)
         })
         .finally(() => {
           this.loading = false

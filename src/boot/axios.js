@@ -26,10 +26,30 @@ api.interceptors.request.use(function (config) {
 
 api.interceptors.response.use(
   (response) => {
-    return Promise.resolve(response);
+    if (response.status === 200) {
+      return Promise.resolve(response.data.data)
+    }
+    return Promise.reject({
+      message: response.data.message
+    })
   },
   (error) => {
-    return Promise.reject(error);
+    if (error.response === undefined) {
+      return Promise.reject({
+        message: "Lost connection to server",
+        status: 503
+      })
+    }
+    if (error.response.data.message) {
+      return Promise.reject({
+        message: error.response.data.message,
+        status: error.response.status
+      })
+    }
+    return Promise.reject({
+      message: error.response.data,
+      status: 404
+    })
   }
 );
 

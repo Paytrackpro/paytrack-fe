@@ -2,17 +2,16 @@ import { api } from "boot/axios";
 
 export default {
   async login({ commit }, user) {
-    return api.post("/auth/login", user).then(function (res) {
-      const responseData = res.data.data
-      if (responseData.otp) {
-        localStorage.setItem("tempUser", JSON.stringify(responseData))
+    return api.post("/auth/login", user).then(function (data) {
+      if (data.otp) {
+        localStorage.setItem("tempUser", JSON.stringify(data))
         return
       }
 
-      localStorage.setItem("token", responseData.token)
-      commit("setUser", responseData.userInfo)
+      localStorage.setItem("token", data.token)
+      commit("setUser", data.userInfo)
       commit("setAuthenticated", true)
-      commit("setUserProfile", JSON.stringify(responseData.userInfo))
+      commit("setUserProfile", JSON.stringify(data.userInfo))
     })
   },
 
@@ -35,14 +34,13 @@ export default {
         userId: payload.userId,
         firstTime: payload.firstTime
       })
-      .then((res) => {
+      .then((data) => {
         localStorage.removeItem("tempUser")
 
-        const responseData = res.data.data
-        localStorage.setItem("token", responseData.token)
-        commit("setUser",responseData.userInfo)
+        localStorage.setItem("token", data.token)
+        commit("setUser",data.userInfo)
         commit("setAuthenticated", true)
-        commit("setUserProfile", JSON.stringify(responseData.userInfo))
+        commit("setUserProfile", JSON.stringify(data.userInfo))
       })
   },
 };

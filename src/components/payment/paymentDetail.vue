@@ -198,6 +198,7 @@ import MDate from "components/common/mDate";
 import Invoices from "components/payment/invoices";
 import PaymentSetting from "components/payment/paymentSetting";
 import {PAYMENT_OBJECT_REMINDER} from "src/consts/paymentType";
+import {responseError} from "src/helper/error";
 export default {
   name: "paymentDetail",
   components: { MDate, Invoices, PaymentSetting },
@@ -233,13 +234,14 @@ export default {
       this.fetchingRate = true
       this.$api
         .post("/payment/request-rate", reqData)
-        .then((res) => {
-          this.fetchingRate = false;
-          this.$emit("update", res.data.data);
+        .then((data) => {
+          this.fetchingRate = false
+          this.$emit("update", data)
         })
         .catch((err) => {
-          this.fetchingRate = false;
-        });
+          this.fetchingRate = false
+          responseError(err)
+        })
     },
     processPayment() {
       this.processing = true;
@@ -265,9 +267,9 @@ export default {
       };
       this.$api
         .post("/payment/process", reqData)
-        .then((res) => {
-          this.paying = false;
-          this.$emit("update", res.data.data);
+        .then((data) => {
+          this.paying = false
+          this.$emit("update", data)
           this.$q.notify({
             message: "payment has been payed",
             color: "positive",
@@ -275,8 +277,9 @@ export default {
           });
         })
         .catch((err) => {
-          this.paying = false;
-        });
+          this.paying = false
+          responseError(err)
+        })
     },
     methodChange(method) {
       const settings = this.payment.paymentSettings || [];
