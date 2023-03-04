@@ -221,7 +221,7 @@ export default {
   },
   methods: {
     goToList() {
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
+      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
       this.$router.push({ path: `/${path}` })
     },
     queryRate() {

@@ -107,7 +107,7 @@ export default {
     },
     goToDetail(id) {
       if (this.isUser) {
-        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-pay" : "pay"
+        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay"
         this.$router.push({ path: `/${path}/${id}` })
       }
     },

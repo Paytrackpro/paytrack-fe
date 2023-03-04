@@ -69,9 +69,9 @@ export default {
         },
         {
           icon: "call_received",
-          label: "Get Pay",
+          label: "Get Paid",
           separator: false,
-          to: "/get-pay",
+          to: "/get-paid",
         },
         {
           icon: "arrow_outward",
