@@ -1,11 +1,16 @@
 <template>
-  <div @keydown.enter.capture.stop>
+  <div>
     <q-toggle
-      v-show="!!!qrImage"
-      v-model="model"
-      @update:model-value="onUpdated"
-      color="green"
-      label="Use two-factor authentication"
+    v-show="!!!qrImage"
+    v-model="model"
+    @update:model-value="onUpdated"
+    color="green"
+    label="Use two-factor authentication"
+  />
+  <input
+      type="text"
+      ref="preventToggleEnterEvt"
+      v-bind:style="{ maxWidth: '0px', maxHeight: '0px', opacity: 0, position: 'absolute' }"
     />
   </div>
 </template>
@@ -20,10 +25,10 @@ export default {
     onUpdatedValue: Function,
     modelValue: Boolean
   },
-  data( ) {
+  data() {
     return {
-      model: this.modelValue,
-    };
+      model: false
+    }
   },
   computed: {
     ...mapGetters({
@@ -33,7 +38,17 @@ export default {
   },
   methods: {
     onUpdated(value) {
+      this.$refs["preventToggleEnterEvt"].focus();
       this.$emit("onUpdateValue", value);
+      this.$emit("update:modelValue", value);
+    },
+  },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(newVal) {
+        this.model = newVal
+      },
     },
   },
 };

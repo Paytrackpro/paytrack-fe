@@ -4,7 +4,6 @@
     <QRCodeVerify @verified="verified" />
     <EnableOtpDialog v-model="enableDialog" @hideDialog="hideDialog" />
     <DisableOtpDialog v-model="disableDialog" @hideDialog="hideOtpDialog" />
-    <input type="hidden" ref="preventToggleEnterEvt" />
   </q-card>
 </template>
 
@@ -43,12 +42,10 @@ export default {
   },
   methods: {
     showDialogs(enable) {
-      this.$refs["preventToggleEnterEvt"].focus();
       if (enable && !this.user.otp) {
         this.enableDialog = true;
       }
       if (!enable && this.user.otp) {
-        this.$refs["preventToggleEnterEvt"].focus();
         this.disableDialog = true;
       }
     },
