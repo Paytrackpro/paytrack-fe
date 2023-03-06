@@ -1,6 +1,5 @@
-const user = localStorage.getItem("user");
-export default function () {
-  return {
-    userInfo: user,
-  };
-}
+export default {
+  userInfo: localStorage.getItem("user"),
+  qrImage: '',
+  tempPassword: '',
+};

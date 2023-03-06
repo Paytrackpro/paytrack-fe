@@ -65,15 +65,7 @@ const routes = [
             meta: {
               title: "Settings",
             },
-          },
-          {
-            path: "settings/2fa",
-            name: "settings.2fa",
-            component: () => import("pages/users/2fa.vue"),
-            meta: {
-              title: "2FA",
-            },
-          },
+          }
         ],
       },
       {
@@ -177,12 +169,7 @@ const routes = [
     path: "/register",
     name: "register",
     component: () => import("pages/register.vue"),
-  },
-  {
-    path: "/otp",
-    name: "otp",
-    component: () => import("pages/otp.vue"),
-  },
+  }
 ]
 
 export default routes;
