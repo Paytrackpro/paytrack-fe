@@ -73,7 +73,6 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          console.log(err)
           switch (err.status) {
             case 403:
               this.isForbidden = true

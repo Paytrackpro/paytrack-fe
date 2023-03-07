@@ -91,7 +91,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col"></div>
+      <div class="col-4"></div>
       <div class="col-4" v-if="!expanded">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
@@ -115,7 +115,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-8" />
+      <div class="col-8" v-if="!expanded"/>
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Choose payment method
@@ -355,14 +355,22 @@ export default {
           });
       }
     },
-    submit(isDraft) {
+    async submit(isDraft) {
       if (this.submitting) {
         return;
       }
-      if (isDraft === true) {
-        this.$refs.paymentForm.reset()
+      const valid = await this.$refs.paymentForm.validate()
+      if (!valid) {
+        return
       }
-      const payment = { ...this.inPayment }
+      if (this.amount === 0) {
+        this.$q.notify({
+          type: "negative",
+          message: "Amount must greater than 0. Please fill up the invoices and hourly rate"
+        })
+        return
+      }
+      const payment = {...this.inPayment}
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.isDraft = isDraft === true
       if (payment.contactMethod === "email") {
