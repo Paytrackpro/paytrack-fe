@@ -1,18 +1,18 @@
 import { api } from "boot/axios";
 
 export default {
-  async login({ commit }, user) {
-    return api.post("/auth/login", user).then(function (data) {
-      if (data.otp) {
-        localStorage.setItem("tempUser", JSON.stringify(data))
-        return
+  async login({ commit }, payload) {
+    try {
+      const data = await api.post("/auth/login", payload);
+      if (!data.otp) {
+        localStorage.setItem("token", data.token);
+        commit("setUser", data.userInfo);
+        commit("setAuthenticated", true);
       }
-
-      localStorage.setItem("token", data.token)
-      commit("setUser", data.userInfo)
-      commit("setAuthenticated", true)
-      commit("setUserProfile", JSON.stringify(data.userInfo))
-    })
+      return { data };
+    } catch (error) {
+      return { error };
+    }
   },
 
   async register({ commit }, user) {
@@ -22,25 +22,17 @@ export default {
   async logOut({ commit }, user) {
     commit("setUser", "")
     commit("setAuthenticated", false)
-    commit('setUserProfile', '')
-    this.$router.push({ name: "login" })
     localStorage.clear()
   },
 
   async verifyOtp({ commit }, payload) {
-    return api
-      .post("/auth/verify-otp", {
-        otp: payload.otp,
-        userId: payload.userId,
-        firstTime: payload.firstTime
-      })
-      .then((data) => {
-        localStorage.removeItem("tempUser")
-
-        localStorage.setItem("token", data.token)
-        commit("setUser",data.userInfo)
-        commit("setAuthenticated", true)
-        commit("setUserProfile", JSON.stringify(data.userInfo))
-      })
+    try {
+      const data = await api.post("/auth/verify-otp", payload);
+      localStorage.setItem("token", data.token);
+      commit("setUser", data.userInfo);
+      commit("setAuthenticated", true);
+    } catch (error) {
+      return error;
+    }
   },
 };

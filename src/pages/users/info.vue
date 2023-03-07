@@ -67,6 +67,7 @@ export default defineComponent ({
     async getDataApi(){
       this.$api.get("/user/info").then((data) => {
         this.user = data;
+        localStorage.setItem('user' ,JSON.stringify(data))
       }).catch(err => {
         responseError(err)
       })

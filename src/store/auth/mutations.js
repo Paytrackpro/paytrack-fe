@@ -6,7 +6,4 @@ export default {
   setAuthenticated(state, authenticated) {
     state.authenticated = authenticated;
   },
-  setUserProfile(state, userProfile) {
-    this.state.user.userInfo = userProfile;
-  },
 };
