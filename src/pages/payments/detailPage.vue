@@ -86,7 +86,8 @@ export default {
         })
     },
     saved(data) {
-      this.payment = data;
+      this.payment = data
+      this.editing = false
     },
   },
   computed: {

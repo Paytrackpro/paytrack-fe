@@ -68,7 +68,7 @@
           v-model="payment.paymentMethod"
           :options="methods"
           label="Payment method"
-          @input="methodChange"
+          @update:modelValue="methodChange"
           :rules="[ val => !!val || 'Payment method is required' ]"
         />
         <q-field v-else label="Payment method" stack-label>

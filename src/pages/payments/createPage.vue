@@ -67,14 +67,7 @@ export default {
       role: "auth/getRole",
     }),
     title() {
-      switch (this.paymentType) {
-        case PAYMENT_OBJECT_REQUEST:
-          return "Create invoices"
-        case PAYMENT_OBJECT_REMINDER:
-          return "Invite your recipients"
-        default:
-          return "Create payment"
-      }
+      return "Create payment request"
     }
   },
   methods: {
