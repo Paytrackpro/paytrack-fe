@@ -8,10 +8,6 @@
           {{ user.userName }}
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
-              <q-item to="/profile" clickable v-close-popup>
-                <q-item-section>Profile</q-item-section>
-              </q-item>
-              <q-separator />
               <q-item @click="logOut" clickable v-close-popup>
                 <q-item-section>Log out</q-item-section>
               </q-item>
@@ -83,14 +79,14 @@ export default {
           icon: "settings",
           label: "Settings",
           separator: false,
-          to: "/profile/settings",
+          to: "/settings",
         },
       ],
     }
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
     isAdmin() {
       return this.user && this.user.role === role.ADMIN
@@ -101,8 +97,8 @@ export default {
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
     logOut() {
-      this.$store.dispatch("auth/logOut");
-      this.$router.push({ name: "login" })
+      this.$store.dispatch("user/logOut");
+      this.$router.push({ path: "/login" })
     },
     empty(str) {
       return (

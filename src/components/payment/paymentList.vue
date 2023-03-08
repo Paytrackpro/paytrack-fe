@@ -85,7 +85,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
     isUser() {
       return this.user.role === role.USER

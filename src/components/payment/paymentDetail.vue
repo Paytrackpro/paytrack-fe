@@ -304,7 +304,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      role: "auth/getRole",
+      role: "user/getRole",
     }),
     editable() {
       return (this.payment.status === "created" || this.payment.status === "sent") &&

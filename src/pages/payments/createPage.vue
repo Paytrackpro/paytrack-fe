@@ -64,7 +64,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      role: "auth/getRole",
+      role: "user/getRole",
     }),
     title() {
       return "Create payment request"

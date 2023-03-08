@@ -15,8 +15,14 @@ const routes = [
         meta: {
           title: "Home",
         },
-      },
-      {
+      }, {
+        path: "settings",
+        name: "settings",
+        component: () => import("pages/users/settings.vue"),
+        meta: {
+          title: "Settings",
+        },
+      }, {
         path: "users",
         name: "user.list",
         component: () => import("pages/admin/users/list.vue"),
@@ -33,40 +39,6 @@ const routes = [
           roles: [ROLE.ADMIN],
           title: "User Detail",
         },
-      },
-      {
-        path: "profile/",
-        name: "profile",
-        component: () => import("src/pages/users/profile.vue"),
-        meta: {
-          title: "Profile",
-        },
-        children: [
-          {
-            path: "",
-            name: "profile.info",
-            component: () => import("src/pages/users/info.vue"),
-            meta: {
-              title: "Profile Info",
-            },
-          },
-          {
-            path: "edit",
-            name: "profile.edit",
-            component: () => import("src/pages/users/edit.vue"),
-            meta: {
-              title: "Profile Edit",
-            },
-          },
-          {
-            path: "settings",
-            name: "settings",
-            component: () => import("pages/users/settings.vue"),
-            meta: {
-              title: "Settings",
-            },
-          }
-        ],
       },
       {
         path: "pay/",

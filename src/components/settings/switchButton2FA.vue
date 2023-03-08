@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
       qrImage: "user/getQrImage",
     }),
   },

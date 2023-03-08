@@ -153,7 +153,7 @@ export default {
   methods: {
     register() {
       this.$store
-        .dispatch("auth/register", {
+        .dispatch("user/register", {
           username: this.username,
           password: this.password,
           ...(this.email && { email: this.email }),
@@ -165,7 +165,7 @@ export default {
             color: "positive",
             icon: "check",
           })
-          this.$router.push({ name: "login" })
+          this.$router.push({ path: "/login" })
         })
         .catch((error) => {
           this.error = error.response

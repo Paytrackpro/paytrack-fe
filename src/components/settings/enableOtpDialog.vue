@@ -68,10 +68,10 @@ export default {
       this.loading = true;
       const ok = await this.enableOtp({ password: this.password });
       this.loading = false;
-      ok && this.$emit("hideDialog");
+      this.$emit("hideDialog", ok);
     },
     cancel() {
-      this.$emit("hideDialog");
+      this.$emit("hideDialog", false);
     },
     clearForm() {
       this.password = "";

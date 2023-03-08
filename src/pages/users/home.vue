@@ -9,7 +9,7 @@
       <q-card class="q-pa-md q-mt-lg home-card">
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-12 q-py-lg">
-            <router-link class="event-txt" to="/profile">
+            <router-link class="event-txt" to="/settings">
               <span class="text-info home-title-number">1</span> <span class="text-black text-bold"> Verify settings</span>
             </router-link>
           </div>
@@ -38,7 +38,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
   }
 }

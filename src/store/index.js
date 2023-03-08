@@ -1,11 +1,9 @@
 import { createStore } from "vuex";
-import auth from "./auth";
 import user from "./user";
 
 export default function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
-      auth,
       user,
     },
 

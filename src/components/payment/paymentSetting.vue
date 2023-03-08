@@ -16,7 +16,7 @@
       />
     </div>
     <div class="col">
-      <q-markup-table v-if="modelValue && modelValue.length">
+      <q-markup-table v-if="settings && settings.length">
         <thead v-if="!readonly">
           <tr>
             <td style="width: 80px">Default</td>
@@ -24,7 +24,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(setting, i) of modelValue" :key="i">
+          <tr v-for="(setting, i) of settings" :key="i">
             <td>
               <span v-if="readonly">{{ setting.type }}</span>
               <q-radio
@@ -47,6 +47,7 @@
                 lazy-rules
                 stack-label
                 hide-bottom-space
+                @update:model-value="emit"
               />
             </td>
           </tr>
@@ -57,6 +58,7 @@
 </template>
 
 <script>
+import {cloneObject} from "src/helper/helper"
 export default {
   name: "paymentSetting",
   props: {
@@ -69,11 +71,15 @@ export default {
       coins: ["btc", "ltc", "dcr"],
       selectedCoins: [],
       isDefault: "",
+      settings: []
     };
   },
   methods: {
+    emit() {
+      this.$emit("update:modelValue", this.settings);
+    },
     changeCoins(coins) {
-      const settings = this.modelValue || [];
+      const settings = this.settings || [];
       const newSettings = [];
       for (let coin of coins) {
         let found = false;
@@ -98,19 +104,19 @@ export default {
       this.$emit("update:modelValue", newSettings);
     },
     changeDefault(coin) {
-      const settings = this.modelValue || [];
-      for (let setting of settings) {
+      for (let setting of this.settings) {
         setting.isDefault = setting.type === coin;
       }
+      this.emit();
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        const settings = newVal || [];
+        this.settings = cloneObject(newVal)
         const selectedCoins = [];
-        for (let setting of settings) {
+        for (let setting of this.settings) {
           selectedCoins.push(setting.type);
           if (setting.isDefault) {
             this.isDefault = setting.type;
