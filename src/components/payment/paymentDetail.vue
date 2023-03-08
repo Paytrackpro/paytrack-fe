@@ -68,7 +68,7 @@
           v-model="payment.paymentMethod"
           :options="methods"
           label="Payment method"
-          @input="methodChange"
+          @update:modelValue="methodChange"
           :rules="[ val => !!val || 'Payment method is required' ]"
         />
         <q-field v-else label="Payment method" stack-label>
@@ -221,7 +221,7 @@ export default {
   },
   methods: {
     goToList() {
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
+      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
       this.$router.push({ path: `/${path}` })
     },
     queryRate() {
@@ -304,7 +304,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      role: "auth/getRole",
+      role: "user/getRole",
     }),
     editable() {
       return (this.payment.status === "created" || this.payment.status === "sent") &&

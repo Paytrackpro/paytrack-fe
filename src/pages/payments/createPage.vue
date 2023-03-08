@@ -64,17 +64,10 @@ export default {
   },
   computed: {
     ...mapGetters({
-      role: "auth/getRole",
+      role: "user/getRole",
     }),
     title() {
-      switch (this.paymentType) {
-        case PAYMENT_OBJECT_REQUEST:
-          return "Create invoices"
-        case PAYMENT_OBJECT_REMINDER:
-          return "Invite your recipients"
-        default:
-          return "Create payment"
-      }
+      return "Create payment request"
     }
   },
   methods: {
@@ -82,7 +75,7 @@ export default {
       this.$router.push({ path: `/` })
     },
     saved(data) {
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-pay"
+      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
       this.$router.push({ path: `/${path}/${data.id}`, params: { id: data.id } })
     },
   },
@@ -99,7 +92,7 @@ export default {
           this.payment.receiverName = ""
           return
         }
-        if (to.path === "/get-pay/create") {
+        if (to.path === "/get-paid/create") {
           this.paymentType = PAYMENT_OBJECT_REQUEST
           this.payment.paymentSettings = this.user.paymentSettings || []
           this.payment.senderId = 0

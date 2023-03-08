@@ -15,8 +15,14 @@ const routes = [
         meta: {
           title: "Home",
         },
-      },
-      {
+      }, {
+        path: "settings",
+        name: "settings",
+        component: () => import("pages/users/settings.vue"),
+        meta: {
+          title: "Settings",
+        },
+      }, {
         path: "users",
         name: "user.list",
         component: () => import("pages/admin/users/list.vue"),
@@ -35,50 +41,8 @@ const routes = [
         },
       },
       {
-        path: "profile/",
-        name: "profile",
-        component: () => import("src/pages/users/profile.vue"),
-        meta: {
-          title: "Profile",
-        },
-        children: [
-          {
-            path: "",
-            name: "profile.info",
-            component: () => import("src/pages/users/info.vue"),
-            meta: {
-              title: "Profile Info",
-            },
-          },
-          {
-            path: "edit",
-            name: "profile.edit",
-            component: () => import("src/pages/users/edit.vue"),
-            meta: {
-              title: "Profile Edit",
-            },
-          },
-          {
-            path: "settings",
-            name: "settings",
-            component: () => import("pages/users/settings.vue"),
-            meta: {
-              title: "Settings",
-            },
-          }
-        ],
-      },
-      {
-        path: "payment",
-        name: "payment",
-        component: () => import("pages/payments/listPage.vue"),
-        meta: {
-          title: "Payment List",
-        },
-      },
-      {
         path: "pay/",
-        name: "payment.list",
+        name: "pay",
         component: () => import("pages/payments/layout.vue"),
         meta: {
           title: "Pay",
@@ -86,7 +50,7 @@ const routes = [
         children: [
           {
             path: "",
-            name: "payment.pay",
+            name: "pay.list",
             component: () => import("pages/payments/payPage.vue"),
             meta: {
               title: "Payment/Pay",
@@ -94,7 +58,7 @@ const routes = [
           },
           {
             path: "create",
-            name: "payment.pay.create",
+            name: "pay.create",
             component: () => import("pages/payments/createPage.vue"),
             meta: {
               title: "Payment Create",
@@ -102,7 +66,7 @@ const routes = [
           },
           {
             path: ":id(\\d+)",
-            name: "payment.pay.detail",
+            name: "pay.detail",
             component: () => import("pages/payments/detailPage.vue"),
             meta: {
               title: "Payment",
@@ -111,8 +75,8 @@ const routes = [
         ],
       },
       {
-        path: "get-pay/",
-        name: "get-payment.list",
+        path: "get-paid/",
+        name: "get-paid",
         component: () => import("pages/payments/layout.vue"),
         meta: {
           title: "Get Pay",
@@ -120,26 +84,26 @@ const routes = [
         children: [
           {
             path: "",
-            name: "payment.get-pay",
-            component: () => import("pages/payments/getPayPage.vue"),
+            name: "get-paid.list",
+            component: () => import("pages/payments/getPaidPage.vue"),
             meta: {
-              title: "Payment/Get Pay",
+              title: "Get Paid",
             },
           },
           {
             path: "create",
-            name: "payment.get-pay.create",
+            name: "get-paid.create",
             component: () => import("pages/payments/createPage.vue"),
             meta: {
-              title: "Payment Create",
+              title: "Get Paid/ Create",
             },
           },
           {
             path: ":id(\\d+)",
-            name: "payment.get-pay.detail",
+            name: "get-paid.detail",
             component: () => import("pages/payments/detailPage.vue"),
             meta: {
-              title: "Payment detail",
+              title: "Get Paid/ detail",
             },
           },
         ],

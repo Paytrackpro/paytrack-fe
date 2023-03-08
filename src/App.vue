@@ -16,7 +16,7 @@ export default {
     urlPath,
     publicPath,
   }) {
-    const { authenticated, user } = store.state?.auth || {};
+    const { authenticated, user } = store.state?.user || {};
     if (!authenticated) {
       return redirect({ path: "/login" });
     }

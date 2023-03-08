@@ -1,11 +1,11 @@
 <template>
-  <payment-list type="request" label="Get pay"/>
+  <payment-list type="request" label="Get paid"/>
 </template>
 
 <script>
 import { PaymentList } from "components/payment"
 export default {
-  name: "getPayPage",
+  name: "getPaidPage",
   components: {
     PaymentList
   }

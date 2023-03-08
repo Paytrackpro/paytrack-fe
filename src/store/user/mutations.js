@@ -1,11 +1,15 @@
 export default {
-  setUserProfile(state, userProfile) {
-    state.userInfo = userProfile;
+  setUser(state, user) {
+    localStorage.setItem('user' ,JSON.stringify(user))
+    state.user = user;
   },
-  setQrImage(state, val) { 
+  setQrImage(state, val) {
     state.qrImage = val;
   },
   setTempPassword(state, val) {
     state.tempPassword = val;
-  }
+  },
+  setAuthenticated(state, authenticated) {
+    state.authenticated = authenticated;
+  },
 }

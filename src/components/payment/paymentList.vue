@@ -85,7 +85,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
     isUser() {
       return this.user.role === role.USER
@@ -107,7 +107,7 @@ export default {
     },
     goToDetail(id) {
       if (this.isUser) {
-        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-pay" : "pay"
+        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay"
         this.$router.push({ path: `/${path}/${id}` })
       }
     },

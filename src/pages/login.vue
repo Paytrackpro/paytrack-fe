@@ -73,8 +73,8 @@
                 </q-card>
                 <div class="text-center text-grey-6 q-mt-md">
                   Don't have account yet?
-                  <a class="link text-light-blue-6" href="/register"
-                    >Apply now</a
+                  <router-link class="link text-light-blue-6" to="/register"
+                    >Apply now</router-link
                   >
                 </div>
               </div>
@@ -107,12 +107,12 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
   },
   methods: {
     ...mapActions({
-      login: "auth/login",
+      login: "user/login",
     }),
     async goLogin(otpString) {
       const { error, data } = await this.login({

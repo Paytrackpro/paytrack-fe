@@ -10,7 +10,7 @@
         hide-bottom-space
         type="number"
         :error="submitted && invoice.hours < 0"
-        @input="calculateCost"
+        @update:modelValue="calculateCost"
       />
     </td>
     <td class="text-right">
@@ -38,9 +38,9 @@
         :error="submitted && !invoice.description"
       />
     </td>
-    <td class="text-right">
+    <td class="text-center">
       <span class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
-      <span class="event-txt q-ma-xs" @click="cancel">Cancel</span>
+      <span v-if="showCancel" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
     </td>
   </tr>
 </template>
@@ -100,6 +100,12 @@ export default {
       },
     },
   },
+  computed: {
+    showCancel() {
+      const {hours, cost, description} = this.invoice
+      return hours || cost || description
+    }
+  }
 };
 </script>
 
