@@ -11,6 +11,14 @@
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
+    <template v-slot:top-right>
+      <q-btn
+        color="white"
+        text-color="black"
+        label="Create"
+        :to="this.createLink"
+      />
+    </template>
     <template v-slot:body-cell-online="props">
       <q-td :props="props">
         <q-badge rounded :color="props.value ? 'green' : 'grey'" />
@@ -20,18 +28,23 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from "src/helper/paging"
-import { date } from "quasar"
-import { MDateFormat } from "src/consts/common"
-import { mapGetters } from "vuex"
-import role from "src/consts/role"
-import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
-import {responseError} from "src/helper/error";
+import {
+  pathParamsToPaging,
+  pagingToPathParams,
+  defaultPaging,
+} from "src/helper/paging";
+import { date } from "quasar";
+import { MDateFormat } from "src/consts/common";
+import { mapGetters } from "vuex";
+import role from "src/consts/role";
+import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
+import { responseError } from "src/helper/error";
 
 export default {
   name: "paymentList",
   data() {
     return {
+      createLink: "",
       loading: false,
       pagination: {
         ...defaultPaging,
@@ -43,28 +56,44 @@ export default {
           label: "receiver",
           align: "center",
           field: (row) => {
-            if (row.creatorId === row.receiverId || row.contactMethod === "internal") {
-              return row.receiverName
+            if (
+              row.creatorId === row.receiverId ||
+              row.contactMethod === "internal"
+            ) {
+              return row.receiverName;
             }
-            return row.externalEmail
+            return row.externalEmail;
           },
           format: (val) => `${val}`,
         },
-        { name: "senderName", align: "center", label: "sender", field: (row) => {
-          if (row.creatorId === row.senderId || row.contactMethod === "internal") {
-            return row.senderName
-          }
-          return row.externalEmail
-        }
+        {
+          name: "senderName",
+          align: "center",
+          label: "sender",
+          field: (row) => {
+            if (
+              row.creatorId === row.senderId ||
+              row.contactMethod === "internal"
+            ) {
+              return row.senderName;
+            }
+            return row.externalEmail;
+          },
         },
-        { name: "status", align: "center", label: "status", field: "status", sortable: true },
+        {
+          name: "status",
+          align: "center",
+          label: "status",
+          field: "status",
+          sortable: true,
+        },
         {
           name: "amount",
           align: "center",
           label: "amount(USD)",
           field: "amount",
           format: (val) => {
-            return val
+            return val;
           },
         },
         {
@@ -77,7 +106,7 @@ export default {
         },
       ],
       rows: [],
-    }
+    };
   },
   props: {
     type: String,
@@ -88,52 +117,57 @@ export default {
       user: "user/getUser",
     }),
     isUser() {
-      return this.user.role === role.USER
-    }
+      return this.user.role === role.USER;
+    },
   },
   methods: {
     async getPayments(f) {
-      this.loading = true
-      this.$api.get("/payment/list", {
-        params: f
-      }).then((res) => {
-        this.loading = false
-        this.rows = res.payments
-        this.pagination.rowsNumber = res.count
-      }).catch(err => {
-        responseError(err)
-        this.loading = false
-      })
+      this.loading = true;
+      this.$api
+        .get("/payment/list", {
+          params: f,
+        })
+        .then((res) => {
+          this.loading = false;
+          this.rows = res.payments;
+          this.pagination.rowsNumber = res.count;
+        })
+        .catch((err) => {
+          responseError(err);
+          this.loading = false;
+        });
     },
     goToDetail(id) {
       if (this.isUser) {
-        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay"
-        this.$router.push({ path: `/${path}/${id}` })
+        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
+        this.$router.push({ path: `/${path}/${id}` });
       }
     },
     onRequest(props) {
-      const query = pagingToPathParams(props)
+      const query = pagingToPathParams(props);
       this.$router.push({
         path: this.$router.fullPath,
         query,
-      })
-    }
+      });
+    },
   },
   watch: {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination);
+        this.createLink =
+          this.type == PAYMENT_OBJECT_REQUEST
+            ? "/get-paid/create"
+            : "/pay/create";
         this.getPayments({
           ...filter,
-          requestType: this.type
-        })
-      }
-    }
-  }
-}
+          requestType: this.type,
+        });
+      },
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
