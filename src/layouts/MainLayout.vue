@@ -2,7 +2,6 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-btn dense flat round icon="menu" @click="left = !left" />
         <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
         <q-btn flat>
           {{ user.userName }}
@@ -17,11 +16,18 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer show-if-above v-model="left" side="left" bordered>
+    <q-drawer show-if-above side="left" bordered>
       <q-scroll-area class="fit">
         <q-list>
           <template v-for="(menuItem, index) in menuList">
-            <q-item :key="index" clickable :to="menuItem.to" active-class="bg-grey-3" v-if="shouldDisplayRoute(menuItem)" v-ripple>
+            <q-item
+              :key="index"
+              clickable
+              :to="menuItem.to"
+              active-class="bg-grey-3"
+              v-if="shouldDisplayRoute(menuItem)"
+              v-ripple
+            >
               <q-item-section avatar>
                 <q-icon :name="menuItem.icon" />
               </q-item-section>
@@ -44,18 +50,17 @@
 </template>
 
 <script>
-import role from "src/consts/role"
-import { mapGetters } from "vuex"
+import role from "src/consts/role";
+import { mapGetters } from "vuex";
 export default {
   data() {
     return {
-      left: false,
       drawer: false,
       menuList: [
         {
           icon: "home",
           label: "Dashboard",
-          to: "/",
+          to: "/home",
         },
         {
           icon: "people",
@@ -82,23 +87,23 @@ export default {
           to: "/settings",
         },
       ],
-    }
+    };
   },
   computed: {
     ...mapGetters({
       user: "user/getUser",
     }),
     isAdmin() {
-      return this.user && this.user.role === role.ADMIN
+      return this.user && this.user.role === role.ADMIN;
     },
   },
   methods: {
     shouldDisplayRoute(menuItem) {
-      return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
+      return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin);
     },
     logOut() {
       this.$store.dispatch("user/logOut");
-      this.$router.push({ path: "/login" })
+      this.$router.push({ path: "/login" });
     },
     empty(str) {
       return (
@@ -109,8 +114,8 @@ export default {
         !/[^\s]/.test(str) ||
         /^\s*$/.test(str) ||
         str.replace(/\s/g, "") === ""
-      )
+      );
     },
   },
-}
+};
 </script>

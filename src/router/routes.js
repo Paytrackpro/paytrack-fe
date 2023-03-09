@@ -1,4 +1,4 @@
-import ROLE from "../consts/role"
+import ROLE from "../consts/role";
 
 const routes = [
   {
@@ -9,20 +9,22 @@ const routes = [
     },
     children: [
       {
-        path: "",
+        path: "home/",
         name: "home",
         component: () => import("src/pages/users/home.vue"),
         meta: {
           title: "Home",
         },
-      }, {
+      },
+      {
         path: "settings",
         name: "settings",
         component: () => import("pages/users/settings.vue"),
         meta: {
           title: "Settings",
         },
-      }, {
+      },
+      {
         path: "users",
         name: "user.list",
         component: () => import("pages/admin/users/list.vue"),
@@ -133,7 +135,7 @@ const routes = [
     path: "/register",
     name: "register",
     component: () => import("pages/register.vue"),
-  }
-]
+  },
+];
 
 export default routes;
