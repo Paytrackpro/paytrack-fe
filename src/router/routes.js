@@ -9,11 +9,15 @@ const routes = [
     },
     children: [
       {
-        path: "home/",
-        name: "home",
+        path: "",
+        redirect: "/dashboard",
+      },
+      {
+        path: "dashboard/",
+        name: "dashboard",
         component: () => import("src/pages/users/home.vue"),
         meta: {
-          title: "Home",
+          title: "Dashboard",
         },
       },
       {

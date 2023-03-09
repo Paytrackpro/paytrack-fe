@@ -60,7 +60,7 @@ export default {
         {
           icon: "home",
           label: "Dashboard",
-          to: "/home",
+          to: "/dashboard",
         },
         {
           icon: "people",
