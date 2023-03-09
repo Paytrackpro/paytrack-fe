@@ -58,7 +58,7 @@
 </template>
 
 <script>
-import {cloneObject} from "src/helper/helper"
+import { cloneObject } from "src/helper/helper";
 export default {
   name: "paymentSetting",
   props: {
@@ -71,7 +71,7 @@ export default {
       coins: ["btc", "ltc", "dcr"],
       selectedCoins: [],
       isDefault: "",
-      settings: []
+      settings: [],
     };
   },
   methods: {
@@ -114,7 +114,7 @@ export default {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.settings = cloneObject(newVal)
+        this.settings = cloneObject(newVal || []);
         const selectedCoins = [];
         for (let setting of this.settings) {
           selectedCoins.push(setting.type);
