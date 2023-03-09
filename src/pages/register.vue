@@ -14,18 +14,18 @@
           >
             <div class="column justify-center q-pa-xl col-grow">
               <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
-                <span class="text-bold">Account Register</span>
+                <span class="text-bold">Create Account</span>
               </div>
               <q-card class="col" flat bordered>
                 <q-card-section class="q-pa-lg">
                   <q-form class="q-gutter-y-md" @submit="register">
                     <div>
                       <p class="q-mt-none q-mb-xs text-weight-medium">
-                        User name
+                        Username
                       </p>
                       <q-input
                         v-model="username"
-                        placeholder="Your user name"
+                        placeholder="Your username"
                         outlined
                         dense
                         lazy-rules
@@ -43,7 +43,7 @@
                       <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
                       <q-input
                         v-model="email"
-                        placeholder="Your email"
+                        placeholder="Your email (optional)"
                         outlined
                         dense
                         lazy-rules
@@ -119,7 +119,7 @@
                     </div>
                     <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
                     <q-btn
-                      label="Register"
+                      label="Create"
                       type="submit"
                       color="primary"
                       class="full-width"
@@ -161,7 +161,7 @@ export default {
         .then(() => {
           this.$q.notify({
             message:
-              "Your account was registered. You will now be redirected to login page.",
+              "Your account was created. You will now be redirected to the login page.",
             color: "positive",
             icon: "check",
           })
