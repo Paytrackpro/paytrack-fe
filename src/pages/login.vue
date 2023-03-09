@@ -7,19 +7,15 @@
           <div class="flex flex-center q-mx-auto window-height login-form-wrapper">
             <div class="column justify-center q-pa-xl col-grow">
               <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
-                <span class="text-bold">Login</span>
               </div>
               <div v-show="!isOtp">
                 <q-card class="col" flat bordered>
                   <q-card-section class="q-pa-lg">
                     <q-form class="q-gutter-y-md" @submit="goLogin()">
                       <div>
-                        <p class="q-mt-none q-mb-xs text-weight-medium">
-                          User name
-                        </p>
                         <q-input
                           v-model="username"
-                          placeholder="Your user name"
+                          placeholder="Username"
                           outlined
                           dense
                           lazy-rules
@@ -34,9 +30,6 @@
                         </q-input>
                       </div>
                       <div>
-                        <p class="q-mt-none q-mb-xs text-weight-medium">
-                          Password
-                        </p>
                         <q-input
                           :type="isPwd ? 'password' : 'text'"
                           v-model="password"
@@ -72,9 +65,8 @@
                   </q-card-section>
                 </q-card>
                 <div class="text-center text-grey-6 q-mt-md">
-                  Don't have account yet?
                   <router-link class="link text-light-blue-6" to="/register"
-                    >Apply now</router-link
+                    >Create Account</router-link
                   >
                 </div>
               </div>
