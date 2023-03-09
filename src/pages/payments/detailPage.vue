@@ -73,7 +73,6 @@ export default {
         })
         .catch(err => {
           this.loading = false
-          console.log(err)
           switch (err.status) {
             case 403:
               this.isForbidden = true
@@ -86,7 +85,8 @@ export default {
         })
     },
     saved(data) {
-      this.payment = data;
+      this.payment = data
+      this.editing = false
     },
   },
   computed: {

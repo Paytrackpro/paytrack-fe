@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
     <div class="row q-mb-md q-col-gutter-md">
@@ -12,7 +11,7 @@
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'reminder'"
-          v-model="payment.senderName"
+          v-model="inPayment.senderName"
           placeholder="Sender"
           readonly
           outlined
@@ -31,7 +30,7 @@
           v-else
           v-model="partner.value"
           placeholder="Sender"
-          :readonly="user.id !== payment.creatorId"
+          :readonly="user.id !== inPayment.creatorId"
           outlined
           dense
           lazy-rules
@@ -58,7 +57,7 @@
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'request'"
-         v-model="payment.receiverName"
+         v-model="inPayment.receiverName"
          placeholder="Receiver"
          readonly
          outlined
@@ -92,8 +91,8 @@
           </template>
         </q-input>
       </div>
-      <div class="col"></div>
-      <div class="col-4">
+      <div class="col-4"></div>
+      <div class="col-4" v-if="!expanded">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           v-model="amount"
@@ -116,7 +115,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-8" />
+      <div class="col-8" v-if="!expanded"/>
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Choose payment method
@@ -133,7 +132,7 @@
           dense
           stack-label
           hide-bottom-space
-          @input="changePaymentMethod"
+          @update:modelValue="changePaymentMethod"
         />
       </div>
       <div v-if="paymentType === 'reminder'" class="col-8 col-md-9">
@@ -150,7 +149,7 @@
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
         <payment-setting
-          v-model="payment.paymentSettings"
+          v-model="inPayment.paymentSettings"
           label="Payment setting"
         />
       </div>
@@ -171,32 +170,32 @@
                 outlined
                 hide-bottom-space
                 type="number"
-                v-model="payment.hourlyRate"
+                v-model="inPayment.hourlyRate"
                 hint="Used to calculate cost from hours on invoices"
               />
             </div>
           </div>
           <invoices
-            v-model="payment.details"
-            :hourlyRate="Number(payment.hourlyRate)"
+            v-model="inPayment.details"
+            :hourlyRate="Number(inPayment.hourlyRate)"
           ></invoices>
         </q-expansion-item>
       </div>
     </div>
     <div class="row justify-end">
       <q-btn
-        :label="payment.status === '' ? 'Mark as draft' : 'Update'"
+        :label="inPayment.status === '' ? 'Mark as draft' : 'Update'"
         type="button"
         color="primary"
         @click="submit(true)"
         :disable="handling"
       >
-        <q-tooltip v-if="payment.status === ''">
+        <q-tooltip v-if="inPayment.status === ''">
           'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="payment.status === 'created' || payment.status === ''"
+        v-if="inPayment.status === 'created' || inPayment.status === ''"
         label="Send"
         type="submit"
         color="primary"
@@ -253,6 +252,7 @@ export default {
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
+      inPayment: {}
     };
   },
   props: {
@@ -265,9 +265,10 @@ export default {
     payment: {
       immediate: true,
       handler(newPayment) {
-        if (newPayment.contactMethod === "email") {
+        const payment = { ...newPayment }
+        if (payment.contactMethod === "email") {
           if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
-            if (this.payment.creatorId === this.user.id) {
+            if (payment.creatorId === this.user.id) {
               this.partner.value = newPayment.externalEmail
               this.partner.id = 0
             } else {
@@ -276,33 +277,34 @@ export default {
               newPayment.receiverName = newPayment.externalEmail
             }
           } else {
-            if (this.payment.creatorId === this.user.id) {
-              this.partner.value = newPayment.externalEmail
+            if (payment.creatorId === this.user.id) {
+              this.partner.value = payment.externalEmail
               this.partner.id = 0
             } else {
-              this.partner.value = newPayment.receiverName
-              this.partner.id = newPayment.receiverId
-              newPayment.senderName = newPayment.externalEmail
+              this.partner.value = payment.receiverName
+              this.partner.id = payment.receiverId
+              payment.senderName = payment.externalEmail
             }
           }
         } else {
           this.partner.value =
             this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? newPayment.senderName
-              : newPayment.receiverName;
+              ? payment.senderName
+              : payment.receiverName;
           this.partner.id =
             this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? newPayment.senderId
-              : newPayment.receiverId;
+              ? payment.senderId
+              : payment.receiverId;
         }
+        this.inPayment = payment
         // setup correct payment setting
-        if (newPayment.paymentMethod && newPayment.paymentAddress) {
+        if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
-            type: newPayment.paymentMethod,
-            address: newPayment.paymentAddress,
+            type: payment.paymentMethod,
+            address: payment.paymentAddress,
           };
         } else {
-          const settings = newPayment.paymentSettings || [];
+          const settings = payment.paymentSettings || [];
           let filled = true;
           for (let setting of settings) {
             if (setting.isDefault) {
@@ -328,9 +330,9 @@ export default {
       if (emailPattern.test(this.partner.value)) {
         this.partner.status = DESTINATION_CHECK_DONE;
         // eslint-disable-next-line vue/no-mutating-props
-        this.payment.contactMethod = "email";
+        this.inPayment.contactMethod = "email";
         // eslint-disable-next-line vue/no-mutating-props
-        this.payment.senderEmail = this.partner.value;
+        this.inPayment.senderEmail = this.partner.value;
       } else {
         this.partner.status = DESTINATION_CHECK_CHECKING
         this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
@@ -340,7 +342,7 @@ export default {
               this.partner.id = data.id
               this.partner.paymentSettings = data.paymentSettings || []
               // eslint-disable-next-line vue/no-mutating-props
-              this.payment.contactMethod = "internal"
+              this.inPayment.contactMethod = "internal"
               this.updateSettings()
             } else {
               this.partner.status = DESTINATION_CHECK_FAIL
@@ -353,14 +355,22 @@ export default {
           });
       }
     },
-    submit(isDraft) {
+    async submit(isDraft) {
       if (this.submitting) {
         return;
       }
-      if (isDraft === true) {
-        this.$refs.paymentForm.reset()
+      const valid = await this.$refs.paymentForm.validate()
+      if (!valid) {
+        return
       }
-      const payment = { ...this.payment }
+      if (this.amount === 0) {
+        this.$q.notify({
+          type: "negative",
+          message: "Amount must greater than 0. Please fill up the invoices and hourly rate"
+        })
+        return
+      }
+      const payment = {...this.inPayment}
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.isDraft = isDraft === true
       if (payment.contactMethod === "email") {
@@ -402,7 +412,7 @@ export default {
         })
     },
     changePaymentMethod(val) {
-      const settings = this.payment.paymentSettings || [];
+      const settings = this.inPayment.paymentSettings || [];
       this.setting.address = "";
       for (let setting of settings) {
         if (setting.type === this.setting.type) {
@@ -414,22 +424,22 @@ export default {
       pType = pType || this.paymentType;
       if (pType === PAYMENT_OBJECT_REQUEST) {
         // eslint-disable-next-line vue/no-mutating-props
-        this.payment.paymentSettings = this.user.paymentSettings || [];
+        this.inPayment.paymentSettings = this.user.paymentSettings || [];
       }
       if (pType === PAYMENT_OBJECT_REMINDER) {
         // eslint-disable-next-line vue/no-mutating-props
-        this.payment.paymentSettings = this.partner.paymentSettings || [];
+        this.inPayment.paymentSettings = this.partner.paymentSettings || [];
       }
       let isSet = false;
-      for (let setting of this.payment.paymentSettings) {
+      for (let setting of this.inPayment.paymentSettings) {
         if (setting.isDefault) {
           isSet = true;
           this.setting.type = setting.type;
           this.setting.address = setting.address;
         }
       }
-      if (!isSet && this.payment.paymentSettings.length > 0) {
-        const setting = this.payment.paymentSettings[0];
+      if (!isSet && this.inPayment.paymentSettings.length > 0) {
+        const setting = this.inPayment.paymentSettings[0];
         this.setting.type = setting.type;
         this.setting.address = setting.address;
       } else {
@@ -449,11 +459,11 @@ export default {
       return this.partner.status === DESTINATION_CHECK_FAIL;
     },
     amount: function () {
-      if (!this.payment.details) {
+      if (!this.inPayment.details) {
         return 0;
       }
       let amount = 0;
-      for (let invoice of this.payment.details) {
+      for (let invoice of this.inPayment.details) {
         amount += Number(invoice.cost);
       }
       return amount;

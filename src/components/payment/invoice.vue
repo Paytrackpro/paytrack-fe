@@ -10,7 +10,7 @@
         hide-bottom-space
         type="number"
         :error="submitted && invoice.hours < 0"
-        @input="calculateCost"
+        @update:modelValue="calculateCost"
       />
       <span v-else>{{ modelValue.hours || "_" }}</span>
     </td>
@@ -77,6 +77,7 @@ export default {
     hourlyRate: Number,
     readonly: Boolean,
   },
+  emits: ["update:modelValue"],
   data() {
     return {
       editing: false,

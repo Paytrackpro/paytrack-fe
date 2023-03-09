@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   name: "DisableOtpDialog",
@@ -70,9 +70,6 @@ export default {
     ...mapActions({
       disableOtp: "user/disableOtp",
     }),
-    ...mapMutations({
-      updateUser: "auth/setUser",
-    }),
     async onSubmit() {
       this.loading = true;
       const ok = await this.disableOtp({
@@ -80,14 +77,10 @@ export default {
         otp: this.otp,
       });
       this.loading = false;
-      if (!ok) {
-        return;
-      }
-      this.updateUser({ ...this.user, otp: false });
-      this.$emit("hideDialog");
+      this.$emit("hideDialog", ok);
     },
     cancel() {
-      this.$emit("hideDialog");
+      this.$emit("hideDialog", false);
     },
     clearForm() {
       this.password = "";

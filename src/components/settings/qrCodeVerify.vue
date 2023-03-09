@@ -10,9 +10,14 @@
           Enter the 6-digit code from your authenticator app below.
         </p>
         <q-input placeholder="Code" dense outlined v-model="code"></q-input>
-        <q-btn type="submit" :loading="loading" :disable="loading"
-          >Verify</q-btn
-        >
+        <div class="q-mt-md">
+          <q-btn type="submit" :loading="loading" :disable="loading" color="primary" class="q-mr-xs">
+            Verify
+          </q-btn>
+          <q-btn type="button" :loading="loading" :disable="loading" @click="clearQr">
+            Cancel
+          </q-btn>
+        </div>
       </div>
     </q-card>
   </q-form>
@@ -32,7 +37,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
       qrImage: "user/getQrImage",
       tempPassword: "user/getTempPassword",
     }),
@@ -42,10 +47,10 @@ export default {
   },
   methods: {
     ...mapActions({
-      verifyOtp: "auth/verifyOtp",
+      verifyOtp: "user/verifyOtp",
     }),
     ...mapMutations({
-      updateUser: "auth/setUser",
+      updateUser: "user/setUser",
       removeQrImage: "user/setQrImage",
       removeTempPassword: "user/setTempPassword",
     }),
@@ -61,16 +66,20 @@ export default {
         responseError(err);
         return;
       }
-      this.updateUser({ ...this.user, otp: true });
       this.$q.notify({
         message: "2FA activated",
         color: "positive",
         icon: "check",
       });
-      this.removeQrImage();
-      this.removeTempPassword();
-      this.$emit("verified");
+      this.removeQrImage("");
+      this.removeTempPassword("");
+      this.$emit("verified", true);
     },
+    clearQr() {
+      this.removeQrImage("");
+      this.removeTempPassword("");
+      this.$emit("verified", false);
+    }
   },
   watch: {
     qrImage: {

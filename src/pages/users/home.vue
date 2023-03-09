@@ -1,27 +1,26 @@
 <template>
   <div class="row">
     <div class="col-12">
-      <div class="q-py-lg">
-        <span class="text-info text-h3">&lt;{{user.displayName || user.userName}}></span>
+      <div class="q-py-lg q-px-md">
+        <span class="text-info text-h3">{{user.displayName || user.userName}}</span>
       </div>
     </div>
     <div class="col-12">
-      <span class="text-h3">Get Started:</span>
       <q-card class="q-pa-md q-mt-lg home-card">
         <div class="row">
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <router-link class="event-txt" to="/profile">
-              <span class="text-info home-title-number">1</span> <span class="text-black"> Setup your</span> <span class="text-shadow"> profile</span>
+          <div class="col-lg-4 col-md-6 col-sm-12 q-py-lg">
+            <router-link class="event-txt" to="/settings">
+              <span class="text-info home-title-number">1</span> <span class="text-black text-bold"> Verify settings</span>
             </router-link>
           </div>
-          <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="col-lg-4 col-md-6 col-sm-12 q-py-lg">
+            <router-link class="event-txt" to="/get-paid/create">
+              <span class="text-info home-title-number">2</span> <span class="text-black text-bold"> Get paid</span>
+            </router-link>
+          </div>
+          <div class="col-lg-4 col-md-6 col-sm-12 q-py-lg">
             <router-link class="event-txt" to="/pay/create">
-              <span class="text-info home-title-number">2</span> <span class="text-black"> Invite your</span> <span class="text-shadow"> recipients</span>
-            </router-link>
-          </div>
-          <div class="col-lg-4 col-md-6 col-sm-12">
-            <router-link class="event-txt" to="/get-pay/create">
-              <span class="text-info home-title-number">3</span> <span class="text-shadow"> Create</span> <span class="text-black"> invoices</span>
+              <span class="text-info home-title-number">3</span> <span class="text-black text-bold"> Pay</span>
             </router-link>
           </div>
         </div>
@@ -39,7 +38,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "auth/getUser",
+      user: "user/getUser",
     }),
   }
 }

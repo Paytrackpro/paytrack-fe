@@ -41,7 +41,7 @@ export default {
     hourlyRate: [Number, String],
     readonly: Boolean,
   },
-  emits: ["update:invoices", "update:hourlyRate"],
+  emits: ["update:modelValue", "update:hourlyRate"],
   data() {
     return {};
   },

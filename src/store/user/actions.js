@@ -3,17 +3,65 @@ import { Notify } from "quasar";
 import { responseError } from "src/helper/error";
 
 export default {
-  async getUserInfo({ commit }) {
-    commit('setUserProfile', res.data.data);
+  // list actions for login/register
+  async login({ commit }, payload) {
+    try {
+      const data = await api.post("/auth/login", payload);
+      if (!data.otp) {
+        localStorage.setItem("token", data.token);
+        commit("setUser", data.userInfo);
+        commit("setAuthenticated", true);
+      }
+      return { data };
+    } catch (error) {
+      return { error };
+    }
   },
 
-  async updateUserProfile({ commit }, userData) {
-    return api.put('/user/info', userData).then(function (res) {
+  async register({ commit }, user) {
+    return api.post("/auth/register", user);
+  },
+
+  async logOut({ commit }, user) {
+    commit("setUser", "")
+    commit("setAuthenticated", false)
+    localStorage.clear()
+  },
+
+  async verifyOtp({ commit }, payload) {
+    try {
+      const data = await api.post("/auth/verify-otp", payload);
+      localStorage.setItem("token", data.token);
+      commit("setUser", data.userInfo);
+      commit("setAuthenticated", true);
+    } catch (error) {
+      return error;
+    }
+  },
+
+  // list actions for using system
+  async getUser({ commit }) {
+    return api.get('/user/info').then(user => {
+      commit("setUser", user)
+      return user
+    }).catch(err => {
+      responseError(err)
+      return false
+    })
+  },
+
+  async updateUser({ commit }, userData) {
+    return api.put('/user/info', userData).then( (newUser) => {
       Notify.create({
         message: 'your information is updated',
         color: "positive",
         icon: "done",
       })
+      commit("setUser", newUser)
+      return newUser
+    }).catch(err => {
+      responseError(err)
+      return false
     })
   },
 

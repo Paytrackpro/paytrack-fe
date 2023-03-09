@@ -1,65 +1,68 @@
 <template>
-  <q-card flat>
-    <SwitchButton2FA v-model="enabled2FA" @onUpdateValue="showDialogs" />
-    <QRCodeVerify @verified="verified" />
-    <EnableOtpDialog v-model="enableDialog" @hideDialog="hideDialog" />
-    <DisableOtpDialog v-model="disableDialog" @hideDialog="hideOtpDialog" />
+  <q-card class="q-px-lg">
+    <q-card-section class="q-py-none">
+      <q-tabs align="left" v-model="tab">
+        <q-tab label="Profile" name="profile"/>
+        <q-tab label="Payment methods" name="payment_method"/>
+        <q-tab label="Security" name="security"/>
+      </q-tabs>
+      <q-separator />
+    </q-card-section>
+    <q-card-section>
+      <q-skeleton v-if="loading" height="150px" />
+      <q-tab-panels v-else
+                    class="q-mx-none"
+        v-model="tab"
+        animated
+        swipeable
+        vertical
+        transition-prev="jump-up"
+        transition-next="jump-down"
+      >
+        <q-tab-panel class="q-px-none" name="profile">
+          <profile-form v-model="user"/>
+        </q-tab-panel>
+        <q-tab-panel class="q-px-none" name="payment_method">
+          <payment-methods v-model="user"/>
+        </q-tab-panel>
+        <q-tab-panel class="q-px-none" name="security">
+          <security-form v-model="user"/>
+        </q-tab-panel>
+      </q-tab-panels>
+    </q-card-section>
   </q-card>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
-
-import {
-  SwitchButton2FA,
-  EnableOtpDialog,
-  QRCodeVerify,
-  DisableOtpDialog,
-} from "components/settings";
-
+import {mapActions} from "vuex";
+import { ProfileForm, PaymentMethods, SecurityForm } from "components/settings"
 export default {
-  name: "userSetting",
+  name: "userProfile",
   components: {
-    SwitchButton2FA,
-    EnableOtpDialog,
-    QRCodeVerify,
-    DisableOtpDialog,
+    ProfileForm,
+    PaymentMethods,
+    SecurityForm
   },
   data() {
     return {
-      enabled2FA: false,
-      enableDialog: false,
-      disableDialog: false,
+      tab: "profile",
+      loading: false,
+      user: {}
     };
   },
-  computed: {
-    ...mapGetters({
-      user: "auth/getUser",
-    }),
-  },
-  created() {
-    this.enabled2FA = this.user.otp;
-  },
   methods: {
-    showDialogs(enable) {
-      if (enable && !this.user.otp) {
-        this.enableDialog = true;
-      }
-      if (!enable && this.user.otp) {
-        this.disableDialog = true;
-      }
-    },
-    hideDialog() {
-      this.enabled2FA = this.user.otp;
-      this.enableDialog = false;
-    },
-    hideOtpDialog() {
-      this.enabled2FA = this.user.otp;
-      this.disableDialog = false;
-    },
-    verified() {
-      this.enabled2FA = this.user.otp;
-    },
+    ...mapActions({
+      getUser: "user/getUser",
+    })
   },
-};
+  async created() {
+    this.loading = true
+    const user = await this.getUser()
+    if (user) {
+      this.user = user
+      this.loading = false
+    }
+  }
+}
 </script>
+<style scoped></style>
