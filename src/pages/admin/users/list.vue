@@ -14,7 +14,13 @@
       @row-click="(_, row) => goToDetail(row.id)"
     >
       <template v-slot:top-left>
-        <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search" >
+        <q-input
+          outlined
+          dense
+          debounce="300"
+          v-model="KeySearch"
+          placeholder="Search"
+        >
           <template v-slot:prepend>
             <q-icon name="search" />
           </template>
@@ -30,9 +36,13 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from "src/helper/paging"
-import { PAYMENT_TYPES } from "../../../consts/paymentType"
-import { date } from "quasar"
+import {
+  pathParamsToPaging,
+  pagingToPathParams,
+  defaultPaging,
+} from "src/helper/paging";
+import { PAYMENT_TYPES } from "../../../consts/paymentType";
+import { date } from "quasar";
 
 export default {
   name: "adminUserList",
@@ -42,8 +52,8 @@ export default {
   data() {
     return {
       loading: false,
-      KeySearch: '',
-      pagination: {...defaultPaging },
+      KeySearch: "",
+      pagination: { ...defaultPaging },
       columns: [
         {
           name: "userName",
@@ -54,8 +64,20 @@ export default {
           format: (val) => `${val}`,
           sortable: true,
         },
-        { name: "displayName", align: "center", label: "Dislay Name", field: "displayName", sortable: true },
-        { name: "email", align: "center", label: "Email", field: "email", sortable: true },
+        {
+          name: "displayName",
+          align: "center",
+          label: "Dislay Name",
+          field: "displayName",
+          sortable: true,
+        },
+        {
+          name: "email",
+          align: "center",
+          label: "Email",
+          field: "email",
+          sortable: true,
+        },
         {
           name: "paymentType",
           align: "center",
@@ -92,52 +114,52 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
-        filter.KeySearch = this.KeySearch
+        const filter = pathParamsToPaging(to, this.pagination);
+        filter.KeySearch = this.KeySearch;
         this.getUserList({
           ...filter,
-          requestType: this.type
-        })
-      }
+          requestType: this.type,
+        });
+      },
     },
   },
-  created: function(){
-    this.getUserList()
+  created: function () {
+    this.getUserList();
   },
   methods: {
     async getUserList(f) {
       this.loading = true;
-      this.$api.get('/admin/user/list',{
-        params: f
-      }).then((res) => {
-        this.rows = res.data.data.users;
-        this.pagination.rowsNumber = res.data.data.count;
-        this.loading = false;
-      }).catch(err => {
-        this.loading = false
-      });
+      try {
+        const { users, count } = await this.$api.get("/admin/user/list", {
+          params: f,
+        });
+        this.rows = users;
+        this.pagination.rowsNumber = count;
+      } catch (err) {
+        console.error(err);
+      }
+      this.loading = false;
     },
     goToDetail(id) {
-      this.$router.push({ name: "user.detail", params: { id } })
+      this.$router.push({ name: "user.detail", params: { id } });
     },
     onRequest(props) {
-      const query = pagingToPathParams(props)
+      const query = pagingToPathParams(props);
       query.s = props.filter;
       this.$router.push({
         path: this.$router.fullPath,
         query,
-      })
+      });
     },
   },
 };
 </script>
 <style lang="scss">
-  .list-user-header .list-user-icon-sort{
-    display: flex;
-    width: 100px;
-  }
-  .list-user-header:hover .list-user-icon-sort{
-    display: block;
-  }
+.list-user-header .list-user-icon-sort {
+  display: flex;
+  width: 100px;
+}
+.list-user-header:hover .list-user-icon-sort {
+  display: block;
+}
 </style>
-
