@@ -123,9 +123,6 @@ export default {
       },
     },
   },
-  created: function () {
-    this.getUserList();
-  },
   methods: {
     async getUserList(f) {
       this.loading = true;
