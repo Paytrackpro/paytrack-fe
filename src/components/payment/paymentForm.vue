@@ -3,16 +3,16 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Sender
+          Payer
           <q-icon name="info">
             <q-tooltip>
-              The sender is person who will pay for the payment
+              The payer is person who will pay for the payment
             </q-tooltip>
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'reminder'"
           v-model="inPayment.senderName"
-          placeholder="Sender"
+          placeholder="Payer"
           readonly
           outlined
           dense
@@ -29,7 +29,7 @@
         <q-input
           v-else
           v-model="partner.value"
-          placeholder="Sender"
+          placeholder="Payer"
           :readonly="user.id !== inPayment.creatorId"
           outlined
           dense
@@ -37,7 +37,7 @@
           stack-label
           hide-bottom-space
           @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Sender is required']"
+          :rules="[(val) => !!val || 'Payer is required']"
           :error="partnerError"
           :error-message="partner.error"
           hint="expect an user name on mgmt or an email address"
