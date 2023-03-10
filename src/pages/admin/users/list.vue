@@ -124,9 +124,9 @@ export default {
       const query = pagingToPathParams(props)
       query.s = props.filter;
       this.$router.push({
-        path: this.$router.fullPath,
+        path: this.$route.fullPath,
         query,
-      })
+      });
     },
   },
 };

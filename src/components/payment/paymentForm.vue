@@ -3,62 +3,16 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Payer
+          Requester
           <q-icon name="info">
             <q-tooltip>
-              The payer is person who will pay for the payment
-            </q-tooltip>
-          </q-icon>
-        </p>
-        <q-input v-if="paymentType === 'reminder'"
-          v-model="inPayment.senderName"
-          placeholder="Payer"
-          readonly
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          :error="false"
-          error-message=""
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
-        <q-input
-          v-else
-          v-model="partner.value"
-          placeholder="Payer"
-          :readonly="user.id !== inPayment.creatorId"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Payer is required']"
-          :error="partnerError"
-          :error-message="partner.error"
-          hint="expect an user name on mgmt or an email address"
-        >
-          <template v-slot:prepend>
-            <q-icon name="person_add" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">
-          Receiver
-          <q-icon name="info">
-            <q-tooltip>
-              The receiver is person who will receive the payment
+              The requester is person who will receive the payment
             </q-tooltip>
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'request'"
          v-model="inPayment.receiverName"
-         placeholder="Receiver"
+         placeholder="Requester"
          readonly
          outlined
          dense
@@ -70,26 +24,58 @@
             <q-icon name="person" />
           </template>
         </q-input>
-        <q-input
+        <q-input-system-user
           v-else
-          v-model="partner.value"
-          placeholder="Receiver"
-          :readonly="user.id !== payment.creatorId"
+          v-model="partner"
+          placeholder="Requester"
+          readonly
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
-          @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Receiver is required']"
-          :error="partnerError"
-          :error-message="partner.error"
+          :rules="[(val) => !!val || 'Requester is required']"
           hint="expect an user name on mgmt or an email address"
+        />
+      </div>
+      <div class="col-4">
+        <p class="q-mt-none q-mb-xs text-weight-medium">
+          Payer
+          <q-icon name="info">
+            <q-tooltip>
+              The payer is person who will pay for the payment
+            </q-tooltip>
+          </q-icon>
+        </p>
+        <q-input v-if="paymentType === 'reminder'"
+           v-model="inPayment.senderName"
+           placeholder="Payer"
+           readonly
+           outlined
+           dense
+           lazy-rules
+           stack-label
+           hide-bottom-space
+           :error="false"
+           error-message=""
         >
           <template v-slot:prepend>
-            <q-icon name="person_add" />
+            <q-icon name="person" />
           </template>
         </q-input>
+        <q-input-system-user
+          v-else
+          v-model="partner"
+          placeholder="Payer"
+          :readonly="user.id !== inPayment.creatorId"
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
+          :rules="[(val) => !!val || 'Payer is required']"
+          hint="expect an user name on mgmt or an email address"
+        />
       </div>
       <div class="col-4"></div>
       <div class="col-4" v-if="!expanded">
@@ -225,17 +211,13 @@ import {
 } from "src/consts/paymentType";
 import { emailPattern } from "src/helper/validations"
 import Invoices from "components/payment/invoices"
+import QInputSystemUser from "components/common/qInputSystemUser";
 import PaymentSetting from "components/payment/paymentSetting"
 import {responseError} from "src/helper/error";
 
-const DESTINATION_CHECK_NONE = 0;
-const DESTINATION_CHECK_CHECKING = 1;
-const DESTINATION_CHECK_FAIL = 2;
-const DESTINATION_CHECK_DONE = 3;
-
 export default {
   name: "paymentForm",
-  components: { Invoices, PaymentSetting },
+  components: { Invoices, PaymentSetting, QInputSystemUser },
   data() {
     return {
       expanded: false,
@@ -246,8 +228,6 @@ export default {
       partner: {
         id: 0,
         value: "",
-        status: DESTINATION_CHECK_NONE,
-        error: "",
         paymentSettings: [],
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
@@ -266,6 +246,7 @@ export default {
       immediate: true,
       handler(newPayment) {
         const payment = { ...newPayment }
+        this.partner.contactMethod = payment.contactMethod
         if (payment.contactMethod === "email") {
           if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
             if (payment.creatorId === this.user.id) {
@@ -320,43 +301,8 @@ export default {
     },
   },
   methods: {
-    checkingDestination($e) {
-      this.partner.status = DESTINATION_CHECK_NONE;
-      this.partner.error = "";
-      this.partner.id = 0;
-      if (!this.partner.value) {
-        return;
-      }
-      if (emailPattern.test(this.partner.value)) {
-        this.partner.status = DESTINATION_CHECK_DONE;
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.contactMethod = "email";
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.senderEmail = this.partner.value;
-      } else {
-        this.partner.status = DESTINATION_CHECK_CHECKING
-        this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
-          .then((data) => {
-            if (data.found) {
-              this.partner.status = DESTINATION_CHECK_DONE
-              this.partner.id = data.id
-              this.partner.paymentSettings = data.paymentSettings || []
-              // eslint-disable-next-line vue/no-mutating-props
-              this.inPayment.contactMethod = "internal"
-              this.updateSettings()
-            } else {
-              this.partner.status = DESTINATION_CHECK_FAIL
-              this.partner.error = data.message
-            }
-          })
-          .catch(() => {
-            this.partner.status = DESTINATION_CHECK_FAIL;
-            this.partner.error = "the user name is not found";
-          });
-      }
-    },
     async submit(isDraft) {
-      if (this.submitting) {
+      if (this.submitting || !this.partner.contactMethod) {
         return;
       }
       const valid = await this.$refs.paymentForm.validate()
@@ -373,6 +319,7 @@ export default {
       const payment = {...this.inPayment}
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.isDraft = isDraft === true
+      payment.contactMethod = this.partner.contactMethod
       if (payment.contactMethod === "email") {
         if (!payment.id || this.user.id === payment.creatorId) {
           payment.externalEmail = this.partner.value
@@ -420,43 +367,10 @@ export default {
         }
       }
     },
-    updateSettings(pType) {
-      pType = pType || this.paymentType;
-      if (pType === PAYMENT_OBJECT_REQUEST) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.paymentSettings = this.user.paymentSettings || [];
-      }
-      if (pType === PAYMENT_OBJECT_REMINDER) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.paymentSettings = this.partner.paymentSettings || [];
-      }
-      let isSet = false;
-      for (let setting of this.inPayment.paymentSettings) {
-        if (setting.isDefault) {
-          isSet = true;
-          this.setting.type = setting.type;
-          this.setting.address = setting.address;
-        }
-      }
-      if (!isSet && this.inPayment.paymentSettings.length > 0) {
-        const setting = this.inPayment.paymentSettings[0];
-        this.setting.type = setting.type;
-        this.setting.address = setting.address;
-      } else {
-        this.setting.type = "";
-        this.setting.address = "";
-      }
-    },
   },
   computed: {
     handling() {
-      if (this.submitting) {
-        return true;
-      }
-      return this.partner.status === DESTINATION_CHECK_CHECKING;
-    },
-    partnerError: function () {
-      return this.partner.status === DESTINATION_CHECK_FAIL;
+      return this.submitting
     },
     amount: function () {
       if (!this.inPayment.details) {

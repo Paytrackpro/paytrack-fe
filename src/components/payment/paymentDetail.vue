@@ -3,7 +3,7 @@
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
-        <q-field label="The sender" stack-label>
+        <q-field label="The payer" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.senderName || payment.externalEmail }}
