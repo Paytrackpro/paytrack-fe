@@ -121,7 +121,7 @@ export default {
         this.isOtp = true;
         return;
       }
-      this.$router.push({ name: "home" });
+      this.$router.push({ path: "/dashboard" });
     },
   },
 };
