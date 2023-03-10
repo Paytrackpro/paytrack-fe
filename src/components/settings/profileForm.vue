@@ -8,7 +8,7 @@
         </div>
       </div>
       <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Display name </p>
+        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Display name</p>
         <q-input
           outlined
           dense
@@ -20,7 +20,7 @@
         />
       </div>
       <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Email </p>
+        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Email</p>
         <q-input
           outlined
           dense
@@ -29,56 +29,66 @@
           hide-bottom-space
           v-model="user.email"
           placeholder="Email"
-          :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address',]"
+          :rules="[
+            (val, rules) =>
+              !val ||
+              (val && rules.email(val)) ||
+              'Please enter a valid email address',
+          ]"
         />
       </div>
     </div>
     <q-separator />
     <div class="q-mt-md">
-      <q-btn label="Save" class="q-mr-xs" :disable="loading"  type="submit" color="primary"/>
+      <q-btn
+        label="Save"
+        class="q-mr-xs"
+        :disable="loading"
+        type="submit"
+        color="primary"
+      />
     </div>
   </q-form>
 </template>
 
 <script>
-import {mapActions} from "vuex";
+import { mapActions } from "vuex";
 
 export default {
   data() {
     return {
       user: {},
-      loading: false
-    }
+      loading: false,
+    };
   },
   name: "profileForm",
   props: {
-    modelValue: Object
+    modelValue: Object,
   },
   emits: ["update:modelValue"],
   watch: {
     modelValue(val) {
-      this.user = {...val}
-    }
+      this.user = { ...val };
+    },
   },
   methods: {
     ...mapActions({
       updateUser: "user/updateUser",
+      getUser: "user/getUser",
     }),
     async submit() {
-      this.loading = true
-      const newUser = await this.updateUser(this.user)
+      this.loading = true;
+      const newUser = await this.updateUser(this.user);
       if (newUser) {
-        this.$emit("update:modelValue", newUser)
+        this.$emit("update:modelValue", this.user);
       }
-      this.loading = false
-    }
+      this.loading = false;
+    },
   },
   created() {
-    this.user = {...this.modelValue}
-  }
-}
+    this.user = { ...this.modelValue };
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
