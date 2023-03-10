@@ -129,18 +129,15 @@ export default {
   methods: {
     async getUserList(f) {
       this.loading = true;
-      this.$api
-        .get("/admin/user/list", {
-          params: f,
-        })
-        .then((res) => {
-          this.rows = res.data.data.users;
-          this.pagination.rowsNumber = res.data.data.count;
-          this.loading = false;
-        })
-        .catch((err) => {
-          this.loading = false;
-        });
+      this.$api.get('/admin/user/list',{
+        params: f
+      }).then(({users, count}) => {
+        this.rows = users || [];
+        this.pagination.rowsNumber = count;
+        this.loading = false;
+      }).catch(err => {
+        this.loading = false
+      });
     },
     goToDetail(id) {
       this.$router.push({ name: "user.detail", params: { id } });
