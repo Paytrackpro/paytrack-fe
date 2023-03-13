@@ -1,17 +1,22 @@
 <template>
 <q-card flat bordered class="q-pa-md">
   <q-card-section>
-    <div class="text-h6">{{ mainTitle }}</div>
+    <div class="text-h6">
+      Payment request
+      <template v-if="payment.status">
+        (<payment-status :status="payment.status" :receiver-id="payment.receiverId"/>)
+      </template>
+    </div>
   </q-card-section>
   <q-separator inset />
   <payment-detail
     v-show="!loading && !isError && !editing"
-    :payment="payment"
+    v-model="payment"
+    v-model:editing="editing"
     :payment-type="paymentType"
     :token="token"
     :user="user"
-    @edit="editing=true"
-    @update="saved"
+    @update:modelValue="saved"
   />
   <payment-form
     v-if="editing"
@@ -26,20 +31,23 @@
     <div class="text-h6">{{ errorText }}</div>
   </q-card-section>
 
-    <q-inner-loading :showing="loading">
-      <q-spinner-gears size="50px" color="primary" class="q-mt-lg" />
-    </q-inner-loading>
+  <q-inner-loading
+    :showing="loading"
+    label="Please wait..."
+    label-class="text-teal"
+    label-style="font-size: 1.1em"
+  />
   </q-card>
 </template>
 
 <script>
 import {PaymentForm, PaymentDetail} from "components/payment";
-import MDate from "components/common/mDate";
 import {PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
+import PaymentStatus from "components/payment/paymentStatus";
 import {mapGetters} from "vuex";
 export default {
   name: "detailPaymentPage",
-  components: { PaymentForm, PaymentDetail },
+  components: { PaymentForm, PaymentDetail, PaymentStatus },
   data() {
     return {
       loading: false,
@@ -85,7 +93,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
+      user: "user/getUser"
     }),
     isError: function () {
       return this.isForbidden || this.isNotfound || this.isUnknownError;
@@ -99,13 +107,6 @@ export default {
       }
       return "Unknown error. Please contact the admin"
     },
-    mainTitle() {
-      let status = this.payment.status
-      if (this.payment.status === "created") {
-        status = "draft"
-      }
-      return status ? `Payment request (${status})` : "Payment request"
-    }
   },
   watch: {
     payment: {

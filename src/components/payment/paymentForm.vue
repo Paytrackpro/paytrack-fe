@@ -286,8 +286,10 @@ export default {
       }
       const payment = {...this.inPayment}
       payment.hourlyRate = Number(payment.hourlyRate)
-      payment.isDraft = isDraft === true
       payment.contactMethod = this.partner.contactMethod
+      if (isDraft === true) {
+        payment.status = "sent"
+      }
       if (payment.contactMethod === "email") {
         if (!payment.id || this.user.id === payment.creatorId) {
           payment.externalEmail = this.partner.value

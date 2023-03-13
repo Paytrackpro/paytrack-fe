@@ -21,10 +21,23 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field label="Status" stack-label>
+        <q-select
+          v-if="processing"
+          v-model="payment.status"
+          :options="statuses"
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          emit-value
+          map-options
+          label="Status"
+          :rules="[ val => !!val || 'Status is required' ]"
+        />
+        <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.status }}
+              <payment-status :status="payment.status" :receiver-id="payment.receiverId"/>
             </div>
           </template>
         </q-field>
@@ -42,13 +55,13 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field label="Convert Rate" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.convertRate }}
-            </div>
-          </template>
-        </q-field>
+        <PaymentRateInput
+          :readonly="!processing"
+          ref="rateInput"
+          v-model="payment"
+          v-model:loading="fetchingRate"
+          @update:modelValue="updateLocal"
+        />
       </div>
       <div class="col-4">
         <q-field
@@ -67,6 +80,10 @@
           v-if="processing"
           v-model="payment.paymentMethod"
           :options="methods"
+          outlined
+          dense
+          lazy-rules
+          stack-label
           label="Payment method"
           @update:modelValue="methodChange"
           :rules="[ val => !!val || 'Payment method is required' ]"
@@ -107,6 +124,10 @@
           v-model="txId"
           label="Transaction id"
           ref="txId"
+          outlined
+          dense
+          lazy-rules
+          stack-label
         />
         <q-field v-if="!processing" label="Transaction id" stack-label>
           <template v-slot:control>
@@ -163,16 +184,16 @@
     <div class="row justify-end q-mt-lg">
       <q-btn
         v-if="processable && processing"
-        :label="fetchRateLabel"
+        label="save"
         type="button"
         color="primary"
-        @click="queryRate"
         :disable="fetchingRate || paying"
         class="q-mr-sm"
+        @click="update"
       />
       <q-btn
         v-if="processable && processing"
-        label="Mark as paid"
+        label="paid"
         type="submit"
         color="primary"
         :disable="fetchingRate || paying"
@@ -186,66 +207,77 @@
         @click="processPayment"
         class="q-mr-sm"
       />
-      <q-btn v-if="editable && !processing" label="Edit" type="button" color="primary" @click="$emit('edit')" />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="goToList" />
+      <q-btn
+        v-if="editable && !processing"
+        label="Edit"
+        type="button"
+        color="primary"
+        @click="$emit('update:editing', true)"
+        class="q-mr-sm"
+      />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
     </div>
   </q-form>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import {mapActions, mapGetters} from "vuex";
 import MDate from "components/common/mDate";
 import Invoices from "components/payment/invoices";
 import PaymentSetting from "components/payment/paymentSetting";
 import {PAYMENT_OBJECT_REMINDER} from "src/consts/paymentType";
 import {responseError} from "src/helper/error";
+import PaymentStatus from "components/payment/paymentStatus";
+import PaymentRateInput from "components/payment/paymentRateInput";
 export default {
   name: "paymentDetail",
-  components: { MDate, Invoices, PaymentSetting },
+  components: { MDate, Invoices, PaymentSetting, PaymentStatus, PaymentRateInput },
   data() {
     return {
       txId: "",
       pMethod: "",
       methods: [],
+      statuses: [
+        {
+          label: 'Received',
+          value: 'sent'
+        },
+        {
+          label: 'Ready for Payment',
+          value: 'confirmed'
+        }
+      ],
       expanded: false,
       processing: false,
       fetchingRate: false,
       paying: false,
+      payment: {}
     };
   },
   props: {
-    payment: Object,
+    modelValue: Object,
     user: Object,
     token: String,
-    paymentType: String
+    paymentType: String,
+    editing: Boolean
   },
   methods: {
-    goToList() {
+    ...mapActions({
+      savePayment: "payment/save"
+    }),
+    cancel() {
+      if (this.processing) {
+        this.processing = false
+        return
+      }
       const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
       this.$router.push({ path: `/${path}` })
     },
-    queryRate() {
-      const reqData = {
-        id: this.payment.id,
-        paymentMethod: this.payment.paymentMethod,
-        paymentAddress: this.payment.paymentAddress,
-        token: this.token,
-      }
-      this.fetchingRate = true
-      this.$api
-        .post("/payment/request-rate", reqData)
-        .then((data) => {
-          this.fetchingRate = false
-          this.$emit("update", data)
-        })
-        .catch((err) => {
-          this.fetchingRate = false
-          responseError(err)
-        })
-    },
     processPayment() {
       this.processing = true;
-      this.queryRate();
+      if (this.payment.paymentMethod !== "none") {
+        this.$refs.rateInput.fetchRate()
+      }
     },
     markAsPaid() {
       const txId = this.txId.trim();
@@ -281,25 +313,58 @@ export default {
           responseError(err)
         })
     },
+    async update() {
+      const form = {
+        ...this.payment,
+        token: this.token,
+        txId: this.txId
+      }
+      /*console.log(form.status)
+      return*/
+      this.paying = true
+      const { data } = await this.savePayment(form)
+      this.paying = false
+      this.updateLocal(data.payment)
+    },
+    updateLocal(payment, editing) {
+      payment = payment || this.payment
+      this.$emit("update:modelValue", payment)
+      if (editing) {
+        this.$emit("update:editing", true)
+      }
+    },
     methodChange(method) {
       const settings = this.payment.paymentSettings || [];
       const setting = settings.find((s) => s.type === method);
       if (setting) {
-        // eslint-disable-next-line vue/no-mutating-props
         this.payment.paymentAddress = setting.address;
       }
-      this.queryRate();
+      this.$refs.rateInput.fetchRate();
     },
   },
   watch: {
-    payment: {
+    modelValue: {
       immediate: true,
       handler(newPayment) {
         this.txId = newPayment.txId;
         this.pMethod = newPayment.paymentMethod;
         let settings = newPayment.paymentSettings || [];
         this.methods = settings.map((s) => s.type);
-      },
+        this.payment = { ...newPayment }
+        // setup default payment method
+        const paymentSettings = this.payment.paymentSettings || []
+        if (this.payment.paymentMethod === "none" && paymentSettings.length) {
+          let setting = paymentSettings[0]
+          for (let ps of paymentSettings) {
+            if (ps.isDefault) {
+              setting = ps
+              break
+            }
+          }
+          this.payment.paymentMethod = setting.type
+          this.payment.paymentAddress = setting.address
+        }
+      }
     },
   },
   computed: {
@@ -307,18 +372,12 @@ export default {
       role: "user/getRole",
     }),
     editable() {
-      return (this.payment.status === "created" || this.payment.status === "sent") &&
+      return ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
         (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token);
     },
     processable() {
-      return (this.payment.status === "created" || this.payment.status === "sent") &&
+      return ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
         (this.payment.senderId === this.user.id || (this.token && this.payment.senderId === 0))
-    },
-    fetchRateLabel() {
-      if (this.fetchingRate) {
-        return "Fetching Rate";
-      }
-      return "Re-fetch rate";
     },
   },
 };
