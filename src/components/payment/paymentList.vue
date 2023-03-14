@@ -92,7 +92,7 @@ export default {
       let flexibleCol = this.type === PAYMENT_OBJECT_REQUEST ? {
         name: "senderName",
         align: "center",
-        label: "Payer",
+        label: "Recipient",
         field: (row) => {
           if (
             row.creatorId === row.senderId ||
@@ -105,7 +105,7 @@ export default {
       } : {
         name: "receiverName",
         required: true,
-        label: "Requester",
+        label: "Sender",
         align: "center",
         field: (row) => {
           if (

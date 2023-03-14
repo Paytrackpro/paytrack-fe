@@ -3,16 +3,16 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Requester
+          Sender
           <q-icon name="info">
             <q-tooltip>
-              The requester is person who will receive the payment
+              You are the sender of the payment request to the recipient
             </q-tooltip>
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'request'"
          v-model="inPayment.receiverName"
-         placeholder="Requester"
+         placeholder="Sender"
          readonly
          outlined
          dense
@@ -27,29 +27,29 @@
         <q-input-system-user
           v-else
           v-model="partner"
-          placeholder="Requester"
+          placeholder="Sender"
           readonly
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
-          :rules="[(val) => !!val || 'Requester is required']"
+          :rules="[(val) => !!val || 'Sender is required']"
           hint="expect an user name on mgmt or an email address"
         />
       </div>
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Payer
+          Recipient
           <q-icon name="info">
             <q-tooltip>
-              The payer is person who will pay for the payment
+              The user who will be paying the payment request
             </q-tooltip>
           </q-icon>
         </p>
         <q-input v-if="paymentType === 'reminder'"
            v-model="inPayment.senderName"
-           placeholder="Payer"
+           placeholder="Recipient"
            readonly
            outlined
            dense
@@ -66,14 +66,14 @@
         <q-input-system-user
           v-else
           v-model="partner"
-          placeholder="Payer"
+          placeholder="Recipient"
           :readonly="user.id !== inPayment.creatorId"
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
-          :rules="[(val) => !!val || 'Payer is required']"
+          :rules="[(val) => !!val || 'Recipient is required']"
           hint="expect an user name on mgmt or an email address"
         />
       </div>
