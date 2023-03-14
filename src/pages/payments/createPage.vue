@@ -24,47 +24,31 @@ export default {
   components: {
     PaymentForm,
   },
+  props: {
+    paymentType: String
+  },
   data() {
-    let user = localStorage.getItem("user");
-    if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user);
-    } else {
-      user = {};
-    }
-    let paymentSetting = {};
-    if (user.paymentSetting && Array.isArray(user.paymentSetting)) {
-      paymentSetting = user.paymentSetting[0];
-      for (let s in user.paymentSetting) {
-        if (s.isDefault) {
-          paymentSetting = s;
-          break;
-        }
-      }
-    }
     return {
-      user: user,
       payment: {
         contactMethod: "internal",
         status: "",
         receiverId: 0,
         receiverName: "",
-        creatorId: user.id,
+        creatorId: 0,
         senderId: 0,
         senderName: "",
         hourlyRate: 0,
         senderEmail: "",
         txId: "",
-        paymentMethod: paymentSetting.type || "",
-        paymentAddress: paymentSetting.address || "",
-        paymentSettings: user.paymentSettings || [],
+        paymentSettings: [],
         details: [],
       },
-      paymentType: PAYMENT_OBJECT_REQUEST
     }
   },
   computed: {
     ...mapGetters({
       role: "user/getRole",
+      user: "user/getUser"
     }),
     title() {
       return "Create payment request"
@@ -80,20 +64,24 @@ export default {
     },
   },
   watch: {
-    $route: {
+    user: {
       immediate: true,
-      handler(to) {
-        if (to.path === "/pay/create") {
-          this.paymentType = PAYMENT_OBJECT_REMINDER
+      handler(user) {
+        this.payment.paymentSettings = user.paymentSettings || []
+        this.payment.creatorId = user.id || 0
+      }
+    },
+    paymentType: {
+      immediate: true,
+      handler(pType) {
+        if (pType === PAYMENT_OBJECT_REMINDER) {
           this.payment.paymentSettings = []
           this.payment.senderId = this.user.id
           this.payment.senderName = this.user.userName
           this.payment.receiverId = 0
           this.payment.receiverName = ""
-          return
         }
-        if (to.path === "/get-paid/create") {
-          this.paymentType = PAYMENT_OBJECT_REQUEST
+        if (pType === PAYMENT_OBJECT_REQUEST) {
           this.payment.paymentSettings = this.user.paymentSettings || []
           this.payment.senderId = 0
           this.payment.senderName = ""
@@ -102,6 +90,9 @@ export default {
         }
       }
     }
+  },
+  created() {
+    console.log(this.paymentType)
   }
 }
 </script>

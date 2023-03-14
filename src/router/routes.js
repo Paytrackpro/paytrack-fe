@@ -1,4 +1,5 @@
 import ROLE from "../consts/role";
+import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
 
 const routes = [
   {
@@ -59,15 +60,7 @@ const routes = [
             name: "pay.list",
             component: () => import("pages/payments/payPage.vue"),
             meta: {
-              title: "Payment/Pay",
-            },
-          },
-          {
-            path: "create",
-            name: "pay.create",
-            component: () => import("pages/payments/createPage.vue"),
-            meta: {
-              title: "Payment Create",
+              title: "Make payment",
             },
           },
           {
@@ -103,6 +96,9 @@ const routes = [
             meta: {
               title: "Get Paid/ Create",
             },
+            props: {
+              paymentType: PAYMENT_OBJECT_REQUEST
+            }
           },
           {
             path: ":id(\\d+)",

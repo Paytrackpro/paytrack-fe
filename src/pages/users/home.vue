@@ -19,7 +19,7 @@
             </router-link>
           </div>
           <div class="col-lg-4 col-md-6 col-sm-12 q-py-lg">
-            <router-link class="event-txt" to="/pay/create">
+            <router-link class="event-txt" to="/pay">
               <span class="text-info home-title-number">3</span> <span class="text-black text-bold"> Pay</span>
             </router-link>
           </div>
