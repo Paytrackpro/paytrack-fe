@@ -206,10 +206,8 @@
 <script>
 import {
   PAYMENT_TYPE_OPTIONS,
-  PAYMENT_OBJECT_REMINDER,
   PAYMENT_OBJECT_REQUEST,
 } from "src/consts/paymentType";
-import { emailPattern } from "src/helper/validations"
 import Invoices from "components/payment/invoices"
 import QInputSystemUser from "components/common/qInputSystemUser";
 import PaymentSetting from "components/payment/paymentSetting"
