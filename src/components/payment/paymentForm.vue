@@ -182,6 +182,7 @@ import Invoices from "components/payment/invoices"
 import QInputSystemUser from "components/common/qInputSystemUser";
 import PaymentSetting from "components/payment/paymentSetting"
 import {responseError} from "src/helper/error";
+import {mapActions} from "vuex";
 
 export default {
   name: "paymentForm",
@@ -269,6 +270,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      savePayment: "payment/save"
+    }),
     async submit(isDraft) {
       if (this.submitting || !this.partner.contactMethod) {
         return;
@@ -306,27 +310,19 @@ export default {
       }
       payment.token = this.token
       this.submitting = true
-      let url = `/payment`
       let successNotify = "Payment request sent"
       if (payment.id > 0) {
-        url = `/payment/${payment.id}`
         successNotify = "Payment request updated"
       }
-      this.$api
-        .post(url, payment)
-        .then((data) => {
-          this.$q.notify({
-            message: successNotify,
-            color: "positive",
-            icon: "check",
-          });
-          this.submitting = false
-          this.$emit("saved", data.payment)
-        })
-        .catch((err) => {
-          this.submitting = false
-          responseError(err)
-        })
+      const { data } = await this.savePayment(payment)
+      if (data) {
+        this.$emit("saved", data.payment)
+        this.$q.notify({
+          message: successNotify,
+          color: "positive",
+          icon: "check",
+        });
+      }
     },
     changePaymentMethod(val) {
       const settings = this.inPayment.paymentSettings || [];

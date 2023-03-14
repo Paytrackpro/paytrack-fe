@@ -319,8 +319,6 @@ export default {
         token: this.token,
         txId: this.txId
       }
-      /*console.log(form.status)
-      return*/
       this.paying = true
       const { data } = await this.savePayment(form)
       this.paying = false
