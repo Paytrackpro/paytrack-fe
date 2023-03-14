@@ -10,7 +10,7 @@
             </q-tooltip>
           </q-icon>
         </p>
-        <q-input v-if="paymentType === 'request'"
+        <q-input
          v-model="inPayment.receiverName"
          placeholder="Sender"
          readonly
@@ -24,19 +24,6 @@
             <q-icon name="person" />
           </template>
         </q-input>
-        <q-input-system-user
-          v-else
-          v-model="partner"
-          placeholder="Sender"
-          readonly
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          :rules="[(val) => !!val || 'Sender is required']"
-          hint="expect an user name on mgmt or an email address"
-        />
       </div>
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
@@ -47,24 +34,7 @@
             </q-tooltip>
           </q-icon>
         </p>
-        <q-input v-if="paymentType === 'reminder'"
-           v-model="inPayment.senderName"
-           placeholder="Recipient"
-           readonly
-           outlined
-           dense
-           lazy-rules
-           stack-label
-           hide-bottom-space
-           :error="false"
-           error-message=""
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
         <q-input-system-user
-          v-else
           v-model="partner"
           placeholder="Recipient"
           :readonly="user.id !== inPayment.creatorId"
