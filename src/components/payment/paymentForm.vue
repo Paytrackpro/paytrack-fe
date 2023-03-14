@@ -287,7 +287,7 @@ export default {
       const payment = {...this.inPayment}
       payment.hourlyRate = Number(payment.hourlyRate)
       payment.contactMethod = this.partner.contactMethod
-      if (isDraft === true) {
+      if (isDraft !== true) {
         payment.status = "sent"
       }
       if (payment.contactMethod === "email") {
