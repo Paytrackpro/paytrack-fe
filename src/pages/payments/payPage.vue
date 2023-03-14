@@ -1,5 +1,5 @@
 <template>
-  <payment-list type="reminder" label="Pay" />
+  <payment-list type="reminder" label="Make payment" />
 </template>
 
 <script>

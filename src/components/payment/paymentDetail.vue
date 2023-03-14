@@ -12,7 +12,7 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field label="The receiver" stack-label>
+        <q-field label="The recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{payment.receiverName || payment.externalEmail}}

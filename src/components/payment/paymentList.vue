@@ -11,12 +11,12 @@
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
-    <template v-slot:top-right>
+    <template v-if="type === 'request'" v-slot:top-right>
       <q-btn
         color="white"
         text-color="black"
         label="Create"
-        :to="this.createLink"
+        to="/get-paid/create"
       />
     </template>
     <template v-slot:body-cell-online="props">
@@ -44,53 +44,23 @@ export default {
   name: "paymentList",
   data() {
     return {
-      createLink: "",
       loading: false,
       pagination: {
         ...defaultPaging,
       },
-      columns: [
-        {
-          name: "receiverName",
-          required: true,
-          label: "receiver",
-          align: "center",
-          field: (row) => {
-            if (
-              row.creatorId === row.receiverId ||
-              row.contactMethod === "internal"
-            ) {
-              return row.receiverName;
-            }
-            return row.externalEmail;
-          },
-          format: (val) => `${val}`,
-        },
-        {
-          name: "senderName",
-          align: "center",
-          label: "sender",
-          field: (row) => {
-            if (
-              row.creatorId === row.senderId ||
-              row.contactMethod === "internal"
-            ) {
-              return row.senderName;
-            }
-            return row.externalEmail;
-          },
-        },
+      rows: [],
+      fixedColumns: [
         {
           name: "status",
           align: "center",
-          label: "status",
+          label: "Status",
           field: "status",
           sortable: true,
         },
         {
           name: "amount",
           align: "center",
-          label: "amount(USD)",
+          label: "Amount(USD)",
           field: "amount",
           format: (val) => {
             return val;
@@ -104,8 +74,7 @@ export default {
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
-      ],
-      rows: [],
+      ]
     };
   },
   props: {
@@ -119,6 +88,42 @@ export default {
     isUser() {
       return this.user.role === role.USER;
     },
+    columns() {
+      let flexibleCol = this.type === PAYMENT_OBJECT_REQUEST ? {
+        name: "senderName",
+        align: "center",
+        label: "Recipient",
+        field: (row) => {
+          if (
+            row.creatorId === row.senderId ||
+            row.contactMethod === "internal"
+          ) {
+            return row.senderName;
+          }
+          return row.externalEmail;
+        },
+      } : {
+        name: "receiverName",
+        required: true,
+        label: "Sender",
+        align: "center",
+        field: (row) => {
+          if (
+            row.creatorId === row.receiverId ||
+            row.contactMethod === "internal"
+          ) {
+            return row.receiverName;
+          }
+          return row.externalEmail;
+        },
+        format: (val) => `${val}`,
+      }
+
+      return [
+        flexibleCol,
+        ... this.fixedColumns
+      ]
+    }
   },
   methods: {
     async getPayments(f) {
@@ -146,7 +151,7 @@ export default {
     onRequest(props) {
       const query = pagingToPathParams(props);
       this.$router.push({
-        path: this.$router.fullPath,
+        path: this.$route.fullPath,
         query,
       });
     },
@@ -156,10 +161,6 @@ export default {
       immediate: true,
       handler(to) {
         const filter = pathParamsToPaging(to, this.pagination);
-        this.createLink =
-          this.type == PAYMENT_OBJECT_REQUEST
-            ? "/get-paid/create"
-            : "/pay/create";
         this.getPayments({
           ...filter,
           requestType: this.type,

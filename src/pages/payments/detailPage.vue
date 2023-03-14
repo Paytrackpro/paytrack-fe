@@ -36,18 +36,12 @@
 import {PaymentForm, PaymentDetail} from "components/payment";
 import MDate from "components/common/mDate";
 import {PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
+import {mapGetters} from "vuex";
 export default {
   name: "detailPaymentPage",
   components: { PaymentForm, PaymentDetail },
   data() {
-    let user = localStorage.getItem("user");
-    if (typeof user == "string" && user.length > 0) {
-      user = JSON.parse(user);
-    } else {
-      user = {};
-    }
     return {
-      user,
       loading: false,
       editing: false,
       isForbidden: false,
@@ -90,6 +84,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      user: "user/getUser",
+    }),
     isError: function () {
       return this.isForbidden || this.isNotfound || this.isUnknownError;
     },
