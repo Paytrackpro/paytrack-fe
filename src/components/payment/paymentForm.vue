@@ -144,18 +144,18 @@
         type="button"
         color="primary"
         @click="submit(true)"
-        :disable="handling"
+        :disable="submitting"
       >
         <q-tooltip v-if="inPayment.status === ''">
           'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'created' || inPayment.status === ''"
+        v-if="inPayment.status === 'draft' || inPayment.status === ''"
         label="Send"
         type="submit"
         color="primary"
-        :disable="handling"
+        :disable="submitting"
       >
         <q-tooltip>
           'Send' will notify the payment to the
@@ -217,34 +217,11 @@ export default {
         const payment = { ...newPayment }
         this.partner.contactMethod = payment.contactMethod
         if (payment.contactMethod === "email") {
-          if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = newPayment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = newPayment.senderName
-              this.partner.id = newPayment.senderId
-              newPayment.receiverName = newPayment.externalEmail
-            }
-          } else {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = payment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = payment.receiverName
-              this.partner.id = payment.receiverId
-              payment.senderName = payment.externalEmail
-            }
-          }
+          this.partner.value = newPayment.externalEmail
+          this.partner.id = 0
         } else {
-          this.partner.value =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderName
-              : payment.receiverName;
-          this.partner.id =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderId
-              : payment.receiverId;
+          this.partner.value = payment.senderName
+          this.partner.id = payment.senderId
         }
         this.inPayment = payment
         // setup correct payment setting

@@ -42,7 +42,13 @@ export default {
   },
   methods: {
     fetchRate() {
-      console.log(this.payment.paymentMethod, this.payment.paymentAddress)
+      if (this.modelValue.paymentMethod === "none") {
+        this.$q.notify({
+          message: "Please choose the payment request",
+          type: "negative"
+        })
+        return
+      }
       const reqData = {
         id: this.modelValue.id,
         paymentMethod: this.modelValue.paymentMethod,

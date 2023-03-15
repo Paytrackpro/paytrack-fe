@@ -6,7 +6,7 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.senderName || payment.externalEmail }}
+              {{ payment.receiverName || payment.externalEmail }}
             </div>
           </template>
         </q-field>
@@ -15,7 +15,7 @@
         <q-field label="The recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.receiverName || payment.externalEmail}}
+              {{payment.senderName || payment.externalEmail}}
             </div>
           </template>
         </q-field>
@@ -301,7 +301,7 @@ export default {
         .post("/payment/process", reqData)
         .then((data) => {
           this.paying = false
-          this.$emit("update", data)
+          this.$emit("update:modelValue", data)
           this.$q.notify({
             message: "payment has been payed",
             color: "positive",
@@ -322,7 +322,14 @@ export default {
       this.paying = true
       const { data } = await this.savePayment(form)
       this.paying = false
-      this.updateLocal(data.payment)
+      if (data) {
+        this.updateLocal(data.payment)
+        this.$q.notify({
+          message: "payment is updated",
+          color: "positive",
+          icon: "check",
+        });
+      }
     },
     updateLocal(payment, editing) {
       payment = payment || this.payment
