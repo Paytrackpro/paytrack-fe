@@ -19,9 +19,9 @@
         to="/get-paid/create"
       />
     </template>
-    <template v-slot:body-cell-online="props">
+    <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <q-badge rounded :color="props.value ? 'green' : 'grey'" />
+        <payment-status :status="props.row.status" :receiver-id="props.row.receiverId"/>
       </q-td>
     </template>
   </q-table>
@@ -33,6 +33,7 @@ import {
   pagingToPathParams,
   defaultPaging,
 } from "src/helper/paging";
+import PaymentStatus from "components/payment/paymentStatus";
 import { date } from "quasar";
 import { MDateFormat } from "src/consts/common";
 import { mapGetters } from "vuex";
@@ -76,6 +77,9 @@ export default {
         },
       ]
     };
+  },
+  components: {
+    PaymentStatus
   },
   props: {
     type: String,
