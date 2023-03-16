@@ -23,9 +23,9 @@ export default {
   },
 
   async logOut({ commit }, user) {
-    commit("setUser", "")
-    commit("setAuthenticated", false)
-    localStorage.clear()
+    commit("setUser", "");
+    commit("setAuthenticated", false);
+    localStorage.clear();
   },
 
   async verifyOtp({ commit }, payload) {
@@ -41,35 +41,41 @@ export default {
 
   // list actions for using system
   async getUser({ commit }) {
-    return api.get('/user/info').then(user => {
-      commit("setUser", user)
-      return user
-    }).catch(err => {
-      responseError(err)
-      return false
-    })
+    return api
+      .get("/user/info")
+      .then((user) => {
+        commit("setUser", user);
+        return user;
+      })
+      .catch((err) => {
+        responseError(err);
+        return false;
+      });
   },
 
   async updateUser({ commit }, userData) {
-    return api.put('/user/info', userData).then( (newUser) => {
-      Notify.create({
-        message: 'your information is updated',
-        color: "positive",
-        icon: "done",
+    return api
+      .put("/user/info", userData)
+      .then((newUser) => {
+        Notify.create({
+          message: "your information is updated",
+          color: "positive",
+          icon: "done",
+        });
+        commit("setUser", newUser);
+        return newUser;
       })
-      commit("setUser", newUser)
-      return newUser
-    }).catch(err => {
-      responseError(err)
-      return false
-    })
+      .catch((err) => {
+        responseError(err);
+        return false;
+      });
   },
 
   async disableOtp({ commit }, body) {
     try {
-      await api.post('/user/disable-otp', body);
+      await api.post("/user/disable-otp", body);
       Notify.create({
-        message: '2FA disabled',
+        message: "2FA disabled",
         color: "positive",
         icon: "done",
       });
@@ -82,18 +88,18 @@ export default {
 
   async enableOtp({ commit }, body) {
     try {
-      const res = await api.post('/user/generate-otp', body);
+      const res = await api.post("/user/generate-otp", body);
       Notify.create({
-        message: 'QR code created',
+        message: "QR code created",
         color: "positive",
         icon: "done",
-      })
-      commit('setQrImage', res.mfa_qr_image);
-      commit('setTempPassword', body.password);
+      });
+      commit("setQrImage", res.mfa_qr_image);
+      commit("setTempPassword", body.password);
       return true;
     } catch (error) {
       responseError(error);
     }
     return false;
   },
-}
+};

@@ -19,9 +19,12 @@
         to="/get-paid/create"
       />
     </template>
-    <template v-slot:body-cell-online="props">
+    <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <q-badge rounded :color="props.value ? 'green' : 'grey'" />
+        <payment-status
+          :status="props.row.status"
+          :receiver-id="props.row.receiverId"
+        />
       </q-td>
     </template>
   </q-table>
@@ -33,6 +36,7 @@ import {
   pagingToPathParams,
   defaultPaging,
 } from "src/helper/paging";
+import PaymentStatus from "components/payment/paymentStatus";
 import { date } from "quasar";
 import { MDateFormat } from "src/consts/common";
 import { mapGetters } from "vuex";
@@ -74,8 +78,11 @@ export default {
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
-      ]
+      ],
     };
+  },
+  components: {
+    PaymentStatus,
   },
   props: {
     type: String,
@@ -89,41 +96,36 @@ export default {
       return this.user.role === role.USER;
     },
     columns() {
-      let flexibleCol = this.type === PAYMENT_OBJECT_REQUEST ? {
-        name: "senderName",
-        align: "center",
-        label: "Recipient",
-        field: (row) => {
-          if (
-            row.creatorId === row.senderId ||
-            row.contactMethod === "internal"
-          ) {
-            return row.senderName;
+      let flexibleCol =
+        this.type === PAYMENT_OBJECT_REQUEST
+          ? {
+            name: "receiverName",
+            align: "center",
+            label: "Recipient",
+            field: (row) => {
+              return row.receiverName || row.externalEmail;
+              if (
+                row.creatorId === row.senderId ||
+                  row.contactMethod === "internal"
+              ) {
+                return;
+              }
+              return row.externalEmail;
+            },
           }
-          return row.externalEmail;
-        },
-      } : {
-        name: "receiverName",
-        required: true,
-        label: "Sender",
-        align: "center",
-        field: (row) => {
-          if (
-            row.creatorId === row.receiverId ||
-            row.contactMethod === "internal"
-          ) {
-            return row.receiverName;
-          }
-          return row.externalEmail;
-        },
-        format: (val) => `${val}`,
-      }
+          : {
+            name: "senderName",
+            required: true,
+            label: "Sender",
+            align: "center",
+            field: (row) => {
+              return row.senderName;
+            },
+            format: (val) => `${val}`,
+          };
 
-      return [
-        flexibleCol,
-        ... this.fixedColumns
-      ]
-    }
+      return [flexibleCol, ...this.fixedColumns];
+    },
   },
   methods: {
     async getPayments(f) {
@@ -132,10 +134,10 @@ export default {
         .get("/payment/list", {
           params: f,
         })
-        .then((res) => {
+        .then(({ payments, count }) => {
           this.loading = false;
-          this.rows = res.payments;
-          this.pagination.rowsNumber = res.count;
+          this.rows = payments || [];
+          this.pagination.rowsNumber = count;
         })
         .catch((err) => {
           responseError(err);

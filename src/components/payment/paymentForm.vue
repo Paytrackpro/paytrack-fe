@@ -11,14 +11,14 @@
           </q-icon>
         </p>
         <q-input
-         v-model="inPayment.receiverName"
-         placeholder="Sender"
-         readonly
-         outlined
-         dense
-         lazy-rules
-         stack-label
-         hide-bottom-space
+          v-model="inPayment.senderName"
+          placeholder="Sender"
+          readonly
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
         >
           <template v-slot:prepend>
             <q-icon name="person" />
@@ -37,7 +37,7 @@
         <q-input-system-user
           v-model="partner"
           placeholder="Recipient"
-          :readonly="user.id !== inPayment.creatorId"
+          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
           outlined
           dense
           lazy-rules
@@ -71,7 +71,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-8" v-if="!expanded"/>
+      <div class="col-8" v-if="!expanded" />
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Choose payment method
@@ -138,29 +138,26 @@
         </q-expansion-item>
       </div>
     </div>
-    <div class="row justify-end">
+    <div class="row justify-end q-gutter-sm">
       <q-btn
         :label="inPayment.status === '' ? 'Mark as draft' : 'Update'"
         type="button"
         color="primary"
         @click="submit(true)"
-        :disable="handling"
+        :disable="submitting"
       >
         <q-tooltip v-if="inPayment.status === ''">
-          'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
+          'Mark as draft' will not notify the payment to the recipient
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'created' || inPayment.status === ''"
+        v-if="inPayment.status === 'draft' || inPayment.status === ''"
         label="Send"
-        type="submit"
         color="primary"
-        :disable="handling"
+        :disable="submitting"
+        @click="submit(false)"
       >
-        <q-tooltip>
-          'Send' will notify the payment to the
-          {{ paymentType === "request" ? "sender" : "receiver" }}
-        </q-tooltip>
+        <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
       </q-btn>
       <q-btn
         label="Cancel"
@@ -174,14 +171,11 @@
 </template>
 
 <script>
-import {
-  PAYMENT_TYPE_OPTIONS,
-  PAYMENT_OBJECT_REQUEST,
-} from "src/consts/paymentType";
-import Invoices from "components/payment/invoices"
+import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
+import Invoices from "components/payment/invoices";
 import QInputSystemUser from "components/common/qInputSystemUser";
-import PaymentSetting from "components/payment/paymentSetting"
-import {responseError} from "src/helper/error";
+import PaymentSetting from "components/payment/paymentSetting";
+import { mapActions } from "vuex";
 
 export default {
   name: "paymentForm",
@@ -200,52 +194,29 @@ export default {
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
-      inPayment: {}
+      inPayment: {},
     };
   },
   props: {
     payment: Object,
     user: Object,
     token: String,
-    paymentType: String
+    paymentType: String,
   },
   watch: {
     payment: {
       immediate: true,
       handler(newPayment) {
-        const payment = { ...newPayment }
-        this.partner.contactMethod = payment.contactMethod
+        const payment = { ...newPayment };
+        this.partner.contactMethod = payment.contactMethod;
         if (payment.contactMethod === "email") {
-          if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = newPayment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = newPayment.senderName
-              this.partner.id = newPayment.senderId
-              newPayment.receiverName = newPayment.externalEmail
-            }
-          } else {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = payment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = payment.receiverName
-              this.partner.id = payment.receiverId
-              payment.senderName = payment.externalEmail
-            }
-          }
+          this.partner.value = newPayment.externalEmail;
+          this.partner.id = 0;
         } else {
-          this.partner.value =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderName
-              : payment.receiverName;
-          this.partner.id =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderId
-              : payment.receiverId;
+          this.partner.value = payment.receiverName;
+          this.partner.id = payment.receiverId;
         }
-        this.inPayment = payment
+        this.inPayment = payment;
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
@@ -257,74 +228,72 @@ export default {
           let filled = true;
           for (let setting of settings) {
             if (setting.isDefault) {
-              this.setting = setting;
+              this.setting = { ...setting };
               return;
             }
           }
           if (!filled && settings.length > 0) {
-            this.setting = settings[0];
+            this.setting = {
+              ...settings[0],
+            };
           }
         }
       },
     },
   },
   methods: {
+    ...mapActions({
+      savePayment: "payment/save",
+    }),
     async submit(isDraft) {
       if (this.submitting || !this.partner.contactMethod) {
         return;
       }
-      const valid = await this.$refs.paymentForm.validate()
+      const valid = await this.$refs.paymentForm.validate();
       if (!valid) {
-        return
+        return;
       }
       if (this.amount === 0) {
         this.$q.notify({
           type: "negative",
-          message: "Amount must greater than 0. Please fill up the invoices and hourly rate"
-        })
-        return
+          message:
+            "Amount must greater than 0. Please fill up the invoices and hourly rate",
+        });
+        return;
       }
-      const payment = {...this.inPayment}
-      payment.hourlyRate = Number(payment.hourlyRate)
-      payment.isDraft = isDraft === true
-      payment.contactMethod = this.partner.contactMethod
+      const payment = { ...this.inPayment };
+      payment.hourlyRate = Number(payment.hourlyRate);
+      payment.contactMethod = this.partner.contactMethod;
+      if (isDraft !== true) {
+        payment.status = "sent";
+      }
       if (payment.contactMethod === "email") {
         if (!payment.id || this.user.id === payment.creatorId) {
-          payment.externalEmail = this.partner.value
+          payment.externalEmail = this.partner.value;
         }
       }
       payment.paymentMethod = this.setting.type;
       payment.paymentAddress = this.setting.address;
-      if (this.paymentType === "request") {
-        payment.senderId = this.partner.id;
-        payment.receiverId = this.user.id;
-      } else {
-        payment.senderId = this.user.id;
-        payment.receiverId = this.partner.id;
-      }
-      payment.token = this.token
-      this.submitting = true
-      let url = `/payment`
-      let successNotify = "Payment request sent"
+      payment.receiverId = this.partner.id;
+      payment.token = this.token;
+      this.submitting = true;
+      let successNotify = "Payment request created";
       if (payment.id > 0) {
-        url = `/payment/${payment.id}`
-        successNotify = "Payment request updated"
+        successNotify = "Payment request updated";
       }
-      this.$api
-        .post(url, payment)
-        .then((data) => {
-          this.$q.notify({
-            message: successNotify,
-            color: "positive",
-            icon: "check",
-          });
-          this.submitting = false
-          this.$emit("saved", data.payment)
-        })
-        .catch((err) => {
-          this.submitting = false
-          responseError(err)
-        })
+      if (isDraft !== true) {
+        successNotify = "Payment request sent";
+      }
+      const { data } = await this.savePayment(payment);
+      this.submitting = false
+      if (data) {
+        this.$emit("saved", data.payment);
+        this.$q.notify({
+          message: successNotify,
+          color: "positive",
+          icon: "check",
+        });
+      }
     },
     changePaymentMethod(val) {
       const settings = this.inPayment.paymentSettings || [];
@@ -337,9 +306,6 @@ export default {
     },
   },
   computed: {
-    handling() {
-      return this.submitting
-    },
     amount: function () {
       if (!this.inPayment.details) {
         return 0;

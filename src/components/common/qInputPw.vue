@@ -1,8 +1,5 @@
 <template>
-  <q-input
-    v-bind="$props"
-    :type="visible ? 'text' : 'password'"
-  >
+  <q-input v-bind="$props" :type="visible ? 'text' : 'password'">
     <template v-slot:append>
       <q-icon
         :name="visible ? 'visibility' : 'visibility_off'"
@@ -18,12 +15,10 @@ export default {
   name: "qInputPw",
   data() {
     return {
-      visible: false
-    }
-  }
-}
+      visible: false,
+    };
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

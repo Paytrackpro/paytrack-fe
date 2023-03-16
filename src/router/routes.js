@@ -1,5 +1,5 @@
 import ROLE from "../consts/role";
-import {PAYMENT_OBJECT_REQUEST} from "src/consts/paymentType";
+import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
 
 const routes = [
   {
@@ -97,8 +97,8 @@ const routes = [
               title: "Get Paid/ Create",
             },
             props: {
-              paymentType: PAYMENT_OBJECT_REQUEST
-            }
+              paymentType: PAYMENT_OBJECT_REQUEST,
+            },
           },
           {
             path: ":id(\\d+)",
