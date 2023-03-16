@@ -11,10 +11,21 @@
         </p>
         <q-input placeholder="Code" dense outlined v-model="code"></q-input>
         <div class="q-mt-md">
-          <q-btn type="submit" :loading="loading" :disable="loading" color="primary" class="q-mr-xs">
+          <q-btn
+            type="submit"
+            :loading="loading"
+            :disable="loading"
+            color="primary"
+            class="q-mr-xs"
+          >
             Verify
           </q-btn>
-          <q-btn type="button" :loading="loading" :disable="loading" @click="clearQr">
+          <q-btn
+            type="button"
+            :loading="loading"
+            :disable="loading"
+            @click="clearQr"
+          >
             Cancel
           </q-btn>
         </div>
@@ -79,7 +90,7 @@ export default {
       this.removeQrImage("");
       this.removeTempPassword("");
       this.$emit("verified", false);
-    }
+    },
   },
   watch: {
     qrImage: {

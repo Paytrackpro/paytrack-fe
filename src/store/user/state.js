@@ -29,6 +29,6 @@ export default {
   authenticated: checkValidToken(),
   user: setUser(),
   role: null,
-  qrImage: '',
-  tempPassword: '',
+  qrImage: "",
+  tempPassword: "",
 };

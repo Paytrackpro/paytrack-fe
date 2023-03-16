@@ -117,5 +117,17 @@ export default {
       );
     },
   },
+  watch: {
+    $route: {
+      immediate: true,
+      handler(to) {
+        if (to.meta.requiresAuth && this.user.id === 0) {
+          this.$router.push({
+            path: "/login",
+          });
+        }
+      },
+    },
+  },
 };
 </script>

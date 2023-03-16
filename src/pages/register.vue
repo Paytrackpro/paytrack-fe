@@ -164,8 +164,8 @@ export default {
               "Your account was created. You will now be redirected to the login page.",
             color: "positive",
             icon: "check",
-          })
-          this.$router.push({ path: "/login" })
+          });
+          this.$router.push({ path: "/login" });
         })
         .catch((error) => {
           this.error = error.response

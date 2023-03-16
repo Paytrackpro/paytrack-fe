@@ -1,16 +1,21 @@
 <template>
   <div>
     <q-toggle
-    v-show="!!!qrImage"
-    v-model="model"
-    @update:model-value="onUpdated"
-    color="green"
-    label="Use two-factor authentication"
-  />
-  <input
+      v-show="!!!qrImage"
+      v-model="model"
+      @update:model-value="onUpdated"
+      color="green"
+      label="Use two-factor authentication"
+    />
+    <input
       type="text"
       ref="preventToggleEnterEvt"
-      v-bind:style="{ maxWidth: '0px', maxHeight: '0px', opacity: 0, position: 'absolute' }"
+      v-bind:style="{
+        maxWidth: '0px',
+        maxHeight: '0px',
+        opacity: 0,
+        position: 'absolute',
+      }"
     />
   </div>
 </template>
@@ -23,12 +28,12 @@ export default {
   props: {
     show: Boolean,
     onUpdatedValue: Function,
-    modelValue: Boolean
+    modelValue: Boolean,
   },
   data() {
     return {
-      model: false
-    }
+      model: false,
+    };
   },
   computed: {
     ...mapGetters({
@@ -47,7 +52,7 @@ export default {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.model = newVal
+        this.model = newVal;
       },
     },
   },

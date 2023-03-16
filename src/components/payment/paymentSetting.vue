@@ -114,7 +114,6 @@ export default {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        console.log(newVal)
         this.settings = cloneObject(newVal || []);
         const selectedCoins = [];
         for (let setting of this.settings) {

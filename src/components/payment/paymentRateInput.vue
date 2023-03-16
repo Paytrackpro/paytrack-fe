@@ -14,17 +14,13 @@
         icon="currency_exchange"
         @click="fetchRate"
       />
-      <q-spinner-oval
-        v-else
-        color="primary"
-        size="1em"
-      />
+      <q-spinner-oval v-else color="primary" size="1em" />
     </template>
   </q-field>
 </template>
 
 <script>
-import {responseError} from "src/helper/error";
+import { responseError } from "src/helper/error";
 
 export default {
   name: "paymentRateInput",
@@ -33,55 +29,53 @@ export default {
       payment: {
         convertRate: 0,
       },
-    }
+    };
   },
   props: {
     modelValue: Object,
     readonly: Boolean,
-    loading: Boolean
+    loading: Boolean,
   },
   methods: {
     fetchRate() {
       if (this.modelValue.paymentMethod === "none") {
         this.$q.notify({
           message: "Please choose the payment request",
-          type: "negative"
-        })
-        return
+          type: "negative",
+        });
+        return;
       }
       const reqData = {
         id: this.modelValue.id,
         paymentMethod: this.modelValue.paymentMethod,
         paymentAddress: this.modelValue.paymentAddress,
-        token: this.token,
-      }
-      this.$emit("update:loading", true)
+        token: this.$route.params.token,
+      };
+      this.$emit("update:loading", true);
       this.$api
         .post("/payment/request-rate", reqData)
         .then((data) => {
-          this.$emit("update:modelValue", data)
+          this.$emit("update:modelValue", data);
         })
         .catch((err) => {
-          responseError(err)
+          responseError(err);
         })
         .finally(() => {
-          this.$emit("update:loading", false)
-        })
-    }
+          this.$emit("update:loading", false);
+        });
+    },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newPayment) {
         this.payment = {
-          ...newPayment
-        }
-      }
-    }
-  }
-}
+          ...newPayment,
+        };
+      },
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

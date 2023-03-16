@@ -3,9 +3,7 @@
     <q-card style="width: 350px">
       <q-form @submit="onSubmit">
         <q-card-section>
-          <div class="text-h6">
-            Change your password
-          </div>
+          <div class="text-h6">Change your password</div>
           <q-input-pw
             v-model="form.oldPassword"
             :autofocus="true"
@@ -18,7 +16,8 @@
             hint="Password"
             :rules="[(val) => !!val || 'Password is required']"
           />
-          <q-input v-if="isOtp"
+          <q-input
+            v-if="isOtp"
             v-model="form.otp"
             type="text"
             hint="OTP"
@@ -51,11 +50,11 @@
 
 <script>
 import QInputPw from "components/common/qInputPw";
-import {responseError} from "src/helper/error";
+import { responseError } from "src/helper/error";
 export default {
   name: "changePassword",
   components: {
-    QInputPw
+    QInputPw,
   },
   props: {
     isOtp: Boolean,
@@ -63,12 +62,12 @@ export default {
   data() {
     return {
       loading: false,
-      form : {
+      form: {
         oldPassword: "",
         password: "",
         otp: "",
-      }
-    }
+      },
+    };
   },
   methods: {
     cancel() {
@@ -76,31 +75,30 @@ export default {
         oldPassword: "",
         password: "",
         otp: "",
-      }
-      this.$emit("update:modelValue", false)
+      };
+      this.$emit("update:modelValue", false);
     },
     onSubmit() {
-      this.loading = true
-      this.$api.put("/user/change-password", this.form)
+      this.loading = true;
+      this.$api
+        .put("/user/change-password", this.form)
         .then((data) => {
           this.$q.notify({
             message: "your password is updated",
             color: "positive",
             icon: "check",
           });
-          this.cancel()
+          this.cancel();
         })
         .catch((err) => {
-          responseError(err)
+          responseError(err);
         })
         .finally(() => {
-          this.loading = false
-        })
-    }
-  }
-}
+          this.loading = false;
+        });
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

@@ -6,7 +6,7 @@ export default function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
       user,
-      payment
+      payment,
     },
 
     // enable strict mode (adds overhead!)

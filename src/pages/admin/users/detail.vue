@@ -75,8 +75,8 @@
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType"
-import {responseError} from "src/helper/error";
+import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
+import { responseError } from "src/helper/error";
 export default {
   name: "pageUserDetails",
   data() {
@@ -95,14 +95,14 @@ export default {
   },
   methods: {
     getUserInfo() {
-      const id = this.$route.params.id
+      const id = this.$route.params.id;
       this.$api.get(`/admin/user/info/${id}`).then((data) => {
-        this.email = data.email
-        this.paymentAddress = data.paymentAddress
-        this.paymentType = data.paymenType
-        this.userName = data.userName
-        this.displayName = data.displayName
-      })
+        this.email = data.email;
+        this.paymentAddress = data.paymentAddress;
+        this.paymentType = data.paymenType;
+        this.userName = data.userName;
+        this.displayName = data.displayName;
+      });
     },
     updateUserInfo() {
       this.$api
@@ -120,11 +120,11 @@ export default {
             color: "positive",
             icon: "check",
           });
-          this.$router.push({ name: "user.list" })
+          this.$router.push({ name: "user.list" });
         })
         .catch((err) => {
-          responseError(err)
-        })
+          responseError(err);
+        });
     },
   },
 };

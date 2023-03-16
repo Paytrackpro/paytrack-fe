@@ -6,7 +6,7 @@
         <q-field label="The sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.receiverName || payment.externalEmail }}
+              {{ payment.senderName || payment.externalEmail }}
             </div>
           </template>
         </q-field>
@@ -15,7 +15,7 @@
         <q-field label="The recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{payment.senderName || payment.externalEmail}}
+              {{ payment.receiverName || payment.externalEmail }}
             </div>
           </template>
         </q-field>
@@ -32,12 +32,15 @@
           emit-value
           map-options
           label="Status"
-          :rules="[ val => !!val || 'Status is required' ]"
+          :rules="[(val) => !!val || 'Status is required']"
         />
         <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :status="payment.status" :receiver-id="payment.receiverId"/>
+              <payment-status
+                :status="payment.status"
+                :receiver-id="payment.receiverId"
+              />
             </div>
           </template>
         </q-field>
@@ -86,7 +89,7 @@
           stack-label
           label="Payment method"
           @update:modelValue="methodChange"
-          :rules="[ val => !!val || 'Payment method is required' ]"
+          :rules="[(val) => !!val || 'Payment method is required']"
         />
         <q-field v-else label="Payment method" stack-label>
           <template v-slot:control>
@@ -215,23 +218,35 @@
         @click="$emit('update:editing', true)"
         class="q-mr-sm"
       />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
+      <q-btn
+        label="Cancel"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="cancel"
+      />
     </div>
   </q-form>
 </template>
 
 <script>
-import {mapActions, mapGetters} from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import MDate from "components/common/mDate";
 import Invoices from "components/payment/invoices";
 import PaymentSetting from "components/payment/paymentSetting";
-import {PAYMENT_OBJECT_REMINDER} from "src/consts/paymentType";
-import {responseError} from "src/helper/error";
+import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
+import { responseError } from "src/helper/error";
 import PaymentStatus from "components/payment/paymentStatus";
 import PaymentRateInput from "components/payment/paymentRateInput";
 export default {
   name: "paymentDetail",
-  components: { MDate, Invoices, PaymentSetting, PaymentStatus, PaymentRateInput },
+  components: {
+    MDate,
+    Invoices,
+    PaymentSetting,
+    PaymentStatus,
+    PaymentRateInput,
+  },
   data() {
     return {
       txId: "",
@@ -239,19 +254,19 @@ export default {
       methods: [],
       statuses: [
         {
-          label: 'Received',
-          value: 'sent'
+          label: "Received",
+          value: "sent",
         },
         {
-          label: 'Ready for Payment',
-          value: 'confirmed'
-        }
+          label: "Ready for Payment",
+          value: "confirmed",
+        },
       ],
       expanded: false,
       processing: false,
       fetchingRate: false,
       paying: false,
-      payment: {}
+      payment: {},
     };
   },
   props: {
@@ -259,24 +274,25 @@ export default {
     user: Object,
     token: String,
     paymentType: String,
-    editing: Boolean
+    editing: Boolean,
   },
   methods: {
     ...mapActions({
-      savePayment: "payment/save"
+      savePayment: "payment/save",
     }),
     cancel() {
       if (this.processing) {
-        this.processing = false
-        return
+        this.processing = false;
+        return;
       }
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
-      this.$router.push({ path: `/${path}` })
+      const path =
+        this.paymentType === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
+      this.$router.push({ path: `/${path}` });
     },
     processPayment() {
       this.processing = true;
       if (this.payment.paymentMethod !== "none") {
-        this.$refs.rateInput.fetchRate()
+        this.$refs.rateInput.fetchRate();
       }
     },
     markAsPaid() {
@@ -300,8 +316,8 @@ export default {
       this.$api
         .post("/payment/process", reqData)
         .then((data) => {
-          this.paying = false
-          this.$emit("update:modelValue", data)
+          this.paying = false;
+          this.$emit("update:modelValue", data);
           this.$q.notify({
             message: "payment has been payed",
             color: "positive",
@@ -309,21 +325,21 @@ export default {
           });
         })
         .catch((err) => {
-          this.paying = false
-          responseError(err)
-        })
+          this.paying = false;
+          responseError(err);
+        });
     },
     async update() {
       const form = {
         ...this.payment,
         token: this.token,
-        txId: this.txId
-      }
-      this.paying = true
-      const { data } = await this.savePayment(form)
-      this.paying = false
+        txId: this.txId,
+      };
+      this.paying = true;
+      const { data } = await this.savePayment(form);
+      this.paying = false;
       if (data) {
-        this.updateLocal(data.payment)
+        this.updateLocal(data.payment);
         this.$q.notify({
           message: "payment is updated",
           color: "positive",
@@ -332,10 +348,10 @@ export default {
       }
     },
     updateLocal(payment, editing) {
-      payment = payment || this.payment
-      this.$emit("update:modelValue", payment)
+      payment = payment || this.payment;
+      this.$emit("update:modelValue", payment);
       if (editing) {
-        this.$emit("update:editing", true)
+        this.$emit("update:editing", true);
       }
     },
     methodChange(method) {
@@ -355,21 +371,21 @@ export default {
         this.pMethod = newPayment.paymentMethod;
         let settings = newPayment.paymentSettings || [];
         this.methods = settings.map((s) => s.type);
-        this.payment = { ...newPayment }
+        this.payment = { ...newPayment };
         // setup default payment method
-        const paymentSettings = this.payment.paymentSettings || []
+        const paymentSettings = this.payment.paymentSettings || [];
         if (this.payment.paymentMethod === "none" && paymentSettings.length) {
-          let setting = paymentSettings[0]
+          let setting = paymentSettings[0];
           for (let ps of paymentSettings) {
             if (ps.isDefault) {
-              setting = ps
-              break
+              setting = ps;
+              break;
             }
           }
-          this.payment.paymentMethod = setting.type
-          this.payment.paymentAddress = setting.address
+          this.payment.paymentMethod = setting.type;
+          this.payment.paymentAddress = setting.address;
         }
-      }
+      },
     },
   },
   computed: {
@@ -377,12 +393,19 @@ export default {
       role: "user/getRole",
     }),
     editable() {
-      return ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token);
+      return (
+        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
+        (this.payment.senderId === this.user.id ||
+          this.payment.receiverId === this.user.id ||
+          this.token)
+      );
     },
     processable() {
-      return ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id || (this.token && this.payment.senderId === 0))
+      return (
+        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
+        (this.payment.receiverId === this.user.id ||
+          (this.token && this.payment.receiverId === 0))
+      );
     },
   },
 };

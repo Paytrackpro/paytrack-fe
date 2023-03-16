@@ -1,7 +1,5 @@
-const cloneObject = obj => {
-  return JSON.parse(JSON.stringify(obj))
-}
+const cloneObject = (obj) => {
+  return JSON.parse(JSON.stringify(obj));
+};
 
-export {
-  cloneObject
-}
+export { cloneObject };

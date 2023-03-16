@@ -14,9 +14,9 @@ export default {
     return state.authenticated;
   },
   getUser(state, reload) {
-    return state.user;
+    return state.user || { id: 0 };
   },
   getRole(state) {
     return state.user.role === ROLE.ADMIN ? "admin" : "user";
   },
-}
+};

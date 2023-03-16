@@ -1,5 +1,5 @@
 <template>
-<span>{{statusView}}</span>
+  <span>{{ statusView }}</span>
 </template>
 
 <script>
@@ -13,27 +13,25 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser"
+      user: "user/getUser",
     }),
     statusView() {
-      const requestSide = this.receiverId === this.user.id
+      const reminderSide = this.receiverId === this.user.id;
       switch (this.status) {
         case "draft":
-          return "Draft"
+          return "Draft";
         case "sent":
-          return requestSide ? "Sent" : "Received"
+          return reminderSide ? "Received" : "Sent";
         case "confirmed":
-          return requestSide ? "Sent" : "Ready for Payment"
+          return reminderSide ? "Ready for Payment" : "Sent";
         case "paid":
-          return "Paid"
+          return "Paid";
         default:
-          return "Unknown"
+          return "Unknown";
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

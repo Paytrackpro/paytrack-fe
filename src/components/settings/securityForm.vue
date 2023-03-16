@@ -6,8 +6,14 @@
     <QRCodeVerify @verified="verified" />
     <EnableOtpDialog v-model="enableDialog" @hideDialog="hideDialog" />
     <DisableOtpDialog v-model="disableDialog" @hideDialog="hideOtpDialog" />
-    <q-btn v-if="!qrImage" color="white" text-color="black" label="Change password" @click="changePassDialog = true" />
-    <ChangePassword v-model="changePassDialog" :is-otp="user.otp || false"/>
+    <q-btn
+      v-if="!qrImage"
+      color="white"
+      text-color="black"
+      label="Change password"
+      @click="changePassDialog = true"
+    />
+    <ChangePassword v-model="changePassDialog" :is-otp="user.otp || false" />
   </q-form>
 </template>
 
@@ -19,7 +25,7 @@ import {
   QRCodeVerify,
   DisableOtpDialog,
 } from "components/settings";
-import {mapGetters, mapMutations} from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 export default {
   name: "securityUser",
   components: {
@@ -30,7 +36,7 @@ export default {
     ChangePassword,
   },
   props: {
-    modelValue: Object
+    modelValue: Object,
   },
   data() {
     return {
@@ -39,8 +45,8 @@ export default {
       enabled2FA: false,
       enableDialog: false,
       disableDialog: false,
-      changePassDialog: false
-    }
+      changePassDialog: false,
+    };
   },
   methods: {
     ...mapMutations({
@@ -58,47 +64,45 @@ export default {
       this.enableDialog = false;
     },
     hideOtpDialog(ok) {
-      this.enabled2FA = !ok
+      this.enabled2FA = !ok;
       if (ok) {
         this.updateUser({
           ...this.user,
-          otp: false
-        })
+          otp: false,
+        });
       }
       this.disableDialog = false;
     },
     verified(ok) {
-      this.enabled2FA = ok
+      this.enabled2FA = ok;
       if (ok) {
-        this.enabled2FA = true
+        this.enabled2FA = true;
         this.updateUser({
           ...this.user,
-          otp: true
-        })
+          otp: true,
+        });
       }
     },
-    updateUser(user){
-      this.updateUserState(user)
-      this.$emit("update:modelValue", user)
-    }
+    updateUser(user) {
+      this.updateUserState(user);
+      this.$emit("update:modelValue", user);
+    },
   },
   watch: {
-    modelValue : {
+    modelValue: {
       immediate: true,
       handler(newVal) {
-        this.user = {...newVal}
-        this.enabled2FA = !!this.user.otp
-      }
-    }
+        this.user = { ...newVal };
+        this.enabled2FA = !!this.user.otp;
+      },
+    },
   },
   computed: {
     ...mapGetters({
       qrImage: "user/getQrImage",
     }),
-  }
-}
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
