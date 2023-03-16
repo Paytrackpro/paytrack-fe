@@ -15,9 +15,12 @@
 </template>
 
 <script>
-import { PaymentForm } from "components/payment"
-import { mapGetters } from "vuex"
-import { PAYMENT_OBJECT_REQUEST, PAYMENT_OBJECT_REMINDER } from "src/consts/paymentType"
+import { PaymentForm } from "components/payment";
+import { mapGetters } from "vuex";
+import {
+  PAYMENT_OBJECT_REQUEST,
+  PAYMENT_OBJECT_REMINDER,
+} from "src/consts/paymentType";
 
 export default {
   name: "createPayment",
@@ -25,7 +28,7 @@ export default {
     PaymentForm,
   },
   props: {
-    paymentType: String
+    paymentType: String,
   },
   data() {
     return {
@@ -43,58 +46,50 @@ export default {
         paymentSettings: [],
         details: [],
       },
-    }
+    };
   },
   computed: {
     ...mapGetters({
       role: "user/getRole",
-      user: "user/getUser"
+      user: "user/getUser",
     }),
     title() {
-      return "Create payment request"
-    }
+      return "Create payment request";
+    },
   },
   methods: {
     cancel() {
-      this.$router.push({ path: `/` })
+      this.$router.push({ path: `/` });
     },
     saved(data) {
-      const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid"
-      this.$router.push({ path: `/${path}/${data.id}`, params: { id: data.id } })
+      const path =
+        this.paymentType === PAYMENT_OBJECT_REMINDER ? "pay" : "get-paid";
+      this.$router.push({
+        path: `/${path}/${data.id}`,
+        params: { id: data.id },
+      });
     },
   },
   watch: {
     user: {
       immediate: true,
       handler(user) {
-        this.payment.paymentSettings = user.paymentSettings || []
-        this.payment.creatorId = user.id || 0
-      }
+        this.payment.paymentSettings = user.paymentSettings || [];
+        this.payment.creatorId = user.id || 0;
+      },
     },
     paymentType: {
       immediate: true,
       handler(pType) {
-        if (pType === PAYMENT_OBJECT_REMINDER) {
-          this.payment.paymentSettings = []
-          this.payment.senderId = this.user.id
-          this.payment.senderName = this.user.userName
-          this.payment.receiverId = 0
-          this.payment.receiverName = ""
-        }
-        if (pType === PAYMENT_OBJECT_REQUEST) {
-          this.payment.paymentSettings = this.user.paymentSettings || []
-          this.payment.senderId = 0
-          this.payment.senderName = ""
-          this.payment.receiverId = this.user.id
-          this.payment.receiverName = this.user.userName
-        }
-      }
-    }
+        this.payment.paymentSettings = this.user.paymentSettings || [];
+        this.payment.senderId = this.user.id;
+        this.payment.senderName = this.user.userName;
+        this.payment.receiverId = 0;
+        this.payment.receiverName = "";
+      },
+    },
   },
-  created() {
-    console.log(this.paymentType)
-  }
-}
+};
 </script>
 
 <style scoped></style>

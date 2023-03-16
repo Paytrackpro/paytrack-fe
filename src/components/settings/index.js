@@ -14,4 +14,4 @@ export {
   ProfileForm,
   PaymentMethods,
   SecurityForm,
-}
+};

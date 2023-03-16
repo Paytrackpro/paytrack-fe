@@ -1,6 +1,6 @@
 export default {
   setUser(state, user) {
-    localStorage.setItem('user' ,JSON.stringify(user))
+    localStorage.setItem("user", JSON.stringify(user));
     state.user = user;
   },
   setQrImage(state, val) {
@@ -12,4 +12,4 @@ export default {
   setAuthenticated(state, authenticated) {
     state.authenticated = authenticated;
   },
-}
+};

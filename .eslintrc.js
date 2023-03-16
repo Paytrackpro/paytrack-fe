@@ -58,7 +58,7 @@ module.exports = {
   // add your custom rules here
   rules: {
     "prefer-promise-reject-errors": "off",
-    "indent": ["error", 2, { "SwitchCase": 1 }],
+    indent: ["error", 2, { SwitchCase: 1 }],
     // allow debugger during development only
     "no-debugger": process.env.NODE_ENV === "production" ? "error" : "off",
   },
