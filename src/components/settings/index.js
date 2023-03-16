@@ -5,6 +5,7 @@ import DisableOtpDialog from "components/settings/disableOtpDialog";
 import ProfileForm from "components/settings/profileForm";
 import PaymentMethods from "components/settings/paymentMethods";
 import SecurityForm from "components/settings/securityForm";
+import ApprovalMethod from "components/settings/approvalMethod";
 
 export {
   SwitchButton2FA,
@@ -14,4 +15,5 @@ export {
   ProfileForm,
   PaymentMethods,
   SecurityForm,
+  ApprovalMethod,
 }
