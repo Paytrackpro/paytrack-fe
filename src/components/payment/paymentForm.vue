@@ -6,11 +6,11 @@
           Sender
           <q-icon name="info">
             <q-tooltip>
-              The sender is person who will pay for the payment
+              You are the sender of the payment request to the recipient
             </q-tooltip>
           </q-icon>
         </p>
-        <q-input v-if="paymentType === 'reminder'"
+        <q-input
           v-model="inPayment.senderName"
           placeholder="Sender"
           readonly
@@ -19,77 +19,33 @@
           lazy-rules
           stack-label
           hide-bottom-space
-          :error="false"
-          error-message=""
         >
           <template v-slot:prepend>
             <q-icon name="person" />
-          </template>
-        </q-input>
-        <q-input
-          v-else
-          v-model="partner.value"
-          placeholder="Sender"
-          :readonly="user.id !== inPayment.creatorId"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Sender is required']"
-          :error="partnerError"
-          :error-message="partner.error"
-          hint="expect an user name on mgmt or an email address"
-        >
-          <template v-slot:prepend>
-            <q-icon name="person_add" />
           </template>
         </q-input>
       </div>
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Receiver
+          Recipient
           <q-icon name="info">
             <q-tooltip>
-              The receiver is person who will receive the payment
+              The user who will be paying the payment request
             </q-tooltip>
           </q-icon>
         </p>
-        <q-input v-if="paymentType === 'request'"
-         v-model="inPayment.receiverName"
-         placeholder="Receiver"
-         readonly
-         outlined
-         dense
-         lazy-rules
-         stack-label
-         hide-bottom-space
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
-        <q-input
-          v-else
-          v-model="partner.value"
-          placeholder="Receiver"
-          :readonly="user.id !== payment.creatorId"
+        <q-input-system-user
+          v-model="partner"
+          placeholder="Recipient"
+          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
           outlined
           dense
           lazy-rules
           stack-label
           hide-bottom-space
-          @blur="checkingDestination"
-          :rules="[(val) => !!val || 'Receiver is required']"
-          :error="partnerError"
-          :error-message="partner.error"
+          :rules="[(val) => !!val || 'Recipient is required']"
           hint="expect an user name on mgmt or an email address"
-        >
-          <template v-slot:prepend>
-            <q-icon name="person_add" />
-          </template>
-        </q-input>
+        />
       </div>
       <div class="col-4"></div>
       <div class="col-4" v-if="!expanded">
@@ -115,7 +71,7 @@
           </template>
         </q-input>
       </div>
-      <div class="col-8" v-if="!expanded"/>
+      <div class="col-8" v-if="!expanded" />
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Choose payment method
@@ -182,29 +138,26 @@
         </q-expansion-item>
       </div>
     </div>
-    <div class="row justify-end">
+    <div class="row justify-end q-gutter-sm">
       <q-btn
         :label="inPayment.status === '' ? 'Mark as draft' : 'Update'"
         type="button"
         color="primary"
         @click="submit(true)"
-        :disable="handling"
+        :disable="submitting"
       >
         <q-tooltip v-if="inPayment.status === ''">
-          'Mark as draft' will not notify the payment to the {{ paymentType === "request" ? "sender" : "receiver" }}
+          'Mark as draft' will not notify the payment to the recipient
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'created' || inPayment.status === ''"
+        v-if="inPayment.status === 'draft' || inPayment.status === ''"
         label="Send"
-        type="submit"
         color="primary"
-        :disable="handling"
+        :disable="submitting"
+        @click="submit(false)"
       >
-        <q-tooltip>
-          'Send' will notify the payment to the
-          {{ paymentType === "request" ? "sender" : "receiver" }}
-        </q-tooltip>
+        <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
       </q-btn>
       <q-btn
         label="Cancel"
@@ -218,24 +171,15 @@
 </template>
 
 <script>
-import {
-  PAYMENT_TYPE_OPTIONS,
-  PAYMENT_OBJECT_REMINDER,
-  PAYMENT_OBJECT_REQUEST,
-} from "src/consts/paymentType";
-import { emailPattern } from "src/helper/validations"
-import Invoices from "components/payment/invoices"
-import PaymentSetting from "components/payment/paymentSetting"
-import {responseError} from "src/helper/error";
-
-const DESTINATION_CHECK_NONE = 0;
-const DESTINATION_CHECK_CHECKING = 1;
-const DESTINATION_CHECK_FAIL = 2;
-const DESTINATION_CHECK_DONE = 3;
+import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
+import Invoices from "components/payment/invoices";
+import QInputSystemUser from "components/common/qInputSystemUser";
+import PaymentSetting from "components/payment/paymentSetting";
+import { mapActions } from "vuex";
 
 export default {
   name: "paymentForm",
-  components: { Invoices, PaymentSetting },
+  components: { Invoices, PaymentSetting, QInputSystemUser },
   data() {
     return {
       expanded: false,
@@ -246,57 +190,33 @@ export default {
       partner: {
         id: 0,
         value: "",
-        status: DESTINATION_CHECK_NONE,
-        error: "",
         paymentSettings: [],
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
-      inPayment: {}
+      inPayment: {},
     };
   },
   props: {
     payment: Object,
     user: Object,
     token: String,
-    paymentType: String
+    paymentType: String,
   },
   watch: {
     payment: {
       immediate: true,
       handler(newPayment) {
-        const payment = { ...newPayment }
+        const payment = { ...newPayment };
+        this.partner.contactMethod = payment.contactMethod;
         if (payment.contactMethod === "email") {
-          if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = newPayment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = newPayment.senderName
-              this.partner.id = newPayment.senderId
-              newPayment.receiverName = newPayment.externalEmail
-            }
-          } else {
-            if (payment.creatorId === this.user.id) {
-              this.partner.value = payment.externalEmail
-              this.partner.id = 0
-            } else {
-              this.partner.value = payment.receiverName
-              this.partner.id = payment.receiverId
-              payment.senderName = payment.externalEmail
-            }
-          }
+          this.partner.value = newPayment.externalEmail;
+          this.partner.id = 0;
         } else {
-          this.partner.value =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderName
-              : payment.receiverName;
-          this.partner.id =
-            this.paymentType === PAYMENT_OBJECT_REQUEST
-              ? payment.senderId
-              : payment.receiverId;
+          this.partner.value = payment.receiverName;
+          this.partner.id = payment.receiverId;
         }
-        this.inPayment = payment
+        this.inPayment = payment;
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
@@ -308,108 +228,72 @@ export default {
           let filled = true;
           for (let setting of settings) {
             if (setting.isDefault) {
-              this.setting = setting;
+              this.setting = { ...setting };
               return;
             }
           }
           if (!filled && settings.length > 0) {
-            this.setting = settings[0];
+            this.setting = {
+              ...settings[0],
+            };
           }
         }
       },
     },
   },
   methods: {
-    checkingDestination($e) {
-      this.partner.status = DESTINATION_CHECK_NONE;
-      this.partner.error = "";
-      this.partner.id = 0;
-      if (!this.partner.value) {
-        return;
-      }
-      if (emailPattern.test(this.partner.value)) {
-        this.partner.status = DESTINATION_CHECK_DONE;
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.contactMethod = "email";
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.senderEmail = this.partner.value;
-      } else {
-        this.partner.status = DESTINATION_CHECK_CHECKING
-        this.$api.get(`/user/exist-checking?userName=${this.partner.value}`)
-          .then((data) => {
-            if (data.found) {
-              this.partner.status = DESTINATION_CHECK_DONE
-              this.partner.id = data.id
-              this.partner.paymentSettings = data.paymentSettings || []
-              // eslint-disable-next-line vue/no-mutating-props
-              this.inPayment.contactMethod = "internal"
-              this.updateSettings()
-            } else {
-              this.partner.status = DESTINATION_CHECK_FAIL
-              this.partner.error = data.message
-            }
-          })
-          .catch(() => {
-            this.partner.status = DESTINATION_CHECK_FAIL;
-            this.partner.error = "the user name is not found";
-          });
-      }
-    },
+    ...mapActions({
+      savePayment: "payment/save",
+    }),
     async submit(isDraft) {
-      if (this.submitting) {
+      if (this.submitting || !this.partner.contactMethod) {
         return;
       }
-      const valid = await this.$refs.paymentForm.validate()
+      const valid = await this.$refs.paymentForm.validate();
       if (!valid) {
-        return
+        return;
       }
       if (this.amount === 0) {
         this.$q.notify({
           type: "negative",
-          message: "Amount must greater than 0. Please fill up the invoices and hourly rate"
-        })
-        return
+          message:
+            "Amount must greater than 0. Please fill up the invoices and hourly rate",
+        });
+        return;
       }
-      const payment = {...this.inPayment}
-      payment.hourlyRate = Number(payment.hourlyRate)
-      payment.isDraft = isDraft === true
+      const payment = { ...this.inPayment };
+      payment.hourlyRate = Number(payment.hourlyRate);
+      payment.contactMethod = this.partner.contactMethod;
+      if (isDraft !== true) {
+        payment.status = "sent";
+      }
       if (payment.contactMethod === "email") {
         if (!payment.id || this.user.id === payment.creatorId) {
-          payment.externalEmail = this.partner.value
+          payment.externalEmail = this.partner.value;
         }
       }
       payment.paymentMethod = this.setting.type;
       payment.paymentAddress = this.setting.address;
-      if (this.paymentType === "request") {
-        payment.senderId = this.partner.id;
-        payment.receiverId = this.user.id;
-      } else {
-        payment.senderId = this.user.id;
-        payment.receiverId = this.partner.id;
-      }
-      payment.token = this.token
-      this.submitting = true
-      let url = `/payment`
-      let successNotify = "Payment request sent"
+      payment.receiverId = this.partner.id;
+      payment.token = this.token;
+      this.submitting = true;
+      let successNotify = "Payment request created";
       if (payment.id > 0) {
-        url = `/payment/${payment.id}`
-        successNotify = "Payment request updated"
+        successNotify = "Payment request updated";
       }
-      this.$api
-        .post(url, payment)
-        .then((data) => {
-          this.$q.notify({
-            message: successNotify,
-            color: "positive",
-            icon: "check",
-          });
-          this.submitting = false
-          this.$emit("saved", data.payment)
-        })
-        .catch((err) => {
-          this.submitting = false
-          responseError(err)
-        })
+      if (isDraft !== true) {
+        successNotify = "Payment request sent";
+      }
+      const { data } = await this.savePayment(payment);
+      this.submitting = false
+      if (data) {
+        this.$emit("saved", data.payment);
+        this.$q.notify({
+          message: successNotify,
+          color: "positive",
+          icon: "check",
+        });
+      }
     },
     changePaymentMethod(val) {
       const settings = this.inPayment.paymentSettings || [];
@@ -420,44 +304,8 @@ export default {
         }
       }
     },
-    updateSettings(pType) {
-      pType = pType || this.paymentType;
-      if (pType === PAYMENT_OBJECT_REQUEST) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.paymentSettings = this.user.paymentSettings || [];
-      }
-      if (pType === PAYMENT_OBJECT_REMINDER) {
-        // eslint-disable-next-line vue/no-mutating-props
-        this.inPayment.paymentSettings = this.partner.paymentSettings || [];
-      }
-      let isSet = false;
-      for (let setting of this.inPayment.paymentSettings) {
-        if (setting.isDefault) {
-          isSet = true;
-          this.setting.type = setting.type;
-          this.setting.address = setting.address;
-        }
-      }
-      if (!isSet && this.inPayment.paymentSettings.length > 0) {
-        const setting = this.inPayment.paymentSettings[0];
-        this.setting.type = setting.type;
-        this.setting.address = setting.address;
-      } else {
-        this.setting.type = "";
-        this.setting.address = "";
-      }
-    },
   },
   computed: {
-    handling() {
-      if (this.submitting) {
-        return true;
-      }
-      return this.partner.status === DESTINATION_CHECK_CHECKING;
-    },
-    partnerError: function () {
-      return this.partner.status === DESTINATION_CHECK_FAIL;
-    },
     amount: function () {
       if (!this.inPayment.details) {
         return 0;

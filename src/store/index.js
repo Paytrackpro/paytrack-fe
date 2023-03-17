@@ -1,10 +1,12 @@
 import { createStore } from "vuex";
 import user from "./user";
+import payment from "./payment";
 
 export default function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
       user,
+      payment,
     },
 
     // enable strict mode (adds overhead!)

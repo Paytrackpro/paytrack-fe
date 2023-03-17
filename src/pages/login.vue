@@ -4,10 +4,13 @@
       <q-page>
         <div class="position-relative">
           <img class="absolute q-ma-md logo" src="~assets/team_raedah.svg" />
-          <div class="flex flex-center q-mx-auto window-height login-form-wrapper">
+          <div
+            class="flex flex-center q-mx-auto window-height login-form-wrapper"
+          >
             <div class="column justify-center q-pa-xl col-grow">
-              <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
-              </div>
+              <div
+                class="flex items-center q-mb-md q-gutter-sm text-grey-7"
+              ></div>
               <div v-show="!isOtp">
                 <q-card class="col" flat bordered>
                   <q-card-section class="q-pa-lg">
@@ -121,7 +124,7 @@ export default {
         this.isOtp = true;
         return;
       }
-      this.$router.push({ name: "home" });
+      this.$router.push({ path: "/dashboard" });
     },
   },
 };

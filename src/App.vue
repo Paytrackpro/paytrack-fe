@@ -17,7 +17,7 @@ export default {
     publicPath,
   }) {
     const { authenticated, user } = store.state?.user || {};
-    if (!authenticated) {
+    if (!authenticated && currentRoute.meta.requiresAuth) {
       return redirect({ path: "/login" });
     }
 

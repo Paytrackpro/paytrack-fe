@@ -1,17 +1,15 @@
 <template>
-  <payment-list type="reminder" label="Pay" />
+  <payment-list type="reminder" label="Make payment" />
 </template>
 
 <script>
-import { PaymentList } from "components/payment"
+import { PaymentList } from "components/payment";
 export default {
   name: "payPage",
   components: {
-    PaymentList
-  }
-}
+    PaymentList,
+  },
+};
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

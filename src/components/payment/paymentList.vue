@@ -11,17 +11,20 @@
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
-    <template v-slot:top-right>
+    <template v-if="type === 'request'" v-slot:top-right>
       <q-btn
         color="white"
         text-color="black"
         label="Create"
-        :to="this.createLink"
+        to="/get-paid/create"
       />
     </template>
-    <template v-slot:body-cell-online="props">
+    <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <q-badge rounded :color="props.value ? 'green' : 'grey'" />
+        <payment-status
+          :status="props.row.status"
+          :receiver-id="props.row.receiverId"
+        />
       </q-td>
     </template>
   </q-table>
@@ -33,6 +36,7 @@ import {
   pagingToPathParams,
   defaultPaging,
 } from "src/helper/paging";
+import PaymentStatus from "components/payment/paymentStatus";
 import { date } from "quasar";
 import { MDateFormat } from "src/consts/common";
 import { mapGetters } from "vuex";
@@ -44,53 +48,23 @@ export default {
   name: "paymentList",
   data() {
     return {
-      createLink: "",
       loading: false,
       pagination: {
         ...defaultPaging,
       },
-      columns: [
-        {
-          name: "receiverName",
-          required: true,
-          label: "receiver",
-          align: "center",
-          field: (row) => {
-            if (
-              row.creatorId === row.receiverId ||
-              row.contactMethod === "internal"
-            ) {
-              return row.receiverName;
-            }
-            return row.externalEmail;
-          },
-          format: (val) => `${val}`,
-        },
-        {
-          name: "senderName",
-          align: "center",
-          label: "sender",
-          field: (row) => {
-            if (
-              row.creatorId === row.senderId ||
-              row.contactMethod === "internal"
-            ) {
-              return row.senderName;
-            }
-            return row.externalEmail;
-          },
-        },
+      rows: [],
+      fixedColumns: [
         {
           name: "status",
           align: "center",
-          label: "status",
+          label: "Status",
           field: "status",
           sortable: true,
         },
         {
           name: "amount",
           align: "center",
-          label: "amount(USD)",
+          label: "Amount(USD)",
           field: "amount",
           format: (val) => {
             return val;
@@ -105,8 +79,10 @@ export default {
           format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
-      rows: [],
     };
+  },
+  components: {
+    PaymentStatus,
   },
   props: {
     type: String,
@@ -119,6 +95,37 @@ export default {
     isUser() {
       return this.user.role === role.USER;
     },
+    columns() {
+      let flexibleCol =
+        this.type === PAYMENT_OBJECT_REQUEST
+          ? {
+            name: "receiverName",
+            align: "center",
+            label: "Recipient",
+            field: (row) => {
+              return row.receiverName || row.externalEmail;
+              if (
+                row.creatorId === row.senderId ||
+                  row.contactMethod === "internal"
+              ) {
+                return;
+              }
+              return row.externalEmail;
+            },
+          }
+          : {
+            name: "senderName",
+            required: true,
+            label: "Sender",
+            align: "center",
+            field: (row) => {
+              return row.senderName;
+            },
+            format: (val) => `${val}`,
+          };
+
+      return [flexibleCol, ...this.fixedColumns];
+    },
   },
   methods: {
     async getPayments(f) {
@@ -127,10 +134,10 @@ export default {
         .get("/payment/list", {
           params: f,
         })
-        .then((res) => {
+        .then(({ payments, count }) => {
           this.loading = false;
-          this.rows = res.payments;
-          this.pagination.rowsNumber = res.count;
+          this.rows = payments || [];
+          this.pagination.rowsNumber = count;
         })
         .catch((err) => {
           responseError(err);
@@ -138,15 +145,13 @@ export default {
         });
     },
     goToDetail(id) {
-      if (this.isUser) {
-        const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
-        this.$router.push({ path: `/${path}/${id}` });
-      }
+      const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
+      this.$router.push({ path: `/${path}/${id}` });
     },
     onRequest(props) {
       const query = pagingToPathParams(props);
       this.$router.push({
-        path: this.$router.fullPath,
+        path: this.$route.fullPath,
         query,
       });
     },
@@ -156,10 +161,6 @@ export default {
       immediate: true,
       handler(to) {
         const filter = pathParamsToPaging(to, this.pagination);
-        this.createLink =
-          this.type == PAYMENT_OBJECT_REQUEST
-            ? "/get-paid/create"
-            : "/pay/create";
         this.getPayments({
           ...filter,
           requestType: this.type,
