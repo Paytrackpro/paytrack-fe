@@ -27,6 +27,16 @@
         />
       </q-td>
     </template>
+    <template v-slot:body-cell-approvers="props">
+      <q-td :props="props">
+        <payment-status
+          v-for="approver in props.row.approvers" :key="approver.approverId"
+          :status="approver.status"
+          :receiver-id="props.receiverId"
+          :text="approver.approverName"
+        />
+      </q-td>
+    </template>
   </q-table>
 </template>
 
@@ -69,6 +79,12 @@ export default {
           format: (val) => {
             return val;
           },
+        },
+        {
+          name: "approvers",
+          align: "center",
+          label: "Approvers",
+          field: "approvers",
         },
         {
           name: "createdAt",

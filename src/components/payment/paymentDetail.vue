@@ -219,6 +219,23 @@
         class="q-mr-sm"
       />
       <q-btn
+        label="Approval"
+        type="button"
+        color="teal"
+        text-color="white"
+        v-if="approvalable"
+        @click="handlerApprovalAction(PAYMENT_STATUS_APPROVED)"
+        class="q-mr-sm"
+      />
+      <q-btn
+        label="Reject"
+        type="button"
+        color="primary"
+        v-if="rejectable"
+        @click="handlerApprovalAction(PAYMENT_STATUS_REJECTED)"
+        class="q-mr-sm"
+      />
+      <q-btn
         label="Cancel"
         type="button"
         color="white"
@@ -234,7 +251,14 @@ import { mapActions, mapGetters } from "vuex";
 import MDate from "components/common/mDate";
 import Invoices from "components/payment/invoices";
 import PaymentSetting from "components/payment/paymentSetting";
-import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
+import {
+  PAYMENT_STATUS_APPROVED,
+  PAYMENT_STATUS_REJECTED,
+  PAYMENT_OBJECT_REQUEST,
+  PAYMENT_STATUS_APPROVED_TEXT,
+  PAYMENT_STATUS_REJECTED_TEXT,
+  PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
+} from "src/consts/paymentType";
 import { responseError } from "src/helper/error";
 import PaymentStatus from "components/payment/paymentStatus";
 import PaymentRateInput from "components/payment/paymentRateInput";
@@ -251,6 +275,8 @@ export default {
     return {
       txId: "",
       pMethod: "",
+      PAYMENT_STATUS_APPROVED: PAYMENT_STATUS_APPROVED,
+      PAYMENT_STATUS_REJECTED: PAYMENT_STATUS_REJECTED,
       methods: [],
       statuses: [
         {
@@ -347,6 +373,31 @@ export default {
         });
       }
     },
+    handlerApprovalAction(status) {
+      const reqData = {
+        paymentId: this.payment.id,
+        status,
+      };
+      this.paying = true;
+      this.$api
+        .post("/payment/approve", reqData)
+        .then((data) => {
+          if (data) {
+            this.updateLocal(data);
+            this.$q.notify({
+              message: "payment is updated",
+              color: "positive",
+              icon: "check",
+            });
+          }
+        })
+        .catch((err) => {
+          responseError(err);
+        })
+        .finally(() => {
+          this.paying = false;
+        });
+    },
     updateLocal(payment, editing) {
       payment = payment || this.payment;
       this.$emit("update:modelValue", payment);
@@ -405,6 +456,26 @@ export default {
         ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
         (this.payment.receiverId === this.user.id ||
           (this.token && this.payment.receiverId === 0))
+      );
+    },
+    approvalable() {
+      console.log(1, this.payment.status, this.user);
+      return (
+        [
+          PAYMENT_STATUS_REJECTED_TEXT,
+          PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
+        ].includes(this.payment.status) &&
+        this.user.id !== this.payment.receiverId
+      );
+    },
+    rejectable() {
+      console.log(2, this.payment.status, this.user);
+      return (
+        [
+          PAYMENT_STATUS_APPROVED_TEXT,
+          PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
+        ].includes(this.payment.status) &&
+        this.user.id !== this.payment.receiverId
       );
     },
   },

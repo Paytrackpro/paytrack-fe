@@ -4,10 +4,10 @@
       <div class="text-h6">
         Payment request
         <template v-if="payment.status">
-          (<payment-status
+          <payment-status
             :status="payment.status"
             :receiver-id="payment.receiverId"
-          />)
+          />
         </template>
       </div>
     </q-card-section>
