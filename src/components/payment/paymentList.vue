@@ -30,7 +30,8 @@
     <template v-slot:body-cell-approvers="props">
       <q-td :props="props">
         <payment-status
-          v-for="approver in props.row.approvers" :key="approver.approverId"
+          v-for="approver in props.row.approvers"
+          :key="approver.approverId"
           :status="approver.status"
           :receiver-id="props.receiverId"
           :text="approver.approverName"
@@ -51,7 +52,10 @@ import { date } from "quasar";
 import { MDateFormat } from "src/consts/common";
 import { mapGetters } from "vuex";
 import role from "src/consts/role";
-import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
+import {
+  PAYMENT_OBJECT_REMINDER,
+  PAYMENT_OBJECT_REQUEST,
+} from "src/consts/paymentType";
 import { responseError } from "src/helper/error";
 
 export default {
@@ -80,12 +84,7 @@ export default {
             return val;
           },
         },
-        {
-          name: "approvers",
-          align: "center",
-          label: "Approvers",
-          field: "approvers",
-        },
+
         {
           name: "createdAt",
           align: "center",
@@ -112,9 +111,10 @@ export default {
       return this.user.role === role.USER;
     },
     columns() {
-      let flexibleCol =
+      let flexibleCol = [
         this.type === PAYMENT_OBJECT_REQUEST
-          ? {
+          ? 
+          {
             name: "receiverName",
             align: "center",
             label: "Recipient",
@@ -122,14 +122,15 @@ export default {
               return row.receiverName || row.externalEmail;
               if (
                 row.creatorId === row.senderId ||
-                  row.contactMethod === "internal"
+                row.contactMethod === "internal"
               ) {
                 return;
               }
               return row.externalEmail;
             },
           }
-          : {
+          : 
+          {
             name: "senderName",
             required: true,
             label: "Sender",
@@ -138,9 +139,19 @@ export default {
               return row.senderName;
             },
             format: (val) => `${val}`,
-          };
+          }
+      ];
+        
+      if (this.type === PAYMENT_OBJECT_REMINDER) {
+        flexibleCol.push({
+          name: "approvers",
+          align: "center",
+          label: "Approvers",
+          field: "approvers",
+        });
+      }
 
-      return [flexibleCol, ...this.fixedColumns];
+      return [...flexibleCol, ...this.fixedColumns];
     },
   },
   methods: {
