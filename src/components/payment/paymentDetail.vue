@@ -1,6 +1,21 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
+    <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
+      <div class="col-12">
+        <q-field label="Approvers" stack-label>
+          <template v-slot:control>
+            <payment-status
+              v-for="approver in payment.approvers"
+              :key="approver.approverId"
+              :status="approver.status"
+              :receiver-id="payment.receiverId"
+              :text="approver.approverName"
+            />
+          </template>
+        </q-field>
+      </div>
+    </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-field label="The sender" stack-label>
@@ -459,7 +474,6 @@ export default {
       );
     },
     approvalable() {
-      console.log(1, this.payment.status, this.user);
       return (
         [
           PAYMENT_STATUS_REJECTED_TEXT,
@@ -469,7 +483,6 @@ export default {
       );
     },
     rejectable() {
-      console.log(2, this.payment.status, this.user);
       return (
         [
           PAYMENT_STATUS_APPROVED_TEXT,
