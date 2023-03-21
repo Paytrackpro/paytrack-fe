@@ -6,33 +6,25 @@
 
 <script>
 export default {
-  name: "App",
-  preFetch({
-    store,
-    currentRoute,
-    previousRoute,
-    redirect,
-    ssrContext,
-    urlPath,
-    publicPath,
-  }) {
-    const { authenticated, user } = store.state?.user || {};
+  name: 'App',
+  preFetch({ store, currentRoute, previousRoute, redirect, ssrContext, urlPath, publicPath }) {
+    const { authenticated, user } = store.state?.user || {}
     if (!authenticated && currentRoute.meta.requiresAuth) {
-      return redirect({ path: "/login" });
+      return redirect({ path: '/login' })
     }
 
     if (authenticated && !currentRoute.meta.requiresAuth) {
-      return redirect({ path: "/" });
+      return redirect({ path: '/' })
     }
 
-    const role = user?.role;
+    const role = user?.role
     if (currentRoute.meta.roles && !currentRoute.meta.roles.includes(role)) {
-      return redirect({ path: "/" });
+      return redirect({ path: '/' })
     }
 
-    redirect({ path: urlPath });
+    redirect({ path: urlPath })
   },
-};
+}
 </script>
 
 <style>

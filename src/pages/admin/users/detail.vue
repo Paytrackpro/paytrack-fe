@@ -23,15 +23,7 @@
         </div>
         <div class="col-4 col-md-3">
           <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
-          <q-input
-            v-model="email"
-            placeholder="Email"
-            outlined
-            dense
-            lazy-rules
-            stack-label
-            hide-bottom-space
-          >
+          <q-input v-model="email" placeholder="Email" outlined dense lazy-rules stack-label hide-bottom-space>
           </q-input>
         </div>
         <div class="col-4 col-md-3">
@@ -75,34 +67,34 @@
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
-import { responseError } from "src/helper/error";
+import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
+import { responseError } from 'src/helper/error'
 export default {
-  name: "pageUserDetails",
+  name: 'pageUserDetails',
   data() {
     return {
       paymentTypeOptions: PAYMENT_TYPE_OPTIONS,
-      userName: "",
-      email: "",
-      displayName: "",
+      userName: '',
+      email: '',
+      displayName: '',
       paymentType: null,
-      paymentAddress: "",
-    };
+      paymentAddress: '',
+    }
   },
   computed: {},
   created: function () {
-    this.getUserInfo();
+    this.getUserInfo()
   },
   methods: {
     getUserInfo() {
-      const id = this.$route.params.id;
+      const id = this.$route.params.id
       this.$api.get(`/admin/user/info/${id}`).then((data) => {
-        this.email = data.email;
-        this.paymentAddress = data.paymentAddress;
-        this.paymentType = data.paymenType;
-        this.userName = data.userName;
-        this.displayName = data.displayName;
-      });
+        this.email = data.email
+        this.paymentAddress = data.paymentAddress
+        this.paymentType = data.paymenType
+        this.userName = data.userName
+        this.displayName = data.displayName
+      })
     },
     updateUserInfo() {
       this.$api
@@ -116,16 +108,16 @@ export default {
         })
         .then(() => {
           this.$q.notify({
-            message: "User saved",
-            color: "positive",
-            icon: "check",
-          });
-          this.$router.push({ name: "user.list" });
+            message: 'User saved',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.$router.push({ name: 'user.list' })
         })
         .catch((err) => {
-          responseError(err);
-        });
+          responseError(err)
+        })
     },
   },
-};
+}
 </script>

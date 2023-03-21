@@ -12,19 +12,11 @@
     @request="onRequest"
   >
     <template v-if="type === 'request'" v-slot:top-right>
-      <q-btn
-        color="white"
-        text-color="black"
-        label="Create"
-        to="/get-paid/create"
-      />
+      <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
     </template>
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <payment-status
-          :status="props.row.status"
-          :receiver-id="props.row.receiverId"
-        />
+        <payment-status :status="props.row.status" :receiver-id="props.row.receiverId" />
       </q-td>
     </template>
     <template v-slot:body-cell-approvers="props">
@@ -42,24 +34,17 @@
 </template>
 
 <script>
-import {
-  pathParamsToPaging,
-  pagingToPathParams,
-  defaultPaging,
-} from "src/helper/paging";
-import PaymentStatus from "components/payment/paymentStatus";
-import { date } from "quasar";
-import { MDateFormat } from "src/consts/common";
-import { mapGetters } from "vuex";
-import role from "src/consts/role";
-import {
-  PAYMENT_OBJECT_REMINDER,
-  PAYMENT_OBJECT_REQUEST,
-} from "src/consts/paymentType";
-import { responseError } from "src/helper/error";
+import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import PaymentStatus from 'components/payment/paymentStatus'
+import { date } from 'quasar'
+import { MDateFormat } from 'src/consts/common'
+import { mapGetters } from 'vuex'
+import role from 'src/consts/role'
+import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import { responseError } from 'src/helper/error'
 
 export default {
-  name: "paymentList",
+  name: 'paymentList',
   data() {
     return {
       loading: false,
@@ -69,32 +54,32 @@ export default {
       rows: [],
       fixedColumns: [
         {
-          name: "status",
-          align: "center",
-          label: "Status",
-          field: "status",
+          name: 'status',
+          align: 'center',
+          label: 'Status',
+          field: 'status',
           sortable: true,
         },
         {
-          name: "amount",
-          align: "center",
-          label: "Amount(USD)",
-          field: "amount",
+          name: 'amount',
+          align: 'center',
+          label: 'Amount(USD)',
+          field: 'amount',
           format: (val) => {
-            return val;
+            return val
           },
         },
 
         {
-          name: "createdAt",
-          align: "center",
-          label: "Created At",
-          field: "createdAt",
+          name: 'createdAt',
+          align: 'center',
+          label: 'Created At',
+          field: 'createdAt',
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
-    };
+    }
   },
   components: {
     PaymentStatus,
@@ -105,97 +90,88 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
+      user: 'user/getUser',
     }),
     isUser() {
-      return this.user.role === role.USER;
+      return this.user.role === role.USER
     },
     columns() {
       let flexibleCol = [
         this.type === PAYMENT_OBJECT_REQUEST
-          ? 
-          {
-            name: "receiverName",
-            align: "center",
-            label: "Recipient",
-            field: (row) => {
-              return row.receiverName || row.externalEmail;
-              if (
-                row.creatorId === row.senderId ||
-                row.contactMethod === "internal"
-              ) {
-                return;
-              }
-              return row.externalEmail;
+          ? {
+              name: 'receiverName',
+              align: 'center',
+              label: 'Recipient',
+              field: (row) => {
+                return row.receiverName || row.externalEmail
+              },
+            }
+          : {
+              name: 'senderName',
+              required: true,
+              label: 'Sender',
+              align: 'center',
+              field: (row) => {
+                return row.senderName
+              },
+              format: (val) => `${val}`,
             },
-          }
-          : 
-          {
-            name: "senderName",
-            required: true,
-            label: "Sender",
-            align: "center",
-            field: (row) => {
-              return row.senderName;
-            },
-            format: (val) => `${val}`,
-          }
-      ];
-        
+      ]
+
       if (this.type === PAYMENT_OBJECT_REMINDER) {
         flexibleCol.push({
-          name: "approvers",
-          align: "center",
-          label: "Approvers",
-          field: "approvers",
-        });
+          name: 'approvers',
+          align: 'center',
+          label: 'Approvers',
+          field: 'approvers',
+        })
       }
 
-      return [...flexibleCol, ...this.fixedColumns];
+      return [...flexibleCol, ...this.fixedColumns]
     },
   },
   methods: {
     async getPayments(f) {
-      this.loading = true;
+      this.loading = true
       this.$api
-        .get("/payment/list", {
+        .get('/payment/list', {
           params: f,
         })
         .then(({ payments, count }) => {
-          this.loading = false;
-          this.rows = payments || [];
-          this.pagination.rowsNumber = count;
+          this.loading = false
+          this.rows = payments || []
+          this.pagination.rowsNumber = count
         })
         .catch((err) => {
-          responseError(err);
-          this.loading = false;
-        });
+          responseError(err)
+          this.loading = false
+        })
     },
     goToDetail(id) {
-      const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
-      this.$router.push({ path: `/${path}/${id}` });
+      const path = this.type === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}/${id}` })
     },
     onRequest(props) {
-      const query = pagingToPathParams(props);
+      const query = pagingToPathParams(props)
       this.$router.push({
         path: this.$route.fullPath,
         query,
-      });
+      })
     },
   },
   watch: {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination);
+        const filter = pathParamsToPaging(to, this.pagination)
         this.getPayments({
           ...filter,
           requestType: this.type,
-        });
+        })
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

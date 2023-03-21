@@ -1,10 +1,10 @@
-import { Notify } from "quasar";
+import { Notify } from 'quasar'
 
 const responseError = (error) => {
   Notify.create({
-    type: "negative",
+    type: 'negative',
     message: error.message,
-  });
-};
+  })
+}
 
-export { responseError };
+export { responseError }

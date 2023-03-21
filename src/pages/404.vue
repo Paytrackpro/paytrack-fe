@@ -4,8 +4,8 @@
 
 <script>
 export default {
-  name: "pageNotFound",
-};
+  name: 'pageNotFound',
+}
 </script>
 
 <style lang="scss">

@@ -66,24 +66,8 @@
       >
         <template v-slot:body-cell-action="props">
           <q-td :props="props">
-            <q-btn
-              :props="props"
-              dense
-              round
-              flat
-              color="grey"
-              @click="editRow(props)"
-              icon="edit"
-            ></q-btn>
-            <q-btn
-              :props="props"
-              dense
-              round
-              flat
-              color="grey"
-              @click="deleteRow(props)"
-              icon="delete"
-            ></q-btn>
+            <q-btn :props="props" dense round flat color="grey" @click="editRow(props)" icon="edit"></q-btn>
+            <q-btn :props="props" dense round flat color="grey" @click="deleteRow(props)" icon="delete"></q-btn>
           </q-td>
         </template>
       </q-table>
@@ -97,10 +81,10 @@ import {
   DESTINATION_CHECK_DONE,
   DESTINATION_CHECK_CHECKING,
   DESTINATION_CHECK_FAIL,
-} from "src/consts/common";
-import { defaultPaging } from "src/helper/paging";
-import { responseError } from "src/helper/error";
-import { mapActions } from "vuex";
+} from 'src/consts/common'
+import { defaultPaging } from 'src/helper/paging'
+import { responseError } from 'src/helper/error'
+import { mapActions } from 'vuex'
 
 export default {
   data() {
@@ -108,15 +92,15 @@ export default {
       user: {},
       sender: {
         id: 0,
-        value: "",
+        value: '',
         status: DESTINATION_CHECK_NONE,
-        error: "",
+        error: '',
       },
       approver: {
         ids: [],
-        value: "",
+        value: '',
         status: DESTINATION_CHECK_NONE,
-        error: "",
+        error: '',
       },
       loading: false,
       pagination: {
@@ -124,107 +108,107 @@ export default {
       },
       columns: [
         {
-          name: "sendUserName",
+          name: 'sendUserName',
           required: true,
-          label: "Sender User",
-          align: "center",
+          label: 'Sender User',
+          align: 'center',
           field: (row) => {
-            return row.sendUserName;
+            return row.sendUserName
           },
           format: (val) => {
-            return val;
+            return val
           },
         },
         {
-          name: "Approvers",
-          align: "center",
-          label: "Approvers",
+          name: 'Approvers',
+          align: 'center',
+          label: 'Approvers',
           field: (row) => {
-            return row.approvers.map((item) => item.approverName).join(", ");
+            return row.approvers.map((item) => item.approverName).join(', ')
           },
           format: (val) => {
-            console.log({ val });
-            return val;
+            console.log({ val })
+            return val
           },
         },
         {
-          name: "action",
-          align: "center",
-          label: "Action",
-          field: "",
+          name: 'action',
+          align: 'center',
+          label: 'Action',
+          field: '',
         },
       ],
       rows: [],
-    };
+    }
   },
-  name: "approverMethod",
+  name: 'approverMethod',
   props: {
     modelValue: Object,
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   watch: {
     modelValue(val) {
-      this.user = { ...val };
+      this.user = { ...val }
     },
   },
   methods: {
     checkValidSender() {
-      this.sender.status = DESTINATION_CHECK_CHECKING;
+      this.sender.status = DESTINATION_CHECK_CHECKING
       this.$api
         .get(`/user/exist-checking?userName=${this.sender.value}`)
         .then((data) => {
           if (data.found) {
-            this.sender.status = DESTINATION_CHECK_DONE;
-            this.sender.id = data.id;
+            this.sender.status = DESTINATION_CHECK_DONE
+            this.sender.id = data.id
           } else {
-            this.sender.status = DESTINATION_CHECK_FAIL;
-            this.sender.error = data.message;
+            this.sender.status = DESTINATION_CHECK_FAIL
+            this.sender.error = data.message
           }
         })
         .catch(() => {
-          this.sender.status = DESTINATION_CHECK_FAIL;
-          this.sender.error = "the user name is not found";
-        });
+          this.sender.status = DESTINATION_CHECK_FAIL
+          this.sender.error = 'the user name is not found'
+        })
     },
     checkValidApprovers() {
-      this.approver.status = DESTINATION_CHECK_CHECKING;
-      const value = this.approver.value.replace(/,\s*$/, "");
-      this.approver.value = value;
+      this.approver.status = DESTINATION_CHECK_CHECKING
+      const value = this.approver.value.replace(/,\s*$/, '')
+      this.approver.value = value
       this.$api
         .get(`/user/exists?userNames=${value}`)
         .then((data) => {
           if (data && data.length) {
-            this.approver.status = DESTINATION_CHECK_DONE;
-            this.approver.ids = data.map((item) => item.id);
+            this.approver.status = DESTINATION_CHECK_DONE
+            this.approver.ids = data.map((item) => item.id)
           } else {
-            this.approver.status = DESTINATION_CHECK_FAIL;
-            this.approver.error = data.message;
+            this.approver.status = DESTINATION_CHECK_FAIL
+            this.approver.error = data.message
           }
         })
         .catch((err) => {
-          this.approver.status = DESTINATION_CHECK_FAIL;
-          this.approver.error = err.message || "the user name is not found";
-        });
+          this.approver.status = DESTINATION_CHECK_FAIL
+          this.approver.error = err.message || 'the user name is not found'
+        })
     },
     getList() {
-      this.loading = true;
+      this.loading = true
       this.$api
-        .get("/user/setting/payment", {})
+        .get('/user/setting/payment', {})
         .then((res) => {
-          this.loading = false;
-          this.rows = res;
-          this.pagination.rowsNumber = res.length;
+          this.loading = false
+          this.rows = res
+          this.pagination.rowsNumber = res.length
         })
         .catch((err) => {
-          console.log({ err });
-          responseError(err);
-          this.loading = false;
-        });
+          console.log({ err })
+          responseError(err)
+          this.loading = false
+        })
     },
 
     async submit() {
-      this.loading = true;
-      let list = [];
+      this.loading = true
+      let list = []
 
       if (this.rows) {
         list = this.rows
@@ -233,36 +217,36 @@ export default {
             return {
               sendUserId: item.sendUserId,
               approverIds: item.approvers.map((item) => item.approverId),
-            };
-          });
+            }
+          })
       }
       list.push({
         sendUserId: this.sender.id,
         approverIds: this.approver.ids,
-      });
+      })
       const data = {
         list,
-      };
-      this.save(data);
+      }
+      this.save(data)
     },
     editRow(row) {
-      console.log({ row });
-      const data = row.row;
+      console.log({ row })
+      const data = row.row
       this.sender = {
         id: data.sendUserId,
         value: data.sendUserName,
         status: DESTINATION_CHECK_DONE,
-      };
+      }
       this.approver = {
         ids: data.approvers.map((item) => item.approverId),
-        value: data.approvers.map((item) => item.approverName).join(","),
+        value: data.approvers.map((item) => item.approverName).join(','),
         status: DESTINATION_CHECK_DONE,
-        error: "",
-      };
+        error: '',
+      }
     },
     deleteRow(row) {
-      if (confirm("Are you sure to remove this?")) {
-        let list = [];
+      if (confirm('Are you sure to remove this?')) {
+        let list = []
         if (this.rows) {
           list = this.rows
             .filter((item) => item.sendUserId != row.row.sendUserId)
@@ -270,46 +254,46 @@ export default {
               return {
                 sendUserId: item.sendUserId,
                 approverIds: item.approvers.map((item) => item.approverId),
-              };
-            });
+              }
+            })
         }
 
         const data = {
           list,
-        };
-        console.log(data);
+        }
+        console.log(data)
 
-        this.save(data);
+        this.save(data)
       }
     },
     save(data) {
       this.$api
-        .put("user/setting/payment", data)
+        .put('user/setting/payment', data)
         .then((res) => {
-          this.getList();
+          this.getList()
         })
         .catch((err) => {
-          responseError(err);
+          responseError(err)
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
   },
 
   computed: {
     senderError: function () {
-      return this.sender.status === DESTINATION_CHECK_FAIL;
+      return this.sender.status === DESTINATION_CHECK_FAIL
     },
     approverError: function () {
-      return this.approver.status === DESTINATION_CHECK_FAIL;
+      return this.approver.status === DESTINATION_CHECK_FAIL
     },
   },
   created() {
-    this.getList();
-    this.user = { ...this.modelValue };
+    this.getList()
+    this.user = { ...this.modelValue }
   },
-};
+}
 </script>
 
 <style scoped></style>

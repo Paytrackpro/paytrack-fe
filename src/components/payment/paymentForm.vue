@@ -5,9 +5,7 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Sender
           <q-icon name="info">
-            <q-tooltip>
-              You are the sender of the payment request to the recipient
-            </q-tooltip>
+            <q-tooltip> You are the sender of the payment request to the recipient </q-tooltip>
           </q-icon>
         </p>
         <q-input
@@ -29,9 +27,7 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Recipient
           <q-icon name="info">
-            <q-tooltip>
-              The user who will be paying the payment request
-            </q-tooltip>
+            <q-tooltip> The user who will be paying the payment request </q-tooltip>
           </q-icon>
         </p>
         <q-input-system-user
@@ -60,11 +56,7 @@
           lazy-rules
           stack-label
           hide-bottom-space
-          :rules="[
-            (val) =>
-              val > 0 ||
-              'Amount > 0. Please fill up the invoices and hourly rate',
-          ]"
+          :rules="[(val) => val > 0 || 'Amount > 0. Please fill up the invoices and hourly rate']"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
@@ -73,9 +65,7 @@
       </div>
       <div class="col-8" v-if="!expanded" />
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
-        <p class="q-mt-none q-mb-xs text-weight-medium">
-          Choose payment method
-        </p>
+        <p class="q-mt-none q-mb-xs text-weight-medium">Choose payment method</p>
         <q-select
           v-model="setting.type"
           :options="paymentMethods"
@@ -104,17 +94,10 @@
         />
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting
-          v-model="inPayment.paymentSettings"
-          label="Payment setting"
-        />
+        <payment-setting v-model="inPayment.paymentSettings" label="Payment setting" />
       </div>
       <div class="col-12">
-        <q-expansion-item
-          v-model="expanded"
-          label="Payment invoices"
-          caption="Click to expand"
-        >
+        <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
           <div class="row">
             <div class="col-3">
               <q-input
@@ -131,10 +114,7 @@
               />
             </div>
           </div>
-          <invoices
-            v-model="inPayment.details"
-            :hourlyRate="Number(inPayment.hourlyRate)"
-          ></invoices>
+          <invoices v-model="inPayment.details" :hourlyRate="Number(inPayment.hourlyRate)"></invoices>
         </q-expansion-item>
       </div>
     </div>
@@ -159,43 +139,37 @@
       >
         <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
       </q-btn>
-      <q-btn
-        label="Cancel"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="$emit('cancel')"
-      />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')" />
     </div>
   </q-form>
 </template>
 
 <script>
-import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
-import Invoices from "components/payment/invoices";
-import QInputSystemUser from "components/common/qInputSystemUser";
-import PaymentSetting from "components/payment/paymentSetting";
-import { mapActions } from "vuex";
+import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
+import Invoices from 'components/payment/invoices'
+import QInputSystemUser from 'components/common/qInputSystemUser'
+import PaymentSetting from 'components/payment/paymentSetting'
+import { mapActions } from 'vuex'
 
 export default {
-  name: "paymentForm",
+  name: 'paymentForm',
   components: { Invoices, PaymentSetting, QInputSystemUser },
   data() {
     return {
       expanded: false,
       setting: {
-        type: "",
-        address: "",
+        type: '',
+        address: '',
       },
       partner: {
         id: 0,
-        value: "",
+        value: '',
         paymentSettings: [],
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
       inPayment: {},
-    };
+    }
   },
   props: {
     payment: Object,
@@ -207,35 +181,35 @@ export default {
     payment: {
       immediate: true,
       handler(newPayment) {
-        const payment = { ...newPayment };
-        this.partner.contactMethod = payment.contactMethod;
-        if (payment.contactMethod === "email") {
-          this.partner.value = newPayment.externalEmail;
-          this.partner.id = 0;
+        const payment = { ...newPayment }
+        this.partner.contactMethod = payment.contactMethod
+        if (payment.contactMethod === 'email') {
+          this.partner.value = newPayment.externalEmail
+          this.partner.id = 0
         } else {
-          this.partner.value = payment.receiverName;
-          this.partner.id = payment.receiverId;
+          this.partner.value = payment.receiverName
+          this.partner.id = payment.receiverId
         }
-        this.inPayment = payment;
+        this.inPayment = payment
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
             type: payment.paymentMethod,
             address: payment.paymentAddress,
-          };
+          }
         } else {
-          const settings = payment.paymentSettings || [];
-          let filled = true;
+          const settings = payment.paymentSettings || []
+          let filled = true
           for (let setting of settings) {
             if (setting.isDefault) {
-              this.setting = { ...setting };
-              return;
+              this.setting = { ...setting }
+              return
             }
           }
           if (!filled && settings.length > 0) {
             this.setting = {
               ...settings[0],
-            };
+            }
           }
         }
       },
@@ -243,64 +217,63 @@ export default {
   },
   methods: {
     ...mapActions({
-      savePayment: "payment/save",
+      savePayment: 'payment/save',
     }),
     async submit(isDraft) {
       if (this.submitting || !this.partner.contactMethod) {
-        return;
+        return
       }
-      const valid = await this.$refs.paymentForm.validate();
+      const valid = await this.$refs.paymentForm.validate()
       if (!valid) {
-        return;
+        return
       }
       if (this.amount === 0) {
         this.$q.notify({
-          type: "negative",
-          message:
-            "Amount must greater than 0. Please fill up the invoices and hourly rate",
-        });
-        return;
+          type: 'negative',
+          message: 'Amount must greater than 0. Please fill up the invoices and hourly rate',
+        })
+        return
       }
-      const payment = { ...this.inPayment };
-      payment.hourlyRate = Number(payment.hourlyRate);
-      payment.contactMethod = this.partner.contactMethod;
+      const payment = { ...this.inPayment }
+      payment.hourlyRate = Number(payment.hourlyRate)
+      payment.contactMethod = this.partner.contactMethod
       if (isDraft !== true) {
-        payment.status = "sent";
+        payment.status = 'sent'
       }
-      if (payment.contactMethod === "email") {
+      if (payment.contactMethod === 'email') {
         if (!payment.id || this.user.id === payment.creatorId) {
-          payment.externalEmail = this.partner.value;
+          payment.externalEmail = this.partner.value
         }
       }
-      payment.paymentMethod = this.setting.type;
-      payment.paymentAddress = this.setting.address;
-      payment.receiverId = this.partner.id;
-      payment.token = this.token;
-      this.submitting = true;
-      let successNotify = "Payment request created";
+      payment.paymentMethod = this.setting.type
+      payment.paymentAddress = this.setting.address
+      payment.receiverId = this.partner.id
+      payment.token = this.token
+      this.submitting = true
+      let successNotify = 'Payment request created'
       if (payment.id > 0) {
-        successNotify = "Payment request updated";
+        successNotify = 'Payment request updated'
       }
       if (isDraft !== true) {
-        successNotify = "Payment request sent";
+        successNotify = 'Payment request sent'
       }
-      const { data } = await this.savePayment(payment);
+      const { data } = await this.savePayment(payment)
       this.submitting = false
       if (data) {
-        this.$emit("saved", data.payment);
+        this.$emit('saved', data.payment)
         this.$q.notify({
           message: successNotify,
-          color: "positive",
-          icon: "check",
-        });
+          color: 'positive',
+          icon: 'check',
+        })
       }
     },
     changePaymentMethod(val) {
-      const settings = this.inPayment.paymentSettings || [];
-      this.setting.address = "";
+      const settings = this.inPayment.paymentSettings || []
+      this.setting.address = ''
       for (let setting of settings) {
         if (setting.type === this.setting.type) {
-          this.setting.address = setting.address;
+          this.setting.address = setting.address
         }
       }
     },
@@ -308,16 +281,16 @@ export default {
   computed: {
     amount: function () {
       if (!this.inPayment.details) {
-        return 0;
+        return 0
       }
-      let amount = 0;
+      let amount = 0
       for (let invoice of this.inPayment.details) {
-        amount += Number(invoice.cost);
+        amount += Number(invoice.cost)
       }
-      return amount;
+      return amount
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

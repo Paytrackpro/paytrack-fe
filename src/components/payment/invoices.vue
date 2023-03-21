@@ -20,43 +20,39 @@
           @delete="deleteInvoice"
           :readonly="readonly"
         />
-        <new-invoice
-          v-if="!readonly"
-          @save="newInvoice"
-          :hourly-rate="hourlyRate"
-        />
+        <new-invoice v-if="!readonly" @save="newInvoice" :hourly-rate="hourlyRate" />
       </tbody>
     </table>
   </q-markup-table>
 </template>
 
 <script>
-import NewInvoice from "components/payment/newInvoice";
-import Invoice from "components/payment/invoice";
+import NewInvoice from 'components/payment/newInvoice'
+import Invoice from 'components/payment/invoice'
 export default {
-  name: "InvoicesList",
+  name: 'InvoicesList',
   components: { NewInvoice, Invoice },
   props: {
     modelValue: [Array],
     hourlyRate: [Number, String],
     readonly: Boolean,
   },
-  emits: ["update:modelValue", "update:hourlyRate"],
+  emits: ['update:modelValue', 'update:hourlyRate'],
   data() {
-    return {};
+    return {}
   },
   methods: {
     newInvoice(newInv) {
-      const invoices = [...this.modelValue, newInv];
-      this.$emit("update:modelValue", invoices);
+      const invoices = [...this.modelValue, newInv]
+      this.$emit('update:modelValue', invoices)
     },
     deleteInvoice(key) {
-      const invoices = [...this.modelValue];
-      invoices.splice(key, 1);
-      this.$emit("update:modelValue", invoices);
+      const invoices = [...this.modelValue]
+      invoices.splice(key, 1)
+      this.$emit('update:modelValue', invoices)
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

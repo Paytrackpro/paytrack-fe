@@ -52,10 +52,7 @@
         <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status
-                :status="payment.status"
-                :receiver-id="payment.receiverId"
-              />
+              <payment-status :status="payment.status" :receiver-id="payment.receiverId" />
             </div>
           </template>
         </q-field>
@@ -82,10 +79,7 @@
         />
       </div>
       <div class="col-4">
-        <q-field
-          :label="`Amount to send(${payment.paymentMethod})`"
-          stack-label
-        >
+        <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.expectedAmount }}
@@ -115,10 +109,7 @@
         </q-field>
       </div>
       <div class="col-8">
-        <q-field
-          :label="`Payment address (${payment.paymentMethod})`"
-          stack-label
-        >
+        <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.paymentAddress }}
@@ -126,15 +117,8 @@
           </template>
         </q-field>
       </div>
-      <div
-        v-if="payment.paymentSettings && payment.paymentSettings.length"
-        class="col-12"
-      >
-        <payment-setting
-          :modelValue="payment.paymentSettings"
-          readonly
-          label="Accepted payment settings"
-        />
+      <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
+        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
       <div class="col-12">
         <q-input
@@ -174,11 +158,7 @@
         </q-field>
       </div>
       <div class="col-12">
-        <q-expansion-item
-          v-model="expanded"
-          label="Payment invoices"
-          caption="Click to expand"
-        >
+        <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
           <div class="row">
             <div class="col-3">
               <q-input
@@ -191,11 +171,7 @@
               />
             </div>
           </div>
-          <invoices
-            v-model="payment.details"
-            :hourlyRate="Number(payment.hourlyRate)"
-            readonly
-          ></invoices>
+          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
         </q-expansion-item>
       </div>
     </div>
@@ -250,22 +226,16 @@
         @click="handlerApprovalAction(PAYMENT_STATUS_REJECTED)"
         class="q-mr-sm"
       />
-      <q-btn
-        label="Cancel"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="cancel"
-      />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
     </div>
   </q-form>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import MDate from "components/common/mDate";
-import Invoices from "components/payment/invoices";
-import PaymentSetting from "components/payment/paymentSetting";
+import { mapActions, mapGetters } from 'vuex'
+import MDate from 'components/common/mDate'
+import Invoices from 'components/payment/invoices'
+import PaymentSetting from 'components/payment/paymentSetting'
 import {
   PAYMENT_STATUS_APPROVED,
   PAYMENT_STATUS_REJECTED,
@@ -273,12 +243,12 @@ import {
   PAYMENT_STATUS_APPROVED_TEXT,
   PAYMENT_STATUS_REJECTED_TEXT,
   PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
-} from "src/consts/paymentType";
-import { responseError } from "src/helper/error";
-import PaymentStatus from "components/payment/paymentStatus";
-import PaymentRateInput from "components/payment/paymentRateInput";
+} from 'src/consts/paymentType'
+import { responseError } from 'src/helper/error'
+import PaymentStatus from 'components/payment/paymentStatus'
+import PaymentRateInput from 'components/payment/paymentRateInput'
 export default {
-  name: "paymentDetail",
+  name: 'paymentDetail',
   components: {
     MDate,
     Invoices,
@@ -288,19 +258,19 @@ export default {
   },
   data() {
     return {
-      txId: "",
-      pMethod: "",
+      txId: '',
+      pMethod: '',
       PAYMENT_STATUS_APPROVED: PAYMENT_STATUS_APPROVED,
       PAYMENT_STATUS_REJECTED: PAYMENT_STATUS_REJECTED,
       methods: [],
       statuses: [
         {
-          label: "Received",
-          value: "sent",
+          label: 'Received',
+          value: 'sent',
         },
         {
-          label: "Ready for Payment",
-          value: "confirmed",
+          label: 'Ready for Payment',
+          value: 'confirmed',
         },
       ],
       expanded: false,
@@ -308,7 +278,7 @@ export default {
       fetchingRate: false,
       paying: false,
       payment: {},
-    };
+    }
   },
   props: {
     modelValue: Object,
@@ -319,33 +289,32 @@ export default {
   },
   methods: {
     ...mapActions({
-      savePayment: "payment/save",
+      savePayment: 'payment/save',
     }),
     cancel() {
       if (this.processing) {
-        this.processing = false;
-        return;
+        this.processing = false
+        return
       }
-      const path =
-        this.paymentType === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
-      this.$router.push({ path: `/${path}` });
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
     },
     processPayment() {
-      this.processing = true;
-      if (this.payment.paymentMethod !== "none") {
-        this.$refs.rateInput.fetchRate();
+      this.processing = true
+      if (this.payment.paymentMethod !== 'none') {
+        this.$refs.rateInput.fetchRate()
       }
     },
     markAsPaid() {
-      const txId = this.txId.trim();
+      const txId = this.txId.trim()
       if (
         txId.length === 0 &&
         !confirm(
-          "Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier"
+          'Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier'
         )
       ) {
-        this.$refs.txId.$el.focus();
-        return;
+        this.$refs.txId.$el.focus()
+        return
       }
       const reqData = {
         id: this.payment.id,
@@ -353,146 +322,137 @@ export default {
         token: this.token,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
-      };
+      }
       this.$api
-        .post("/payment/process", reqData)
+        .post('/payment/process', reqData)
         .then((data) => {
-          this.paying = false;
-          this.$emit("update:modelValue", data);
+          this.paying = false
+          this.$emit('update:modelValue', data)
           this.$q.notify({
-            message: "payment has been payed",
-            color: "positive",
-            icon: "check",
-          });
+            message: 'payment has been payed',
+            color: 'positive',
+            icon: 'check',
+          })
         })
         .catch((err) => {
-          this.paying = false;
-          responseError(err);
-        });
+          this.paying = false
+          responseError(err)
+        })
     },
     async update() {
       const form = {
         ...this.payment,
         token: this.token,
         txId: this.txId,
-      };
-      this.paying = true;
-      const { data } = await this.savePayment(form);
-      this.paying = false;
+      }
+      this.paying = true
+      const { data } = await this.savePayment(form)
+      this.paying = false
       if (data) {
-        this.updateLocal(data.payment);
+        this.updateLocal(data.payment)
         this.$q.notify({
-          message: "payment is updated",
-          color: "positive",
-          icon: "check",
-        });
+          message: 'payment is updated',
+          color: 'positive',
+          icon: 'check',
+        })
       }
     },
     handlerApprovalAction(status) {
       const reqData = {
         paymentId: this.payment.id,
         status,
-      };
-      this.paying = true;
+      }
+      this.paying = true
       this.$api
-        .post("/payment/approve", reqData)
+        .post('/payment/approve', reqData)
         .then((data) => {
           if (data) {
-            this.updateLocal(data);
+            this.updateLocal(data)
             this.$q.notify({
-              message: "payment is updated",
-              color: "positive",
-              icon: "check",
-            });
+              message: 'payment is updated',
+              color: 'positive',
+              icon: 'check',
+            })
           }
         })
         .catch((err) => {
-          responseError(err);
+          responseError(err)
         })
         .finally(() => {
-          this.paying = false;
-        });
+          this.paying = false
+        })
     },
     updateLocal(payment, editing) {
-      payment = payment || this.payment;
-      this.$emit("update:modelValue", payment);
+      payment = payment || this.payment
+      this.$emit('update:modelValue', payment)
       if (editing) {
-        this.$emit("update:editing", true);
+        this.$emit('update:editing', true)
       }
     },
     methodChange(method) {
-      const settings = this.payment.paymentSettings || [];
-      const setting = settings.find((s) => s.type === method);
+      const settings = this.payment.paymentSettings || []
+      const setting = settings.find((s) => s.type === method)
       if (setting) {
-        this.payment.paymentAddress = setting.address;
+        this.payment.paymentAddress = setting.address
       }
-      this.$refs.rateInput.fetchRate();
+      this.$refs.rateInput.fetchRate()
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newPayment) {
-        this.txId = newPayment.txId;
-        this.pMethod = newPayment.paymentMethod;
-        let settings = newPayment.paymentSettings || [];
-        this.methods = settings.map((s) => s.type);
-        this.payment = { ...newPayment };
+        this.txId = newPayment.txId
+        this.pMethod = newPayment.paymentMethod
+        let settings = newPayment.paymentSettings || []
+        this.methods = settings.map((s) => s.type)
+        this.payment = { ...newPayment }
         // setup default payment method
-        const paymentSettings = this.payment.paymentSettings || [];
-        if (this.payment.paymentMethod === "none" && paymentSettings.length) {
-          let setting = paymentSettings[0];
+        const paymentSettings = this.payment.paymentSettings || []
+        if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
+          let setting = paymentSettings[0]
           for (let ps of paymentSettings) {
             if (ps.isDefault) {
-              setting = ps;
-              break;
+              setting = ps
+              break
             }
           }
-          this.payment.paymentMethod = setting.type;
-          this.payment.paymentAddress = setting.address;
+          this.payment.paymentMethod = setting.type
+          this.payment.paymentAddress = setting.address
         }
       },
     },
   },
   computed: {
     ...mapGetters({
-      role: "user/getRole",
+      role: 'user/getRole',
     }),
     editable() {
       return (
-        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id ||
-          this.payment.receiverId === this.user.id ||
-          this.token)
-      );
+        ['draft', 'sent', 'confirmed'].indexOf(this.payment.status) !== -1 &&
+        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
+      )
     },
     processable() {
       return (
-        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.receiverId === this.user.id ||
-          (this.token && this.payment.receiverId === 0))
-      );
+        ['draft', 'sent', 'confirmed'].indexOf(this.payment.status) !== -1 &&
+        (this.payment.receiverId === this.user.id || (this.token && this.payment.receiverId === 0))
+      )
     },
     approvalable() {
       return (
-        [
-          PAYMENT_STATUS_REJECTED_TEXT,
-          PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
-        ].includes(this.payment.status) &&
+        [PAYMENT_STATUS_REJECTED_TEXT, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) &&
         this.user.id !== this.payment.receiverId
-      );
+      )
     },
     rejectable() {
       return (
-        [
-          PAYMENT_STATUS_APPROVED_TEXT,
-          PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
-        ].includes(this.payment.status) &&
+        [PAYMENT_STATUS_APPROVED_TEXT, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) &&
         this.user.id !== this.payment.receiverId
-      );
+      )
     },
   },
-};
+}
 </script>
 
 <style scoped></style>
