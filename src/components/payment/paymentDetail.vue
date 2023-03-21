@@ -236,14 +236,7 @@ import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
 import Invoices from 'components/payment/invoices'
 import PaymentSetting from 'components/payment/paymentSetting'
-import {
-  PAYMENT_STATUS_APPROVED,
-  PAYMENT_STATUS_REJECTED,
-  PAYMENT_OBJECT_REQUEST,
-  PAYMENT_STATUS_APPROVED_TEXT,
-  PAYMENT_STATUS_REJECTED_TEXT,
-  PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
-} from 'src/consts/paymentType'
+import { PAYMENT_STATUS_APPROVED, PAYMENT_STATUS_REJECTED, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'

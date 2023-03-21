@@ -44,15 +44,6 @@
         />
       </div>
     </div>
-    <!-- <div class="q-mt-md">
-      <q-btn
-        label="Save"
-        class="q-mr-xs"
-        :disable="loading"
-        type="submit"
-        color="primary"
-      />
-    </div> -->
     <div class="q-mt-md">
       <q-table
         title="Approver Settings List"
