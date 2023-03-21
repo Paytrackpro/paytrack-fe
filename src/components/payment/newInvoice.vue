@@ -35,6 +35,7 @@
         hide-bottom-space
         rows="1"
         type="textarea"
+        autogrow
         :error="submitted && !invoice.description"
       />
     </td>

@@ -37,7 +37,10 @@
         <q-input-system-user
           v-model="partner"
           placeholder="Recipient"
-          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
+          :readonly="
+            user.id !== inPayment.creatorId ||
+            ['draft', ''].indexOf(inPayment.status) === -1
+          "
           outlined
           dense
           lazy-rules
@@ -48,30 +51,6 @@
         />
       </div>
       <div class="col-4"></div>
-      <div class="col-4" v-if="!expanded">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
-        <q-input
-          v-model="amount"
-          placeholder="Amount"
-          type="number"
-          readonly
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          :rules="[
-            (val) =>
-              val > 0 ||
-              'Amount > 0. Please fill up the invoices and hourly rate',
-          ]"
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_money" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-8" v-if="!expanded" />
       <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Choose payment method
@@ -110,32 +89,7 @@
         />
       </div>
       <div class="col-12">
-        <q-expansion-item
-          v-model="expanded"
-          label="Payment invoices"
-          caption="Click to expand"
-        >
-          <div class="row">
-            <div class="col-3">
-              <q-input
-                style=""
-                label="Hourly rate(USD)"
-                dense
-                lazy-rules
-                stack-label
-                outlined
-                hide-bottom-space
-                type="number"
-                v-model="inPayment.hourlyRate"
-                hint="Used to calculate cost from hours on invoices"
-              />
-            </div>
-          </div>
-          <invoices
-            v-model="inPayment.details"
-            :hourlyRate="Number(inPayment.hourlyRate)"
-          ></invoices>
-        </q-expansion-item>
+        <payment-invoice-mode v-model="inPayment" ref="paymentMode" />
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
@@ -172,17 +126,18 @@
 
 <script>
 import { PAYMENT_TYPE_OPTIONS } from "src/consts/paymentType";
-import Invoices from "components/payment/invoices";
+import PaymentInvoiceMode from "components/payment/paymentInvoiceMode";
 import QInputSystemUser from "components/common/qInputSystemUser";
 import PaymentSetting from "components/payment/paymentSetting";
 import { mapActions } from "vuex";
 
 export default {
   name: "paymentForm",
-  components: { Invoices, PaymentSetting, QInputSystemUser },
+  components: { PaymentSetting, QInputSystemUser, PaymentInvoiceMode },
   data() {
     return {
       expanded: false,
+      tab: "simple",
       setting: {
         type: "",
         address: "",
@@ -249,15 +204,16 @@ export default {
       if (this.submitting || !this.partner.contactMethod) {
         return;
       }
+      await this.$refs.paymentMode.resetMode();
       const valid = await this.$refs.paymentForm.validate();
       if (!valid) {
         return;
       }
-      if (this.amount === 0) {
+      if (!this.inPayment.amount > 0) {
         this.$q.notify({
           type: "negative",
           message:
-            "Amount must greater than 0. Please fill up the invoices and hourly rate",
+            "Amount must greater than 0. Please fill up the invoices and hourly rate or type amount in simple mode",
         });
         return;
       }
@@ -284,8 +240,9 @@ export default {
       if (isDraft !== true) {
         successNotify = "Payment request sent";
       }
+      console.log(payment);
       const { data } = await this.savePayment(payment);
-      this.submitting = false
+      this.submitting = false;
       if (data) {
         this.$emit("saved", data.payment);
         this.$q.notify({

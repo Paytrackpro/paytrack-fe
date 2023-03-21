@@ -33,6 +33,7 @@
         v-if="editing"
         label="Description"
         v-model="invoice.description"
+        autogrow
         dense
         stack-label
         hide-bottom-space
@@ -40,7 +41,7 @@
         type="textarea"
         :error="submitted && !invoice.description"
       />
-      <span v-else>{{ modelValue.description }}</span>
+      <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
       <span

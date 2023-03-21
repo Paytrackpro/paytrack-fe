@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-markup-table flat bordered separator="cell">
     <table class="q-table">
@@ -12,8 +11,9 @@
       </thead>
       <tbody>
         <invoice
-          v-for="(invoice, i) of modelValue"
-          v-model="modelValue[i]"
+          v-for="(_, i) of invoices"
+          v-model="invoices[i]"
+          @update:modelValue="$emit('update:modelValue', invoices)"
           :key="i"
           :i="i"
           :hourly-rate="hourlyRate"
@@ -41,19 +41,29 @@ export default {
     hourlyRate: [Number, String],
     readonly: Boolean,
   },
-  emits: ["update:modelValue", "update:hourlyRate"],
+  emits: ["update:modelValue"],
   data() {
-    return {};
+    return {
+      invoices: [],
+    };
   },
   methods: {
     newInvoice(newInv) {
-      const invoices = [...this.modelValue, newInv];
+      const invoices = [...this.invoices, newInv];
       this.$emit("update:modelValue", invoices);
     },
     deleteInvoice(key) {
-      const invoices = [...this.modelValue];
+      const invoices = [...this.invoices];
       invoices.splice(key, 1);
       this.$emit("update:modelValue", invoices);
+    },
+  },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(newVal) {
+        this.invoices = newVal || [];
+      },
     },
   },
 };
