@@ -25,9 +25,9 @@ const PAYMENT_TYPE_OPTIONS = [
 const PAYMENT_OBJECT_REMINDER = 'reminder'
 const PAYMENT_OBJECT_REQUEST = 'request'
 
-export const PAYMENT_STATUS_WAIT_APPROVAL = 4
-export const PAYMENT_STATUS_APPROVED = 5
-export const PAYMENT_STATUS_REJECTED = 6
+export const PAYMENT_STATUS_WAIT_APPROVAL = 1
+export const PAYMENT_STATUS_APPROVED = 2
+export const PAYMENT_STATUS_REJECTED = 3
 
 export const PAYMENT_STATUS_WAIT_APPROVAL_TEXT = 'wait approve'
 export const PAYMENT_STATUS_APPROVED_TEXT = 'approved'

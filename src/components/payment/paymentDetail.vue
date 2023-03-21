@@ -440,16 +440,26 @@ export default {
       )
     },
     approvalable() {
-      return (
-        [PAYMENT_STATUS_REJECTED_TEXT, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) &&
-        this.user.id !== this.payment.receiverId
-      )
+      if (this.payment.receiverId == this.user.id) return false
+      if (this.payment.approvers == null) return true
+      let resutl = true
+      for (let app of this.payment.approvers) {
+        if (app.approverId == this.user.id) {
+          resutl = app.status == PAYMENT_STATUS_REJECTED
+        }
+      }
+      return resutl
     },
     rejectable() {
-      return (
-        [PAYMENT_STATUS_APPROVED_TEXT, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) &&
-        this.user.id !== this.payment.receiverId
-      )
+      if (this.payment.receiverId == this.user.id) return false
+      if (this.payment.approvers == null) return true
+      let resutl = true
+      for (let app of this.payment.approvers) {
+        if (app.approverId == this.user.id) {
+          resutl = app.status == PAYMENT_STATUS_APPROVED
+        }
+      }
+      return resutl
     },
   },
 }
