@@ -3,7 +3,7 @@
     <table class="q-table">
       <thead>
         <tr>
-          <th class="text-right" style="width: 100px">Hours</th>
+          <th class="text-right" style="width: 150px">Detail</th>
           <th class="text-right" style="width: 120px">Costs(USD)</th>
           <th class="text-right">Description</th>
           <th style="width: 100px" v-if="!readonly">#</th>
@@ -21,10 +21,29 @@
           :readonly="readonly"
         />
         <new-invoice
-          v-if="!readonly"
+          v-if="!readonly && creating"
           @save="newInvoice"
           :hourly-rate="hourlyRate"
+          :type="createType"
+          @cancel="creating = false"
         />
+        <tr v-if="!creating">
+          <td rowspan="4">
+            <q-btn
+              label="Add Labor"
+              class="q-mr-sm"
+              outline
+              color="secondary"
+              @click="createInvoice('labor')"
+            />
+            <q-btn
+              label="Add Material"
+              outline
+              color="secondary"
+              @click="createInvoice('material')"
+            />
+          </td>
+        </tr>
       </tbody>
     </table>
   </q-markup-table>
@@ -45,17 +64,25 @@ export default {
   data() {
     return {
       invoices: [],
+      creating: false,
+      createType: "labor",
     };
   },
   methods: {
     newInvoice(newInv) {
       const invoices = [...this.invoices, newInv];
       this.$emit("update:modelValue", invoices);
+      this.creating = false;
     },
     deleteInvoice(key) {
       const invoices = [...this.invoices];
       invoices.splice(key, 1);
       this.$emit("update:modelValue", invoices);
+    },
+    createInvoice(type) {
+      console.log(type);
+      this.createType = type;
+      this.creating = true;
     },
   },
   watch: {
@@ -69,4 +96,4 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style></style>

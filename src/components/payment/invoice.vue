@@ -1,18 +1,38 @@
 <template>
   <tr>
-    <td class="text-right">
-      <q-input
-        v-if="editing"
-        label="Hours"
-        v-model="invoice.hours"
-        dense
-        stack-label
-        hide-bottom-space
-        type="number"
-        :error="submitted && invoice.hours < 0"
-        @update:modelValue="calculateCost"
-      />
-      <span v-else>{{ modelValue.hours || "_" }}</span>
+    <td class="invoice-price-detail text-right">
+      <div v-if="editing" class="row items-start">
+        <q-input
+          class="col"
+          :label="type === 'labor' ? 'Hours' : 'Quantity'"
+          v-model="invoice.quantity"
+          dense
+          stack-label
+          hide-bottom-space
+          type="number"
+          :error="submitted && invoice.hours < 0"
+          @update:modelValue="calculateCost"
+        />
+        <q-input
+          v-if="type === 'material'"
+          class="col"
+          label="Price"
+          v-model="invoice.price"
+          dense
+          stack-label
+          hide-bottom-space
+          type="number"
+          :error="submitted && invoice.hours < 0"
+          @update:modelValue="calculateCost"
+        />
+      </div>
+      <template v-else>{{
+        type === "material"
+          ? `$${modelValue.price}/${modelValue.quantity}(qty)`
+          : modelValue.quantity
+          ? `${modelValue.quantity} hour(s)`
+          : "_"
+      }}</template>
     </td>
     <td class="text-right">
       <q-input
@@ -84,10 +104,12 @@ export default {
       editing: false,
       submitted: false,
       invoice: {
-        hours: "",
+        quantity: "",
+        price: "",
         cost: "",
         description: "",
       },
+      type: "labor",
     };
   },
   methods: {
@@ -97,15 +119,12 @@ export default {
     },
     save: function () {
       this.submitted = true;
-      if (
-        !this.invoice.description ||
-        this.invoice.cost <= 0 ||
-        this.invoice.hours < 0
-      ) {
+      if (!this.invoice.description || this.invoice.cost <= 0) {
         return;
       }
       this.$emit("update:modelValue", {
-        hours: Number(this.invoice.hours),
+        quantity: Number(this.invoice.quantity),
+        price: Number(this.invoice.price),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
       });
@@ -115,24 +134,39 @@ export default {
       this.editing = false;
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate;
+      let price = Number(this.invoice.price);
+      if (this.type === "labor") {
+        price = this.hourlyRate;
+      }
+      this.invoice.cost = Number(this.invoice.quantity) * price;
     },
   },
   watch: {
     hourlyRate: {
       immediate: true,
       handler(newHR) {
-        if (this.modelValue.hours > 0) {
+        if (this.modelValue.quantity > 0 && this.modelValue.price === 0) {
           this.$emit("update:modelValue", {
-            hours: Number(this.modelValue.hours),
-            cost: Number(this.modelValue.hours) * newHR,
+            price: 0,
+            quantity: Number(this.modelValue.quantity),
+            cost: Number(this.modelValue.quantity) * Number(newHR),
             description: this.modelValue.description,
           });
         }
+      },
+    },
+    modelValue: {
+      immediate: true,
+      handler(newHR) {
+        this.type = newHR.price > 0 ? "material" : "labor";
       },
     },
   },
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.invoice-price-detail {
+  max-height: 150px;
+}
+</style>

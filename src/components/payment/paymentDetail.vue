@@ -159,7 +159,7 @@
         </q-field>
       </div>
       <div class="col-12">
-        <PaymentInvoiceMode v-model="payment" readonly />
+        <PaymentInvoiceMode ref="invoiceMode" v-model="payment" readonly />
       </div>
     </div>
     <div class="row justify-end q-mt-lg">

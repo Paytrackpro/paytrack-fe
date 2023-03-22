@@ -188,7 +188,9 @@ export default {
     this.resetMode();
   },
   updated() {
-    this.resetMode();
+    if (this.readonly) {
+      this.resetMode();
+    }
   },
 };
 </script>
