@@ -120,10 +120,10 @@ export default {
 
       if (this.type === PAYMENT_OBJECT_REMINDER) {
         flexibleCol.push({
-          name: 'approvers',
+          name: 'receiverName',
           align: 'center',
-          label: 'Approvers',
-          field: 'approvers',
+          label: 'Recipient',
+          field: 'receiverName',
         })
       }
 

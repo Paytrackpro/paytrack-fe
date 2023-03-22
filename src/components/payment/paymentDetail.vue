@@ -218,14 +218,6 @@
         @click="handlerApprovalAction(PAYMENT_STATUS_APPROVED)"
         class="q-mr-sm"
       />
-      <q-btn
-        label="Reject"
-        type="button"
-        color="primary"
-        v-if="rejectable"
-        @click="handlerApprovalAction(PAYMENT_STATUS_REJECTED)"
-        class="q-mr-sm"
-      />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
     </div>
   </q-form>
@@ -236,7 +228,11 @@ import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
 import Invoices from 'components/payment/invoices'
 import PaymentSetting from 'components/payment/paymentSetting'
-import { PAYMENT_STATUS_APPROVED, PAYMENT_STATUS_REJECTED, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import {
+  PAYMENT_STATUS_APPROVED,
+  PAYMENT_OBJECT_REQUEST,
+  PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
+} from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
@@ -254,7 +250,6 @@ export default {
       txId: '',
       pMethod: '',
       PAYMENT_STATUS_APPROVED: PAYMENT_STATUS_APPROVED,
-      PAYMENT_STATUS_REJECTED: PAYMENT_STATUS_REJECTED,
       methods: [],
       statuses: [
         {
@@ -422,37 +417,20 @@ export default {
     }),
     editable() {
       return (
-        ['draft', 'sent', 'confirmed'].indexOf(this.payment.status) !== -1 &&
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
         (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
       )
     },
     processable() {
       return (
-        ['draft', 'sent', 'confirmed'].indexOf(this.payment.status) !== -1 &&
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
         (this.payment.receiverId === this.user.id || (this.token && this.payment.receiverId === 0))
       )
     },
     approvalable() {
-      if (this.payment.receiverId == this.user.id) return false
-      if (this.payment.approvers == null) return true
-      let resutl = true
-      for (let app of this.payment.approvers) {
-        if (app.approverId == this.user.id) {
-          resutl = app.status == PAYMENT_STATUS_REJECTED
-        }
-      }
-      return resutl
-    },
-    rejectable() {
-      if (this.payment.receiverId == this.user.id) return false
-      if (this.payment.approvers == null) return true
-      let resutl = true
-      for (let app of this.payment.approvers) {
-        if (app.approverId == this.user.id) {
-          resutl = app.status == PAYMENT_STATUS_APPROVED
-        }
-      }
-      return resutl
+      return (
+        [PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) && this.user.id !== this.payment.receiverId
+      )
     },
   },
 }

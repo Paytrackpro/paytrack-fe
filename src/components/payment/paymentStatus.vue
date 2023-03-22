@@ -7,7 +7,6 @@ import {
   getStatusTagColor,
   getStatusText,
   PAYMENT_STATUS_APPROVED_TEXT,
-  PAYMENT_STATUS_REJECTED_TEXT,
   PAYMENT_STATUS_WAIT_APPROVAL,
   PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
 } from 'src/consts/paymentType'
@@ -39,7 +38,6 @@ export default {
           return 'Paid'
         case PAYMENT_STATUS_WAIT_APPROVAL_TEXT:
         case PAYMENT_STATUS_APPROVED_TEXT:
-        case PAYMENT_STATUS_REJECTED_TEXT:
           return getStatusText(this.status)
         default:
           return 'Unknown'
