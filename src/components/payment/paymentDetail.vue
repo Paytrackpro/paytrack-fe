@@ -348,7 +348,6 @@ export default {
     handlerApprovalAction(status) {
       const reqData = {
         paymentId: this.payment.id,
-        status,
       }
       this.paying = true
       this.$api
