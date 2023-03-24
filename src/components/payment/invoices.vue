@@ -20,30 +20,32 @@
           @delete="deleteInvoice"
           :readonly="readonly"
         />
-        <new-invoice
-          v-if="!readonly && creating"
-          @save="newInvoice"
-          :hourly-rate="hourlyRate"
-          :type="createType"
-          @cancel="creating = false"
-        />
-        <tr v-if="!creating">
-          <td rowspan="4">
-            <q-btn
-              label="Add Labor"
-              class="q-mr-sm"
-              outline
-              color="secondary"
-              @click="createInvoice('labor')"
-            />
-            <q-btn
-              label="Add Material"
-              outline
-              color="secondary"
-              @click="createInvoice('material')"
-            />
-          </td>
-        </tr>
+        <template v-if="!readonly">
+          <new-invoice
+            v-if="creating"
+            @save="newInvoice"
+            :hourly-rate="hourlyRate"
+            :type="createType"
+            @cancel="creating = false"
+          />
+          <tr v-if="!creating">
+            <td rowspan="4">
+              <q-btn
+                label="Add Labor"
+                class="q-mr-sm"
+                outline
+                color="secondary"
+                @click="createInvoice('labor')"
+              />
+              <q-btn
+                label="Add Material"
+                outline
+                color="secondary"
+                @click="createInvoice('material')"
+              />
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </q-markup-table>

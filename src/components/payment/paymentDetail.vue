@@ -373,9 +373,7 @@ export default {
     editable() {
       return (
         ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id ||
-          this.payment.receiverId === this.user.id ||
-          this.token)
+        this.payment.senderId === this.user.id
       );
     },
     processable() {
