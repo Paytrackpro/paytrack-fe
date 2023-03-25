@@ -8,6 +8,15 @@
             :status="payment.status"
             :receiver-id="payment.receiverId"
           />)
+          <q-icon name="info" color="red" v-if="payment.status === 'rejected'">
+            <q-tooltip
+              class="bg-red rejection-reason"
+              :offset="[10, 10]"
+              max-width="40vw"
+            >
+              {{ payment.rejectionReason }}
+            </q-tooltip>
+          </q-icon>
         </template>
       </div>
     </q-card-section>
@@ -130,4 +139,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style>
+.rejection-reason {
+  white-space: pre-line;
+}
+</style>
