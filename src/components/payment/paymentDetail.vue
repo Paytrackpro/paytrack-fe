@@ -211,6 +211,15 @@
         class="q-mr-sm"
       />
       <q-btn
+        v-if="rejectable && !processing"
+        label="reject"
+        type="button"
+        color="primary"
+        :disable="paying"
+        @click="toggleRejectDialog(true)"
+        class="q-mr-sm"
+      />
+      <q-btn
         v-if="editable && !processing"
         label="Edit"
         type="button"
@@ -226,6 +235,12 @@
         @click="cancel"
       />
     </div>
+    <PaymentRejectDialog
+      v-model="paymentRejectDialog"
+      @toggle="toggleRejectDialog"
+      :paymentId="payment.id"
+      :token="token"
+    />
   </q-form>
 </template>
 
@@ -238,6 +253,8 @@ import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
 import { responseError } from "src/helper/error";
 import PaymentStatus from "components/payment/paymentStatus";
 import PaymentRateInput from "components/payment/paymentRateInput";
+import PaymentRejectDialog from "components/payment/paymentRejectDialog";
+
 export default {
   name: "paymentDetail",
   components: {
@@ -246,6 +263,7 @@ export default {
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
+    PaymentRejectDialog,
   },
   data() {
     return {
@@ -267,6 +285,7 @@ export default {
       fetchingRate: false,
       paying: false,
       payment: {},
+      paymentRejectDialog: false,
     };
   },
   props: {
@@ -362,6 +381,9 @@ export default {
       }
       this.$refs.rateInput.fetchRate();
     },
+    toggleRejectDialog(val) {
+      this.paymentRejectDialog = val;
+    },
   },
   watch: {
     modelValue: {
@@ -394,7 +416,9 @@ export default {
     }),
     editable() {
       return (
-        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
+        ["draft", "sent", "confirmed", "rejected"].indexOf(
+          this.payment.status
+        ) !== -1 &&
         (this.payment.senderId === this.user.id ||
           this.payment.receiverId === this.user.id ||
           this.token)
@@ -405,6 +429,12 @@ export default {
         ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
         (this.payment.receiverId === this.user.id ||
           (this.token && this.payment.receiverId === 0))
+      );
+    },
+    rejectable() {
+      return (
+        this.user.id !== this.payment.creatorId &&
+        ["sent", "confirmed"].includes(this.payment.status)
       );
     },
   },

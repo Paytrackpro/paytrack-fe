@@ -37,7 +37,10 @@
         <q-input-system-user
           v-model="partner"
           placeholder="Recipient"
-          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
+          :readonly="
+            user.id !== inPayment.creatorId ||
+            ['draft', ''].indexOf(inPayment.status) === -1
+          "
           outlined
           dense
           lazy-rules
@@ -134,6 +137,7 @@
           <invoices
             v-model="inPayment.details"
             :hourlyRate="Number(inPayment.hourlyRate)"
+            :readonly="!canEditInvoice"
           ></invoices>
         </q-expansion-item>
       </div>
@@ -151,7 +155,11 @@
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'draft' || inPayment.status === ''"
+        v-if="
+          inPayment.status === 'draft' ||
+          inPayment.status === 'rejected' ||
+          inPayment.status === ''
+        "
         label="Send"
         color="primary"
         :disable="submitting"
@@ -285,7 +293,7 @@ export default {
         successNotify = "Payment request sent";
       }
       const { data } = await this.savePayment(payment);
-      this.submitting = false
+      this.submitting = false;
       if (data) {
         this.$emit("saved", data.payment);
         this.$q.notify({
@@ -315,6 +323,9 @@ export default {
         amount += Number(invoice.cost);
       }
       return amount;
+    },
+    canEditInvoice: function () {
+      return this.user.id === this.inPayment.creatorId;
     },
   },
 };

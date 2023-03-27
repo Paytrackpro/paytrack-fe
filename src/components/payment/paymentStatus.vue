@@ -26,6 +26,8 @@ export default {
           return reminderSide ? "Ready for Payment" : "Sent";
         case "paid":
           return "Paid";
+        case "rejected":
+          return "Rejected";
         default:
           return "Unknown";
       }
