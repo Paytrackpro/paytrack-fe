@@ -4,16 +4,9 @@
       <div class="text-h6">
         Payment request
         <template v-if="payment.status">
-          (<payment-status
-            :status="payment.status"
-            :receiver-id="payment.receiverId"
-          />)
+          (<payment-status :status="payment.status" :receiver-id="payment.receiverId" />)
           <q-icon name="info" color="red" v-if="payment.status === 'rejected'">
-            <q-tooltip
-              class="bg-red rejection-reason"
-              :offset="[10, 10]"
-              max-width="40vw"
-            >
+            <q-tooltip class="bg-red rejection-reason" :offset="[10, 10]" max-width="40vw">
               {{ payment.rejectionReason }}
             </q-tooltip>
           </q-icon>
@@ -43,25 +36,17 @@
       <div class="text-h6">{{ errorText }}</div>
     </q-card-section>
 
-    <q-inner-loading
-      :showing="loading"
-      label="Please wait..."
-      label-class="text-teal"
-      label-style="font-size: 1.1em"
-    />
+    <q-inner-loading :showing="loading" label="Please wait..." label-class="text-teal" label-style="font-size: 1.1em" />
   </q-card>
 </template>
 
 <script>
-import { PaymentForm, PaymentDetail } from "components/payment";
-import {
-  PAYMENT_OBJECT_REMINDER,
-  PAYMENT_OBJECT_REQUEST,
-} from "src/consts/paymentType";
-import PaymentStatus from "components/payment/paymentStatus";
-import { mapGetters } from "vuex";
+import { PaymentForm, PaymentDetail } from 'components/payment'
+import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import PaymentStatus from 'components/payment/paymentStatus'
+import { mapGetters } from 'vuex'
 export default {
-  name: "detailPaymentPage",
+  name: 'detailPaymentPage',
   components: { PaymentForm, PaymentDetail, PaymentStatus },
   data() {
     return {
@@ -71,57 +56,57 @@ export default {
       isNotfound: false,
       isUnknownError: false,
       payment: {},
-      token: "",
+      token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
-    };
+    }
   },
   created() {
-    this.token = this.$route.params.token || "";
-    this.fetchData();
+    this.token = this.$route.params.token || ''
+    this.fetchData()
   },
   methods: {
     fetchData() {
-      const token = this.$route.params.token || "";
-      this.loading = true;
+      const token = this.$route.params.token || ''
+      this.loading = true
       this.$api
         .get(`/payment/${this.$route.params.id}?token=${token}`)
         .then((data) => {
-          this.loading = false;
-          this.payment = data;
+          this.loading = false
+          this.payment = data
         })
         .catch((err) => {
-          this.loading = false;
+          this.loading = false
           switch (err.status) {
             case 403:
-              this.isForbidden = true;
-              return;
+              this.isForbidden = true
+              return
             case 404:
-              this.isNotfound = true;
-              return;
+              this.isNotfound = true
+              return
           }
-          this.isUnknownError = true;
-        });
+          this.isUnknownError = true
+        })
     },
     saved(data) {
-      this.payment = data;
-      this.editing = false;
+      this.payment = data
+      this.editing = false
     },
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
+      user: 'user/getUser',
     }),
     isError: function () {
-      return this.isForbidden || this.isNotfound || this.isUnknownError;
+      return this.isForbidden || this.isNotfound || this.isUnknownError
     },
     errorText: function () {
       if (this.isForbidden) {
-        return "You do not have access right to this asset";
+        return 'You do not have access right to this asset'
       }
       if (this.isNotfound) {
-        return "Payment not found";
+        return 'Payment not found'
       }
-      return "Unknown error. Please contact the admin";
+      return 'Unknown error. Please contact the admin'
     },
   },
   watch: {
@@ -129,14 +114,14 @@ export default {
       immediate: true,
       handler(to) {
         if (this.user.id === to.receiverId) {
-          this.paymentType = PAYMENT_OBJECT_REMINDER;
+          this.paymentType = PAYMENT_OBJECT_REMINDER
         } else {
-          this.paymentType = PAYMENT_OBJECT_REQUEST;
+          this.paymentType = PAYMENT_OBJECT_REQUEST
         }
       },
     },
   },
-};
+}
 </script>
 
 <style>

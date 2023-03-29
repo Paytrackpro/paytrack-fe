@@ -40,16 +40,14 @@
     </td>
     <td class="text-center">
       <span class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
-      <span v-if="showCancel" class="event-txt q-ma-xs" @click="cancel"
-        >Cancel</span
-      >
+      <span v-if="showCancel" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
     </td>
   </tr>
 </template>
 
 <script>
 export default {
-  name: "newInvoice",
+  name: 'newInvoice',
   props: {
     hourlyRate: Number,
   },
@@ -57,39 +55,35 @@ export default {
     return {
       submitted: false,
       invoice: {
-        hours: "",
-        cost: "",
-        description: "",
+        hours: '',
+        cost: '',
+        description: '',
       },
-    };
+    }
   },
   methods: {
     save() {
-      this.submitted = true;
-      if (
-        !this.invoice.description ||
-        this.invoice.cost <= 0 ||
-        this.invoice.hours < 0
-      ) {
-        return;
+      this.submitted = true
+      if (!this.invoice.description || this.invoice.cost <= 0 || this.invoice.hours < 0) {
+        return
       }
-      this.$emit("save", {
+      this.$emit('save', {
         hours: Number(this.invoice.hours),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
-      });
-      this.cancel();
+      })
+      this.cancel()
     },
     cancel() {
-      this.submitted = false;
+      this.submitted = false
       this.invoice = {
-        hours: "",
-        cost: "",
-        description: "",
-      };
+        hours: '',
+        cost: '',
+        description: '',
+      }
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate;
+      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate
     },
   },
   watch: {
@@ -97,18 +91,18 @@ export default {
       immediate: true,
       handler(newHR) {
         if (this.invoice.hours > 0) {
-          this.invoice.cost = Number(this.invoice.hours) * newHR;
+          this.invoice.cost = Number(this.invoice.hours) * newHR
         }
       },
     },
   },
   computed: {
     showCancel() {
-      const { hours, cost, description } = this.invoice;
-      return hours || cost || description;
+      const { hours, cost, description } = this.invoice
+      return hours || cost || description
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

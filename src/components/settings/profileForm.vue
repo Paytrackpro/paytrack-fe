@@ -29,65 +29,54 @@
           hide-bottom-space
           v-model="user.email"
           placeholder="Email"
-          :rules="[
-            (val, rules) =>
-              !val ||
-              (val && rules.email(val)) ||
-              'Please enter a valid email address',
-          ]"
+          :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address']"
         />
       </div>
     </div>
     <q-separator />
     <div class="q-mt-md">
-      <q-btn
-        label="Save"
-        class="q-mr-xs"
-        :disable="loading"
-        type="submit"
-        color="primary"
-      />
+      <q-btn label="Save" class="q-mr-xs" :disable="loading" type="submit" color="primary" />
     </div>
   </q-form>
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions } from 'vuex'
 
 export default {
   data() {
     return {
       user: {},
       loading: false,
-    };
+    }
   },
-  name: "profileForm",
+  name: 'profileForm',
   props: {
     modelValue: Object,
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   watch: {
     modelValue(val) {
-      this.user = { ...val };
+      this.user = { ...val }
     },
   },
   methods: {
     ...mapActions({
-      updateUser: "user/updateUser",
+      updateUser: 'user/updateUser',
     }),
     async submit() {
-      this.loading = true;
-      const newUser = await this.updateUser(this.user);
+      this.loading = true
+      const newUser = await this.updateUser(this.user)
       if (newUser) {
-        this.$emit("update:modelValue", newUser);
+        this.$emit('update:modelValue', newUser)
       }
-      this.loading = false;
+      this.loading = false
     },
   },
   created() {
-    this.user = { ...this.modelValue };
+    this.user = { ...this.modelValue }
   },
-};
+}
 </script>
 
 <style scoped></style>

@@ -12,7 +12,7 @@
         :error="submitted && invoice.hours < 0"
         @update:modelValue="calculateCost"
       />
-      <span v-else>{{ modelValue.hours || "_" }}</span>
+      <span v-else>{{ modelValue.hours || '_' }}</span>
     </td>
     <td class="text-right">
       <q-input
@@ -43,78 +43,57 @@
       <span v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
-      <span
-        v-if="!editing"
-        class="event-txt q-ma-xs text-secondary"
-        @click="edit"
-        >Edit</span
-      >
-      <span
-        v-if="!editing"
-        class="event-txt q-ma-xs text-red"
-        @click="$emit('delete', i)"
-        >Delete</span
-      >
-      <span
-        v-if="editing"
-        class="event-txt q-ma-xs text-secondary"
-        @click="save"
-        >Save</span
-      >
-      <span v-if="editing" class="event-txt q-ma-xs" @click="cancel"
-        >Cancel</span
-      >
+      <span v-if="!editing" class="event-txt q-ma-xs text-secondary" @click="edit">Edit</span>
+      <span v-if="!editing" class="event-txt q-ma-xs text-red" @click="$emit('delete', i)">Delete</span>
+      <span v-if="editing" class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
+      <span v-if="editing" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
     </td>
   </tr>
 </template>
 
 <script>
 export default {
-  name: "invoiceRow",
+  name: 'invoiceRow',
   props: {
     i: Number,
     modelValue: Object,
     hourlyRate: Number,
     readonly: Boolean,
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   data() {
     return {
       editing: false,
       submitted: false,
       invoice: {
-        hours: "",
-        cost: "",
-        description: "",
+        hours: '',
+        cost: '',
+        description: '',
       },
-    };
+    }
   },
   methods: {
     edit: function () {
-      this.invoice = { ...this.modelValue };
-      this.editing = true;
+      this.invoice = { ...this.modelValue }
+      this.editing = true
     },
     save: function () {
-      this.submitted = true;
-      if (
-        !this.invoice.description ||
-        this.invoice.cost <= 0 ||
-        this.invoice.hours < 0
-      ) {
-        return;
+      this.submitted = true
+      if (!this.invoice.description || this.invoice.cost <= 0 || this.invoice.hours < 0) {
+        return
       }
-      this.$emit("update:modelValue", {
+      this.$emit('update:modelValue', {
         hours: Number(this.invoice.hours),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
-      });
-      this.editing = false;
+      })
+      this.editing = false
     },
     cancel: function () {
-      this.editing = false;
+      this.editing = false
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate;
+      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate
     },
   },
   watch: {
@@ -122,16 +101,16 @@ export default {
       immediate: true,
       handler(newHR) {
         if (this.modelValue.hours > 0) {
-          this.$emit("update:modelValue", {
+          this.$emit('update:modelValue', {
             hours: Number(this.modelValue.hours),
             cost: Number(this.modelValue.hours) * newHR,
             description: this.modelValue.description,
-          });
+          })
         }
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

@@ -1,111 +1,111 @@
-import ROLE from "../consts/role";
-import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
+import ROLE from '../consts/role'
+import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 
 const routes = [
   {
-    path: "/",
-    component: () => import("src/layouts/MainLayout.vue"),
+    path: '/',
+    component: () => import('src/layouts/MainLayout.vue'),
     meta: {
       requiresAuth: true,
     },
     children: [
       {
-        path: "",
-        redirect: "/dashboard",
+        path: '',
+        redirect: '/dashboard',
       },
       {
-        path: "dashboard/",
-        name: "dashboard",
-        component: () => import("src/pages/users/home.vue"),
+        path: 'dashboard/',
+        name: 'dashboard',
+        component: () => import('src/pages/users/home.vue'),
         meta: {
-          title: "Dashboard",
+          title: 'Dashboard',
         },
       },
       {
-        path: "settings",
-        name: "settings",
-        component: () => import("pages/users/settings.vue"),
+        path: 'settings',
+        name: 'settings',
+        component: () => import('pages/users/settings.vue'),
         meta: {
-          title: "Settings",
+          title: 'Settings',
         },
       },
       {
-        path: "users",
-        name: "user.list",
-        component: () => import("pages/admin/users/list.vue"),
+        path: 'users',
+        name: 'user.list',
+        component: () => import('pages/admin/users/list.vue'),
         meta: {
           roles: [ROLE.ADMIN],
-          title: "User Management",
+          title: 'User Management',
         },
       },
       {
-        path: "users/:id",
-        name: "user.detail",
-        component: () => import("pages/admin/users/detail.vue"),
+        path: 'users/:id',
+        name: 'user.detail',
+        component: () => import('pages/admin/users/detail.vue'),
         meta: {
           roles: [ROLE.ADMIN],
-          title: "User Detail",
+          title: 'User Detail',
         },
       },
       {
-        path: "pay/",
-        name: "pay",
-        component: () => import("pages/payments/layout.vue"),
+        path: 'pay/',
+        name: 'pay',
+        component: () => import('pages/payments/layout.vue'),
         meta: {
-          title: "Pay",
+          title: 'Pay',
         },
         children: [
           {
-            path: "",
-            name: "pay.list",
-            component: () => import("pages/payments/payPage.vue"),
+            path: '',
+            name: 'pay.list',
+            component: () => import('pages/payments/payPage.vue'),
             meta: {
-              title: "Make payment",
+              title: 'Make payment',
             },
           },
           {
-            path: ":id(\\d+)",
-            name: "pay.detail",
-            component: () => import("pages/payments/detailPage.vue"),
+            path: ':id(\\d+)',
+            name: 'pay.detail',
+            component: () => import('pages/payments/detailPage.vue'),
             meta: {
-              title: "Payment",
+              title: 'Payment',
             },
           },
         ],
       },
       {
-        path: "get-paid/",
-        name: "get-paid",
-        component: () => import("pages/payments/layout.vue"),
+        path: 'get-paid/',
+        name: 'get-paid',
+        component: () => import('pages/payments/layout.vue'),
         meta: {
-          title: "Get Pay",
+          title: 'Get Pay',
         },
         children: [
           {
-            path: "",
-            name: "get-paid.list",
-            component: () => import("pages/payments/getPaidPage.vue"),
+            path: '',
+            name: 'get-paid.list',
+            component: () => import('pages/payments/getPaidPage.vue'),
             meta: {
-              title: "Get Paid",
+              title: 'Get Paid',
             },
           },
           {
-            path: "create",
-            name: "get-paid.create",
-            component: () => import("pages/payments/createPage.vue"),
+            path: 'create',
+            name: 'get-paid.create',
+            component: () => import('pages/payments/createPage.vue'),
             meta: {
-              title: "Get Paid/ Create",
+              title: 'Get Paid/ Create',
             },
             props: {
               paymentType: PAYMENT_OBJECT_REQUEST,
             },
           },
           {
-            path: ":id(\\d+)",
-            name: "get-paid.detail",
-            component: () => import("pages/payments/detailPage.vue"),
+            path: ':id(\\d+)',
+            name: 'get-paid.detail',
+            component: () => import('pages/payments/detailPage.vue'),
             meta: {
-              title: "Get Paid/ detail",
+              title: 'Get Paid/ detail',
             },
           },
         ],
@@ -113,29 +113,29 @@ const routes = [
     ],
   },
   {
-    path: "/",
-    component: () => import("src/layouts/PublicLayout.vue"),
+    path: '/',
+    component: () => import('src/layouts/PublicLayout.vue'),
     children: [
       {
-        path: "/payment/:id(\\d+)/:token",
-        name: "payment.detail",
-        component: () => import("pages/payments/detailPage.vue"),
+        path: '/payment/:id(\\d+)/:token',
+        name: 'payment.detail',
+        component: () => import('pages/payments/detailPage.vue'),
         meta: {
-          title: "Payment Detail",
+          title: 'Payment Detail',
         },
       },
     ],
   },
   {
-    path: "/login",
-    name: "login",
-    component: () => import("pages/login.vue"),
+    path: '/login',
+    name: 'login',
+    component: () => import('pages/login.vue'),
   },
   {
-    path: "/register",
-    name: "register",
-    component: () => import("pages/register.vue"),
+    path: '/register',
+    name: 'register',
+    component: () => import('pages/register.vue'),
   },
-];
+]
 
-export default routes;
+export default routes

@@ -21,10 +21,10 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters } from 'vuex'
 
 export default {
-  name: "Switch2FAButton",
+  name: 'Switch2FAButton',
   props: {
     show: Boolean,
     onUpdatedValue: Function,
@@ -33,28 +33,28 @@ export default {
   data() {
     return {
       model: false,
-    };
+    }
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
-      qrImage: "user/getQrImage",
+      user: 'user/getUser',
+      qrImage: 'user/getQrImage',
     }),
   },
   methods: {
     onUpdated(value) {
-      this.$refs["preventToggleEnterEvt"].focus();
-      this.$emit("onUpdateValue", value);
-      this.$emit("update:modelValue", value);
+      this.$refs['preventToggleEnterEvt'].focus()
+      this.$emit('onUpdateValue', value)
+      this.$emit('update:modelValue', value)
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.model = newVal;
+        this.model = newVal
       },
     },
   },
-};
+}
 </script>

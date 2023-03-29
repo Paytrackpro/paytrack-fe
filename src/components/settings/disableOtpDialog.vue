@@ -3,9 +3,7 @@
     <q-card>
       <q-form @submit="onSubmit">
         <q-card-section>
-          <div class="text-h6">
-            Please confirm your OTP to disable this function
-          </div>
+          <div class="text-h6">Please confirm your OTP to disable this function</div>
           <q-input
             v-model="password"
             :autofocus="true"
@@ -21,30 +19,12 @@
               />
             </template>
           </q-input>
-          <q-input
-            v-model="otp"
-            type="text"
-            hint="OTP"
-            :rules="[(val) => !!val || 'OTP is required']"
-          />
+          <q-input v-model="otp" type="text" hint="OTP" :rules="[(val) => !!val || 'OTP is required']" />
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn
-            flat
-            label="Cancel"
-            color="primary"
-            type="button"
-            @click="cancel"
-          />
-          <q-btn
-            flat
-            label="Confirm"
-            color="primary"
-            type="submit"
-            :loading="loading"
-            :disable="loading"
-          />
+          <q-btn flat label="Cancel" color="primary" type="button" @click="cancel" />
+          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
         </q-card-actions>
       </q-form>
     </q-card>
@@ -52,40 +32,40 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions } from 'vuex'
 
 export default {
-  name: "DisableOtpDialog",
+  name: 'DisableOtpDialog',
   props: {
     dialog: Boolean,
     hideDialog: Function,
   },
   data: () => ({
-    password: "",
-    otp: "",
+    password: '',
+    otp: '',
     pwdVisibility: true,
     loading: false,
   }),
   methods: {
     ...mapActions({
-      disableOtp: "user/disableOtp",
+      disableOtp: 'user/disableOtp',
     }),
     async onSubmit() {
-      this.loading = true;
+      this.loading = true
       const ok = await this.disableOtp({
         password: this.password,
         otp: this.otp,
-      });
-      this.loading = false;
-      this.$emit("hideDialog", ok);
+      })
+      this.loading = false
+      this.$emit('hideDialog', ok)
     },
     cancel() {
-      this.$emit("hideDialog", false);
+      this.$emit('hideDialog', false)
     },
     clearForm() {
-      this.password = "";
-      this.otp = "";
+      this.password = ''
+      this.otp = ''
     },
   },
-};
+}
 </script>
