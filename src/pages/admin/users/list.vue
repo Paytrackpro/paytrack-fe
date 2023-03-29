@@ -113,9 +113,6 @@ export default {
       },
     },
   },
-  created: function () {
-    this.getUserList()
-  },
   methods: {
     async getUserList(f) {
       this.loading = true
@@ -123,9 +120,9 @@ export default {
         .get('/admin/user/list', {
           params: f,
         })
-        .then((res) => {
-          this.rows = res.data.data.users
-          this.pagination.rowsNumber = res.data.data.count
+        .then(({ users, count }) => {
+          this.rows = users || []
+          this.pagination.rowsNumber = count
           this.loading = false
         })
         .catch((err) => {

@@ -4,15 +4,7 @@
     <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
       <div class="col-12">
         <q-field label="Approvers" stack-label>
-          <template v-slot:control>
-            <payment-status
-              v-for="approver in payment.approvers"
-              :key="approver.approverId"
-              :status="approver.status"
-              :receiver-id="payment.receiverId"
-              :text="approver.approverName"
-            />
-          </template>
+          {{ approverText }}
         </q-field>
       </div>
     </div>
@@ -38,8 +30,8 @@
       <div class="col-4">
         <q-select
           v-if="processing"
-          v-model="payment.status"
-          :options="statuses"
+          v-model="paymentStatus"
+          :options="statusOption"
           outlined
           dense
           lazy-rules
@@ -202,6 +194,15 @@
         class="q-mr-sm"
       />
       <q-btn
+        v-if="rejectable && !processing"
+        label="reject"
+        type="button"
+        color="primary"
+        :disable="paying"
+        @click="toggleRejectDialog(true)"
+        class="q-mr-sm"
+      />
+      <q-btn
         v-if="editable && !processing"
         label="Edit"
         type="button"
@@ -220,6 +221,12 @@
       />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
     </div>
+    <PaymentRejectDialog
+      v-model="paymentRejectDialog"
+      @toggle="toggleRejectDialog"
+      :paymentId="payment.id"
+      :token="token"
+    />
   </q-form>
 </template>
 
@@ -236,6 +243,7 @@ import {
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
+import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 export default {
   name: 'paymentDetail',
   components: {
@@ -244,6 +252,7 @@ export default {
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
+    PaymentRejectDialog,
   },
   data() {
     return {
@@ -251,21 +260,14 @@ export default {
       pMethod: '',
       PAYMENT_STATUS_APPROVED: PAYMENT_STATUS_APPROVED,
       methods: [],
-      statuses: [
-        {
-          label: 'Received',
-          value: 'sent',
-        },
-        {
-          label: 'Ready for Payment',
-          value: 'confirmed',
-        },
-      ],
       expanded: false,
       processing: false,
       fetchingRate: false,
       paying: false,
       payment: {},
+      paymentRejectDialog: false,
+      paymentStatus: '',
+      approverText: '',
     }
   },
   props: {
@@ -333,6 +335,7 @@ export default {
         token: this.token,
         txId: this.txId,
       }
+      form.status = this.paymentStatus
       this.paying = true
       const { data } = await this.savePayment(form)
       this.paying = false
@@ -384,6 +387,9 @@ export default {
       }
       this.$refs.rateInput.fetchRate()
     },
+    toggleRejectDialog(val) {
+      this.paymentRejectDialog = val
+    },
   },
   watch: {
     modelValue: {
@@ -394,6 +400,9 @@ export default {
         let settings = newPayment.paymentSettings || []
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
+        this.paymentStatus = this.payment.status
+        let appovers = this.payment.approvers || []
+        this.approverText = appovers.map((el) => el.approverName).join(', ')
         // setup default payment method
         const paymentSettings = this.payment.paymentSettings || []
         if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
@@ -414,9 +423,50 @@ export default {
     ...mapGetters({
       role: 'user/getRole',
     }),
+    statusOption() {
+      let status = [
+        {
+          label: 'Ready for Payment',
+          value: 'confirmed',
+        },
+      ]
+      switch (this.payment.status) {
+        case 'wait approve':
+          status.push({
+            label: 'Wait approve',
+            value: 'sent',
+          })
+          break
+        case 'approved':
+          status.push({
+            label: 'Approved',
+            value: 'approved',
+          })
+          break
+        case 'confirmed':
+          if (this.payment.isApproved) {
+            status.push({
+              label: 'Approved',
+              value: 'approved',
+            })
+          } else {
+            status.push({
+              label: 'Wait approve',
+              value: 'sent',
+            })
+          }
+          break
+        default:
+          status.push({
+            label: 'Received',
+            value: 'sent',
+          })
+      }
+      return status
+    },
     editable() {
       return (
-        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1 &&
         (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
       )
     },
@@ -430,6 +480,9 @@ export default {
       return (
         [PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(this.payment.status) && this.user.id !== this.payment.receiverId
       )
+    },
+    rejectable() {
+      return this.user.id !== this.payment.creatorId && ['sent', 'confirmed'].includes(this.payment.status)
     },
   },
 }

@@ -1,5 +1,6 @@
 <template>
-  <q-chip outline :color="statusColor" :text-color="statusColor">{{ statusView }}</q-chip>
+  <!-- <q-chip outline :color="statusColor" :text-color="statusColor">{{ statusView }}</q-chip> -->
+  <span>{{ statusView }}</span>
 </template>
 
 <script>
@@ -36,6 +37,8 @@ export default {
           return reminderSide ? 'Ready for Payment' : 'Sent'
         case 'paid':
           return 'Paid'
+        case 'rejected':
+          return 'Rejected'
         case PAYMENT_STATUS_WAIT_APPROVAL_TEXT:
         case PAYMENT_STATUS_APPROVED_TEXT:
           return getStatusText(this.status)

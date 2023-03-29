@@ -114,7 +114,11 @@
               />
             </div>
           </div>
-          <invoices v-model="inPayment.details" :hourlyRate="Number(inPayment.hourlyRate)"></invoices>
+          <invoices
+            v-model="inPayment.details"
+            :hourlyRate="Number(inPayment.hourlyRate)"
+            :readonly="!canEditInvoice"
+          ></invoices>
         </q-expansion-item>
       </div>
     </div>
@@ -131,7 +135,7 @@
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'draft' || inPayment.status === ''"
+        v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
         label="Send"
         color="primary"
         :disable="submitting"
@@ -288,6 +292,9 @@ export default {
         amount += Number(invoice.cost)
       }
       return amount
+    },
+    canEditInvoice: function () {
+      return this.user.id === this.inPayment.creatorId
     },
   },
 }
