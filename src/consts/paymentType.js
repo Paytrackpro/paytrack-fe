@@ -25,25 +25,14 @@ const PAYMENT_TYPE_OPTIONS = [
 const PAYMENT_OBJECT_REMINDER = 'reminder'
 const PAYMENT_OBJECT_REQUEST = 'request'
 
-export const PAYMENT_STATUS_WAIT_APPROVAL = 4
-export const PAYMENT_STATUS_APPROVED = 5
-
 export const PAYMENT_STATUS_WAIT_APPROVAL_TEXT = 'wait approve'
 export const PAYMENT_STATUS_APPROVED_TEXT = 'approved'
 
-export const getStatusTagColor = (status) => {
-  if ([PAYMENT_STATUS_WAIT_APPROVAL, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(status)) {
-    return 'orange'
-  } else if ([PAYMENT_STATUS_APPROVED, PAYMENT_STATUS_APPROVED_TEXT].includes(status)) {
-    return 'teal'
-  }
-  return 'black'
-}
-
 export const getStatusText = (status) => {
-  if ([PAYMENT_STATUS_WAIT_APPROVAL, PAYMENT_STATUS_WAIT_APPROVAL_TEXT].includes(status)) {
+  ;``
+  if (PAYMENT_STATUS_WAIT_APPROVAL_TEXT == status) {
     return 'Wait Approval'
-  } else if ([PAYMENT_STATUS_APPROVED, PAYMENT_STATUS_APPROVED_TEXT].includes(status)) {
+  } else if (PAYMENT_STATUS_APPROVED_TEXT == status) {
     return 'Approved'
   }
   return null

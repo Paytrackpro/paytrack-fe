@@ -1,5 +1,4 @@
 <template>
-  <!-- <q-chip outline :color="statusColor" :text-color="statusColor">{{ statusView }}</q-chip> -->
   <span>{{ statusView }}</span>
 </template>
 
@@ -8,7 +7,6 @@ import {
   getStatusTagColor,
   getStatusText,
   PAYMENT_STATUS_APPROVED_TEXT,
-  PAYMENT_STATUS_WAIT_APPROVAL,
   PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
 } from 'src/consts/paymentType'
 import { mapGetters } from 'vuex'
@@ -25,7 +23,6 @@ export default {
       user: 'user/getUser',
     }),
     statusView() {
-      console.log(this.text, this.status)
       if (this.text) return this.text
       const reminderSide = this.receiverId === this.user.id
       switch (this.status) {
@@ -45,10 +42,6 @@ export default {
         default:
           return 'Unknown'
       }
-    },
-
-    statusColor() {
-      return getStatusTagColor(this.status)
     },
   },
 }
