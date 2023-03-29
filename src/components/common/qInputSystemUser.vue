@@ -14,75 +14,75 @@
 </template>
 
 <script>
-import { emailPattern } from "src/helper/validations";
-const DESTINATION_CHECK_NONE = 0;
-const DESTINATION_CHECK_CHECKING = 1;
-const DESTINATION_CHECK_FAIL = 2;
-const DESTINATION_CHECK_DONE = 3;
+import { emailPattern } from 'src/helper/validations'
+const DESTINATION_CHECK_NONE = 0
+const DESTINATION_CHECK_CHECKING = 1
+const DESTINATION_CHECK_FAIL = 2
+const DESTINATION_CHECK_DONE = 3
 
 export default {
-  name: "qInputSystemUser",
+  name: 'qInputSystemUser',
   data() {
     return {
       partner: {
         id: 0,
-        value: "",
+        value: '',
         paymentSettings: [],
-        contactMethod: "",
+        contactMethod: '',
       },
-      error: "",
+      error: '',
       status: DESTINATION_CHECK_NONE,
-    };
+    }
   },
   props: {
     modelValue: Object,
   },
   methods: {
     checkingDestination($e) {
-      this.status = DESTINATION_CHECK_NONE;
-      this.error = "";
-      this.partner.id = 0;
-      this.partner.contactMethod = "";
+      this.status = DESTINATION_CHECK_NONE
+      this.error = ''
+      this.partner.id = 0
+      this.partner.contactMethod = ''
       if (!this.partner.value) {
-        this.emit();
-        return;
+        this.emit()
+        return
       }
       if (emailPattern.test(this.partner.value)) {
-        this.status = DESTINATION_CHECK_DONE;
-        this.partner.contactMethod = "email";
-        this.emit();
-        return;
+        this.status = DESTINATION_CHECK_DONE
+        this.partner.contactMethod = 'email'
+        this.emit()
+        return
       }
       // checking
-      this.partner.status = DESTINATION_CHECK_CHECKING;
+      this.partner.status = DESTINATION_CHECK_CHECKING
       this.$api
         .get(`/user/exist-checking?userName=${this.partner.value}`)
         .then(({ found, id, userName, paymentSettings, message }) => {
           if (found) {
-            this.status = DESTINATION_CHECK_DONE;
-            this.partner.id = id;
-            this.partner.paymentSettings = paymentSettings || [];
-            this.partner.contactMethod = "internal";
+            this.status = DESTINATION_CHECK_DONE
+            this.partner.id = id
+            this.partner.paymentSettings = paymentSettings || []
+            this.partner.contactMethod = 'internal'
           } else {
-            this.status = DESTINATION_CHECK_FAIL;
-            this.error = message;
+            this.status = DESTINATION_CHECK_FAIL
+            this.error = message
           }
         })
         .catch(() => {
-          this.status = DESTINATION_CHECK_FAIL;
-          this.error = "the user name is not found";
+          this.status = DESTINATION_CHECK_FAIL
+          this.error = 'the user name is not found'
         })
         .finally(() => {
-          this.emit();
-        });
+          this.emit()
+        })
     },
     emit() {
-      this.$emit("update:modelValue", this.partner);
+      this.$emit('update:modelValue', this.partner)
     },
   },
   computed: {
     partnerError: function () {
-      return this.status === DESTINATION_CHECK_FAIL;
+      return this.status === DESTINATION_CHECK_FAIL
     },
   },
   watch: {
@@ -93,11 +93,11 @@ export default {
           id,
           value,
           paymentSettings,
-        };
+        }
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

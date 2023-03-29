@@ -3,9 +3,7 @@
     <q-card>
       <q-form @submit="onSubmit">
         <q-card-section>
-          <div class="text-h6">
-            Please confirm your password to active two-factor authentication
-          </div>
+          <div class="text-h6">Please confirm your password to active two-factor authentication</div>
           <q-input
             :autofocus="true"
             v-model="password"
@@ -23,21 +21,8 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn
-            flat
-            label="Cancel"
-            color="primary"
-            type="button"
-            @click="cancel"
-          />
-          <q-btn
-            flat
-            label="Confirm"
-            color="primary"
-            type="submit"
-            :loading="loading"
-            :disable="loading"
-          />
+          <q-btn flat label="Cancel" color="primary" type="button" @click="cancel" />
+          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
         </q-card-actions>
       </q-form>
     </q-card>
@@ -45,37 +30,37 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions } from 'vuex'
 
 export default {
-  name: "EnableOtpDialog",
+  name: 'EnableOtpDialog',
   props: {
     dialog: Boolean,
     hideDialog: Function,
   },
   data() {
     return {
-      password: "",
+      password: '',
       pwdVisibility: true,
       loading: false,
-    };
+    }
   },
   methods: {
     ...mapActions({
-      enableOtp: "user/enableOtp",
+      enableOtp: 'user/enableOtp',
     }),
     async onSubmit() {
-      this.loading = true;
-      const ok = await this.enableOtp({ password: this.password });
-      this.loading = false;
-      this.$emit("hideDialog", ok);
+      this.loading = true
+      const ok = await this.enableOtp({ password: this.password })
+      this.loading = false
+      this.$emit('hideDialog', ok)
     },
     cancel() {
-      this.$emit("hideDialog", false);
+      this.$emit('hideDialog', false)
     },
     clearForm() {
-      this.password = "";
+      this.password = ''
     },
   },
-};
+}
 </script>

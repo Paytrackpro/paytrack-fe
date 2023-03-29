@@ -3,13 +3,13 @@
 </template>
 
 <script>
-import { PaymentList } from "components/payment";
+import { PaymentList } from 'components/payment'
 export default {
-  name: "getPaidPage",
+  name: 'getPaidPage',
   components: {
     PaymentList,
   },
-};
+}
 </script>
 
 <style scoped></style>
