@@ -216,7 +216,7 @@
         color="teal"
         text-color="white"
         v-if="approvalable"
-        @click="handlerApprovalAction(PAYMENT_STATUS_APPROVED)"
+        @click="handlerApprovalAction()"
         class="q-mr-sm"
       />
       <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
@@ -235,11 +235,7 @@ import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
 import Invoices from 'components/payment/invoices'
 import PaymentSetting from 'components/payment/paymentSetting'
-import {
-  PAYMENT_STATUS_APPROVED,
-  PAYMENT_OBJECT_REQUEST,
-  PAYMENT_STATUS_WAIT_APPROVAL_TEXT,
-} from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REQUEST, PAYMENT_STATUS_WAIT_APPROVAL_TEXT } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
@@ -258,7 +254,6 @@ export default {
     return {
       txId: '',
       pMethod: '',
-      PAYMENT_STATUS_APPROVED: PAYMENT_STATUS_APPROVED,
       methods: [],
       expanded: false,
       processing: false,

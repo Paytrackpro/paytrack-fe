@@ -14,7 +14,7 @@
     @request="onRequest"
   >
     <template v-slot:top>
-      <div class="q-table__title">{{ label || "Payments" }}</div>
+      <div class="q-table__title">{{ label || 'Payments' }}</div>
       <q-space />
       <template v-if="showBulkPay">
         <q-checkbox label="Can pay BTC" v-model="isBulkPay" />
@@ -50,12 +50,12 @@
       </q-card-section>
 
       <q-card-section class="q-pt-none">
-        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="TXID.."/>
+        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="TXID" />
         <q-list bordered separator>
           <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
             <q-item-section>
-              <q-item-label>Address:{{item.paymentSettings[0].address}}</q-item-label>
-              <q-item-label caption>Amount: {{item.amount}}</q-item-label>
+              <q-item-label>Address:{{ item.paymentSettings[0].address }}</q-item-label>
+              <q-item-label caption>Amount: {{ item.amount }}</q-item-label>
             </q-item-section>
           </q-item>
         </q-list>
@@ -136,40 +136,35 @@ export default {
       return this.user.role === role.USER
     },
     showBulkPay() {
-      return this.type === PAYMENT_OBJECT_REMINDER;
+      return this.type === PAYMENT_OBJECT_REMINDER
     },
     columns() {
       let flexibleCol = [
         this.type === PAYMENT_OBJECT_REQUEST
-          ? 
-          {
-            name: "receiverName",
-            align: "center",
-            label: "Recipient",
-            field: (row) => {
-              return row.receiverName || row.externalEmail;
-              if (
-                row.creatorId === row.senderId ||
-                row.contactMethod === "internal"
-              ) {
-                return;
-              }
-              return row.externalEmail;
+          ? {
+              name: 'receiverName',
+              align: 'center',
+              label: 'Recipient',
+              field: (row) => {
+                return row.receiverName || row.externalEmail
+                if (row.creatorId === row.senderId || row.contactMethod === 'internal') {
+                  return
+                }
+                return row.externalEmail
+              },
+            }
+          : {
+              name: 'senderName',
+              required: true,
+              label: 'Sender',
+              align: 'center',
+              field: (row) => {
+                return row.senderName
+              },
+              format: (val) => `${val}`,
             },
-          }
-          : 
-          {
-            name: "senderName",
-            required: true,
-            label: "Sender",
-            align: "center",
-            field: (row) => {
-              return row.senderName;
-            },
-            format: (val) => `${val}`,
-          }
-      ];
-        
+      ]
+
       if (this.type === PAYMENT_OBJECT_REMINDER) {
         flexibleCol.push({
           name: 'receiverName',
@@ -178,7 +173,7 @@ export default {
           field: 'receiverName',
         })
       }
-      return [...flexibleCol, ...this.fixedColumns];
+      return [...flexibleCol, ...this.fixedColumns]
     },
   },
   methods: {
@@ -198,38 +193,38 @@ export default {
           this.loading = false
         })
     },
-    handlePaid(){
-      const txId = this.txId.trim();
+    handlePaid() {
+      const txId = this.txId.trim()
       if (
         txId.length === 0 &&
         !confirm(
-          "Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier"
+          'Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier'
         )
       ) {
-        this.$refs.txId.$el.focus();
-        return;
+        this.$refs.txId.$el.focus()
+        return
       }
       const reqData = {
-        paymentIds: this.selected.map(item => item.id),
+        paymentIds: this.selected.map((item) => item.id),
         txid: txId,
-      };
+      }
 
-      this.paying = true;
+      this.paying = true
       this.$api
-        .post("/payment/bulk-paid-btc", reqData)
+        .post('/payment/bulk-paid-btc', reqData)
         .then((data) => {
           this.isBulkPay = false
           this.$q.notify({
-            message: "payments has been payed",
-            color: "positive",
-            icon: "check",
-          });
+            message: 'payments has been payed',
+            color: 'positive',
+            icon: 'check',
+          })
         })
         .catch((err) => {
-          responseError(err);
+          responseError(err)
         })
         .finally(() => {
-          this.paying = false;
+          this.paying = false
         })
     },
     goToDetail(id) {
@@ -246,23 +241,23 @@ export default {
   },
   watch: {
     isBulkPay(newVal) {
-      const filter = pathParamsToPaging({query: {}}, this.pagination);
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
       if (newVal) {
         this.getPayments({
           ...filter,
           requestType: 'bulk_btc',
-        });
-      }else{
+        })
+      } else {
         this.getPayments({
           ...filter,
           requestType: this.type,
-        });
+        })
       }
     },
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination);
+        const filter = pathParamsToPaging(to, this.pagination)
         this.getPayments({
           ...filter,
           requestType: this.type,
