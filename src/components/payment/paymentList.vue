@@ -198,7 +198,7 @@ export default {
       if (
         txId.length === 0 &&
         !confirm(
-          'Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier'
+          'Are you sure you want to mark the payment as paid? providing the txId will make the requester confirm your payment faster'
         )
       ) {
         this.$refs.txId.$el.focus()
@@ -215,7 +215,7 @@ export default {
         .then((data) => {
           this.isBulkPay = false
           this.$q.notify({
-            message: 'payments has been payed',
+            message: 'payments made successfully',
             color: 'positive',
             icon: 'check',
           })
