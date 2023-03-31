@@ -25,12 +25,12 @@ const PAYMENT_TYPE_OPTIONS = [
 const PAYMENT_OBJECT_REMINDER = 'reminder'
 const PAYMENT_OBJECT_REQUEST = 'request'
 
-export const PAYMENT_STATUS_WAIT_APPROVAL_TEXT = 'wait approve'
+export const PAYMENT_STATUS_AWAITING_APPROVAL_TEXT = 'awaiting approval'
 export const PAYMENT_STATUS_APPROVED_TEXT = 'approved'
 
 export const getStatusText = (status) => {
   ;``
-  if (PAYMENT_STATUS_WAIT_APPROVAL_TEXT == status) {
+  if (PAYMENT_STATUS_AWAITING_APPROVAL_TEXT == status) {
     return 'Wait Approval'
   } else if (PAYMENT_STATUS_APPROVED_TEXT == status) {
     return 'Approved'

@@ -4,13 +4,25 @@
     :loading="loading"
     :rows="rows"
     :columns="columns"
-    row-key="name"
+    row-key="id"
     v-model:pagination="pagination"
+    :selection="isBulkPay ? 'multiple' : 'none'"
+    v-model:selected="selected"
     flat
     bordered
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
+    <template v-slot:top>
+      <div class="q-table__title">{{ label || 'Payments' }}</div>
+      <q-space />
+      <template v-if="showBulkPay">
+        <q-checkbox label="Can pay BTC" v-model="isBulkPay" />
+        <q-btn @click="detailBulk = true" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
+          >Bulk Pay BTC</q-btn
+        >
+      </template>
+    </template>
     <template v-if="type === 'request'" v-slot:top-right>
       <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
     </template>
@@ -31,6 +43,29 @@
       </q-td>
     </template>
   </q-table>
+  <q-dialog v-model="detailBulk">
+    <q-card style="width: 700px; max-width: 80vw">
+      <q-card-section>
+        <div class="text-h6">Bulk Pay BTC</div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="TXID" />
+        <q-list bordered separator>
+          <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
+            <q-item-section>
+              <q-item-label>Address:{{ item.paymentSettings[0].address }}</q-item-label>
+              <q-item-label caption>Amount: {{ item.amount }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+
+      <q-card-actions align="right" class="bg-white text-teal">
+        <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -51,6 +86,11 @@ export default {
       pagination: {
         ...defaultPaging,
       },
+      txId: '',
+      paying: false,
+      selected: [],
+      isBulkPay: false,
+      detailBulk: false,
       rows: [],
       fixedColumns: [
         {
@@ -95,6 +135,9 @@ export default {
     isUser() {
       return this.user.role === role.USER
     },
+    showBulkPay() {
+      return this.type === PAYMENT_OBJECT_REMINDER
+    },
     columns() {
       let flexibleCol = [
         this.type === PAYMENT_OBJECT_REQUEST
@@ -104,6 +147,10 @@ export default {
               label: 'Recipient',
               field: (row) => {
                 return row.receiverName || row.externalEmail
+                if (row.creatorId === row.senderId || row.contactMethod === 'internal') {
+                  return
+                }
+                return row.externalEmail
               },
             }
           : {
@@ -126,7 +173,6 @@ export default {
           field: 'receiverName',
         })
       }
-
       return [...flexibleCol, ...this.fixedColumns]
     },
   },
@@ -147,6 +193,40 @@ export default {
           this.loading = false
         })
     },
+    handlePaid() {
+      const txId = this.txId.trim()
+      if (
+        txId.length === 0 &&
+        !confirm(
+          'Are you sure you want to mark the payment as paid? providing the txId will make the requester confirm your payment faster'
+        )
+      ) {
+        this.$refs.txId.$el.focus()
+        return
+      }
+      const reqData = {
+        paymentIds: this.selected.map((item) => item.id),
+        txid: txId,
+      }
+
+      this.paying = true
+      this.$api
+        .post('/payment/bulk-paid-btc', reqData)
+        .then((data) => {
+          this.isBulkPay = false
+          this.$q.notify({
+            message: 'payments made successfully',
+            color: 'positive',
+            icon: 'check',
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+        .finally(() => {
+          this.paying = false
+        })
+    },
     goToDetail(id) {
       const path = this.type === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}/${id}` })
@@ -160,6 +240,20 @@ export default {
     },
   },
   watch: {
+    isBulkPay(newVal) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      if (newVal) {
+        this.getPayments({
+          ...filter,
+          requestType: 'bulk_btc',
+        })
+      } else {
+        this.getPayments({
+          ...filter,
+          requestType: this.type,
+        })
+      }
+    },
     $route: {
       immediate: true,
       handler(to) {
