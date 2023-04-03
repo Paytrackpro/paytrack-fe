@@ -58,9 +58,9 @@
 </template>
 
 <script>
-import { cloneObject } from "src/helper/helper";
+import { cloneObject } from 'src/helper/helper'
 export default {
-  name: "paymentSetting",
+  name: 'paymentSetting',
   props: {
     modelValue: Array,
     readonly: Boolean,
@@ -68,65 +68,65 @@ export default {
   },
   data() {
     return {
-      coins: ["btc", "ltc", "dcr"],
+      coins: ['btc', 'ltc', 'dcr'],
       selectedCoins: [],
-      isDefault: "",
+      isDefault: '',
       settings: [],
-    };
+    }
   },
   methods: {
     emit() {
-      this.$emit("update:modelValue", this.settings);
+      this.$emit('update:modelValue', this.settings)
     },
     changeCoins(coins) {
-      const settings = this.settings || [];
-      const newSettings = [];
+      const settings = this.settings || []
+      const newSettings = []
       for (let coin of coins) {
-        let found = false;
+        let found = false
         for (let setting of settings) {
           if (setting.type === coin) {
-            found = true;
+            found = true
             newSettings.push({
               type: setting.type,
               address: setting.address,
               isDefault: setting.isDefault,
-            });
+            })
           }
         }
         if (!found) {
           newSettings.push({
             type: coin,
-            address: "",
+            address: '',
             isDefault: false,
-          });
+          })
         }
       }
-      this.$emit("update:modelValue", newSettings);
+      this.$emit('update:modelValue', newSettings)
     },
     changeDefault(coin) {
       for (let setting of this.settings) {
-        setting.isDefault = setting.type === coin;
+        setting.isDefault = setting.type === coin
       }
-      this.emit();
+      this.emit()
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.settings = cloneObject(newVal || []);
-        const selectedCoins = [];
+        this.settings = cloneObject(newVal || [])
+        const selectedCoins = []
         for (let setting of this.settings) {
-          selectedCoins.push(setting.type);
+          selectedCoins.push(setting.type)
           if (setting.isDefault) {
-            this.isDefault = setting.type;
+            this.isDefault = setting.type
           }
         }
-        this.selectedCoins = selectedCoins;
+        this.selectedCoins = selectedCoins
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

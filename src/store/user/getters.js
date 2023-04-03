@@ -1,22 +1,22 @@
-import ROLE from "src/consts/role";
+import ROLE from 'src/consts/role'
 
 export default {
   getUserProfile(state) {
-    return state.user;
+    return state.user
   },
   getTempPassword(state) {
-    return state.tempPassword;
+    return state.tempPassword
   },
   getQrImage(state) {
-    return state.qrImage;
+    return state.qrImage
   },
   isAuthenticated(state) {
-    return state.authenticated;
+    return state.authenticated
   },
   getUser(state, reload) {
-    return state.user || { id: 0 };
+    return state.user || { id: 0 }
   },
   getRole(state) {
-    return state.user.role === ROLE.ADMIN ? "admin" : "user";
+    return state.user.role === ROLE.ADMIN ? 'admin' : 'user'
   },
-};
+}

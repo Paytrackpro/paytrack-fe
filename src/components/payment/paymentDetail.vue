@@ -1,6 +1,13 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
+    <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
+      <div class="col-12">
+        <q-field label="Approvers" stack-label>
+          {{ approverText }}
+        </q-field>
+      </div>
+    </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-field label="The sender" stack-label>
@@ -23,8 +30,8 @@
       <div class="col-4">
         <q-select
           v-if="processing"
-          v-model="payment.status"
-          :options="statuses"
+          v-model="paymentStatus"
+          :options="statusOption"
           outlined
           dense
           lazy-rules
@@ -37,10 +44,7 @@
         <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status
-                :status="payment.status"
-                :receiver-id="payment.receiverId"
-              />
+              <payment-status :status="payment.status" :receiver-id="payment.receiverId" />
             </div>
           </template>
         </q-field>
@@ -67,10 +71,7 @@
         />
       </div>
       <div class="col-4">
-        <q-field
-          :label="`Amount to send(${payment.paymentMethod})`"
-          stack-label
-        >
+        <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.expectedAmount }}
@@ -100,10 +101,7 @@
         </q-field>
       </div>
       <div class="col-8">
-        <q-field
-          :label="`Payment address (${payment.paymentMethod})`"
-          stack-label
-        >
+        <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.paymentAddress }}
@@ -111,15 +109,8 @@
           </template>
         </q-field>
       </div>
-      <div
-        v-if="payment.paymentSettings && payment.paymentSettings.length"
-        class="col-12"
-      >
-        <payment-setting
-          :modelValue="payment.paymentSettings"
-          readonly
-          label="Accepted payment settings"
-        />
+      <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
+        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
       <div class="col-12">
         <q-input
@@ -160,6 +151,21 @@
       </div>
       <div class="col-12">
         <PaymentInvoiceMode ref="invoiceMode" v-model="payment" readonly />
+        <!-- <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
+          <div class="row">
+            <div class="col-3">
+              <q-input
+                style=""
+                label="Hourly rate(USD)"
+                readonly
+                type="number"
+                v-model="payment.hourlyRate"
+                hint="Used to calculate cost from hours on invoices"
+              />
+            </div>
+          </div>
+          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
+        </q-expansion-item> -->
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -189,6 +195,15 @@
         class="q-mr-sm"
       />
       <q-btn
+        v-if="rejectable && !processing"
+        label="reject"
+        type="button"
+        color="primary"
+        :disable="paying"
+        @click="toggleRejectDialog(true)"
+        class="q-mr-sm"
+      />
+      <q-btn
         v-if="editable && !processing"
         label="Edit"
         type="button"
@@ -197,55 +212,60 @@
         class="q-mr-sm"
       />
       <q-btn
-        label="Cancel"
+        label="Approval"
         type="button"
-        color="white"
-        text-color="black"
-        @click="cancel"
+        color="teal"
+        text-color="white"
+        v-if="approvalable"
+        @click="handlerApprovalAction()"
+        class="q-mr-sm"
       />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
     </div>
+    <PaymentRejectDialog
+      v-model="paymentRejectDialog"
+      @toggle="toggleRejectDialog"
+      :paymentId="payment.id"
+      :token="token"
+    />
   </q-form>
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
-import MDate from "components/common/mDate";
-import PaymentSetting from "components/payment/paymentSetting";
-import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
-import { responseError } from "src/helper/error";
-import PaymentStatus from "components/payment/paymentStatus";
-import PaymentRateInput from "components/payment/paymentRateInput";
-import PaymentInvoiceMode from "components/payment/paymentInvoiceMode";
+import { mapActions, mapGetters } from 'vuex'
+import MDate from 'components/common/mDate'
+import Invoices from 'components/payment/invoices'
+import PaymentSetting from 'components/payment/paymentSetting'
+import { PAYMENT_OBJECT_REQUEST, PAYMENT_STATUS_AWAITING_APPROVAL_TEXT } from 'src/consts/paymentType'
+import { responseError } from 'src/helper/error'
+import PaymentStatus from 'components/payment/paymentStatus'
+import PaymentRateInput from 'components/payment/paymentRateInput'
+import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
+import PaymentInvoiceMode from 'components/payment/paymentInvoiceMode'
 export default {
-  name: "paymentDetail",
+  name: 'paymentDetail',
   components: {
     MDate,
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
     PaymentInvoiceMode,
+    PaymentRejectDialog,
   },
   data() {
     return {
-      txId: "",
-      pMethod: "",
+      txId: '',
+      pMethod: '',
       methods: [],
-      statuses: [
-        {
-          label: "Received",
-          value: "sent",
-        },
-        {
-          label: "Ready for Payment",
-          value: "confirmed",
-        },
-      ],
       expanded: false,
       processing: false,
       fetchingRate: false,
       paying: false,
       payment: {},
-    };
+      paymentRejectDialog: false,
+      paymentStatus: '',
+      approverText: '',
+    }
   },
   props: {
     modelValue: Object,
@@ -256,33 +276,32 @@ export default {
   },
   methods: {
     ...mapActions({
-      savePayment: "payment/save",
+      savePayment: 'payment/save',
     }),
     cancel() {
       if (this.processing) {
-        this.processing = false;
-        return;
+        this.processing = false
+        return
       }
-      const path =
-        this.paymentType === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
-      this.$router.push({ path: `/${path}` });
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
     },
     processPayment() {
-      this.processing = true;
-      if (this.payment.paymentMethod !== "none") {
-        this.$refs.rateInput.fetchRate();
+      this.processing = true
+      if (this.payment.paymentMethod !== 'none') {
+        this.$refs.rateInput.fetchRate()
       }
     },
     markAsPaid() {
-      const txId = this.txId.trim();
+      const txId = this.txId.trim()
       if (
         txId.length === 0 &&
         !confirm(
-          "Are you sure to mark the payment as paid? Fill up txId will make the requester confirm your payment easier"
+          'Are you sure you want to mark the payment as paid? providing the txId will make the requester confirm your payment faster'
         )
       ) {
-        this.$refs.txId.$el.focus();
-        return;
+        this.$refs.txId.$el.focus()
+        return
       }
       const reqData = {
         id: this.payment.id,
@@ -290,101 +309,184 @@ export default {
         token: this.token,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
-      };
+      }
       this.$api
-        .post("/payment/process", reqData)
+        .post('/payment/process', reqData)
         .then((data) => {
-          this.paying = false;
-          this.$emit("update:modelValue", data);
+          this.paying = false
+          this.$emit('update:modelValue', data)
           this.$q.notify({
-            message: "payment has been payed",
-            color: "positive",
-            icon: "check",
-          });
+            message: 'payment has been payed',
+            color: 'positive',
+            icon: 'check',
+          })
         })
         .catch((err) => {
-          this.paying = false;
-          responseError(err);
-        });
+          this.paying = false
+          responseError(err)
+        })
     },
     async update() {
       const form = {
         ...this.payment,
         token: this.token,
         txId: this.txId,
-      };
-      this.paying = true;
-      const { data } = await this.savePayment(form);
-      this.paying = false;
+      }
+      form.status = this.paymentStatus
+      this.paying = true
+      const { data } = await this.savePayment(form)
+      this.paying = false
       if (data) {
-        this.updateLocal(data.payment);
+        this.updateLocal(data.payment)
         this.$q.notify({
-          message: "payment is updated",
-          color: "positive",
-          icon: "check",
-        });
+          message: 'payment is updated',
+          color: 'positive',
+          icon: 'check',
+        })
       }
     },
+    handlerApprovalAction(status) {
+      const reqData = {
+        paymentId: this.payment.id,
+      }
+      this.paying = true
+      this.$api
+        .post('/payment/approve', reqData)
+        .then((data) => {
+          if (data) {
+            this.updateLocal(data)
+            this.$q.notify({
+              message: 'payment is updated',
+              color: 'positive',
+              icon: 'check',
+            })
+          }
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+        .finally(() => {
+          this.paying = false
+        })
+    },
     updateLocal(payment, editing) {
-      payment = payment || this.payment;
-      this.$emit("update:modelValue", payment);
+      payment = payment || this.payment
+      this.$emit('update:modelValue', payment)
       if (editing) {
-        this.$emit("update:editing", true);
+        this.$emit('update:editing', true)
       }
     },
     methodChange(method) {
-      const settings = this.payment.paymentSettings || [];
-      const setting = settings.find((s) => s.type === method);
+      const settings = this.payment.paymentSettings || []
+      const setting = settings.find((s) => s.type === method)
       if (setting) {
-        this.payment.paymentAddress = setting.address;
+        this.payment.paymentAddress = setting.address
       }
-      this.$refs.rateInput.fetchRate();
+      this.$refs.rateInput.fetchRate()
+    },
+    toggleRejectDialog(val) {
+      this.paymentRejectDialog = val
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newPayment) {
-        this.txId = newPayment.txId;
-        this.pMethod = newPayment.paymentMethod;
-        let settings = newPayment.paymentSettings || [];
-        this.methods = settings.map((s) => s.type);
-        this.payment = { ...newPayment };
+        this.txId = newPayment.txId
+        this.pMethod = newPayment.paymentMethod
+        let settings = newPayment.paymentSettings || []
+        this.methods = settings.map((s) => s.type)
+        this.payment = { ...newPayment }
+        this.paymentStatus = this.payment.status
+        let appovers = this.payment.approvers || []
+        this.approverText = appovers.map((el) => el.approverName).join(', ')
         // setup default payment method
-        const paymentSettings = this.payment.paymentSettings || [];
-        if (this.payment.paymentMethod === "none" && paymentSettings.length) {
-          let setting = paymentSettings[0];
+        const paymentSettings = this.payment.paymentSettings || []
+        if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
+          let setting = paymentSettings[0]
           for (let ps of paymentSettings) {
             if (ps.isDefault) {
-              setting = ps;
-              break;
+              setting = ps
+              break
             }
           }
-          this.payment.paymentMethod = setting.type;
-          this.payment.paymentAddress = setting.address;
+          this.payment.paymentMethod = setting.type
+          this.payment.paymentAddress = setting.address
         }
       },
     },
   },
   computed: {
     ...mapGetters({
-      role: "user/getRole",
+      role: 'user/getRole',
     }),
+    statusOption() {
+      let status = [
+        {
+          label: 'Ready for Payment',
+          value: 'confirmed',
+        },
+      ]
+      switch (this.payment.status) {
+        case 'wait approve':
+          status.push({
+            label: 'Wait approve',
+            value: 'sent',
+          })
+          break
+        case 'approved':
+          status.push({
+            label: 'Approved',
+            value: 'approved',
+          })
+          break
+        case 'confirmed':
+          if (this.payment.isApproved) {
+            status.push({
+              label: 'Approved',
+              value: 'approved',
+            })
+          } else {
+            status.push({
+              label: 'Wait approve',
+              value: 'sent',
+            })
+          }
+          break
+        default:
+          status.push({
+            label: 'Received',
+            value: 'sent',
+          })
+      }
+      return status
+    },
     editable() {
       return (
-        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        this.payment.senderId === this.user.id
-      );
+        //   ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
+        //   this.payment.senderId === this.user.id
+        // );
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1 &&
+        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
+      )
     },
     processable() {
       return (
-        ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        (this.payment.receiverId === this.user.id ||
-          (this.token && this.payment.receiverId === 0))
-      );
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
+        (this.payment.receiverId === this.user.id || (this.token && this.payment.receiverId === 0))
+      )
+    },
+    approvalable() {
+      return (
+        [PAYMENT_STATUS_AWAITING_APPROVAL_TEXT].includes(this.payment.status) &&
+        this.user.id !== this.payment.receiverId
+      )
+    },
+    rejectable() {
+      return this.user.id !== this.payment.creatorId && ['sent', 'confirmed'].includes(this.payment.status)
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

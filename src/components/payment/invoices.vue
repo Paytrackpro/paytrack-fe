@@ -30,19 +30,8 @@
           />
           <tr v-if="!creating">
             <td rowspan="4">
-              <q-btn
-                label="Add Labor"
-                class="q-mr-sm"
-                outline
-                color="secondary"
-                @click="createInvoice('labor')"
-              />
-              <q-btn
-                label="Add Material"
-                outline
-                color="secondary"
-                @click="createInvoice('material')"
-              />
+              <q-btn label="Add Labor" class="q-mr-sm" outline color="secondary" @click="createInvoice('labor')" />
+              <q-btn label="Add Material" outline color="secondary" @click="createInvoice('material')" />
             </td>
           </tr>
         </template>
@@ -52,50 +41,50 @@
 </template>
 
 <script>
-import NewInvoice from "components/payment/newInvoice";
-import Invoice from "components/payment/invoice";
+import NewInvoice from 'components/payment/newInvoice'
+import Invoice from 'components/payment/invoice'
 export default {
-  name: "InvoicesList",
+  name: 'InvoicesList',
   components: { NewInvoice, Invoice },
   props: {
     modelValue: [Array],
     hourlyRate: [Number, String],
     readonly: Boolean,
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   data() {
     return {
       invoices: [],
       creating: false,
-      createType: "labor",
-    };
+      createType: 'labor',
+    }
   },
   methods: {
     newInvoice(newInv) {
-      const invoices = [...this.invoices, newInv];
-      this.$emit("update:modelValue", invoices);
-      this.creating = false;
+      const invoices = [...this.invoices, newInv]
+      this.$emit('update:modelValue', invoices)
+      this.creating = false
     },
     deleteInvoice(key) {
-      const invoices = [...this.invoices];
-      invoices.splice(key, 1);
-      this.$emit("update:modelValue", invoices);
+      const invoices = [...this.invoices]
+      invoices.splice(key, 1)
+      this.$emit('update:modelValue', invoices)
     },
     createInvoice(type) {
-      console.log(type);
-      this.createType = type;
-      this.creating = true;
+      console.log(type)
+      this.createType = type
+      this.creating = true
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.invoices = newVal || [];
+        this.invoices = newVal || []
       },
     },
   },
-};
+}
 </script>
 
 <style></style>

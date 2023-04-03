@@ -11,23 +11,8 @@
         </p>
         <q-input placeholder="Code" dense outlined v-model="code"></q-input>
         <div class="q-mt-md">
-          <q-btn
-            type="submit"
-            :loading="loading"
-            :disable="loading"
-            color="primary"
-            class="q-mr-xs"
-          >
-            Verify
-          </q-btn>
-          <q-btn
-            type="button"
-            :loading="loading"
-            :disable="loading"
-            @click="clearQr"
-          >
-            Cancel
-          </q-btn>
+          <q-btn type="submit" :loading="loading" :disable="loading" color="primary" class="q-mr-xs"> Verify </q-btn>
+          <q-btn type="button" :loading="loading" :disable="loading" @click="clearQr"> Cancel </q-btn>
         </div>
       </div>
     </q-card>
@@ -35,70 +20,70 @@
 </template>
 
 <script>
-import { mapGetters, mapActions, mapMutations } from "vuex";
-import { responseError } from "src/helper/error";
+import { mapGetters, mapActions, mapMutations } from 'vuex'
+import { responseError } from 'src/helper/error'
 
 export default {
-  name: "QRCodeVerify",
+  name: 'QRCodeVerify',
   data() {
     return {
-      code: "",
+      code: '',
       loading: false,
-    };
+    }
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
-      qrImage: "user/getQrImage",
-      tempPassword: "user/getTempPassword",
+      user: 'user/getUser',
+      qrImage: 'user/getQrImage',
+      tempPassword: 'user/getTempPassword',
     }),
     isShowForm() {
-      return this.qrImage && !this.user.otp;
+      return this.qrImage && !this.user.otp
     },
   },
   methods: {
     ...mapActions({
-      verifyOtp: "user/verifyOtp",
+      verifyOtp: 'user/verifyOtp',
     }),
     ...mapMutations({
-      updateUser: "user/setUser",
-      removeQrImage: "user/setQrImage",
-      removeTempPassword: "user/setTempPassword",
+      updateUser: 'user/setUser',
+      removeQrImage: 'user/setQrImage',
+      removeTempPassword: 'user/setTempPassword',
     }),
     async onSubmit() {
-      this.loading = true;
+      this.loading = true
       const err = await this.verifyOtp({
         otp: this.code,
         firstTime: true,
         password: this.tempPassword,
-      });
-      this.loading = false;
+      })
+      this.loading = false
       if (err) {
-        responseError(err);
-        return;
+        responseError(err)
+        return
       }
       this.$q.notify({
-        message: "2FA activated",
-        color: "positive",
-        icon: "check",
-      });
-      this.removeQrImage("");
-      this.removeTempPassword("");
-      this.$emit("verified", true);
+        message: '2FA activated',
+        color: 'positive',
+        icon: 'check',
+      })
+      this.removeQrImage('')
+      this.removeTempPassword('')
+      this.$emit('verified', true)
     },
     clearQr() {
-      this.removeQrImage("");
-      this.removeTempPassword("");
-      this.$emit("verified", false);
+      this.removeQrImage('')
+      this.removeTempPassword('')
+      this.$emit('verified', false)
     },
   },
   watch: {
     qrImage: {
       immediate: true,
       handler() {
-        this.code = "";
+        this.code = ''
       },
     },
   },
-};
+}
 </script>

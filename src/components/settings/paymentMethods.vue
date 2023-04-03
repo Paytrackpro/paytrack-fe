@@ -7,23 +7,17 @@
     </div>
     <q-separator />
     <div class="q-mt-md">
-      <q-btn
-        label="Save"
-        class="q-mr-xs"
-        :disable="loading"
-        type="submit"
-        color="primary"
-      />
+      <q-btn label="Save" class="q-mr-xs" :disable="loading" type="submit" color="primary" />
     </div>
   </q-form>
 </template>
 
 <script>
-import { mapActions } from "vuex";
-import PaymentSetting from "components/payment/paymentSetting";
+import { mapActions } from 'vuex'
+import PaymentSetting from 'components/payment/paymentSetting'
 
 export default {
-  name: "paymentMethods",
+  name: 'paymentMethods',
   components: {
     PaymentSetting,
   },
@@ -34,31 +28,31 @@ export default {
     return {
       user: {},
       loading: false,
-    };
+    }
   },
-  emits: ["update:modelValue"],
+  emits: ['update:modelValue'],
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.user = { ...newVal };
+        this.user = { ...newVal }
       },
     },
   },
   methods: {
     ...mapActions({
-      updateUser: "user/updateUser",
+      updateUser: 'user/updateUser',
     }),
     async submit() {
-      this.loading = true;
-      const newUser = await this.updateUser(this.user);
+      this.loading = true
+      const newUser = await this.updateUser(this.user)
       if (newUser) {
-        this.$emit("update:modelValue", newUser);
+        this.$emit('update:modelValue', newUser)
       }
-      this.loading = false;
+      this.loading = false
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

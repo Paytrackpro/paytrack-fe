@@ -62,7 +62,7 @@
 
 <script>
 export default {
-  name: "newInvoice",
+  name: 'newInvoice',
   props: {
     hourlyRate: Number,
     type: String,
@@ -71,54 +71,54 @@ export default {
     return {
       submitted: false,
       invoice: {
-        quantity: "",
-        price: "",
-        cost: "",
-        description: "",
+        quantity: '',
+        price: '',
+        cost: '',
+        description: '',
       },
-    };
+    }
   },
   methods: {
     save() {
-      this.submitted = true;
+      this.submitted = true
       if (!this.invoice.description || this.invoice.cost <= 0) {
-        return;
+        return
       }
-      this.$emit("save", {
+      this.$emit('save', {
         quantity: Number(this.invoice.quantity),
         price: Number(this.invoice.price),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
-      });
-      this.cancel();
+      })
+      this.cancel()
     },
     cancel() {
-      this.submitted = false;
+      this.submitted = false
       this.invoice = {
-        quantity: "",
-        price: "",
-        cost: "",
-        description: "",
-      };
-      this.$emit("cancel");
+        quantity: '',
+        price: '',
+        cost: '',
+        description: '',
+      }
+      this.$emit('cancel')
     },
     calculateCost() {
-      let price = Number(this.invoice.price);
-      if (this.type === "labor") {
-        price = this.hourlyRate;
+      let price = Number(this.invoice.price)
+      if (this.type === 'labor') {
+        price = this.hourlyRate
       }
-      this.invoice.cost = Number(this.invoice.quantity) * price;
+      this.invoice.cost = Number(this.invoice.quantity) * price
     },
   },
   watch: {
     hourlyRate: {
       immediate: true,
       handler(newHR) {
-        this.calculateCost();
+        this.calculateCost()
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

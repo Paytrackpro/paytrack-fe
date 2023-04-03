@@ -34,14 +34,7 @@
             :loading="loading"
             :disable="loading"
           />
-          <q-btn
-            flat
-            label="Confirm"
-            color="primary"
-            type="submit"
-            :loading="loading"
-            :disable="loading"
-          />
+          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
         </q-card-actions>
       </q-form>
     </q-card>
@@ -49,10 +42,10 @@
 </template>
 
 <script>
-import QInputPw from "components/common/qInputPw";
-import { responseError } from "src/helper/error";
+import QInputPw from 'components/common/qInputPw'
+import { responseError } from 'src/helper/error'
 export default {
-  name: "changePassword",
+  name: 'changePassword',
   components: {
     QInputPw,
   },
@@ -63,42 +56,42 @@ export default {
     return {
       loading: false,
       form: {
-        oldPassword: "",
-        password: "",
-        otp: "",
+        oldPassword: '',
+        password: '',
+        otp: '',
       },
-    };
+    }
   },
   methods: {
     cancel() {
       this.form = {
-        oldPassword: "",
-        password: "",
-        otp: "",
-      };
-      this.$emit("update:modelValue", false);
+        oldPassword: '',
+        password: '',
+        otp: '',
+      }
+      this.$emit('update:modelValue', false)
     },
     onSubmit() {
-      this.loading = true;
+      this.loading = true
       this.$api
-        .put("/user/change-password", this.form)
+        .put('/user/change-password', this.form)
         .then((data) => {
           this.$q.notify({
-            message: "your password is updated",
-            color: "positive",
-            icon: "check",
-          });
-          this.cancel();
+            message: 'your password is updated',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.cancel()
         })
         .catch((err) => {
-          responseError(err);
+          responseError(err)
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
   },
-};
+}
 </script>
 
 <style scoped></style>

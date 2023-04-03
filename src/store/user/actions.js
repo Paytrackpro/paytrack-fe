@@ -1,105 +1,105 @@
-import { api } from "boot/axios";
-import { Notify } from "quasar";
-import { responseError } from "src/helper/error";
+import { api } from 'boot/axios'
+import { Notify } from 'quasar'
+import { responseError } from 'src/helper/error'
 
 export default {
   // list actions for login/register
   async login({ commit }, payload) {
     try {
-      const data = await api.post("/auth/login", payload);
+      const data = await api.post('/auth/login', payload)
       if (!data.otp) {
-        localStorage.setItem("token", data.token);
-        commit("setUser", data.userInfo);
-        commit("setAuthenticated", true);
+        localStorage.setItem('token', data.token)
+        commit('setUser', data.userInfo)
+        commit('setAuthenticated', true)
       }
-      return { data };
+      return { data }
     } catch (error) {
-      return { error };
+      return { error }
     }
   },
 
   async register({ commit }, user) {
-    return api.post("/auth/register", user);
+    return api.post('/auth/register', user)
   },
 
   async logOut({ commit }, user) {
-    commit("setUser", "");
-    commit("setAuthenticated", false);
-    localStorage.clear();
+    commit('setUser', '')
+    commit('setAuthenticated', false)
+    localStorage.clear()
   },
 
   async verifyOtp({ commit }, payload) {
     try {
-      const data = await api.post("/auth/verify-otp", payload);
-      localStorage.setItem("token", data.token);
-      commit("setUser", data.userInfo);
-      commit("setAuthenticated", true);
+      const data = await api.post('/auth/verify-otp', payload)
+      localStorage.setItem('token', data.token)
+      commit('setUser', data.userInfo)
+      commit('setAuthenticated', true)
     } catch (error) {
-      return error;
+      return error
     }
   },
 
   // list actions for using system
   async getUser({ commit }) {
     return api
-      .get("/user/info")
+      .get('/user/info')
       .then((user) => {
-        commit("setUser", user);
-        return user;
+        commit('setUser', user)
+        return user
       })
       .catch((err) => {
-        responseError(err);
-        return false;
-      });
+        responseError(err)
+        return false
+      })
   },
 
   async updateUser({ commit }, userData) {
     return api
-      .put("/user/info", userData)
+      .put('/user/info', userData)
       .then((newUser) => {
         Notify.create({
-          message: "your information is updated",
-          color: "positive",
-          icon: "done",
-        });
-        commit("setUser", newUser);
-        return newUser;
+          message: 'your information is updated',
+          color: 'positive',
+          icon: 'done',
+        })
+        commit('setUser', newUser)
+        return newUser
       })
       .catch((err) => {
-        responseError(err);
-        return false;
-      });
+        responseError(err)
+        return false
+      })
   },
 
   async disableOtp({ commit }, body) {
     try {
-      await api.post("/user/disable-otp", body);
+      await api.post('/user/disable-otp', body)
       Notify.create({
-        message: "2FA disabled",
-        color: "positive",
-        icon: "done",
-      });
-      return true;
+        message: '2FA disabled',
+        color: 'positive',
+        icon: 'done',
+      })
+      return true
     } catch (error) {
-      responseError(error);
+      responseError(error)
     }
-    return false;
+    return false
   },
 
   async enableOtp({ commit }, body) {
     try {
-      const res = await api.post("/user/generate-otp", body);
+      const res = await api.post('/user/generate-otp', body)
       Notify.create({
-        message: "QR code created",
-        color: "positive",
-        icon: "done",
-      });
-      commit("setQrImage", res.mfa_qr_image);
-      commit("setTempPassword", body.password);
-      return true;
+        message: 'QR code created',
+        color: 'positive',
+        icon: 'done',
+      })
+      commit('setQrImage', res.mfa_qr_image)
+      commit('setTempPassword', body.password)
+      return true
     } catch (error) {
-      responseError(error);
+      responseError(error)
     }
-    return false;
+    return false
   },
-};
+}

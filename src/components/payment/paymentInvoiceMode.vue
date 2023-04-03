@@ -21,9 +21,8 @@
           <div class="row q-mb-md q-col-gutter-md">
             <div v-if="!readonly" class="col-12">
               <span class="text-caption text-grey">
-                SIMPLE MODE will only be active when there are no invoices is
-                entered on INVOICE MODE. Please ensure there are no entered
-                invoices if you want to use SIMPLE MODE
+                SIMPLE MODE will only be active when there are no invoices is entered on INVOICE MODE. Please ensure
+                there are no entered invoices if you want to use SIMPLE MODE
               </span>
             </div>
             <div v-if="!readonly" class="col-3">
@@ -41,9 +40,7 @@
               />
             </div>
             <div class="col-12">
-              <p v-if="readonly" class="q-mt-none q-mb-xs text-weight-medium">
-                Description
-              </p>
+              <p v-if="readonly" class="q-mt-none q-mb-xs text-weight-medium">Description</p>
               <q-input
                 v-model="payment.description"
                 @update:modelValue="updateBack('simple')"
@@ -56,12 +53,7 @@
                 lazy-rules
                 stack-label
                 hide-bottom-space
-                :rules="[
-                  (val) =>
-                    !!val ||
-                    payment.details.length ||
-                    'Description is required',
-                ]"
+                :rules="[(val) => !!val || payment.details.length || 'Description is required']"
               />
             </div>
           </div>
@@ -69,9 +61,7 @@
         <q-tab-panel class="q-px-none" name="invoice">
           <div class="row q-mb-md q-col-gutter-md">
             <div class="col-12">
-              <p v-if="readonly" class="q-mt-none q-mb-xs text-weight-medium">
-                Invoices information
-              </p>
+              <p v-if="readonly" class="q-mt-none q-mb-xs text-weight-medium">Invoices information</p>
               <span v-else class="text-caption text-grey">
                 INVOICE MODE will be active if you entered any invoices.
               </span>
@@ -117,9 +107,9 @@
 </template>
 
 <script>
-import Invoices from "components/payment/invoices";
+import Invoices from 'components/payment/invoices'
 export default {
-  name: "PaymentInvoiceMode",
+  name: 'PaymentInvoiceMode',
   components: {
     Invoices,
   },
@@ -129,70 +119,70 @@ export default {
   },
   data() {
     return {
-      tab: "simple",
+      tab: 'simple',
       payment: {
         details: [],
         hourlyRate: 0,
         amount: 0,
-        description: "",
+        description: '',
       },
-    };
+    }
   },
   methods: {
     resetMode() {
-      const { details } = this.modelValue;
-      this.tab = details && details.length > 0 ? "invoice" : "simple";
-      this.tab = details && details.length > 0 ? "invoice" : "simple";
+      const { details } = this.modelValue
+      this.tab = details && details.length > 0 ? 'invoice' : 'simple'
+      this.tab = details && details.length > 0 ? 'invoice' : 'simple'
     },
     updateBack(mode) {
-      let { details, hourlyRate, amount, description } = this.payment;
-      hourlyRate = Number(hourlyRate);
-      amount = Number(amount);
+      let { details, hourlyRate, amount, description } = this.payment
+      hourlyRate = Number(hourlyRate)
+      amount = Number(amount)
       if (details && details.length > 0) {
-        if (mode === "simple") {
-          return;
+        if (mode === 'simple') {
+          return
         }
-        amount = this.invoicesAmount;
-        description = "";
+        amount = this.invoicesAmount
+        description = ''
       }
-      this.$emit("update:modelValue", {
+      this.$emit('update:modelValue', {
         ...this.modelValue,
         details,
         hourlyRate,
         amount,
         description,
-      });
+      })
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
-        this.payment = { ...newVal };
+        this.payment = { ...newVal }
       },
     },
   },
   computed: {
     invoicesAmount: function () {
       if (!this.payment.details) {
-        return 0;
+        return 0
       }
-      let amount = 0;
+      let amount = 0
       for (let invoice of this.payment.details) {
-        amount += Number(invoice.cost);
+        amount += Number(invoice.cost)
       }
-      return amount;
+      return amount
     },
   },
   mounted() {
-    this.resetMode();
+    this.resetMode()
   },
   updated() {
     if (this.readonly) {
-      this.resetMode();
+      this.resetMode()
     }
   },
-};
+}
 </script>
 
 <style scoped></style>

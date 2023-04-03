@@ -12,19 +12,11 @@
             lazy-rules
             stack-label
             hide-bottom-space
-            :rules="[
-              (val) => (val && val.length > 0) || 'Please enter your otp',
-            ]"
+            :rules="[(val) => (val && val.length > 0) || 'Please enter your otp']"
           />
         </div>
         <p class="q-mb-none text-red">{{ error }}</p>
-        <q-btn
-          label="Confirm"
-          type="button"
-          color="primary"
-          class="full-width"
-          @click="loginOtp"
-        />
+        <q-btn label="Confirm" type="button" color="primary" class="full-width" @click="loginOtp" />
       </q-form>
     </q-card-section>
   </q-card>
@@ -32,22 +24,22 @@
 
 <script>
 export default {
-  name: "OptLogin",
+  name: 'OptLogin',
   props: {
     login: Function,
     error: String,
   },
   data() {
     return {
-      otp: "",
-    };
+      otp: '',
+    }
   },
   methods: {
     loginOtp() {
-      this.$emit("login", this.otp);
+      this.$emit('login', this.otp)
     },
   },
-};
+}
 </script>
 
 <style lang="scss">

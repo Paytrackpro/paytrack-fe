@@ -2,7 +2,7 @@
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
-        <q-toolbar-title> {{ $route.meta.title || "MGMT" }} </q-toolbar-title>
+        <q-toolbar-title> {{ $route.meta.title || 'MGMT' }} </q-toolbar-title>
         <q-btn flat>
           {{ user.userName }}
           <q-menu transition-show="jump-down" transition-hide="jump-up">
@@ -50,71 +50,71 @@
 </template>
 
 <script>
-import role from "src/consts/role";
-import { mapGetters } from "vuex";
+import role from 'src/consts/role'
+import { mapGetters } from 'vuex'
 export default {
   data() {
     return {
       drawer: false,
       menuList: [
         {
-          icon: "home",
-          label: "Dashboard",
-          to: "/dashboard",
+          icon: 'home',
+          label: 'Dashboard',
+          to: '/dashboard',
         },
         {
-          icon: "people",
-          label: "User Management",
-          to: "/users",
+          icon: 'people',
+          label: 'User Management',
+          to: '/users',
           role: role.ADMIN,
         },
         {
-          icon: "call_received",
-          label: "Get Paid",
+          icon: 'call_received',
+          label: 'Get Paid',
           separator: false,
-          to: "/get-paid",
+          to: '/get-paid',
         },
         {
-          icon: "arrow_outward",
-          label: "Pay",
+          icon: 'arrow_outward',
+          label: 'Pay',
           separator: false,
-          to: "/pay",
+          to: '/pay',
         },
         {
-          icon: "settings",
-          label: "Settings",
+          icon: 'settings',
+          label: 'Settings',
           separator: false,
-          to: "/settings",
+          to: '/settings',
         },
       ],
-    };
+    }
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
+      user: 'user/getUser',
     }),
     isAdmin() {
-      return this.user && this.user.role === role.ADMIN;
+      return this.user && this.user.role === role.ADMIN
     },
   },
   methods: {
     shouldDisplayRoute(menuItem) {
-      return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin);
+      return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
     logOut() {
-      this.$store.dispatch("user/logOut");
-      this.$router.push({ path: "/login" });
+      this.$store.dispatch('user/logOut')
+      this.$router.push({ path: '/login' })
     },
     empty(str) {
       return (
-        typeof str == "undefined" ||
+        typeof str == 'undefined' ||
         !str ||
         str.length === 0 ||
-        str === "" ||
+        str === '' ||
         !/[^\s]/.test(str) ||
         /^\s*$/.test(str) ||
-        str.replace(/\s/g, "") === ""
-      );
+        str.replace(/\s/g, '') === ''
+      )
     },
   },
   watch: {
@@ -123,11 +123,11 @@ export default {
       handler(to) {
         if (to.meta.requiresAuth && this.user.id === 0) {
           this.$router.push({
-            path: "/login",
-          });
+            path: '/login',
+          })
         }
       },
     },
   },
-};
+}
 </script>

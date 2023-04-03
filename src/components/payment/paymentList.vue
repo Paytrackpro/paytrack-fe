@@ -4,82 +4,123 @@
     :loading="loading"
     :rows="rows"
     :columns="columns"
-    row-key="name"
+    row-key="id"
     v-model:pagination="pagination"
+    :selection="isBulkPay ? 'multiple' : 'none'"
+    v-model:selected="selected"
     flat
     bordered
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
+    <template v-if="type === 'reminder'" v-slot:top>
+      <div class="q-table__title">{{ label || 'Payments' }}</div>
+      <q-space />
+      <template v-if="showBulkPay">
+        <q-checkbox label="Can pay BTC" v-model="isBulkPay" />
+        <q-btn @click="detailBulk = true" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
+          >Bulk Pay BTC</q-btn
+        >
+      </template>
+    </template>
     <template v-if="type === 'request'" v-slot:top-right>
-      <q-btn
-        color="white"
-        text-color="black"
-        label="Create"
-        to="/get-paid/create"
-      />
+      <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
     </template>
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
+        <payment-status :status="props.row.status" :receiver-id="props.row.receiverId" />
+      </q-td>
+    </template>
+    <template v-slot:body-cell-approvers="props">
+      <q-td :props="props">
         <payment-status
-          :status="props.row.status"
-          :receiver-id="props.row.receiverId"
+          v-for="approver in props.row.approvers"
+          :key="approver.approverId"
+          :status="approver.status"
+          :receiver-id="props.receiverId"
+          :text="approver.approverName"
         />
       </q-td>
     </template>
   </q-table>
+  <q-dialog v-model="detailBulk">
+    <q-card style="width: 700px; max-width: 80vw">
+      <q-card-section>
+        <div class="text-h6">Bulk Pay BTC</div>
+      </q-card-section>
+
+      <q-card-section class="q-pt-none">
+        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="TXID" />
+        <q-list bordered separator>
+          <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
+            <q-item-section>
+              <q-item-label>Address:{{ item.paymentSettings[0].address }}</q-item-label>
+              <q-item-label caption>Amount: {{ item.amount }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+
+      <q-card-actions align="right" class="bg-white text-teal">
+        <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
-import {
-  pathParamsToPaging,
-  pagingToPathParams,
-  defaultPaging,
-} from "src/helper/paging";
-import PaymentStatus from "components/payment/paymentStatus";
-import { date } from "quasar";
-import { MDateFormat } from "src/consts/common";
-import { mapGetters } from "vuex";
-import role from "src/consts/role";
-import { PAYMENT_OBJECT_REQUEST } from "src/consts/paymentType";
-import { responseError } from "src/helper/error";
+import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import PaymentStatus from 'components/payment/paymentStatus'
+import { date } from 'quasar'
+import { MDateFormat } from 'src/consts/common'
+import { mapGetters } from 'vuex'
+import role from 'src/consts/role'
+import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import { responseError } from 'src/helper/error'
 
 export default {
-  name: "paymentList",
+  name: 'paymentList',
   data() {
+    console.log('--------->', this.type)
     return {
       loading: false,
       pagination: {
         ...defaultPaging,
       },
+      txId: '',
+      paying: false,
+      selected: [],
+      isBulkPay: false,
+      detailBulk: false,
       rows: [],
       fixedColumns: [
         {
-          name: "status",
-          align: "center",
-          label: "Status",
-          field: "status",
+          name: 'status',
+          align: 'center',
+          label: 'Status',
+          field: 'status',
           sortable: true,
         },
         {
-          name: "amount",
-          align: "center",
-          label: "Amount(USD)",
-          field: "amount",
+          name: 'amount',
+          align: 'center',
+          label: 'Amount(USD)',
+          field: 'amount',
           format: (val) => {
-            return val;
+            return val
           },
         },
+
         {
-          name: "createdAt",
-          align: "center",
-          label: "Created At",
-          field: "createdAt",
+          name: 'createdAt',
+          align: 'center',
+          label: 'Created At',
+          field: 'createdAt',
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
-    };
+    }
   },
   components: {
     PaymentStatus,
@@ -90,85 +131,142 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: "user/getUser",
+      user: 'user/getUser',
     }),
     isUser() {
-      return this.user.role === role.USER;
+      return this.user.role === role.USER
+    },
+    showBulkPay() {
+      return this.type === PAYMENT_OBJECT_REMINDER
     },
     columns() {
-      let flexibleCol =
+      let flexibleCol = [
         this.type === PAYMENT_OBJECT_REQUEST
           ? {
-            name: "receiverName",
-            align: "center",
-            label: "Recipient",
-            field: (row) => {
-              return row.receiverName || row.externalEmail;
-              if (
-                row.creatorId === row.senderId ||
-                  row.contactMethod === "internal"
-              ) {
-                return;
-              }
-              return row.externalEmail;
-            },
-          }
+              name: 'receiverName',
+              align: 'center',
+              label: 'Recipient',
+              field: (row) => {
+                return row.receiverName || row.externalEmail
+                if (row.creatorId === row.senderId || row.contactMethod === 'internal') {
+                  return
+                }
+                return row.externalEmail
+              },
+            }
           : {
-            name: "senderName",
-            required: true,
-            label: "Sender",
-            align: "center",
-            field: (row) => {
-              return row.senderName;
+              name: 'senderName',
+              required: true,
+              label: 'Sender',
+              align: 'center',
+              field: (row) => {
+                return row.senderName
+              },
+              format: (val) => `${val}`,
             },
-            format: (val) => `${val}`,
-          };
+      ]
 
-      return [flexibleCol, ...this.fixedColumns];
+      if (this.type === PAYMENT_OBJECT_REMINDER) {
+        flexibleCol.push({
+          name: 'receiverName',
+          align: 'center',
+          label: 'Recipient',
+          field: 'receiverName',
+        })
+      }
+      return [...flexibleCol, ...this.fixedColumns]
     },
   },
   methods: {
     async getPayments(f) {
-      this.loading = true;
+      this.loading = true
       this.$api
-        .get("/payment/list", {
+        .get('/payment/list', {
           params: f,
         })
         .then(({ payments, count }) => {
-          this.loading = false;
-          this.rows = payments || [];
-          this.pagination.rowsNumber = count;
+          this.loading = false
+          this.rows = payments || []
+          this.pagination.rowsNumber = count
         })
         .catch((err) => {
-          responseError(err);
-          this.loading = false;
-        });
+          responseError(err)
+          this.loading = false
+        })
+    },
+    handlePaid() {
+      const txId = this.txId.trim()
+      if (
+        txId.length === 0 &&
+        !confirm(
+          'Are you sure you want to mark the payment as paid? providing the txId will make the requester confirm your payment faster'
+        )
+      ) {
+        this.$refs.txId.$el.focus()
+        return
+      }
+      const reqData = {
+        paymentIds: this.selected.map((item) => item.id),
+        txid: txId,
+      }
+
+      this.paying = true
+      this.$api
+        .post('/payment/bulk-paid-btc', reqData)
+        .then((data) => {
+          this.isBulkPay = false
+          this.$q.notify({
+            message: 'payments made successfully',
+            color: 'positive',
+            icon: 'check',
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+        .finally(() => {
+          this.paying = false
+        })
     },
     goToDetail(id) {
-      const path = this.type === PAYMENT_OBJECT_REQUEST ? "get-paid" : "pay";
-      this.$router.push({ path: `/${path}/${id}` });
+      const path = this.type === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}/${id}` })
     },
     onRequest(props) {
-      const query = pagingToPathParams(props);
+      const query = pagingToPathParams(props)
       this.$router.push({
         path: this.$route.fullPath,
         query,
-      });
+      })
     },
   },
   watch: {
-    $route: {
-      immediate: true,
-      handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination);
+    isBulkPay(newVal) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      if (newVal) {
+        this.getPayments({
+          ...filter,
+          requestType: 'bulk_btc',
+        })
+      } else {
         this.getPayments({
           ...filter,
           requestType: this.type,
-        });
+        })
+      }
+    },
+    $route: {
+      immediate: true,
+      handler(to) {
+        const filter = pathParamsToPaging(to, this.pagination)
+        this.getPayments({
+          ...filter,
+          requestType: this.type,
+        })
       },
     },
   },
-};
+}
 </script>
 
 <style scoped></style>
