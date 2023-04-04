@@ -150,21 +150,7 @@
         </q-field>
       </div>
       <div class="col-12">
-        <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
-          <div class="row">
-            <div class="col-3">
-              <q-input
-                style=""
-                label="Hourly rate(USD)"
-                readonly
-                type="number"
-                v-model="payment.hourlyRate"
-                hint="Used to calculate cost from hours on invoices"
-              />
-            </div>
-          </div>
-          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
-        </q-expansion-item>
+        <PaymentInvoiceMode ref="invoiceMode" v-model="payment" readonly />
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -240,14 +226,15 @@ import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
+import PaymentInvoiceMode from 'components/payment/paymentInvoiceMode'
 export default {
   name: 'paymentDetail',
   components: {
     MDate,
-    Invoices,
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
+    PaymentInvoiceMode,
     PaymentRejectDialog,
   },
   data() {

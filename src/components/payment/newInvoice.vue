@@ -1,24 +1,38 @@
 <template>
   <tr>
     <td class="text-right">
-      <q-input
-        style="max-width: 200px"
-        label="Hours"
-        v-model="invoice.hours"
-        dense
-        stack-label
-        hide-bottom-space
-        type="number"
-        :error="submitted && invoice.hours < 0"
-        @update:modelValue="calculateCost"
-      />
+      <div class="row items-start">
+        <q-input
+          class="col"
+          :label="type === 'labor' ? 'Hours' : 'Quantity'"
+          v-model="invoice.quantity"
+          dense
+          stack-label
+          hide-bottom-space
+          type="number"
+          :error="submitted && invoice.hours < 0"
+          @update:modelValue="calculateCost"
+        />
+        <q-input
+          v-if="type === 'material'"
+          class="col"
+          label="Price"
+          v-model="invoice.price"
+          dense
+          stack-label
+          hide-bottom-space
+          type="number"
+          :error="submitted && invoice.hours < 0"
+          @update:modelValue="calculateCost"
+        />
+      </div>
     </td>
     <td class="text-right">
       <q-input
         style="max-width: 200px"
         label="Cost"
         v-model="invoice.cost"
-        :readonly="invoice.hours > 0"
+        :readonly="type === 'material' || invoice.quantity !== ''"
         dense
         stack-label
         hide-bottom-space
@@ -35,12 +49,13 @@
         hide-bottom-space
         rows="1"
         type="textarea"
+        autogrow
         :error="submitted && !invoice.description"
       />
     </td>
     <td class="text-center">
       <span class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
-      <span v-if="showCancel" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
+      <span class="event-txt q-ma-xs" @click="cancel">Cancel</span>
     </td>
   </tr>
 </template>
@@ -50,12 +65,14 @@ export default {
   name: 'newInvoice',
   props: {
     hourlyRate: Number,
+    type: String,
   },
   data() {
     return {
       submitted: false,
       invoice: {
-        hours: '',
+        quantity: '',
+        price: '',
         cost: '',
         description: '',
       },
@@ -64,11 +81,12 @@ export default {
   methods: {
     save() {
       this.submitted = true
-      if (!this.invoice.description || this.invoice.cost <= 0 || this.invoice.hours < 0) {
+      if (!this.invoice.description || this.invoice.cost <= 0) {
         return
       }
       this.$emit('save', {
-        hours: Number(this.invoice.hours),
+        quantity: Number(this.invoice.quantity),
+        price: Number(this.invoice.price),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
       })
@@ -77,29 +95,27 @@ export default {
     cancel() {
       this.submitted = false
       this.invoice = {
-        hours: '',
+        quantity: '',
+        price: '',
         cost: '',
         description: '',
       }
+      this.$emit('cancel')
     },
     calculateCost() {
-      this.invoice.cost = Number(this.invoice.hours) * this.hourlyRate
+      let price = Number(this.invoice.price)
+      if (this.type === 'labor') {
+        price = this.hourlyRate
+      }
+      this.invoice.cost = Number(this.invoice.quantity) * price
     },
   },
   watch: {
     hourlyRate: {
       immediate: true,
       handler(newHR) {
-        if (this.invoice.hours > 0) {
-          this.invoice.cost = Number(this.invoice.hours) * newHR
-        }
+        this.calculateCost()
       },
-    },
-  },
-  computed: {
-    showCancel() {
-      const { hours, cost, description } = this.invoice
-      return hours || cost || description
     },
   },
 }
