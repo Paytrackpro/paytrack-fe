@@ -98,29 +98,6 @@
       </div>
       <div class="col-12">
         <payment-invoice-mode v-model="inPayment" ref="paymentMode" />
-        <!-- <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
-          <div class="row">
-            <div class="col-3">
-              <q-input
-                style=""
-                label="Hourly rate(USD)"
-                dense
-                lazy-rules
-                stack-label
-                outlined
-                hide-bottom-space
-                type="number"
-                v-model="inPayment.hourlyRate"
-                hint="Used to calculate cost from hours on invoices"
-              />
-            </div>
-          </div>
-          <invoices
-            v-model="inPayment.details"
-            :hourlyRate="Number(inPayment.hourlyRate)"
-            :readonly="!canEditInvoice"
-          ></invoices>
-        </q-expansion-item> -->
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
