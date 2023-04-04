@@ -81,7 +81,6 @@ import { responseError } from 'src/helper/error'
 export default {
   name: 'paymentList',
   data() {
-    console.log('--------->', this.type)
     return {
       loading: false,
       pagination: {
