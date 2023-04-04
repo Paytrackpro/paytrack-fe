@@ -268,11 +268,7 @@ export default {
       if (!this.inPayment.details) {
         return 0
       }
-      let amount = 0
-      for (let invoice of this.inPayment.details) {
-        amount += Number(invoice.cost)
-      }
-      return amount
+      return this.inPayment.amount
     },
     canEditInvoice: function () {
       return this.user.id === this.inPayment.creatorId
