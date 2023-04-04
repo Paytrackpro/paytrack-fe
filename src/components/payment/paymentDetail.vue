@@ -151,21 +151,6 @@
       </div>
       <div class="col-12">
         <PaymentInvoiceMode ref="invoiceMode" v-model="payment" readonly />
-        <!-- <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
-          <div class="row">
-            <div class="col-3">
-              <q-input
-                style=""
-                label="Hourly rate(USD)"
-                readonly
-                type="number"
-                v-model="payment.hourlyRate"
-                hint="Used to calculate cost from hours on invoices"
-              />
-            </div>
-          </div>
-          <invoices v-model="payment.details" :hourlyRate="Number(payment.hourlyRate)" readonly></invoices>
-        </q-expansion-item> -->
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -463,9 +448,6 @@ export default {
     },
     editable() {
       return (
-        //   ["draft", "sent", "confirmed"].indexOf(this.payment.status) !== -1 &&
-        //   this.payment.senderId === this.user.id
-        // );
         ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1 &&
         (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
       )

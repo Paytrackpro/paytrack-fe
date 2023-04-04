@@ -269,7 +269,7 @@ export default {
   },
   computed: {
     amount: function () {
-      if (!this.inPayment.details) {
+      if (!this.inPayment.details && !this.inPayment.description) {
         return 0
       }
       return this.inPayment.amount
