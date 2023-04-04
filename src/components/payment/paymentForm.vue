@@ -97,29 +97,7 @@
         <payment-setting v-model="inPayment.paymentSettings" label="Payment setting" />
       </div>
       <div class="col-12">
-        <q-expansion-item v-model="expanded" label="Payment invoices" caption="Click to expand">
-          <div class="row">
-            <div class="col-3">
-              <q-input
-                style=""
-                label="Hourly rate(USD)"
-                dense
-                lazy-rules
-                stack-label
-                outlined
-                hide-bottom-space
-                type="number"
-                v-model="inPayment.hourlyRate"
-                hint="Used to calculate cost from hours on invoices"
-              />
-            </div>
-          </div>
-          <invoices
-            v-model="inPayment.details"
-            :hourlyRate="Number(inPayment.hourlyRate)"
-            :readonly="!canEditInvoice"
-          ></invoices>
-        </q-expansion-item>
+        <payment-invoice-mode v-model="inPayment" ref="paymentMode" />
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
@@ -150,17 +128,18 @@
 
 <script>
 import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
-import Invoices from 'components/payment/invoices'
+import PaymentInvoiceMode from 'components/payment/paymentInvoiceMode'
 import QInputSystemUser from 'components/common/qInputSystemUser'
 import PaymentSetting from 'components/payment/paymentSetting'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'paymentForm',
-  components: { Invoices, PaymentSetting, QInputSystemUser },
+  components: { PaymentSetting, QInputSystemUser, PaymentInvoiceMode },
   data() {
     return {
       expanded: false,
+      tab: 'simple',
       setting: {
         type: '',
         address: '',
@@ -227,14 +206,16 @@ export default {
       if (this.submitting || !this.partner.contactMethod) {
         return
       }
+      await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
       if (!valid) {
         return
       }
-      if (this.amount === 0) {
+      if (!this.inPayment.amount > 0) {
         this.$q.notify({
           type: 'negative',
-          message: 'Amount must greater than 0. Please fill up the invoices and hourly rate',
+          message:
+            'Amount must greater than 0. Please fill up the invoices and hourly rate or type amount in simple mode',
         })
         return
       }
@@ -287,11 +268,7 @@ export default {
       if (!this.inPayment.details) {
         return 0
       }
-      let amount = 0
-      for (let invoice of this.inPayment.details) {
-        amount += Number(invoice.cost)
-      }
-      return amount
+      return this.inPayment.amount
     },
     canEditInvoice: function () {
       return this.user.id === this.inPayment.creatorId

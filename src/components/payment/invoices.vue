@@ -1,10 +1,9 @@
-<!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-markup-table flat bordered separator="cell">
     <table class="q-table">
       <thead>
         <tr>
-          <th class="text-right" style="width: 100px">Hours</th>
+          <th class="text-right" style="width: 150px">Detail</th>
           <th class="text-right" style="width: 120px">Costs(USD)</th>
           <th class="text-right">Description</th>
           <th style="width: 100px" v-if="!readonly">#</th>
@@ -12,15 +11,30 @@
       </thead>
       <tbody>
         <invoice
-          v-for="(invoice, i) of modelValue"
-          v-model="modelValue[i]"
+          v-for="(_, i) of invoices"
+          v-model="invoices[i]"
+          @update:modelValue="$emit('update:modelValue', invoices)"
           :key="i"
           :i="i"
           :hourly-rate="hourlyRate"
           @delete="deleteInvoice"
           :readonly="readonly"
         />
-        <new-invoice v-if="!readonly" @save="newInvoice" :hourly-rate="hourlyRate" />
+        <template v-if="!readonly">
+          <new-invoice
+            v-if="creating"
+            @save="newInvoice"
+            :hourly-rate="hourlyRate"
+            :type="createType"
+            @cancel="creating = false"
+          />
+          <tr v-if="!creating">
+            <td rowspan="4">
+              <q-btn label="Add Labor" class="q-mr-sm" outline color="secondary" @click="createInvoice('labor')" />
+              <q-btn label="Add Material" outline color="secondary" @click="createInvoice('material')" />
+            </td>
+          </tr>
+        </template>
       </tbody>
     </table>
   </q-markup-table>
@@ -37,22 +51,40 @@ export default {
     hourlyRate: [Number, String],
     readonly: Boolean,
   },
-  emits: ['update:modelValue', 'update:hourlyRate'],
+  emits: ['update:modelValue'],
   data() {
-    return {}
+    return {
+      invoices: [],
+      creating: false,
+      createType: 'labor',
+    }
   },
   methods: {
     newInvoice(newInv) {
-      const invoices = [...this.modelValue, newInv]
+      const invoices = [...this.invoices, newInv]
       this.$emit('update:modelValue', invoices)
+      this.creating = false
     },
     deleteInvoice(key) {
-      const invoices = [...this.modelValue]
+      const invoices = [...this.invoices]
       invoices.splice(key, 1)
       this.$emit('update:modelValue', invoices)
+    },
+    createInvoice(type) {
+      console.log(type)
+      this.createType = type
+      this.creating = true
+    },
+  },
+  watch: {
+    modelValue: {
+      immediate: true,
+      handler(newVal) {
+        this.invoices = newVal || []
+      },
     },
   },
 }
 </script>
 
-<style scoped></style>
+<style></style>

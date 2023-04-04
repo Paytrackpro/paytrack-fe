@@ -13,7 +13,7 @@
     @row-click="(_, row) => goToDetail(row.id)"
     @request="onRequest"
   >
-    <template v-slot:top>
+    <template v-if="type === 'reminder'" v-slot:top>
       <div class="q-table__title">{{ label || 'Payments' }}</div>
       <q-space />
       <template v-if="showBulkPay">
