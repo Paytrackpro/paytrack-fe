@@ -447,10 +447,10 @@ export default {
       return status
     },
     editable() {
-      return (
-        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
-      )
+      let isAllowStatus =
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1
+      let isSender = this.payment.senderId === this.user.id
+      return isAllowStatus && isSender
     },
     processable() {
       return (
