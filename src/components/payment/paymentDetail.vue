@@ -3,7 +3,7 @@
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
       <div class="col-12">
-        <q-field label="Approvers" stack-label>
+        <q-field label="Approved by" stack-label>
           {{ approverText }}
         </q-field>
       </div>
@@ -197,7 +197,7 @@
         class="q-mr-sm"
       />
       <q-btn
-        label="Approval"
+        label="Approve"
         type="button"
         color="teal"
         text-color="white"
