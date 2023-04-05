@@ -17,7 +17,7 @@
       <div class="q-table__title">{{ label || 'Payments' }}</div>
       <q-space />
       <template v-if="showBulkPay">
-        <q-checkbox label="Can pay BTC" v-model="isBulkPay" />
+        <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" />
         <q-btn @click="detailBulk = true" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
           >Bulk Pay BTC</q-btn
         >

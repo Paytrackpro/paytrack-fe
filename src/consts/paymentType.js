@@ -31,7 +31,7 @@ export const PAYMENT_STATUS_APPROVED_TEXT = 'approved'
 export const getStatusText = (status) => {
   ;``
   if (PAYMENT_STATUS_AWAITING_APPROVAL_TEXT == status) {
-    return 'Wait Approval'
+    return 'Waiting for Approval'
   } else if (PAYMENT_STATUS_APPROVED_TEXT == status) {
     return 'Approved'
   }

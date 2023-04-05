@@ -94,7 +94,7 @@
         />
       </div>
       <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting v-model="inPayment.paymentSettings" label="Payment setting" />
+        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment setting" />
       </div>
       <div class="col-12">
         <payment-invoice-mode v-model="inPayment" ref="paymentMode" />
@@ -208,7 +208,11 @@ export default {
       }
       await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
-      if (!valid) {
+      const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
+      if (!valid || !settingValid) {
+        return
+      }
+      if (this.inPayment.paymentSettings.length == 0) {
         return
       }
       if (!this.inPayment.amount > 0) {
@@ -265,7 +269,7 @@ export default {
   },
   computed: {
     amount: function () {
-      if (!this.inPayment.details) {
+      if (!this.inPayment.details && !this.inPayment.description) {
         return 0
       }
       return this.inPayment.amount
