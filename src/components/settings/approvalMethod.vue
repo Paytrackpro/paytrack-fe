@@ -2,7 +2,7 @@
   <q-form @submit="submit">
     <div class="row q-mb-md q-col-gutter-md profile-padding">
       <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Sender User</p>
+        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Sender</p>
         <q-input
           outlined
           dense
@@ -14,7 +14,7 @@
           :error-message="sender.error"
           hide-bottom-space
           v-model="sender.value"
-          placeholder="Sender User"
+          placeholder="Sender"
         />
       </div>
       <div class="col-6">
@@ -101,7 +101,7 @@ export default {
         {
           name: 'sendUserName',
           required: true,
-          label: 'Sender User',
+          label: 'Sender',
           align: 'center',
           field: (row) => {
             return row.sendUserName

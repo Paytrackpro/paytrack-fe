@@ -3,7 +3,7 @@
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
       <div class="col-12">
-        <q-field label="Approvers" stack-label>
+        <q-field label="Approved by" stack-label>
           {{ approverText }}
         </q-field>
       </div>
@@ -197,7 +197,7 @@
         class="q-mr-sm"
       />
       <q-btn
-        label="Approval"
+        label="Approve"
         type="button"
         color="teal"
         text-color="white"
@@ -447,10 +447,10 @@ export default {
       return status
     },
     editable() {
-      return (
-        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1 &&
-        (this.payment.senderId === this.user.id || this.payment.receiverId === this.user.id || this.token)
-      )
+      let isAllowStatus =
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1
+      let isSender = this.payment.senderId === this.user.id
+      return isAllowStatus && isSender
     },
     processable() {
       return (

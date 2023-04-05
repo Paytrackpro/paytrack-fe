@@ -6,13 +6,16 @@
     <div v-if="!readonly" class="col-3">
       <q-select
         filled
+        ref="selectedCoins"
         v-model="selectedCoins"
         multiple
         :options="coins"
         use-chips
         stack-label
+        lazy-rules
         label="Coins you accept"
         @update:model-value="changeCoins"
+        :rules="[(val) => (val !== null && val.length !== 0) || 'Please selected coins to pay']"
       />
     </div>
     <div class="col">
