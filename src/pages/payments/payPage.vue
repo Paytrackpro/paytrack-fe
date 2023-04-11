@@ -1,5 +1,5 @@
 <template>
-  <payment-list type="reminder" label="Make payment" />
+  <payment-list ref="paymentList" type="reminder" label="Make payment" />
 </template>
 
 <script>
@@ -8,6 +8,10 @@ export default {
   name: 'payPage',
   components: {
     PaymentList,
+  },
+  beforeRouteLeave: function (to, from, next) {
+    this.$refs.paymentList.prepareToExit()
+    next()
   },
 }
 </script>

@@ -91,6 +91,7 @@ export default {
       selected: [],
       isBulkPay: false,
       detailBulk: false,
+      isExist: false,
       rows: [],
       fixedColumns: [
         {
@@ -147,10 +148,6 @@ export default {
               label: 'Recipient',
               field: (row) => {
                 return row.receiverName || row.externalEmail
-                if (row.creatorId === row.senderId || row.contactMethod === 'internal') {
-                  return
-                }
-                return row.externalEmail
               },
             }
           : {
@@ -238,6 +235,9 @@ export default {
         query,
       })
     },
+    prepareToExit: function () {
+      this.isExist = true
+    },
   },
   watch: {
     isBulkPay(newVal) {
@@ -257,6 +257,9 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
+        if (this.isExist) {
+          return
+        }
         const filter = pathParamsToPaging(to, this.pagination)
         this.getPayments({
           ...filter,
