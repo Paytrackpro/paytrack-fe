@@ -22,23 +22,14 @@
       <q-markup-table v-if="settings && settings.length">
         <thead v-if="!readonly">
           <tr>
-            <td style="width: 80px">Default</td>
+            <td style="width: 80px">Coin type</td>
             <td>Address</td>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(setting, i) of settings" :key="i">
             <td>
-              <span v-if="readonly">{{ setting.type }}</span>
-              <q-radio
-                v-else
-                v-model="isDefault"
-                checked-icon="task_alt"
-                unchecked-icon="panorama_fish_eye"
-                :val="setting.type"
-                :label="setting.type"
-                @update:model-value="changeDefault"
-              />
+              {{ setting.type }}
             </td>
             <td>
               <q-input
@@ -73,7 +64,6 @@ export default {
     return {
       coins: ['btc', 'ltc', 'dcr'],
       selectedCoins: [],
-      isDefault: '',
       settings: [],
     }
   },
@@ -92,7 +82,6 @@ export default {
             newSettings.push({
               type: setting.type,
               address: setting.address,
-              isDefault: setting.isDefault,
             })
           }
         }
@@ -100,17 +89,10 @@ export default {
           newSettings.push({
             type: coin,
             address: '',
-            isDefault: false,
           })
         }
       }
       this.$emit('update:modelValue', newSettings)
-    },
-    changeDefault(coin) {
-      for (let setting of this.settings) {
-        setting.isDefault = setting.type === coin
-      }
-      this.emit()
     },
   },
   watch: {
@@ -121,9 +103,6 @@ export default {
         const selectedCoins = []
         for (let setting of this.settings) {
           selectedCoins.push(setting.type)
-          if (setting.isDefault) {
-            this.isDefault = setting.type
-          }
         }
         this.selectedCoins = selectedCoins
       },
