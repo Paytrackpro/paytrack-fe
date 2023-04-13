@@ -11,7 +11,7 @@
 <script>
 import { PaymentForm } from 'components/payment'
 import { mapGetters } from 'vuex'
-import { PAYMENT_OBJECT_REQUEST, PAYMENT_OBJECT_REMINDER } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REMINDER } from 'src/consts/paymentType'
 
 export default {
   name: 'createPayment',

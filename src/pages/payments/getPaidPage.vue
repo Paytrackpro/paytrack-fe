@@ -1,5 +1,5 @@
 <template>
-  <payment-list type="request" label="Get paid" />
+  <payment-list ref="paymentList" type="request" label="Get paid" />
 </template>
 
 <script>
@@ -8,6 +8,10 @@ export default {
   name: 'getPaidPage',
   components: {
     PaymentList,
+  },
+  beforeRouteLeave: function (to, from, next) {
+    this.$refs.paymentList.prepareToExit()
+    next()
   },
 }
 </script>
