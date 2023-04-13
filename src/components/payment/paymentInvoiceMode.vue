@@ -107,7 +107,7 @@
 </template>
 
 <script>
-import Invoices from 'components/payment/invoices'
+import Invoices from 'components/payment/invoicesMode'
 export default {
   name: 'PaymentInvoiceMode',
   components: {
@@ -171,7 +171,7 @@ export default {
       for (let invoice of this.payment.details) {
         amount += Number(invoice.cost)
       }
-      return amount
+      return amount.toFixed(2)
     },
   },
   mounted() {

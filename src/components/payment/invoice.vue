@@ -48,7 +48,7 @@
       />
       <span v-else>{{ modelValue.cost }}</span>
     </td>
-    <td class="text-right">
+    <td class="text-left">
       <q-input
         v-if="editing"
         label="Description"
@@ -89,7 +89,7 @@ export default {
       invoice: {
         quantity: '',
         price: '',
-        cost: '',
+        cost: 0,
         description: '',
       },
       type: 'labor',
@@ -122,6 +122,16 @@ export default {
         price = this.hourlyRate
       }
       this.invoice.cost = Number(this.invoice.quantity) * price
+    },
+  },
+  computed: {
+    cost: {
+      get() {
+        return this.invoice.cost.toFixed(2)
+      },
+      set(value) {
+        this.invoice.cost = parseFloat(value)
+      },
     },
   },
   watch: {
