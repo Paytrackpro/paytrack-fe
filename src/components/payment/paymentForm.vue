@@ -36,6 +36,7 @@
           :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
           outlined
           dense
+          ref="inputReceiver"
           lazy-rules
           stack-label
           hide-bottom-space
@@ -206,6 +207,7 @@ export default {
       if (this.submitting || !this.partner.contactMethod) {
         return
       }
+      const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
       await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
       const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
@@ -225,18 +227,18 @@ export default {
       }
       const payment = { ...this.inPayment }
       payment.hourlyRate = Number(payment.hourlyRate)
-      payment.contactMethod = this.partner.contactMethod
+      payment.contactMethod = inPutObject.contactMethod
       if (isDraft !== true) {
         payment.status = 'sent'
       }
       if (payment.contactMethod === 'email') {
         if (!payment.id || this.user.id === payment.creatorId) {
-          payment.externalEmail = this.partner.value
+          payment.externalEmail = inPutObject.value
         }
       }
       payment.paymentMethod = this.setting.type
       payment.paymentAddress = this.setting.address
-      payment.receiverId = this.partner.id
+      payment.receiverId = inPutObject.id
       payment.token = this.token
       this.submitting = true
       let successNotify = 'Payment request created'

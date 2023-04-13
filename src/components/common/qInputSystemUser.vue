@@ -38,6 +38,36 @@ export default {
     modelValue: Object,
   },
   methods: {
+    async validateAndGetValue() {
+      if (!this.partner.value) {
+        this.emit()
+        return
+      }
+      if (emailPattern.test(this.partner.value)) {
+        this.status = DESTINATION_CHECK_DONE
+        this.partner.contactMethod = 'email'
+        this.emit()
+        return
+      }
+      try {
+        const { found, id, userName, paymentSettings, message } = await this.$api.get(
+          `/user/exist-checking?userName=${this.partner.value}`
+        )
+        if (found) {
+          this.status = DESTINATION_CHECK_DONE
+          this.partner.id = id
+          this.partner.paymentSettings = paymentSettings || []
+          this.partner.contactMethod = 'internal'
+        } else {
+          this.status = DESTINATION_CHECK_FAIL
+          this.error = message
+        }
+      } catch (error) {
+        this.status = DESTINATION_CHECK_FAIL
+        this.error = 'the user name is not found'
+      }
+      return this.partner
+    },
     checkingDestination($e) {
       this.status = DESTINATION_CHECK_NONE
       this.error = ''
