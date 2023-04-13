@@ -219,7 +219,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
-import Invoices from 'components/payment/invoices'
 import PaymentSetting from 'components/payment/paymentSetting'
 import { PAYMENT_OBJECT_REQUEST, PAYMENT_STATUS_AWAITING_APPROVAL_TEXT } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
