@@ -5,7 +5,7 @@
         <tr>
           <th class="text-right" style="width: 150px">Detail</th>
           <th class="text-right" style="width: 120px">Costs(USD)</th>
-          <th class="text-right">Description</th>
+          <th class="text-left">Description</th>
           <th style="width: 100px" v-if="!readonly">#</th>
         </tr>
       </thead>
