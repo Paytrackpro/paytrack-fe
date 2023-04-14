@@ -18,7 +18,7 @@
       <q-space />
       <template v-if="showBulkPay">
         <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" />
-        <q-btn @click="detailBulk = true" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
+        <q-btn @click="onBulkPay" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
           >Bulk Pay BTC</q-btn
         >
       </template>
@@ -48,19 +48,27 @@
       <q-card-section>
         <div class="text-h6">Bulk Pay BTC</div>
       </q-card-section>
-
       <q-card-section class="q-pt-none">
-        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="TXID" />
+        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="Enter transaction ID for bulk BTC payment" />
         <q-list bordered separator>
           <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
             <q-item-section>
-              <q-item-label>Address:{{ item.paymentSettings[0].address }}</q-item-label>
-              <q-item-label caption>Amount: {{ item.amount }}</q-item-label>
+              <q-item-label lines="1">
+                <span class="text-weight-medium">Address: </span>
+                <span class="text-grey-8"> {{ item.paymentSettings[0].address }}</span>
+              </q-item-label>
+              <div class="row">
+                <div class="col">
+                  <q-item-label caption>Amount(USD): {{ item.amount }}</q-item-label>
+                </div>
+                <div class="col">
+                  <q-item-label caption>Amount(BTC): {{ item.expectedAmount }}</q-item-label>
+                </div>
+              </div>
             </q-item-section>
           </q-item>
         </q-list>
       </q-card-section>
-
       <q-card-actions align="right" class="bg-white text-teal">
         <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
       </q-card-actions>
@@ -93,6 +101,10 @@ export default {
       detailBulk: false,
       isExist: false,
       rows: [],
+      rate: {
+        rate: 0,
+        converTime: '',
+      },
       fixedColumns: [
         {
           name: 'status',
@@ -190,6 +202,11 @@ export default {
           this.loading = false
         })
     },
+    onBulkPay() {
+      this.detailBulk = true
+      console.log('----------->', this.selected)
+      this.getRate({ symbol: 'btc' })
+    },
     handlePaid() {
       const txId = this.txId.trim()
       if (
@@ -201,10 +218,21 @@ export default {
         this.$refs.txId.$el.focus()
         return
       }
+      const payments = this.selected.map((item) => ({
+        paymentMethod: item.paymentMethod,
+        paymentAddress: item.paymentAddress,
+        convertTime: item.convertTime,
+        id: item.id,
+        rate: item.convertRate,
+      }))
       const reqData = {
-        paymentIds: this.selected.map((item) => item.id),
+        paymentList: payments,
         txid: txId,
       }
+      // const reqData = {
+      //   paymentIds: this.selected.map((item) => item.id),
+      //   txid: txId,
+      // }
 
       this.paying = true
       this.$api
@@ -237,6 +265,22 @@ export default {
     },
     prepareToExit: function () {
       this.isExist = true
+    },
+    getRate(p) {
+      this.$api
+        .get('/payment/rate', {
+          params: p,
+        })
+        .then((data) => {
+          this.selected.forEach((ele) => {
+            ele.expectedAmount = (ele.amount / data.rate).toFixed(8)
+            ele.convertRate = data.rate
+            ele.convertTime = data.convertTime
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
     },
   },
   watch: {
