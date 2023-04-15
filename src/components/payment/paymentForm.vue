@@ -58,7 +58,7 @@
           dense
           lazy-rules
           stack-label
-          :rules="[(val) => val > 0 || 'Amount > 0. Please input amount or fill up the invoices and hourly rate']"
+          :rules="[(val) => val > 0 || 'Please input amount or fill up the invoices and hourly rate']"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
@@ -95,7 +95,11 @@
     </div>
     <div class="row q-py-md" v-if="isInvoiceMode">
       <div class="col">
-        <invoices-mode v-model="invoiceDetail" :hourlyRate="Number(inPayment.hourlyRate)" />
+        <invoices-mode
+          @update:modelValue="updateDetail"
+          v-model="inPayment.details"
+          :hourlyRate="Number(inPayment.hourlyRate)"
+        />
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
@@ -154,15 +158,10 @@ export default {
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
-      invoiceDetail: [],
       inPayment: {},
     }
   },
   watch: {
-    invoiceDetail(value) {
-      this.inPayment.details = value
-      this.inPayment.amount = this.invoicesAmount
-    },
     isInvoiceMode(value) {
       if (value) {
         // calculate amount
@@ -280,6 +279,9 @@ export default {
           this.setting.address = setting.address
         }
       }
+    },
+    updateDetail(value) {
+      this.inPayment.amount = this.invoicesAmount
     },
   },
   computed: {
