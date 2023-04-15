@@ -71,7 +71,6 @@ export default {
       this.$emit('update:modelValue', invoices)
     },
     createInvoice(type) {
-      console.log(type)
       this.createType = type
       this.creating = true
     },

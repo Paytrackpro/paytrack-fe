@@ -1,6 +1,6 @@
 <template>
-  <q-form @submit="submit" class="q-ma-md" ref="paymentForm">
-    <div class="row q-mb-md q-col-gutter-md">
+  <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
+    <div class="row q-gutter-md">
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Sender
@@ -44,61 +44,58 @@
           hint="expect an user name on mgmt or an email address"
         />
       </div>
-      <div class="col-4"></div>
-      <div class="col-4" v-if="!expanded">
+    </div>
+    <div class="row q-gutter-md">
+      <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
-          v-model="amount"
+          class="no-control-button"
+          v-model="this.inPayment.amount"
           placeholder="Amount"
           type="number"
-          readonly
+          :readonly="isInvoiceMode"
           outlined
           dense
           lazy-rules
           stack-label
-          hide-bottom-space
-          :rules="[(val) => val > 0 || 'Amount > 0. Please fill up the invoices and hourly rate']"
+          :rules="[(val) => val > 0 || 'Amount > 0. Please input amount or fill up the invoices and hourly rate']"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
           </template>
         </q-input>
       </div>
-      <div class="col-8" v-if="!expanded" />
-      <div v-if="paymentType === 'reminder'" class="col-4 col-md-3">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Choose payment method</p>
-        <q-select
-          v-model="setting.type"
-          :options="paymentMethods"
-          placeholder="Payment Type"
-          :option-label="(v) => v.label"
-          :option-value="(v) => v.value"
-          emit-value
-          map-options
-          outlined
-          dense
-          stack-label
-          hide-bottom-space
-          @update:modelValue="changePaymentMethod"
-        />
+    </div>
+    <div class="row q-gutter-md">
+      <div class="col">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
+        <q-input v-model="inPayment.description" outlined type="textarea" />
       </div>
-      <div v-if="paymentType === 'reminder'" class="col-8 col-md-9">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Currency address</p>
+    </div>
+    <div class="row q-pt-md">
+      <div class="col">
+        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment setting" />
+      </div>
+    </div>
+    <div class="row">
+      <q-checkbox v-model="isInvoiceMode" label="Invoice mode" />
+    </div>
+    <div class="row q-gutter-md" v-if="isInvoiceMode">
+      <div class="col-3">
         <q-input
-          v-model="setting.address"
-          placeholder="payment address"
+          v-model="inPayment.hourlyRate"
+          label="Hourly rate(USD/h)"
+          type="number"
           outlined
           dense
           lazy-rules
           stack-label
-          hide-bottom-space
         />
       </div>
-      <div v-if="paymentType === 'request'" class="col-12">
-        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment setting" />
-      </div>
-      <div class="col-12">
-        <payment-invoice-mode v-model="inPayment" ref="paymentMode" />
+    </div>
+    <div class="row q-py-md" v-if="isInvoiceMode">
+      <div class="col">
+        <invoices-mode v-model="invoiceDetail" :hourlyRate="Number(inPayment.hourlyRate)" />
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
@@ -129,18 +126,23 @@
 
 <script>
 import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
-import PaymentInvoiceMode from 'components/payment/paymentInvoiceMode'
 import QInputSystemUser from 'components/common/qInputSystemUser'
 import PaymentSetting from 'components/payment/paymentSetting'
+import InvoicesMode from 'components/payment/invoicesMode'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'paymentForm',
-  components: { PaymentSetting, QInputSystemUser, PaymentInvoiceMode },
+  components: { PaymentSetting, QInputSystemUser, InvoicesMode },
+  props: {
+    payment: Object,
+    user: Object,
+    token: String,
+    paymentType: String,
+  },
   data() {
     return {
-      expanded: false,
-      tab: 'simple',
+      isInvoiceMode: false,
       setting: {
         type: '',
         address: '',
@@ -152,16 +154,23 @@ export default {
       },
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
+      invoiceDetail: [],
       inPayment: {},
     }
   },
-  props: {
-    payment: Object,
-    user: Object,
-    token: String,
-    paymentType: String,
-  },
   watch: {
+    invoiceDetail(value) {
+      this.inPayment.details = value
+      this.inPayment.amount = this.invoicesAmount
+    },
+    isInvoiceMode(value) {
+      if (value) {
+        // calculate amount
+        this.inPayment.amount = this.invoicesAmount
+      } else {
+        this.inPayment.amount = 0
+      }
+    },
     payment: {
       immediate: true,
       handler(newPayment) {
@@ -208,7 +217,7 @@ export default {
         return
       }
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
-      await this.$refs.paymentMode.resetMode()
+      // await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
       const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
       if (!valid || !settingValid) {
@@ -248,6 +257,10 @@ export default {
       if (isDraft !== true) {
         successNotify = 'Payment request sent'
       }
+      if (!this.isInvoiceMode) {
+        payment.details = []
+      }
+      payment.amount = Number(payment.amount)
       const { data } = await this.savePayment(payment)
       this.submitting = false
       if (data) {
@@ -270,11 +283,15 @@ export default {
     },
   },
   computed: {
-    amount: function () {
-      if (!this.inPayment.details && !this.inPayment.description) {
+    invoicesAmount: function () {
+      if (!this.inPayment.details) {
         return 0
       }
-      return this.inPayment.amount
+      let amount = 0
+      for (let invoice of this.inPayment.details) {
+        amount += Number(invoice.cost)
+      }
+      return amount.toFixed(2)
     },
     canEditInvoice: function () {
       return this.user.id === this.inPayment.creatorId

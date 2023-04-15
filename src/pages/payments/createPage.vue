@@ -33,6 +33,8 @@ export default {
         senderName: '',
         hourlyRate: 0,
         senderEmail: '',
+        description: '',
+        amount: 0,
         txId: '',
         paymentSettings: [],
         details: [],
