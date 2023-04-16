@@ -182,6 +182,8 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
+        this.isInvoiceMode = payment.details.length > 0
+
         this.inPayment = payment
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
