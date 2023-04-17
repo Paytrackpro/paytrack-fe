@@ -33,7 +33,7 @@
         <q-input-system-user
           v-model="partner"
           placeholder="Recipient"
-          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
+          :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
           outlined
           dense
           ref="inputReceiver"
@@ -242,7 +242,7 @@ export default {
         payment.status = 'sent'
       }
       if (payment.contactMethod === 'email') {
-        if (!payment.id || this.user.id === payment.creatorId) {
+        if (!payment.id || this.user.id === payment.senderId) {
           payment.externalEmail = inPutObject.value
         }
       }
@@ -298,7 +298,7 @@ export default {
       return amount.toFixed(2)
     },
     canEditInvoice: function () {
-      return this.user.id === this.inPayment.creatorId
+      return this.user.id === this.inPayment.senderId
     },
   },
 }

@@ -480,13 +480,13 @@ export default {
       )
     },
     rejectable() {
-      return this.user.id !== this.payment.creatorId && ['sent', 'confirmed'].includes(this.payment.status)
+      return this.user.id !== this.payment.senderId && ['sent', 'confirmed'].includes(this.payment.status)
     },
     isShowInvoice() {
       if (!this.payment.details) {
         return false
       }
-      return true
+      return this.payment.details.length > 0
     },
   },
 }
