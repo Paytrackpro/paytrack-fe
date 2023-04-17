@@ -28,17 +28,11 @@
       </div>
     </td>
     <td class="text-right">
-      <q-input
-        style="max-width: 200px"
-        label="Cost"
-        v-model="invoice.cost"
-        :readonly="type === 'material' || invoice.quantity !== ''"
-        dense
-        stack-label
-        hide-bottom-space
-        type="number"
-        :error="submitted && invoice.cost <= 0"
-      />
+      <q-field label="Cost" dense stack-label>
+        <template v-slot:control>
+          <div class="self-center full-width no-outline">{{ invoice.cost }}</div>
+        </template>
+      </q-field>
     </td>
     <td class="text-right">
       <q-input
