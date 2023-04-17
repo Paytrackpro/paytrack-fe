@@ -49,6 +49,8 @@
           </template>
         </q-field>
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-field label="Amount(USD)" stack-label>
           <template v-slot:prepend>
@@ -79,6 +81,8 @@
           </template>
         </q-field>
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-select
           v-if="processing"
@@ -109,9 +113,13 @@
           </template>
         </q-field>
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12">
         <q-input
           v-if="processing"
@@ -131,6 +139,8 @@
           </template>
         </q-field>
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-3">
         <q-field label="Created At" stack-label>
           <template v-slot:control>
@@ -149,8 +159,16 @@
           </template>
         </q-field>
       </div>
-      <div class="col-12">
-        <PaymentInvoiceMode ref="invoiceMode" v-model="payment" readonly />
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div class="col">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
+        <q-input v-model="payment.description" readonly outlined type="textarea" />
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
+      <div class="col">
+        <invoices-mode v-model="payment.details" readonly :hourlyRate="Number(payment.hourlyRate)" />
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -225,7 +243,7 @@ import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
-import PaymentInvoiceMode from 'components/payment/paymentInvoiceMode'
+import InvoicesMode from 'components/payment/invoicesMode'
 export default {
   name: 'paymentDetail',
   components: {
@@ -233,13 +251,12 @@ export default {
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
-    PaymentInvoiceMode,
     PaymentRejectDialog,
+    InvoicesMode,
   },
   data() {
     return {
       txId: '',
-      pMethod: '',
       methods: [],
       expanded: false,
       processing: false,
@@ -377,7 +394,6 @@ export default {
       immediate: true,
       handler(newPayment) {
         this.txId = newPayment.txId
-        this.pMethod = newPayment.paymentMethod
         let settings = newPayment.paymentSettings || []
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
@@ -465,6 +481,12 @@ export default {
     },
     rejectable() {
       return this.user.id !== this.payment.creatorId && ['sent', 'confirmed'].includes(this.payment.status)
+    },
+    isShowInvoice() {
+      if (!this.payment.details) {
+        return false
+      }
+      return true
     },
   },
 }

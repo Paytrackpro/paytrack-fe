@@ -28,9 +28,9 @@
       </div>
       <template v-else>{{
         type === 'material'
-          ? `$${modelValue.price}/${modelValue.quantity}(qty)`
-          : modelValue.quantity
-          ? `${modelValue.quantity} hour(s)`
+          ? `qty ${invoice.quantity} x $${invoice.price}`
+          : invoice.quantity
+          ? `${invoice.quantity} hour(s)`
           : '_'
       }}</template>
     </td>
@@ -38,15 +38,15 @@
       <q-input
         v-if="editing"
         label="Cost"
-        v-model="invoice.cost"
-        :readonly="invoice.hours > 0"
+        v-model="cost"
+        readonly
         dense
         stack-label
         hide-bottom-space
         type="number"
         :error="submitted && invoice.cost <= 0"
       />
-      <span v-else>{{ modelValue.cost }}</span>
+      <span v-else>{{ cost }}</span>
     </td>
     <td class="text-left">
       <q-input
@@ -150,8 +150,9 @@ export default {
     },
     modelValue: {
       immediate: true,
-      handler(newHR) {
-        this.type = newHR.price > 0 ? 'material' : 'labor'
+      handler(invoice) {
+        this.invoice = { ...invoice }
+        this.type = invoice.price > 0 ? 'material' : 'labor'
       },
     },
   },
