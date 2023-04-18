@@ -218,7 +218,6 @@ export default {
         return
       }
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
-      // await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
       const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
       if (!valid || !settingValid) {
@@ -282,12 +281,11 @@ export default {
         }
       }
     },
-    updateDetail(value) {
-      this.inPayment.amount = this.invoicesAmount
+    updateDetail(details) {
+      this.inPayment.details = details
+      this.inPayment.amount = this.invoicesAmount()
     },
-  },
-  computed: {
-    invoicesAmount: function () {
+    invoicesAmount() {
       if (!this.inPayment.details) {
         return 0
       }
@@ -297,6 +295,8 @@ export default {
       }
       return amount.toFixed(2)
     },
+  },
+  computed: {
     canEditInvoice: function () {
       return this.user.id === this.inPayment.senderId
     },
