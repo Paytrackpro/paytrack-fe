@@ -17,9 +17,7 @@ export default {
       user: 'user/getUser',
     }),
     statusView() {
-      const reminderSide = this.payment.receiverId === this.user.id
       if (this.text) return this.text
-      //3 trường hợp, 1: người gửi, 2: người nhận: 3 approver
       switch (this.payment.status) {
         case 'draft':
           return 'Draft'
@@ -29,7 +27,7 @@ export default {
           }
           return this.getSentStatus()
         case 'confirmed':
-          return reminderSide ? 'Ready for Payment' : 'Sent'
+          return this.getConfirmStatus()
         case 'paid':
           return 'Paid'
         case 'rejected':
@@ -40,6 +38,13 @@ export default {
     },
   },
   methods: {
+    getConfirmStatus() {
+      if (this.user.id == this.payment.senderId) {
+        return 'Sent'
+      } else {
+        return 'Ready for Payment'
+      }
+    },
     getSentStatus() {
       if (this.user.id == this.payment.senderId) {
         return 'Sent'

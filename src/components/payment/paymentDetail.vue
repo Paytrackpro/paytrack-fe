@@ -238,7 +238,7 @@
 import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
 import PaymentSetting from 'components/payment/paymentSetting'
-import { PAYMENT_OBJECT_REQUEST, PAYMENT_STATUS_AWAITING_APPROVAL_TEXT } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
@@ -280,8 +280,6 @@ export default {
       savePayment: 'payment/save',
     }),
     cancel() {
-      console.log('------------->', this.payment)
-      return
       if (this.processing) {
         this.processing = false
         return
@@ -390,14 +388,24 @@ export default {
     toggleRejectDialog(val) {
       this.paymentRejectDialog = val
     },
-    isApproved() {
-      let isApproved = true
-      this.payment.approvers.forEach((el) => {
-        if (!el.isApproved) {
-          isApproved = false
+    isUserApproved() {
+      let approver = this.payment.approvers || []
+      let isApproved = false
+      approver.forEach((el) => {
+        if (el.approverId == this.user.id) {
+          isApproved = el.isApproved
         }
       })
       return isApproved
+    },
+    isPaymentApproved() {
+      let isAllApproved = true
+      this.payment.approvers.forEach((el) => {
+        if (!el.isApproved) {
+          isAllApproved = false
+        }
+      })
+      return isAllApproved
     },
   },
   watch: {
@@ -445,7 +453,7 @@ export default {
         },
       ]
       if (this.payment.approvers.length > 0) {
-        if (this.isApproved()) {
+        if (this.isPaymentApproved()) {
           status.push({
             label: 'Approved',
             value: 'sent',
@@ -477,13 +485,14 @@ export default {
       )
     },
     approvalable() {
-      return (
-        [PAYMENT_STATUS_AWAITING_APPROVAL_TEXT].includes(this.payment.status) &&
-        this.user.id !== this.payment.receiverId
-      )
+      if (this.user.id != this.payment.receiverId && this.user.id != this.payment.senderId) {
+        return !this.isUserApproved()
+      } else {
+        return false
+      }
     },
     rejectable() {
-      return this.user.id !== this.payment.senderId && ['sent', 'confirmed'].includes(this.payment.status)
+      return this.user.id == this.payment.receiverId && ['sent', 'confirmed'].includes(this.payment.status)
     },
     isShowInvoice() {
       if (!this.payment.details) {
