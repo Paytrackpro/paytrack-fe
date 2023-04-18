@@ -30,7 +30,7 @@
     <td class="text-right">
       <q-field label="Cost" dense stack-label>
         <template v-slot:control>
-          <div class="self-center full-width no-outline">{{ invoice.cost }}</div>
+          <div class="self-center full-width no-outline">{{ invoice.cost.toFixed(2) }}</div>
         </template>
       </q-field>
     </td>
@@ -67,7 +67,7 @@ export default {
       invoice: {
         quantity: '',
         price: '',
-        cost: '',
+        cost: 0,
         description: '',
       },
     }
