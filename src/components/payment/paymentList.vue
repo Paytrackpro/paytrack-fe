@@ -119,17 +119,8 @@ export default {
           label: 'Amount(USD)',
           field: 'amount',
           format: (val) => {
-            return val
+            return val.toFixed(2)
           },
-        },
-
-        {
-          name: 'createdAt',
-          align: 'center',
-          label: 'Created At',
-          field: 'createdAt',
-          sortable: true,
-          format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
     }
@@ -174,15 +165,31 @@ export default {
             },
       ]
 
-      if (this.type === PAYMENT_OBJECT_REMINDER) {
-        flexibleCol.push({
-          name: 'receiverName',
+      let lastColum = [
+        {
+          name: 'createdAt',
           align: 'center',
-          label: 'Recipient',
-          field: 'receiverName',
+          label: 'Created At',
+          field: 'createdAt',
+          sortable: true,
+          format: (val) => date.formatDate(val, MDateFormat),
+        },
+      ]
+
+      if (this.type === PAYMENT_OBJECT_REMINDER) {
+        lastColum.unshift({
+          name: 'acceptedCoins',
+          align: 'center',
+          label: 'Accepted Coins',
+          field: (row) => {
+            return row.paymentSettings
+              .map((el) => el.type)
+              .join(',')
+              .toUpperCase()
+          },
         })
       }
-      return [...flexibleCol, ...this.fixedColumns]
+      return [...flexibleCol, ...this.fixedColumns, ...lastColum]
     },
   },
   methods: {
@@ -204,7 +211,6 @@ export default {
     },
     onBulkPay() {
       this.detailBulk = true
-      console.log('----------->', this.selected)
       this.getRate({ symbol: 'btc' })
     },
     handlePaid() {
@@ -229,10 +235,6 @@ export default {
         paymentList: payments,
         txid: txId,
       }
-      // const reqData = {
-      //   paymentIds: this.selected.map((item) => item.id),
-      //   txid: txId,
-      // }
 
       this.paying = true
       this.$api
