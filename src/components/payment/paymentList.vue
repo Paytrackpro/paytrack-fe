@@ -38,7 +38,14 @@
         <div class="text-h6">Bulk Pay BTC</div>
       </q-card-section>
       <q-card-section class="q-pt-none">
-        <q-input class="q-mb-xs" ref="txId" v-model="txId" label="Enter transaction ID for bulk BTC payment" />
+        <q-input
+          class="q-mb-xs"
+          ref="txId"
+          outlined
+          dense
+          v-model="txId"
+          label="Enter transaction ID for bulk BTC payment"
+        />
         <q-list bordered separator>
           <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
             <q-item-section>
@@ -47,12 +54,11 @@
                 <span class="text-grey-8"> {{ item.paymentSettings[0].address }}</span>
               </q-item-label>
               <div class="row">
-                <div class="col">
-                  <q-item-label caption>Amount(USD): {{ item.amount }}</q-item-label>
-                </div>
-                <div class="col">
-                  <q-item-label caption>Amount(BTC): {{ item.expectedAmount }}</q-item-label>
-                </div>
+                <q-item-label class="col q-my-sm" lines="1">Amount(USD): {{ item.amount }}</q-item-label>
+                <q-item-label class="col q-my-sm" lines="1">Amount(BTC): {{ item.expectedAmount }}</q-item-label>
+              </div>
+              <div class="row">
+                <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
               </div>
             </q-item-section>
           </q-item>
