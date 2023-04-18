@@ -3,16 +3,12 @@
 </template>
 
 <script>
-import {
-  getStatusText,
-  PAYMENT_STATUS_APPROVED_TEXT,
-  PAYMENT_STATUS_AWAITING_APPROVAL_TEXT,
-} from 'src/consts/paymentType'
 import { mapGetters } from 'vuex'
 
 export default {
   name: 'paymentStatus',
   props: {
+    payment: Object,
     status: String,
     receiverId: Number,
     text: String,
@@ -22,24 +18,60 @@ export default {
       user: 'user/getUser',
     }),
     statusView() {
-      if (this.text) return this.text
       const reminderSide = this.receiverId === this.user.id
+      if (this.text) return this.text
+      //3 trường hợp, 1: người gửi, 2: người nhận: 3 approver
       switch (this.status) {
         case 'draft':
           return 'Draft'
         case 'sent':
-          return reminderSide ? 'Received' : 'Sent'
+          if (this.user.id == this.payment.senderId) {
+            return 'Sent'
+          }
+          return this.getSentStatus()
         case 'confirmed':
           return reminderSide ? 'Ready for Payment' : 'Sent'
         case 'paid':
           return 'Paid'
         case 'rejected':
           return 'Rejected'
-        case PAYMENT_STATUS_AWAITING_APPROVAL_TEXT:
-        case PAYMENT_STATUS_APPROVED_TEXT:
-          return getStatusText(this.status)
         default:
           return 'Unknown'
+      }
+    },
+  },
+  methods: {
+    getSentStatus() {
+      if (this.user.id == this.payment.senderId) {
+        return 'Sent'
+      } else {
+        let isAllApproved = true
+        let isUserApproved = false
+        this.payment.approvers.forEach((el) => {
+          if (el.approverId == this.user.id && el.isApproved) {
+            isUserApproved = true
+          }
+          if (!el.isApproved) {
+            isAllApproved = false
+          }
+        })
+        // the receiver
+        if (this.user.id == this.payment.receiverId) {
+          if (this.payment.approvers.length == 0) {
+            return 'Received'
+          }
+          let userWaitApproval = this.payment.approvers
+            .map((el) => {
+              if (!el.isApproved) {
+                return el.approverName
+              }
+            })
+            .join(',')
+          return isAllApproved ? 'Approved' : 'Waiting for Approval: ' + userWaitApproval
+        } else {
+          // for approver
+          return isUserApproved ? 'Approved' : 'Waiting for Approval'
+        }
       }
     },
   },

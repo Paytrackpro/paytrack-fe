@@ -28,7 +28,7 @@
     </template>
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <payment-status :status="props.row.status" :receiver-id="props.row.receiverId" />
+        <payment-status :payment="props.row" :status="props.row.status" :receiver-id="props.row.receiverId" />
       </q-td>
     </template>
     <template v-slot:body-cell-approvers="props">
@@ -111,7 +111,7 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
-          sortable: true,
+          sortable: false,
         },
         {
           name: 'amount',
@@ -283,6 +283,9 @@ export default {
         .catch((err) => {
           responseError(err)
         })
+    },
+    getStatus() {
+      return 'ssssss'
     },
   },
   watch: {
