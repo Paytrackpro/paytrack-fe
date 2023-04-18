@@ -28,18 +28,7 @@
     </template>
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <payment-status :status="props.row.status" :receiver-id="props.row.receiverId" />
-      </q-td>
-    </template>
-    <template v-slot:body-cell-approvers="props">
-      <q-td :props="props">
-        <payment-status
-          v-for="approver in props.row.approvers"
-          :key="approver.approverId"
-          :status="approver.status"
-          :receiver-id="props.receiverId"
-          :text="approver.approverName"
-        />
+        <payment-status :payment="props.row" isShowApprover />
       </q-td>
     </template>
   </q-table>
@@ -111,7 +100,7 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
-          sortable: true,
+          sortable: false,
         },
         {
           name: 'amount',
@@ -119,17 +108,8 @@ export default {
           label: 'Amount(USD)',
           field: 'amount',
           format: (val) => {
-            return val
+            return val.toFixed(2)
           },
-        },
-
-        {
-          name: 'createdAt',
-          align: 'center',
-          label: 'Created At',
-          field: 'createdAt',
-          sortable: true,
-          format: (val) => date.formatDate(val, MDateFormat),
         },
       ],
     }
@@ -174,15 +154,31 @@ export default {
             },
       ]
 
-      if (this.type === PAYMENT_OBJECT_REMINDER) {
-        flexibleCol.push({
-          name: 'receiverName',
+      let lastColum = [
+        {
+          name: 'createdAt',
           align: 'center',
-          label: 'Recipient',
-          field: 'receiverName',
+          label: 'Created At',
+          field: 'createdAt',
+          sortable: true,
+          format: (val) => date.formatDate(val, MDateFormat),
+        },
+      ]
+
+      if (this.type === PAYMENT_OBJECT_REMINDER) {
+        lastColum.unshift({
+          name: 'acceptedCoins',
+          align: 'center',
+          label: 'Accepted Coins',
+          field: (row) => {
+            return row.paymentSettings
+              .map((el) => el.type)
+              .join(',')
+              .toUpperCase()
+          },
         })
       }
-      return [...flexibleCol, ...this.fixedColumns]
+      return [...flexibleCol, ...this.fixedColumns, ...lastColum]
     },
   },
   methods: {
@@ -204,7 +200,6 @@ export default {
     },
     onBulkPay() {
       this.detailBulk = true
-      console.log('----------->', this.selected)
       this.getRate({ symbol: 'btc' })
     },
     handlePaid() {
@@ -229,10 +224,6 @@ export default {
         paymentList: payments,
         txid: txId,
       }
-      // const reqData = {
-      //   paymentIds: this.selected.map((item) => item.id),
-      //   txid: txId,
-      // }
 
       this.paying = true
       this.$api
@@ -281,6 +272,9 @@ export default {
         .catch((err) => {
           responseError(err)
         })
+    },
+    getStatus() {
+      return 'ssssss'
     },
   },
   watch: {

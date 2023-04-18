@@ -4,7 +4,7 @@
       <div class="text-h6">
         Payment request
         <template v-if="payment.status">
-          (<payment-status :status="payment.status" :receiver-id="payment.receiverId" />)
+          (<payment-status :payment="payment" />)
           <q-icon name="info" color="red" v-if="payment.status === 'rejected'">
             <q-tooltip class="bg-red rejection-reason" :offset="[10, 10]" max-width="40vw">
               {{ payment.rejectionReason }}

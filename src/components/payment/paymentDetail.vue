@@ -44,7 +44,7 @@
         <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :status="payment.status" :receiver-id="payment.receiverId" />
+              <payment-status :payment="payment" />
             </div>
           </template>
         </q-field>
@@ -238,7 +238,7 @@
 import { mapActions, mapGetters } from 'vuex'
 import MDate from 'components/common/mDate'
 import PaymentSetting from 'components/payment/paymentSetting'
-import { PAYMENT_OBJECT_REQUEST, PAYMENT_STATUS_AWAITING_APPROVAL_TEXT } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
@@ -388,6 +388,25 @@ export default {
     toggleRejectDialog(val) {
       this.paymentRejectDialog = val
     },
+    isUserApproved() {
+      let approver = this.payment.approvers || []
+      let isApproved = false
+      approver.forEach((el) => {
+        if (el.approverId == this.user.id) {
+          isApproved = el.isApproved
+        }
+      })
+      return isApproved
+    },
+    isPaymentApproved() {
+      let isAllApproved = true
+      this.payment.approvers.forEach((el) => {
+        if (!el.isApproved) {
+          isAllApproved = false
+        }
+      })
+      return isAllApproved
+    },
   },
   watch: {
     modelValue: {
@@ -399,7 +418,13 @@ export default {
         this.payment = { ...newPayment }
         this.paymentStatus = this.payment.status
         let appovers = this.payment.approvers || []
-        this.approverText = appovers.map((el) => el.approverName).join(', ')
+        this.approverText = appovers
+          .map((el) => {
+            if (el.isApproved) {
+              return el.approverName
+            }
+          })
+          .join(', ')
         // setup default payment method
         const paymentSettings = this.payment.paymentSettings || []
         if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
@@ -427,37 +452,23 @@ export default {
           value: 'confirmed',
         },
       ]
-      switch (this.payment.status) {
-        case 'wait approve':
-          status.push({
-            label: 'Wait approve',
-            value: 'sent',
-          })
-          break
-        case 'approved':
+      if (this.payment.approvers.length > 0) {
+        if (this.isPaymentApproved()) {
           status.push({
             label: 'Approved',
-            value: 'approved',
-          })
-          break
-        case 'confirmed':
-          if (this.payment.isApproved) {
-            status.push({
-              label: 'Approved',
-              value: 'approved',
-            })
-          } else {
-            status.push({
-              label: 'Wait approve',
-              value: 'sent',
-            })
-          }
-          break
-        default:
-          status.push({
-            label: 'Received',
             value: 'sent',
           })
+        } else {
+          status.push({
+            label: 'Waiting for Approval',
+            value: 'sent',
+          })
+        }
+      } else {
+        status.push({
+          label: 'Received',
+          value: 'sent',
+        })
       }
       return status
     },
@@ -474,19 +485,20 @@ export default {
       )
     },
     approvalable() {
-      return (
-        [PAYMENT_STATUS_AWAITING_APPROVAL_TEXT].includes(this.payment.status) &&
-        this.user.id !== this.payment.receiverId
-      )
+      if (this.user.id != this.payment.receiverId && this.user.id != this.payment.senderId) {
+        return !this.isUserApproved()
+      } else {
+        return false
+      }
     },
     rejectable() {
-      return this.user.id !== this.payment.creatorId && ['sent', 'confirmed'].includes(this.payment.status)
+      return this.user.id == this.payment.receiverId && ['sent', 'confirmed'].includes(this.payment.status)
     },
     isShowInvoice() {
       if (!this.payment.details) {
         return false
       }
-      return true
+      return this.payment.details.length > 0
     },
   },
 }

@@ -33,7 +33,7 @@
         <q-input-system-user
           v-model="partner"
           placeholder="Recipient"
-          :readonly="user.id !== inPayment.creatorId || ['draft', ''].indexOf(inPayment.status) === -1"
+          :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
           outlined
           dense
           ref="inputReceiver"
@@ -218,7 +218,6 @@ export default {
         return
       }
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
-      // await this.$refs.paymentMode.resetMode()
       const valid = await this.$refs.paymentForm.validate()
       const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
       if (!valid || !settingValid) {
@@ -242,7 +241,7 @@ export default {
         payment.status = 'sent'
       }
       if (payment.contactMethod === 'email') {
-        if (!payment.id || this.user.id === payment.creatorId) {
+        if (!payment.id || this.user.id === payment.senderId) {
           payment.externalEmail = inPutObject.value
         }
       }
@@ -282,12 +281,11 @@ export default {
         }
       }
     },
-    updateDetail(value) {
-      this.inPayment.amount = this.invoicesAmount
+    updateDetail(details) {
+      this.inPayment.details = details
+      this.inPayment.amount = this.invoicesAmount()
     },
-  },
-  computed: {
-    invoicesAmount: function () {
+    invoicesAmount() {
       if (!this.inPayment.details) {
         return 0
       }
@@ -297,8 +295,10 @@ export default {
       }
       return amount.toFixed(2)
     },
+  },
+  computed: {
     canEditInvoice: function () {
-      return this.user.id === this.inPayment.creatorId
+      return this.user.id === this.inPayment.senderId
     },
   },
 }

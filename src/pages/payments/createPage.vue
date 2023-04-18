@@ -28,7 +28,6 @@ export default {
         status: '',
         receiverId: 0,
         receiverName: '',
-        creatorId: 0,
         senderId: 0,
         senderName: '',
         hourlyRate: 0,
@@ -67,7 +66,6 @@ export default {
       immediate: true,
       handler(user) {
         this.payment.paymentSettings = user.paymentSettings || []
-        this.payment.creatorId = user.id || 0
       },
     },
     paymentType: {
