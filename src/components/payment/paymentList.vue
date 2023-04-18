@@ -28,18 +28,7 @@
     </template>
     <template v-slot:body-cell-status="props">
       <q-td :props="props">
-        <payment-status :payment="props.row" :status="props.row.status" :receiver-id="props.row.receiverId" />
-      </q-td>
-    </template>
-    <template v-slot:body-cell-approvers="props">
-      <q-td :props="props">
-        <payment-status
-          v-for="approver in props.row.approvers"
-          :key="approver.approverId"
-          :status="approver.status"
-          :receiver-id="props.receiverId"
-          :text="approver.approverName"
-        />
+        <payment-status :payment="props.row" isShowApprover />
       </q-td>
     </template>
   </q-table>

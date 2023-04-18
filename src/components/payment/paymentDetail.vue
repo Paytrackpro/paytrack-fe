@@ -44,7 +44,7 @@
         <q-field v-else label="Status" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :status="payment.status" :receiver-id="payment.receiverId" />
+              <payment-status :payment="payment" />
             </div>
           </template>
         </q-field>
@@ -280,6 +280,8 @@ export default {
       savePayment: 'payment/save',
     }),
     cancel() {
+      console.log('------------->', this.payment)
+      return
       if (this.processing) {
         this.processing = false
         return
@@ -388,6 +390,15 @@ export default {
     toggleRejectDialog(val) {
       this.paymentRejectDialog = val
     },
+    isApproved() {
+      let isApproved = true
+      this.payment.approvers.forEach((el) => {
+        if (!el.isApproved) {
+          isApproved = false
+        }
+      })
+      return isApproved
+    },
   },
   watch: {
     modelValue: {
@@ -399,7 +410,13 @@ export default {
         this.payment = { ...newPayment }
         this.paymentStatus = this.payment.status
         let appovers = this.payment.approvers || []
-        this.approverText = appovers.map((el) => el.approverName).join(', ')
+        this.approverText = appovers
+          .map((el) => {
+            if (el.isApproved) {
+              return el.approverName
+            }
+          })
+          .join(', ')
         // setup default payment method
         const paymentSettings = this.payment.paymentSettings || []
         if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
@@ -427,37 +444,23 @@ export default {
           value: 'confirmed',
         },
       ]
-      switch (this.payment.status) {
-        case 'wait approve':
-          status.push({
-            label: 'Wait approve',
-            value: 'sent',
-          })
-          break
-        case 'approved':
+      if (this.payment.approvers.length > 0) {
+        if (this.isApproved()) {
           status.push({
             label: 'Approved',
-            value: 'approved',
-          })
-          break
-        case 'confirmed':
-          if (this.payment.isApproved) {
-            status.push({
-              label: 'Approved',
-              value: 'approved',
-            })
-          } else {
-            status.push({
-              label: 'Wait approve',
-              value: 'sent',
-            })
-          }
-          break
-        default:
-          status.push({
-            label: 'Received',
             value: 'sent',
           })
+        } else {
+          status.push({
+            label: 'Waiting for Approval',
+            value: 'sent',
+          })
+        }
+      } else {
+        status.push({
+          label: 'Received',
+          value: 'sent',
+        })
       }
       return status
     },

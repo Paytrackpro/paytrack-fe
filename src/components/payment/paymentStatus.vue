@@ -9,19 +9,18 @@ export default {
   name: 'paymentStatus',
   props: {
     payment: Object,
-    status: String,
-    receiverId: Number,
     text: String,
+    isShowApprover: Boolean,
   },
   computed: {
     ...mapGetters({
       user: 'user/getUser',
     }),
     statusView() {
-      const reminderSide = this.receiverId === this.user.id
+      const reminderSide = this.payment.receiverId === this.user.id
       if (this.text) return this.text
       //3 trường hợp, 1: người gửi, 2: người nhận: 3 approver
-      switch (this.status) {
+      switch (this.payment.status) {
         case 'draft':
           return 'Draft'
         case 'sent':
@@ -67,7 +66,11 @@ export default {
               }
             })
             .join(',')
-          return isAllApproved ? 'Approved' : 'Waiting for Approval: ' + userWaitApproval
+          return isAllApproved
+            ? 'Approved'
+            : this.isShowApprover
+            ? 'Waiting for Approval: ' + userWaitApproval
+            : 'Waiting for Approval'
         } else {
           // for approver
           return isUserApproved ? 'Approved' : 'Waiting for Approval'
