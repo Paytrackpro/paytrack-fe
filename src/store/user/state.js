@@ -31,4 +31,7 @@ export default {
   role: null,
   qrImage: '',
   tempPassword: '',
+  checkToken: function () {
+    checkValidToken()
+  },
 }
