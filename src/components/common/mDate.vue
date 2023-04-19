@@ -4,7 +4,7 @@
 
 <script>
 // mgmt Date component, will show all the date item in mgmt system
-import { MDateFormat } from 'src/consts/common'
+import { MDateFormat1 } from 'src/consts/common'
 import { date } from 'quasar'
 export default {
   name: 'mDate',
@@ -17,7 +17,7 @@ export default {
       if (d.getTime() <= 0) {
         return
       }
-      return date.formatDate(this.date, MDateFormat)
+      return date.formatDate(this.date, MDateFormat1)
     },
   },
 }

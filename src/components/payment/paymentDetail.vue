@@ -115,11 +115,14 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
+      <div v-if="payment.paymentSettings && payment.paymentSettings.length && !isApprover" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
+      <div v-if="isApprover" class="col-12">
+        <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
+      </div>
     </div>
-    <div class="row q-mb-md q-col-gutter-md">
+    <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
       <div class="col-12">
         <q-input
           v-if="processing"
@@ -142,7 +145,7 @@
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-3">
-        <q-field label="Created At" stack-label>
+        <q-field label="Received" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <m-date :date="payment.createdAt"></m-date>
@@ -150,7 +153,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-3">
+      <div v-if="!isApprover" class="col-3">
         <q-field label="Paid At" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -471,6 +474,18 @@ export default {
         })
       }
       return status
+    },
+    coinsAccepted() {
+      if (this.payment.paymentSettings && this.payment.paymentSettings.length) {
+        return this.payment.paymentSettings
+          .map((el) => el.type)
+          .join(',')
+          .toUpperCase()
+      }
+      return ''
+    },
+    isApprover() {
+      return this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id
     },
     editable() {
       let isAllowStatus =
