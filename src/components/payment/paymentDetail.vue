@@ -10,7 +10,7 @@
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
-        <q-field label="The sender" stack-label>
+        <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.senderName || payment.externalEmail }}
@@ -19,7 +19,7 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field label="The recipient" stack-label>
+        <q-field label="Recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.receiverName || payment.externalEmail }}
@@ -52,13 +52,13 @@
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
-        <q-field label="Amount(USD)" stack-label>
+        <q-field label="Amount (USD)" stack-label>
           <template v-slot:prepend>
             <q-icon name="attach_money" />
           </template>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.amount }}
+              {{ (payment.amount || 0).toFixed(2) }}
             </div>
           </template>
         </q-field>
@@ -73,9 +73,9 @@
         />
       </div>
       <div class="col-4">
-        <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
+        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
+            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
               {{ payment.expectedAmount }}
             </div>
           </template>
@@ -107,9 +107,12 @@
       <div class="col-8">
         <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
+            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
               {{ payment.paymentAddress }}
             </div>
+          </template>
+          <template v-slot:after>
+            <q-btn round dense flat icon="content_copy" @click="copyAddress" />
           </template>
         </q-field>
       </div>
@@ -124,7 +127,7 @@
         <q-input
           v-if="processing"
           v-model="txId"
-          label="Transaction id"
+          label="Enter transaction ID of sent payment"
           ref="txId"
           outlined
           dense
@@ -183,7 +186,7 @@
       />
       <q-btn
         v-if="processable && processing"
-        label="paid"
+        label="mark paid"
         type="submit"
         color="primary"
         :disable="fetchingRate || paying"
@@ -317,7 +320,7 @@ export default {
           this.paying = false
           this.$emit('update:modelValue', data)
           this.$q.notify({
-            message: 'payment has been payed',
+            message: 'Request marked as paid',
             color: 'positive',
             icon: 'check',
           })
@@ -406,6 +409,14 @@ export default {
         }
       })
       return isAllApproved
+    },
+    async copyAddress() {
+      await navigator.clipboard.writeText(this.payment.paymentAddress || '')
+      this.$q.notify({
+        type: 'positive',
+        message: 'copied.',
+        position: 'bottom',
+      })
     },
   },
   watch: {
