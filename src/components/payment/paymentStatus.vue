@@ -51,17 +51,19 @@ export default {
       } else {
         let isAllApproved = true
         let isUserApproved = false
-        this.payment.approvers.forEach((el) => {
-          if (el.approverId == this.user.id && el.isApproved) {
-            isUserApproved = true
-          }
-          if (!el.isApproved) {
-            isAllApproved = false
-          }
-        })
+        if (this.payment.approvers !== null) {
+          this.payment.approvers.forEach((el) => {
+            if (el.approverId == this.user.id && el.isApproved) {
+              isUserApproved = true
+            }
+            if (!el.isApproved) {
+              isAllApproved = false
+            }
+          })
+        }
         // the receiver
         if (this.user.id == this.payment.receiverId) {
-          if (this.payment.approvers.length == 0) {
+          if (this.payment.approvers === null || this.payment.approvers.length == 0) {
             return 'Received'
           }
           let userWaitApproval = this.payment.approvers
