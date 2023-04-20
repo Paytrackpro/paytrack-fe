@@ -40,6 +40,11 @@ api.interceptors.response.use(
         status: 503,
       })
     }
+    if (error.response.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      location.reload()
+    }
     if (error.response.data.message) {
       return Promise.reject({
         message: error.response.data.message,
