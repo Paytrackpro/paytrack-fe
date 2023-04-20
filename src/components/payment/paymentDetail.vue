@@ -1,16 +1,12 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
-      <div class="col-12">
-        <q-field label="Approved by" stack-label>
-          {{ approverText }}
-        </q-field>
-      </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
-        <q-field label="The sender" stack-label>
+        <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.senderName || payment.externalEmail }}
@@ -19,7 +15,7 @@
         </q-field>
       </div>
       <div class="col-4">
-        <q-field label="The recipient" stack-label>
+        <q-field label="Recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.receiverName || payment.externalEmail }}
@@ -52,13 +48,13 @@
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
-        <q-field label="Amount(USD)" stack-label>
+        <q-field label="Amount (USD)" stack-label>
           <template v-slot:prepend>
             <q-icon name="attach_money" />
           </template>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.amount }}
+              {{ (payment.amount || 0).toFixed(2) }}
             </div>
           </template>
         </q-field>
@@ -73,16 +69,16 @@
         />
       </div>
       <div class="col-4">
-        <q-field :label="`Amount to send(${payment.paymentMethod})`" stack-label>
+        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
+            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
               {{ payment.expectedAmount }}
             </div>
           </template>
         </q-field>
       </div>
     </div>
-    <div class="row q-mb-md q-col-gutter-md">
+    <div v-if="user.id != payment.receiverId" class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-select
           v-if="processing"
@@ -107,19 +103,39 @@
       <div class="col-8">
         <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
+            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
               {{ payment.paymentAddress }}
             </div>
+          </template>
+          <template v-slot:after>
+            <q-btn round dense flat icon="content_copy" @click="copyAddress" />
           </template>
         </q-field>
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="payment.paymentSettings && payment.paymentSettings.length && !isApprover" class="col-12">
+      <div
+        v-if="payment.paymentSettings && payment.paymentSettings.length && !isApprover && user.id != payment.receiverId"
+        class="col-12"
+      >
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
       <div v-if="isApprover" class="col-12">
         <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div
+        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
+        class="col-12"
+      >
+        <payment-setting-method
+          :defautMethod="payment.paymentMethod"
+          :readonly="!processing"
+          @change="methodChange"
+          :modelValue="payment.paymentSettings"
+          label="Accepted payment coins"
+        />
       </div>
     </div>
     <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
@@ -127,7 +143,7 @@
         <q-input
           v-if="processing"
           v-model="txId"
-          label="Transaction id"
+          label="Enter transaction ID of sent payment"
           ref="txId"
           outlined
           dense
@@ -186,7 +202,7 @@
       />
       <q-btn
         v-if="processable && processing"
-        label="paid"
+        label="mark paid"
         type="submit"
         color="primary"
         :disable="fetchingRate || paying"
@@ -247,6 +263,8 @@ import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
+import ApproverDisplay from 'components/payment/approverDisplay'
+import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 export default {
   name: 'paymentDetail',
   components: {
@@ -256,6 +274,8 @@ export default {
     PaymentRateInput,
     PaymentRejectDialog,
     InvoicesMode,
+    ApproverDisplay,
+    paymentSettingMethod,
   },
   data() {
     return {
@@ -268,7 +288,6 @@ export default {
       payment: {},
       paymentRejectDialog: false,
       paymentStatus: '',
-      approverText: '',
     }
   },
   props: {
@@ -320,7 +339,7 @@ export default {
           this.paying = false
           this.$emit('update:modelValue', data)
           this.$q.notify({
-            message: 'payment has been payed',
+            message: 'Request marked as paid',
             color: 'positive',
             icon: 'check',
           })
@@ -384,6 +403,7 @@ export default {
       const settings = this.payment.paymentSettings || []
       const setting = settings.find((s) => s.type === method)
       if (setting) {
+        this.payment.paymentMethod = method
         this.payment.paymentAddress = setting.address
       }
       this.$refs.rateInput.fetchRate()
@@ -410,6 +430,14 @@ export default {
       })
       return isAllApproved
     },
+    async copyAddress() {
+      await navigator.clipboard.writeText(this.payment.paymentAddress || '')
+      this.$q.notify({
+        type: 'positive',
+        message: 'copied.',
+        position: 'bottom',
+      })
+    },
   },
   watch: {
     modelValue: {
@@ -420,14 +448,6 @@ export default {
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
         this.paymentStatus = this.payment.status
-        let appovers = this.payment.approvers || []
-        this.approverText = appovers
-          .map((el) => {
-            if (el.isApproved) {
-              return el.approverName
-            }
-          })
-          .join(', ')
         // setup default payment method
         const paymentSettings = this.payment.paymentSettings || []
         if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
