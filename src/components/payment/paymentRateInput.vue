@@ -1,5 +1,5 @@
 <template>
-  <q-field label="Convert Rate" stack-label>
+  <q-field label="Exchange Rate" stack-label>
     <template v-slot:control>
       <div class="self-center full-width no-outline" tabindex="0">
         {{ payment.convertRate }}

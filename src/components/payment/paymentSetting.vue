@@ -36,7 +36,6 @@
                 v-model="setting.address"
                 :label="`${setting.type} address`"
                 :readonly="readonly"
-                outlined
                 dense
                 lazy-rules
                 stack-label
