@@ -42,8 +42,6 @@ export default {
   },
   methods: {
     udpateValue(value) {
-      console.log(value)
-      console.log('-----------defautl method-------11111------>', this.defautMethod)
       let tempValue = this.value.split('-')
       this.$emit('change', tempValue[0])
     },
