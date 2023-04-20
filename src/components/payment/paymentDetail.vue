@@ -1,12 +1,8 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row q-mb-md q-col-gutter-md" v-if="payment.receiverId === user.id">
-      <div class="col-12">
-        <q-field label="Approved by" stack-label>
-          {{ approverText }}
-        </q-field>
-      </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
@@ -120,6 +116,20 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div
+        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
+        class="col-12"
+      >
+        <payment-setting-method
+          :defautMethod="payment.paymentMethod"
+          :readonly="!processing"
+          @change="methodChange"
+          :modelValue="payment.paymentSettings"
+          label="Accepted payment coins"
+        />
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
@@ -247,6 +257,8 @@ import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
+import ApproverDisplay from 'components/payment/approverDisplay'
+import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 export default {
   name: 'paymentDetail',
   components: {
@@ -256,6 +268,8 @@ export default {
     PaymentRateInput,
     PaymentRejectDialog,
     InvoicesMode,
+    ApproverDisplay,
+    paymentSettingMethod,
   },
   data() {
     return {
@@ -268,7 +282,6 @@ export default {
       payment: {},
       paymentRejectDialog: false,
       paymentStatus: '',
-      approverText: '',
     }
   },
   props: {
@@ -384,6 +397,7 @@ export default {
       const settings = this.payment.paymentSettings || []
       const setting = settings.find((s) => s.type === method)
       if (setting) {
+        this.payment.paymentMethod = method
         this.payment.paymentAddress = setting.address
       }
       this.$refs.rateInput.fetchRate()
@@ -428,14 +442,6 @@ export default {
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
         this.paymentStatus = this.payment.status
-        let appovers = this.payment.approvers || []
-        this.approverText = appovers
-          .map((el) => {
-            if (el.isApproved) {
-              return el.approverName
-            }
-          })
-          .join(', ')
         // setup default payment method
         const paymentSettings = this.payment.paymentSettings || []
         if (this.payment.paymentMethod === 'none' && paymentSettings.length) {
