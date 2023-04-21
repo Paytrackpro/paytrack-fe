@@ -185,6 +185,7 @@ export default {
         this.isInvoiceMode = payment.details.length > 0
 
         this.inPayment = payment
+        this.inPayment.hourlyRate = this.user.hourlyLaborRate
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
