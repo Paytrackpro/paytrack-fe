@@ -1,5 +1,8 @@
 <template>
   <q-form @submit="submit">
+    <div class="row q-mb-md">
+      <q-input type="number" dense outlined v-model="hourlyLaborRate" label="Hour Rate (USD/h)" />
+    </div>
     <div class="row q-mb-md q-col-gutter-md profile-padding">
       <div class="col-12">
         <PaymentSetting v-model="user.paymentSettings" />
@@ -31,6 +34,16 @@ export default {
     }
   },
   emits: ['update:modelValue'],
+  computed: {
+    hourlyLaborRate: {
+      get() {
+        return this.user.hourlyLaborRate
+      },
+      set(hourRate) {
+        this.user.hourlyLaborRate = Number(hourRate)
+      },
+    },
+  },
   watch: {
     modelValue: {
       immediate: true,
