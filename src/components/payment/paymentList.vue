@@ -145,7 +145,7 @@ export default {
               align: 'center',
               label: 'Recipient',
               field: (row) => {
-                return row.receiverName || row.externalEmail
+                return row.receiverDispName || row.externalEmail
               },
             }
           : {
@@ -154,7 +154,7 @@ export default {
               label: 'Sender',
               align: 'center',
               field: (row) => {
-                return row.senderName
+                return row.senderDispName
               },
               format: (val) => `${val}`,
             },
@@ -206,7 +206,7 @@ export default {
     },
     onBulkPay() {
       this.detailBulk = true
-      this.getRate({ symbol: 'btc' })
+      this.getRate({ symbol: 'BTC' })
     },
     handlePaid() {
       const txId = this.txId.trim()
