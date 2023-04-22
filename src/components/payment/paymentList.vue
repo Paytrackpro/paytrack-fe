@@ -206,7 +206,7 @@ export default {
     },
     onBulkPay() {
       this.detailBulk = true
-      this.getRate({ symbol: 'BTC' })
+      this.getRate({ symbol: 'btc' })
     },
     handlePaid() {
       const txId = this.txId.trim()
