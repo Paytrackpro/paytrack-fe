@@ -15,7 +15,7 @@
         lazy-rules
         label="Coins you accept"
         @update:model-value="changeCoins"
-        :rules="[(val) => (val !== null && val.length !== 0) || 'Please selected coins to pay']"
+        :rules="[(val) => (val !== null && val.length !== 0) || 'Please select the coin types you accept for payment']"
       />
     </div>
     <div class="col">
