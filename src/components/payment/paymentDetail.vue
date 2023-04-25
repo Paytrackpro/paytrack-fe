@@ -59,7 +59,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div v-if="!isApprover" class="col-4">
         <PaymentRateInput
           :readonly="!processing"
           ref="rateInput"
@@ -68,7 +68,7 @@
           @update:modelValue="updateLocal"
         />
       </div>
-      <div class="col-4">
+      <div v-if="!isApprover" class="col-4">
         <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
@@ -78,7 +78,7 @@
         </q-field>
       </div>
     </div>
-    <div v-if="user.id != payment.receiverId" class="row q-mb-md q-col-gutter-md">
+    <div v-if="user.id != payment.receiverId && !isApprover" class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-select
           v-if="processing"
