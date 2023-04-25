@@ -185,6 +185,9 @@
         <q-input v-model="payment.description" readonly outlined type="textarea" />
       </div>
     </div>
+    <div class="row q-mt-md" v-if="isShowInvoice">
+      <p><b class="text-weight-medium">Hourly rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
+    </div>
     <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
       <div class="col">
         <invoices-mode v-model="payment.details" readonly :hourlyRate="Number(payment.hourlyRate)" />
