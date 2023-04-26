@@ -58,7 +58,7 @@ export default {
       .put('/user/info', userData)
       .then((newUser) => {
         Notify.create({
-          message: 'your information is updated',
+          message: 'Your information is updated',
           color: 'positive',
           icon: 'done',
         })

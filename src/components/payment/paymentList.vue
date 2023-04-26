@@ -145,7 +145,11 @@ export default {
               align: 'center',
               label: 'Recipient',
               field: (row) => {
-                return row.receiverName || row.externalEmail
+                if (row.receiverDisplayName.length > 0) {
+                  return row.receiverDisplayName
+                } else {
+                  return row.receiverName || row.externalEmail
+                }
               },
             }
           : {
@@ -154,7 +158,11 @@ export default {
               label: 'Sender',
               align: 'center',
               field: (row) => {
-                return row.senderName
+                if (row.senderDisplayName.length > 0) {
+                  return row.senderDisplayName
+                } else {
+                  return row.senderName || row.externalEmail
+                }
               },
               format: (val) => `${val}`,
             },
