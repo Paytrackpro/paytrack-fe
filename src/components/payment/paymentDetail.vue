@@ -75,6 +75,9 @@
               {{ payment.expectedAmount }}
             </div>
           </template>
+          <template v-if="processing" v-slot:after>
+            <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
+          </template>
         </q-field>
       </div>
     </div>
@@ -108,7 +111,7 @@
             </div>
           </template>
           <template v-slot:after>
-            <q-btn round dense flat icon="content_copy" @click="copyAddress" />
+            <q-btn round dense flat icon="content_copy" @click="copy(payment.paymentAddress || '')" />
           </template>
         </q-field>
       </div>
@@ -433,8 +436,8 @@ export default {
       })
       return isAllApproved
     },
-    async copyAddress() {
-      await navigator.clipboard.writeText(this.payment.paymentAddress || '')
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
       this.$q.notify({
         type: 'positive',
         message: 'copied.',
