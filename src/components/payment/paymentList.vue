@@ -145,8 +145,8 @@ export default {
               align: 'center',
               label: 'Recipient',
               field: (row) => {
-                if (row.receiverDispName.length > 0) {
-                  return row.receiverDispName
+                if (row.receiverDisplayName.length > 0) {
+                  return row.receiverDisplayName
                 } else {
                   return row.receiverName || row.externalEmail
                 }
@@ -158,8 +158,8 @@ export default {
               label: 'Sender',
               align: 'center',
               field: (row) => {
-                if (row.senderDispName.length > 0) {
-                  return row.senderDispName
+                if (row.senderDisplayName.length > 0) {
+                  return row.senderDisplayName
                 } else {
                   return row.senderName || row.externalEmail
                 }
