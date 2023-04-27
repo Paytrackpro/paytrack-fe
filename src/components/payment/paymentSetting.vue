@@ -15,7 +15,7 @@
         lazy-rules
         label="Coins you accept"
         @update:model-value="changeCoins"
-        :rules="[(val) => (val !== null && val.length !== 0) || 'Please selected coins to pay']"
+        :rules="[(val) => (val !== null && val.length !== 0) || 'Please select the coin types you accept for payment']"
       />
     </div>
     <div class="col">
@@ -29,12 +29,12 @@
         <tbody>
           <tr v-for="(setting, i) of settings" :key="i">
             <td>
-              {{ setting.type }}
+              {{ getSelectedCoin(setting.type).label }}
             </td>
             <td>
               <q-input
                 v-model="setting.address"
-                :label="`${setting.type} address`"
+                :label="`${getSelectedCoin(setting.type).label} address`"
                 :readonly="readonly"
                 dense
                 lazy-rules
@@ -61,7 +61,11 @@ export default {
   },
   data() {
     return {
-      coins: ['btc', 'ltc', 'dcr'],
+      coins: [
+        { label: 'BTC', value: 'btc' },
+        { label: 'LTC', value: 'ltc' },
+        { label: 'DCR', value: 'dcr' },
+      ],
       selectedCoins: [],
       settings: [],
     }
@@ -76,7 +80,7 @@ export default {
       for (let coin of coins) {
         let found = false
         for (let setting of settings) {
-          if (setting.type === coin) {
+          if (setting.type === coin.value) {
             found = true
             newSettings.push({
               type: setting.type,
@@ -86,12 +90,19 @@ export default {
         }
         if (!found) {
           newSettings.push({
-            type: coin,
+            type: coin.value,
             address: '',
           })
         }
       }
       this.$emit('update:modelValue', newSettings)
+    },
+    getSelectedCoin(type) {
+      for (let coin of this.coins) {
+        if (coin.value === type) {
+          return coin
+        }
+      }
     },
   },
   watch: {
@@ -101,7 +112,7 @@ export default {
         this.settings = cloneObject(newVal || [])
         const selectedCoins = []
         for (let setting of this.settings) {
-          selectedCoins.push(setting.type)
+          selectedCoins.push(this.getSelectedCoin(setting.type))
         }
         this.selectedCoins = selectedCoins
       },

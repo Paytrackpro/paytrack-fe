@@ -59,7 +59,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div v-if="!isApprover" class="col-4">
         <PaymentRateInput
           :readonly="!processing"
           ref="rateInput"
@@ -68,17 +68,20 @@
           @update:modelValue="updateLocal"
         />
       </div>
-      <div class="col-4">
+      <div v-if="!isApprover" class="col-4">
         <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
               {{ payment.expectedAmount }}
             </div>
           </template>
+          <template v-if="processing" v-slot:after>
+            <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
+          </template>
         </q-field>
       </div>
     </div>
-    <div v-if="user.id != payment.receiverId" class="row q-mb-md q-col-gutter-md">
+    <div v-if="user.id != payment.receiverId && !isApprover" class="row q-mb-md q-col-gutter-md">
       <div class="col-4">
         <q-select
           v-if="processing"
@@ -108,7 +111,7 @@
             </div>
           </template>
           <template v-slot:after>
-            <q-btn round dense flat icon="content_copy" @click="copyAddress" />
+            <q-btn round dense flat icon="content_copy" @click="copy(payment.paymentAddress || '')" />
           </template>
         </q-field>
       </div>
@@ -184,6 +187,9 @@
         <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
         <q-input v-model="payment.description" readonly outlined type="textarea" />
       </div>
+    </div>
+    <div class="row q-mt-md" v-if="isShowInvoice">
+      <p><b class="text-weight-medium">Hourly rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
     </div>
     <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
       <div class="col">
@@ -430,8 +436,8 @@ export default {
       })
       return isAllApproved
     },
-    async copyAddress() {
-      await navigator.clipboard.writeText(this.payment.paymentAddress || '')
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
       this.$q.notify({
         type: 'positive',
         message: 'copied.',
