@@ -86,7 +86,7 @@ export default {
           label: 'Created At',
           field: 'createdAt',
           sortable: false,
-          format: (val) => date.formatDate(val, 'DD/MM/YYYY'),
+          format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
         },
         {
           name: 'lastSeen',
@@ -94,7 +94,7 @@ export default {
           label: 'Last Seen',
           field: 'lastSeen',
           sortable: false,
-          format: (val) => date.formatDate(val, 'DD/MM/YYYY'),
+          format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
         },
       ],
       rows: [],
