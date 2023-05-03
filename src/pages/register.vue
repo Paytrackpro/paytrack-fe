@@ -95,6 +95,11 @@
                   </q-form>
                 </q-card-section>
               </q-card>
+              <div class="row justify-center text-grey-6 q-mt-md">
+                <p>Already have an account?</p>
+                &nbsp;
+                <router-link class="link text-light-blue-6" to="/login">Sign in</router-link>
+              </div>
             </div>
           </div>
         </div>
