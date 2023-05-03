@@ -481,7 +481,7 @@ export default {
           value: 'confirmed',
         },
       ]
-      if (this.payment.approvers.length > 0) {
+      if (this.payment.approvers && this.payment.approvers.length > 0) {
         if (this.isPaymentApproved()) {
           status.push({
             label: 'Approved',
