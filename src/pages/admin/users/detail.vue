@@ -74,19 +74,6 @@
         <q-checkbox class="col-12 col-md-4" v-model="lockUser" label="Lock User (Disable Login)" />
       </div>
       <div class="row justify-end q-gutter-sm">
-        <q-btn label="Delete User" color="primary" @click="confirm = true" />
-        <q-dialog v-model="confirm" persistent>
-          <q-card>
-            <q-card-section class="row items-center">
-              <q-avatar icon="warning" color="primary" text-color="white" />
-              <span class="q-ml-sm">Are you sure to delete this user?</span>
-            </q-card-section>
-            <q-card-actions align="right">
-              <q-btn flat label="Delete" color="primary" v-close-popup @click="this.deleteUser()" />
-              <q-btn flat label="Cancel" color="primary" v-close-popup />
-            </q-card-actions>
-          </q-card>
-        </q-dialog>
         <q-btn label="Save" type="submit" color="primary" />
       </div>
     </q-form>
@@ -138,23 +125,6 @@ export default {
         .then(() => {
           this.$q.notify({
             message: 'User saved',
-            color: 'positive',
-            icon: 'check',
-          })
-          this.$router.push({ name: 'user.list' })
-        })
-        .catch((err) => {
-          responseError(err)
-        })
-    },
-    deleteUser() {
-      this.$api
-        .put(`admin/user/delete`, {
-          userId: parseInt(this.$route.params.id),
-        })
-        .then(() => {
-          this.$q.notify({
-            message: 'User has been deleted successfully',
             color: 'positive',
             icon: 'check',
           })
