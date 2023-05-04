@@ -526,8 +526,8 @@ export default {
       )
     },
     approvalable() {
-      if (this.user.id != this.payment.receiverId && this.user.id != this.payment.senderId) {
-        return !this.isUserApproved()
+      if (this.user.id != this.payment.receiverId && this.user.id != this.payment.senderId && this.payment.status) {
+        return !this.isUserApproved() && !['rejected', 'paid', 'confirmed'].includes(this.payment.status)
       } else {
         return false
       }

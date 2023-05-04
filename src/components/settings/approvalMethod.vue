@@ -118,7 +118,6 @@ export default {
             return row.approvers.map((item) => item.approverName).join(', ')
           },
           format: (val) => {
-            console.log({ val })
             return val
           },
         },
@@ -191,7 +190,6 @@ export default {
           this.pagination.rowsNumber = res.length
         })
         .catch((err) => {
-          console.log({ err })
           responseError(err)
           this.loading = false
         })
@@ -221,7 +219,6 @@ export default {
       this.save(data)
     },
     editRow(row) {
-      console.log({ row })
       const data = row.row
       this.sender = {
         id: data.sendUserId,
@@ -248,12 +245,9 @@ export default {
               }
             })
         }
-
         const data = {
           list,
         }
-        console.log(data)
-
         this.save(data)
       }
     },

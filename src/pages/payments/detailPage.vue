@@ -26,6 +26,7 @@
     <payment-form
       v-if="editing"
       :payment="payment"
+      :isEdit="true"
       :payment-type="paymentType"
       :user="user"
       :token="token"

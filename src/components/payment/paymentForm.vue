@@ -143,6 +143,7 @@ export default {
     user: Object,
     token: String,
     paymentType: String,
+    isEdit: Boolean,
   },
   data() {
     return {
@@ -165,7 +166,7 @@ export default {
     isInvoiceMode(value) {
       if (value) {
         // calculate amount
-        this.inPayment.amount = this.invoicesAmount
+        this.inPayment.amount = this.invoicesAmount()
       } else {
         this.inPayment.amount = 0
       }
@@ -185,7 +186,9 @@ export default {
         this.isInvoiceMode = payment.details.length > 0
 
         this.inPayment = payment
-        this.inPayment.hourlyRate = this.user.hourlyLaborRate
+        if (!this.isEdit) {
+          this.inPayment.hourlyRate = this.user.hourlyLaborRate
+        }
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
