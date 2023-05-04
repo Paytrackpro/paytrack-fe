@@ -1,74 +1,76 @@
 <template>
-  <q-table
-    :title="label || 'Payments'"
-    :loading="loading"
-    :rows="rows"
-    :columns="columns"
-    row-key="id"
-    v-model:pagination="pagination"
-    :selection="isBulkPay ? 'multiple' : 'none'"
-    v-model:selected="selected"
-    flat
-    bordered
-    @row-click="(_, row) => goToDetail(row.id)"
-    @request="onRequest"
-  >
-    <template v-if="type === 'reminder'" v-slot:top>
-      <div class="q-table__title">{{ label || 'Payments' }}</div>
-      <q-space />
-      <template v-if="showBulkPay">
-        <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" />
-        <q-btn @click="onBulkPay" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
-          >Bulk Pay BTC</q-btn
-        >
+  <div v-if="isShowList">
+    <q-table
+      :title="label || 'Payments'"
+      :loading="loading"
+      :rows="rows"
+      :columns="columns"
+      row-key="id"
+      v-model:pagination="pagination"
+      :selection="isBulkPay ? 'multiple' : 'none'"
+      v-model:selected="selected"
+      flat
+      bordered
+      @row-click="(_, row) => goToDetail(row.id)"
+      @request="onRequest"
+    >
+      <template v-if="type === 'reminder'" v-slot:top>
+        <div class="q-table__title">{{ label || 'Payments' }}</div>
+        <q-space />
+        <template v-if="showBulkPay">
+          <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" />
+          <q-btn @click="onBulkPay" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
+            >Bulk Pay BTC</q-btn
+          >
+        </template>
       </template>
-    </template>
-    <template v-if="type === 'request'" v-slot:top-right>
-      <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
-    </template>
-    <template v-slot:body-cell-status="props">
-      <q-td :props="props">
-        <payment-status :payment="props.row" isShowApprover />
-      </q-td>
-    </template>
-  </q-table>
-  <q-dialog v-model="detailBulk">
-    <q-card style="width: 700px; max-width: 80vw">
-      <q-card-section>
-        <div class="text-h6">Bulk Pay BTC</div>
-      </q-card-section>
-      <q-card-section class="q-pt-none">
-        <q-input
-          class="q-mb-xs"
-          ref="txId"
-          outlined
-          dense
-          v-model="txId"
-          label="Enter transaction ID for bulk BTC payment"
-        />
-        <q-list bordered separator>
-          <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
-            <q-item-section>
-              <q-item-label lines="1">
-                <span class="text-weight-medium">Address: </span>
-                <span class="text-grey-8"> {{ item.paymentSettings[0].address }}</span>
-              </q-item-label>
-              <div class="row">
-                <q-item-label class="col q-my-sm" lines="1">Amount(USD): {{ item.amount }}</q-item-label>
-                <q-item-label class="col q-my-sm" lines="1">Amount(BTC): {{ item.expectedAmount }}</q-item-label>
-              </div>
-              <div class="row">
-                <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
-              </div>
-            </q-item-section>
-          </q-item>
-        </q-list>
-      </q-card-section>
-      <q-card-actions align="right" class="bg-white text-teal">
-        <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
-      </q-card-actions>
-    </q-card>
-  </q-dialog>
+      <template v-if="type === 'request'" v-slot:top-right>
+        <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
+      </template>
+      <template v-slot:body-cell-status="props">
+        <q-td :props="props">
+          <payment-status :payment="props.row" isShowApprover />
+        </q-td>
+      </template>
+    </q-table>
+    <q-dialog v-model="detailBulk">
+      <q-card style="width: 700px; max-width: 80vw">
+        <q-card-section>
+          <div class="text-h6">Bulk Pay BTC</div>
+        </q-card-section>
+        <q-card-section class="q-pt-none">
+          <q-input
+            class="q-mb-xs"
+            ref="txId"
+            outlined
+            dense
+            v-model="txId"
+            label="Enter transaction ID for bulk BTC payment"
+          />
+          <q-list bordered separator>
+            <q-item v-for="item in selected" :key="item.id" clickable v-ripple>
+              <q-item-section>
+                <q-item-label lines="1">
+                  <span class="text-weight-medium">Address: </span>
+                  <span class="text-grey-8"> {{ item.paymentSettings[0].address }}</span>
+                </q-item-label>
+                <div class="row">
+                  <q-item-label class="col q-my-sm" lines="1">Amount(USD): {{ item.amount }}</q-item-label>
+                  <q-item-label class="col q-my-sm" lines="1">Amount(BTC): {{ item.expectedAmount }}</q-item-label>
+                </div>
+                <div class="row">
+                  <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
+                </div>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </div>
 </template>
 
 <script>
@@ -85,6 +87,7 @@ export default {
   name: 'paymentList',
   data() {
     return {
+      isShowList: true,
       loading: false,
       pagination: {
         ...defaultPaging,
@@ -203,6 +206,9 @@ export default {
           params: f,
         })
         .then(({ payments, count }) => {
+          if (this.type == 'approval' && count == 0) {
+            this.isShowList = false
+          }
           this.loading = false
           this.rows = payments || []
           this.pagination.rowsNumber = count
