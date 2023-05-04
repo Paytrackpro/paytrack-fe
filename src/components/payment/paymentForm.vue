@@ -175,7 +175,6 @@ export default {
       immediate: true,
       handler(newPayment) {
         const payment = { ...newPayment }
-        console.log('payment detail --1111->', payment)
         this.partner.contactMethod = payment.contactMethod
         if (payment.contactMethod === 'email') {
           this.partner.value = newPayment.externalEmail
@@ -211,8 +210,6 @@ export default {
             }
           }
         }
-
-        console.log('payment detail --->', this.inPayment)
       },
     },
   },
@@ -294,14 +291,12 @@ export default {
     },
     invoicesAmount() {
       if (!this.inPayment.details) {
-        console.log('---invoicesAmount-----111------>', 0)
         return 0
       }
       let amount = 0
       for (let invoice of this.inPayment.details) {
         amount += Number(invoice.cost)
       }
-      console.log('---invoicesAmount-----111------>', amount)
       return amount.toFixed(2)
     },
   },
