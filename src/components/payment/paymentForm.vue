@@ -143,6 +143,7 @@ export default {
     user: Object,
     token: String,
     paymentType: String,
+    isEdit: Boolean,
   },
   data() {
     return {
@@ -165,7 +166,7 @@ export default {
     isInvoiceMode(value) {
       if (value) {
         // calculate amount
-        this.inPayment.amount = this.invoicesAmount
+        this.inPayment.amount = this.invoicesAmount()
       } else {
         this.inPayment.amount = 0
       }
@@ -174,6 +175,7 @@ export default {
       immediate: true,
       handler(newPayment) {
         const payment = { ...newPayment }
+        console.log('payment detail --1111->', payment)
         this.partner.contactMethod = payment.contactMethod
         if (payment.contactMethod === 'email') {
           this.partner.value = newPayment.externalEmail
@@ -185,7 +187,9 @@ export default {
         this.isInvoiceMode = payment.details.length > 0
 
         this.inPayment = payment
-        this.inPayment.hourlyRate = this.user.hourlyLaborRate
+        if (!this.isEdit) {
+          this.inPayment.hourlyRate = this.user.hourlyLaborRate
+        }
         // setup correct payment setting
         if (payment.paymentMethod && payment.paymentAddress) {
           this.setting = {
@@ -207,6 +211,8 @@ export default {
             }
           }
         }
+
+        console.log('payment detail --->', this.inPayment)
       },
     },
   },
@@ -288,12 +294,14 @@ export default {
     },
     invoicesAmount() {
       if (!this.inPayment.details) {
+        console.log('---invoicesAmount-----111------>', 0)
         return 0
       }
       let amount = 0
       for (let invoice of this.inPayment.details) {
         amount += Number(invoice.cost)
       }
+      console.log('---invoicesAmount-----111------>', amount)
       return amount.toFixed(2)
     },
   },
