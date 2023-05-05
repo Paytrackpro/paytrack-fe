@@ -24,7 +24,7 @@ add `.env` file and update `.env` file with BASE_URL=[server url]
 
 `npm run format`
 
-### Deploy to test or product (with webserver)
+### Deploy to test or production (with webserver)
 
 - Run `npm run build` or `yarn build`
 - After success you will see the path of output folder
