@@ -42,7 +42,7 @@ export default {
       if (this.user.id == this.payment.senderId) {
         return 'Sent'
       } else {
-        return 'Ready for Payment'
+        return 'Ready for Bulk BTC Payment'
       }
     },
     getSentStatus() {

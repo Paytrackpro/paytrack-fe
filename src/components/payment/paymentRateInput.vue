@@ -1,5 +1,5 @@
 <template>
-  <q-field label="Exchange Rate" stack-label>
+  <q-field v-if="isShow" label="Exchange Rate" stack-label>
     <template v-slot:control>
       <div class="self-center full-width no-outline" tabindex="0">
         {{ payment.convertRate }}
@@ -28,6 +28,7 @@ export default {
     modelValue: Object,
     readonly: Boolean,
     loading: Boolean,
+    isShow: Boolean,
   },
   methods: {
     fetchRate() {
