@@ -187,7 +187,7 @@ export default {
           field: (row) => {
             return row.paymentSettings
               .map((el) => el.type)
-              .join(',')
+              .join(', ')
               .toUpperCase()
           },
         })

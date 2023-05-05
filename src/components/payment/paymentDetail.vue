@@ -59,16 +59,17 @@
           </template>
         </q-field>
       </div>
-      <div v-if="!isApprover" class="col-4">
+      <div class="col-4">
         <PaymentRateInput
           :readonly="!processing"
+          :isShow="isShowExchangeRate"
           ref="rateInput"
           v-model="payment"
           v-model:loading="fetchingRate"
           @update:modelValue="updateLocal"
         />
       </div>
-      <div v-if="!isApprover" class="col-4">
+      <div v-if="isShowExchangeRate" class="col-4">
         <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
@@ -81,55 +82,23 @@
         </q-field>
       </div>
     </div>
-    <div v-if="user.id != payment.receiverId && !isApprover" class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
-        <q-select
-          v-if="processing"
-          v-model="payment.paymentMethod"
-          :options="methods"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          label="Payment method"
-          @update:modelValue="methodChange"
-          :rules="[(val) => !!val || 'Payment method is required']"
-        />
-        <q-field v-else label="Payment method" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.paymentMethod }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-8">
-        <q-field :label="`Payment address (${payment.paymentMethod})`" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
-              {{ payment.paymentAddress }}
-            </div>
-          </template>
-          <template v-slot:after>
-            <q-btn round dense flat icon="content_copy" @click="copy(payment.paymentAddress || '')" />
-          </template>
-        </q-field>
-      </div>
-    </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div
-        v-if="payment.paymentSettings && payment.paymentSettings.length && !isApprover && user.id != payment.receiverId"
-        class="col-12"
-      >
+      <div v-if="isEditPaymentSetting" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
-      <div v-if="isApprover" class="col-12">
+      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidSatus)" class="col-12">
         <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
+      </div>
+      <div v-if="!isApprover && isPaidSatus" class="col-12">
+        <p>
+          <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
+          >{{ payment.paymentAddress }}
+        </p>
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div
-        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
+        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
         class="col-12"
       >
         <payment-setting-method
@@ -153,7 +122,7 @@
           lazy-rules
           stack-label
         />
-        <q-field v-if="!processing" label="Transaction id" stack-label>
+        <q-field v-if="isPaidSatus" label="Transaction id" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.txId }}
@@ -163,7 +132,7 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-3">
+      <div v-if="!isDraftSatus" class="col-3">
         <q-field label="Received" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -172,7 +141,7 @@
           </template>
         </q-field>
       </div>
-      <div v-if="!isApprover" class="col-3">
+      <div v-if="!isApprover && isPaidSatus" class="col-3">
         <q-field label="Paid At" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -475,12 +444,13 @@ export default {
       role: 'user/getRole',
     }),
     statusOption() {
-      let status = [
-        {
-          label: 'Ready for Payment',
+      let status = []
+      if (this.payment.paymentMethod == 'btc') {
+        status.push({
+          label: 'Ready for Bulk BTC Payment',
           value: 'confirmed',
-        },
-      ]
+        })
+      }
       if (this.payment.approvers && this.payment.approvers.length > 0) {
         if (this.isPaymentApproved()) {
           status.push({
@@ -540,6 +510,22 @@ export default {
         return false
       }
       return this.payment.details.length > 0
+    },
+    isReceiver() {
+      return this.user.id == this.payment.receiverId
+    },
+    isEditPaymentSetting() {
+      const isPaymentSettingExist = this.payment.paymentSettings && this.payment.paymentSettings.length
+      return isPaymentSettingExist && !this.isApprover && !this.isReceiver && !this.isPaidSatus
+    },
+    isPaidSatus() {
+      return this.payment.status == 'paid'
+    },
+    isDraftSatus() {
+      return this.payment.status == 'draft'
+    },
+    isShowExchangeRate() {
+      return !this.isApprover && (this.payment.status == 'paid' || this.processing)
     },
   },
 }
