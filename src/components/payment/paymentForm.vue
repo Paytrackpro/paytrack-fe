@@ -58,7 +58,7 @@
           dense
           lazy-rules
           stack-label
-          :rules="[(val) => val > 0 || 'Please input amount or fill up the invoices and hourly rate']"
+          :rules="[(val) => val > 0 || inputAmountMessage]"
         >
           <template v-slot:prepend>
             <q-icon name="attach_money" />
@@ -303,6 +303,9 @@ export default {
   computed: {
     canEditInvoice: function () {
       return this.user.id === this.inPayment.senderId
+    },
+    inputAmountMessage() {
+      return this.isInvoiceMode ? 'Enter invoice details below' : 'Please enter amount'
     },
   },
 }

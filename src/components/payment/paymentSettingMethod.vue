@@ -70,7 +70,7 @@ export default {
       let datas = this.modelValue || []
       datas.forEach((el) => {
         methods.push({
-          label: 'PAY WITH ' + el.type.toUpperCase(),
+          label: el.type.toUpperCase(),
           value: el.type,
         })
       })

@@ -505,7 +505,7 @@ export default {
       if (this.payment.paymentSettings && this.payment.paymentSettings.length) {
         return this.payment.paymentSettings
           .map((el) => el.type)
-          .join(',')
+          .join(', ')
           .toUpperCase()
       }
       return ''

@@ -30,12 +30,21 @@
       </q-card>
     </div>
   </div>
+  <div class="row q-mt-md">
+    <div class="col-12">
+      <payment-list ref="paymentList" type="approval" label="Pending Approvals" />
+    </div>
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import { PaymentList } from 'components/payment'
 export default {
   name: 'userHome',
+  components: {
+    PaymentList,
+  },
   data() {
     return {}
   },
