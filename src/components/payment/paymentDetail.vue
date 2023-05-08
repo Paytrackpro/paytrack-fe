@@ -5,7 +5,7 @@
       <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
+      <div class="col-4" v-if="!(payment.senderId === user.id && payment.status === 'sent')">
         <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -14,7 +14,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div class="col-4" v-if="payment.receiverId != user.id">
         <q-field label="Recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
