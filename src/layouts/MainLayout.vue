@@ -3,7 +3,7 @@
     <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-toolbar-title> {{ $route.meta.title || 'MGMT' }} </q-toolbar-title>
-        <q-btn flat>
+        <q-btn flat no-caps>
           {{ user.userName }}
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">

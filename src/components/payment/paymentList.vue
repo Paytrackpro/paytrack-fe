@@ -9,6 +9,7 @@
       v-model:pagination="pagination"
       :selection="isBulkPay ? 'multiple' : 'none'"
       v-model:selected="selected"
+      :hide-bottom="pagination.rowsNumber < 10"
       flat
       bordered
       @row-click="(_, row) => goToDetail(row.id)"

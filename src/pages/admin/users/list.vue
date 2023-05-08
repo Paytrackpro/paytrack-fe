@@ -8,6 +8,7 @@
       flat
       bordered
       v-model:pagination="pagination"
+      :hide-bottom="pagination.rowsNumber < 10"
       :loading="loading"
       :filter="KeySearch"
       @request="onRequest"
