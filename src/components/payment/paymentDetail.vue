@@ -5,7 +5,7 @@
       <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
+      <div class="col-4" v-if="payment.senderId !== user.id">
         <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -14,7 +14,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div class="col-4" v-if="payment.receiverId != user.id">
         <q-field label="Recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -209,6 +209,27 @@
         class="q-mr-sm"
       />
       <q-btn
+        v-if="isDraftSatus && editable"
+        label="Delete Draft"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="confirm = true"
+        class="q-mr-sm"
+      />
+      <q-dialog v-model="confirm" persistent>
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="warning" color="primary" text-color="white" />
+            <span class="q-ml-sm">Are you sure to delete this draft payment request?</span>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
+            <q-btn flat label="Cancel" color="primary" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <q-btn
         label="Approve"
         type="button"
         color="teal"
@@ -263,6 +284,7 @@ export default {
       payment: {},
       paymentRejectDialog: false,
       paymentStatus: '',
+      confirm: false,
     }
   },
   props: {
@@ -412,6 +434,25 @@ export default {
         message: 'copied.',
         position: 'bottom',
       })
+    },
+    deleteDraft() {
+      this.$api
+        .delete(`/payment/delete/${this.payment.id}`)
+        .then(() => {
+          this.$q.notify({
+            message: 'Draft has been deleted',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.back()
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    back() {
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
     },
   },
   watch: {

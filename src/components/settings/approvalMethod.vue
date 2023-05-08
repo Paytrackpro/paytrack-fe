@@ -52,6 +52,7 @@
         :columns="columns"
         row-key="name"
         v-model:pagination="pagination"
+        :hide-bottom="pagination.rowsNumber < 10"
         flat
         bordered
       >
