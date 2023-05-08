@@ -90,6 +90,32 @@
                         </template>
                       </q-input>
                     </div>
+                    <div>
+                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name</p>
+                      <q-input
+                        v-model="displayName"
+                        placeholder="Your Display Name (optional)"
+                        outlined
+                        dense
+                        lazy-rules
+                        stack-label
+                        hide-bottom-space
+                      >
+                      </q-input>
+                    </div>
+                    <div>
+                      <p class="q-mt-none q-mb-xs text-weight-medium">Company Name</p>
+                      <q-input
+                        v-model="companyName"
+                        placeholder="Your Company Name (optional)"
+                        outlined
+                        dense
+                        lazy-rules
+                        stack-label
+                        hide-bottom-space
+                      >
+                      </q-input>
+                    </div>
                     <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
                     <q-btn label="Create" type="submit" color="primary" class="full-width" :loading="loading" />
                   </q-form>
@@ -114,9 +140,11 @@ export default {
   data() {
     return {
       username: '',
+      displayName: '',
       email: '',
       password: '',
       passwordCfm: '',
+      companyName: '',
       isPwd: true,
       loading: false,
       error: null,
@@ -128,6 +156,8 @@ export default {
         .dispatch('user/register', {
           username: this.username,
           password: this.password,
+          ...(this.displayName && { displayName: this.displayName }),
+          ...(this.companyName && { companyName: this.companyName }),
           ...(this.email && { email: this.email }),
         })
         .then(() => {
