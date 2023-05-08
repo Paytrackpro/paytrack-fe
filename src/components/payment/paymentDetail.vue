@@ -5,7 +5,7 @@
       <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4" v-if="!(payment.senderId === user.id && payment.status === 'sent')">
+      <div class="col-4" v-if="payment.senderId !== user.id">
         <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -437,7 +437,7 @@ export default {
     },
     deleteDraft() {
       this.$api
-        .put('/payment/delete', this.payment)
+        .delete(`/payment/delete/${this.payment.id}`)
         .then(() => {
           this.$q.notify({
             message: 'Draft has been deleted',

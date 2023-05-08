@@ -91,23 +91,10 @@
                       </q-input>
                     </div>
                     <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name</p>
+                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name/Company Name</p>
                       <q-input
                         v-model="displayName"
                         placeholder="Your Display Name (optional)"
-                        outlined
-                        dense
-                        lazy-rules
-                        stack-label
-                        hide-bottom-space
-                      >
-                      </q-input>
-                    </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Company Name</p>
-                      <q-input
-                        v-model="companyName"
-                        placeholder="Your Company Name (optional)"
                         outlined
                         dense
                         lazy-rules
@@ -144,7 +131,6 @@ export default {
       email: '',
       password: '',
       passwordCfm: '',
-      companyName: '',
       isPwd: true,
       loading: false,
       error: null,
@@ -157,7 +143,6 @@ export default {
           username: this.username,
           password: this.password,
           ...(this.displayName && { displayName: this.displayName }),
-          ...(this.companyName && { companyName: this.companyName }),
           ...(this.email && { email: this.email }),
         })
         .then(() => {
