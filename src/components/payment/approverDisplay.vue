@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="q-mt-sm">Approver</p>
+    <p><b>Approvers</b></p>
     <div class="q-gutter-xs">
       <q-chip
         v-for="item in approvers"
