@@ -1,10 +1,25 @@
 <template>
   <q-form v-if="isShowForm" @submit.prevent="onSubmit">
     <q-card class="row q-pa-md" flat bordered>
-      <div class="col-6">
+      <div class="col">
         <div class="text-h6">Setup authenticator app</div>
         <p>Scan the QR code</p>
-        <q-img :src="qrImage" width="200px" height="200px"></q-img>
+        <div class="row">
+          <div class="col">
+            <q-img :src="qrImage" width="200px" height="200px"></q-img>
+          </div>
+          <div class="col">
+            <div class="q-mb-md"><b>Can't scan the code?</b></div>
+            <div class="q-mb-md">
+              To add the entry manually, provide the following details to the application on your phone.
+            </div>
+            <div>Account: {{ qrAccount }}</div>
+            <div>
+              Key: <code>{{ qrKey }}</code>
+            </div>
+            <div>Time based: Yes</div>
+          </div>
+        </div>
         <p>
           Use an authenticator app from your phone to scan.<br />
           Enter the 6-digit code from your authenticator app below.
@@ -35,6 +50,8 @@ export default {
     ...mapGetters({
       user: 'user/getUser',
       qrImage: 'user/getQrImage',
+      qrAccount: 'user/getQrAccount',
+      qrKey: 'user/getQrKey',
       tempPassword: 'user/getTempPassword',
     }),
     isShowForm() {
