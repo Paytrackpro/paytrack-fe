@@ -1,4 +1,5 @@
 <template>
+  <q-btn label="Back" type="button" color="primary" class="q-mb-md" @click="back" />
   <q-card flat bordered class="q-pa-md">
     <q-card-section>
       <div class="text-h6">
@@ -66,6 +67,9 @@ export default {
     this.fetchData()
   },
   methods: {
+    back() {
+      this.$router.back()
+    },
     fetchData() {
       const token = this.$route.params.token || ''
       this.loading = true
