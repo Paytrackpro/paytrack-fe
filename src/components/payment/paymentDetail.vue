@@ -136,7 +136,7 @@
         <q-field label="Received" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <m-date :date="payment.createdAt"></m-date>
+              <m-time :time="payment.createdAt"></m-time>
             </div>
           </template>
         </q-field>
@@ -145,7 +145,7 @@
         <q-field label="Paid At" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <m-date :date="payment.paidAt"></m-date>
+              <m-time :time="payment.paidAt"></m-time>
             </div>
           </template>
         </q-field>
@@ -251,7 +251,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import MDate from 'components/common/mDate'
+import MTime from 'components/common/mTime'
 import PaymentSetting from 'components/payment/paymentSetting'
 import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
@@ -264,7 +264,7 @@ import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 export default {
   name: 'paymentDetail',
   components: {
-    MDate,
+    MTime,
     PaymentSetting,
     PaymentStatus,
     PaymentRateInput,
