@@ -96,6 +96,7 @@
     <div class="row q-py-md" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
+          ref="invoiceMode"
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :hourlyRate="Number(inPayment.hourlyRate)"
@@ -221,10 +222,19 @@ export default {
       if (this.submitting || !this.partner.contactMethod) {
         return
       }
+
+      if (this.$refs.invoiceMode.getState()) {
+        this.$q.notify({
+          type: 'negative',
+          message: 'Please complete the invoice',
+          position: 'bottom',
+        })
+        return
+      }
+
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
       const valid = await this.$refs.paymentForm.validate()
-      const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
-      if (!valid || !settingValid) {
+      if (!valid) {
         return
       }
       if (this.inPayment.paymentSettings.length == 0) {
