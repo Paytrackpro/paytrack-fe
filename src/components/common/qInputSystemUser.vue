@@ -5,7 +5,7 @@
     @blur="checkingDestination"
     :error="partnerError"
     :error-message="error"
-    hint="expect an user name on mgmt or an email address"
+    hint="expects a username on mgmt or an email address"
   >
     <template v-slot:prepend>
       <q-icon name="person_add" />
