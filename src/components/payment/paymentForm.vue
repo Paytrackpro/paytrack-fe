@@ -41,7 +41,7 @@
           stack-label
           hide-bottom-space
           :rules="[(val) => !!val || 'Recipient is required']"
-          hint="expect an user name on mgmt or an email address"
+          hint="expects a username on mgmt or an email address"
         />
       </div>
     </div>
