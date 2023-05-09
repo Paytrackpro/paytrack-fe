@@ -88,8 +88,8 @@
           type="number"
           outlined
           dense
-          lazy-rules
           stack-label
+          :rules="priceRules"
         />
       </div>
     </div>
@@ -160,6 +160,12 @@ export default {
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
       inPayment: {},
+      priceRules: [
+        (v) =>
+          (v && v.toString().split('.').length < 2) ||
+          (v && v.toString().split('.')[1].length <= 2) ||
+          'No more than 2 digits after the decimal point',
+      ],
     }
   },
   watch: {
