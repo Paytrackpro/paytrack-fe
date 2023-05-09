@@ -1,8 +1,19 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row q-mb-md q-col-gutter-md">
-      <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
+    <div class="row justify-between">
+      <div v-if="!isDraftSatus" class="col-3">
+        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+              <m-date :date="payment.createdAt"></m-date>
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-3 q-mb-md">
+        <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
+      </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-4" v-if="payment.senderId !== user.id">
@@ -83,6 +94,12 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
+      <div class="col">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
+        <q-input v-model="payment.description" readonly outlined type="textarea" />
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div v-if="isEditPaymentSetting" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
@@ -132,15 +149,6 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="!isDraftSatus" class="col-3">
-        <q-field label="Received" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-date :date="payment.createdAt"></m-date>
-            </div>
-          </template>
-        </q-field>
-      </div>
       <div v-if="!isApprover && isPaidSatus" class="col-3">
         <q-field label="Paid At" stack-label>
           <template v-slot:control>
@@ -149,12 +157,6 @@
             </div>
           </template>
         </q-field>
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" />
       </div>
     </div>
     <div class="row q-mt-md" v-if="isShowInvoice">
@@ -554,6 +556,9 @@ export default {
     },
     isReceiver() {
       return this.user.id == this.payment.receiverId
+    },
+    isSender() {
+      return this.payment.senderId === this.user.id
     },
     isEditPaymentSetting() {
       const isPaymentSettingExist = this.payment.paymentSettings && this.payment.paymentSettings.length
