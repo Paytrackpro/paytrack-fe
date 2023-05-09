@@ -136,7 +136,7 @@
         <q-field label="Received" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.createdAt"></m-time>
+              <m-time :time="payment.sentAt"></m-time>
             </div>
           </template>
         </q-field>
