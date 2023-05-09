@@ -10,6 +10,12 @@ export default {
   getQrImage(state) {
     return state.qrImage
   },
+  getQrKey(state) {
+    return state.qrKey
+  },
+  getQrAccount(state) {
+    return state.qrAccount
+  },
   isAuthenticated(state) {
     return state.authenticated
   },

@@ -95,6 +95,8 @@ export default {
         icon: 'done',
       })
       commit('setQrImage', res.mfa_qr_image)
+      commit('setQrKey', res.secret_key)
+      commit('setQrAccount', res.account)
       commit('setTempPassword', body.password)
       return true
     } catch (error) {

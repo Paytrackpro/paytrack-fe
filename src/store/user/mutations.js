@@ -6,6 +6,12 @@ export default {
   setQrImage(state, val) {
     state.qrImage = val
   },
+  setQrKey(state, val) {
+    state.qrKey = val
+  },
+  setQrAccount(state, val) {
+    state.qrAccount = val
+  },
   setTempPassword(state, val) {
     state.tempPassword = val
   },
