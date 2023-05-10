@@ -41,7 +41,7 @@
           stack-label
           hide-bottom-space
           :rules="[(val) => !!val || 'Recipient is required']"
-          hint="expect an user name on mgmt or an email address"
+          hint="expects a username on mgmt or an email address"
         />
       </div>
     </div>
@@ -96,6 +96,7 @@
     <div class="row q-py-md" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
+          ref="invoiceMode"
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :hourlyRate="Number(inPayment.hourlyRate)"
@@ -227,13 +228,24 @@ export default {
       if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
       }
+
+      if (this.isInvoiceMode) {
+        if (this.$refs.invoiceMode.getState()) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Please complete the invoice',
+            position: 'bottom',
+          })
+          return
+        }
+      }
+
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
       var valid
       if (!isDraft) {
         valid = await this.$refs.paymentForm.validate()
       }
-      const settingValid = await this.$refs.setting.$refs.selectedCoins.validate()
-      if ((!isDraft && !valid) || !settingValid) {
+      if (!isDraft && !valid) {
         return
       }
       if (this.inPayment.paymentSettings.length == 0) {

@@ -30,5 +30,7 @@ export default {
   user: setUser(),
   role: null,
   qrImage: '',
+  qrAccount: '',
+  qrKey: '',
   tempPassword: '',
 }

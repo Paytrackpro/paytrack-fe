@@ -4,19 +4,22 @@
       <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
     </div>
     <div v-if="!readonly" class="col-3">
-      <q-select
-        filled
-        ref="selectedCoins"
-        v-model="selectedCoins"
-        multiple
-        :options="coins"
-        use-chips
-        stack-label
-        lazy-rules
+      <q-field
+        :model-value="selectedCoins"
         label="Coins you accept"
-        @update:model-value="changeCoins"
+        stack-label
         :rules="[(val) => (val !== null && val.length !== 0) || 'Please select the coin types you accept for payment']"
-      />
+      >
+        <template v-slot:control>
+          <q-option-group
+            :options="coins"
+            type="checkbox"
+            inline
+            v-model="selectedCoins"
+            @update:model-value="changeCoins"
+          />
+        </template>
+      </q-field>
     </div>
     <div class="col">
       <q-markup-table v-if="settings && settings.length">
@@ -80,7 +83,7 @@ export default {
       for (let coin of coins) {
         let found = false
         for (let setting of settings) {
-          if (setting.type === coin.value) {
+          if (setting.type === coin) {
             found = true
             newSettings.push({
               type: setting.type,
@@ -90,7 +93,7 @@ export default {
         }
         if (!found) {
           newSettings.push({
-            type: coin.value,
+            type: coin,
             address: '',
           })
         }
@@ -110,9 +113,12 @@ export default {
       immediate: true,
       handler(newVal) {
         this.settings = cloneObject(newVal || [])
-        const selectedCoins = []
+        let selectedCoins = []
         for (let setting of this.settings) {
-          selectedCoins.push(this.getSelectedCoin(setting.type))
+          const coin = this.getSelectedCoin(setting.type)
+          if (coin) {
+            selectedCoins.push(coin.value)
+          }
         }
         this.selectedCoins = selectedCoins
       },

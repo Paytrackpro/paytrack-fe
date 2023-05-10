@@ -60,6 +60,9 @@ export default {
     }
   },
   methods: {
+    getState() {
+      return this.creating
+    },
     newInvoice(newInv) {
       const invoices = [...this.invoices, newInv]
       this.$emit('update:modelValue', invoices)
