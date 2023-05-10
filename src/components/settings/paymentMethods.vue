@@ -1,7 +1,15 @@
 <template>
   <q-form @submit="submit">
     <div class="row q-mb-md">
-      <q-input type="number" dense outlined v-model="hourlyLaborRate" label="Hour Rate (USD/h)" />
+      <q-input
+        type="number"
+        step="any"
+        dense
+        outlined
+        v-model="hourlyLaborRate"
+        label="Hour Rate (USD/h)"
+        :rules="priceRules"
+      />
     </div>
     <div class="row q-mb-md q-col-gutter-md profile-padding">
       <div class="col-12">
@@ -31,6 +39,12 @@ export default {
     return {
       user: {},
       loading: false,
+      priceRules: [
+        (v) =>
+          (v && v.toString().split('.').length < 2) ||
+          (v && v.toString().split('.')[1].length <= 2) ||
+          'No more than 2 digits after the decimal point',
+      ],
     }
   },
   emits: ['update:modelValue'],

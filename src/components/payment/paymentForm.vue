@@ -88,8 +88,8 @@
           type="number"
           outlined
           dense
-          lazy-rules
           stack-label
+          :rules="priceRules"
         />
       </div>
     </div>
@@ -105,14 +105,14 @@
     </div>
     <div class="row justify-end q-gutter-sm">
       <q-btn
-        :label="inPayment.status === '' ? 'Mark as draft' : 'Update'"
+        :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
         type="button"
         color="primary"
         @click="submit(true)"
         :disable="submitting"
       >
         <q-tooltip v-if="inPayment.status === ''">
-          'Mark as draft' will not notify the payment to the recipient
+          'Save as draft' will not notify the payment to the recipient
         </q-tooltip>
       </q-btn>
       <q-btn
@@ -161,6 +161,12 @@ export default {
       paymentMethods: PAYMENT_TYPE_OPTIONS,
       submitting: false,
       inPayment: {},
+      priceRules: [
+        (v) =>
+          (v && v.toString().split('.').length < 2) ||
+          (v && v.toString().split('.')[1].length <= 2) ||
+          'No more than 2 digits after the decimal point',
+      ],
     }
   },
   watch: {
@@ -219,28 +225,31 @@ export default {
       savePayment: 'payment/save',
     }),
     async submit(isDraft) {
-      if (this.submitting || !this.partner.contactMethod) {
+      if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
       }
 
-      if (this.$refs.invoiceMode.getState()) {
-        this.$q.notify({
-          type: 'negative',
-          message: 'Please complete the invoice',
-          position: 'bottom',
-        })
-        return
+      if (this.isInvoiceMode) {
+        if (this.$refs.invoiceMode.getState()) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Please complete the invoice',
+            position: 'bottom',
+          })
+          return
+        }
       }
 
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
-      const valid = await this.$refs.paymentForm.validate()
-      if (!valid) {
+      var valid
+      if (!isDraft) {
+        valid = await this.$refs.paymentForm.validate()
+      }
+      if (!isDraft && !valid) {
         return
       }
-      if (this.inPayment.paymentSettings.length == 0) {
-        return
-      }
-      if (!this.inPayment.amount > 0) {
+
+      if (!isDraft && !this.inPayment.amount > 0) {
         this.$q.notify({
           type: 'negative',
           message:
@@ -250,18 +259,20 @@ export default {
       }
       const payment = { ...this.inPayment }
       payment.hourlyRate = Number(payment.hourlyRate)
-      payment.contactMethod = inPutObject.contactMethod
       if (isDraft !== true) {
         payment.status = 'sent'
       }
-      if (payment.contactMethod === 'email') {
-        if (!payment.id || this.user.id === payment.senderId) {
-          payment.externalEmail = inPutObject.value
+      if (!isDraft || (isDraft && inPutObject && inPutObject.value)) {
+        payment.contactMethod = inPutObject.contactMethod
+        if (payment.contactMethod === 'email') {
+          if (!payment.id || this.user.id === payment.senderId) {
+            payment.externalEmail = inPutObject.value
+          }
         }
+        payment.receiverId = inPutObject.id
       }
       payment.paymentMethod = this.setting.type
       payment.paymentAddress = this.setting.address
-      payment.receiverId = inPutObject.id
       payment.token = this.token
       this.submitting = true
       let successNotify = 'Payment request created'
