@@ -248,9 +248,7 @@ export default {
       if (!isDraft && !valid) {
         return
       }
-      if (this.inPayment.paymentSettings.length == 0) {
-        return
-      }
+
       if (!isDraft && !this.inPayment.amount > 0) {
         this.$q.notify({
           type: 'negative',
