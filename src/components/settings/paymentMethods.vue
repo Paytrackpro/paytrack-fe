@@ -1,7 +1,15 @@
 <template>
   <q-form @submit="submit">
     <div class="row q-mb-md">
-      <q-input type="number" dense outlined v-model="hourlyLaborRate" label="Hour Rate (USD/h)" :rules="priceRules" />
+      <q-input
+        type="number"
+        step="any"
+        dense
+        outlined
+        v-model="hourlyLaborRate"
+        label="Hour Rate (USD/h)"
+        :rules="priceRules"
+      />
     </div>
     <div class="row q-mb-md q-col-gutter-md profile-padding">
       <div class="col-12">
