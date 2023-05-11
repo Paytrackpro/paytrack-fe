@@ -47,7 +47,7 @@
 
 <script>
 import { PaymentForm, PaymentDetail } from 'components/payment'
-import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_APPROVAL, PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import PaymentStatus from 'components/payment/paymentStatus'
 import MTime from 'components/common/mTime'
 import { mapGetters } from 'vuex'
@@ -72,7 +72,15 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back()
+      if (this.isApprover()) {
+        this.$router.back()
+        return
+      }
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
+    },
+    isApprover() {
+      return this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id
     },
     fetchData() {
       const token = this.$route.params.token || ''
