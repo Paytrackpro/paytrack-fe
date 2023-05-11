@@ -12,7 +12,7 @@
         </q-field>
       </div>
       <div class="col-3 q-mb-md">
-        <approver-display v-if="payment.receiverId === user.id" :approvers="payment.approvers" />
+        <approver-display v-if="displayApprovers" :approvers="payment.approvers" />
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
@@ -572,6 +572,9 @@ export default {
     },
     isShowExchangeRate() {
       return !this.isApprover && (this.payment.status == 'paid' || this.processing)
+    },
+    displayApprovers() {
+      return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
     },
   },
 }
