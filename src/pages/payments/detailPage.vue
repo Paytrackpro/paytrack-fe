@@ -44,7 +44,7 @@
 
 <script>
 import { PaymentForm, PaymentDetail } from 'components/payment'
-import { PAYMENT_OBJECT_APPROVAL, PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import PaymentStatus from 'components/payment/paymentStatus'
 import MTime from 'components/common/mTime'
 import { mapGetters } from 'vuex'

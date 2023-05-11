@@ -168,15 +168,20 @@ export default {
         })
     },
     checkValidSenderSubmit() {
-      this.$api.get(`/user/exist-checking?userName=${this.sender.value}`).then((data) => {
-        if (data.found) {
-          this.sender.status = DESTINATION_CHECK_DONE
-          this.sender.id = data.id
-          this.submitHandler()
-        } else {
+      this.$api
+        .get(`/user/exist-checking?userName=${this.sender.value}`)
+        .then((data) => {
+          if (data.found) {
+            this.sender.status = DESTINATION_CHECK_DONE
+            this.sender.id = data.id
+            this.submitHandler()
+          } else {
+            return
+          }
+        })
+        .catch((err) => {
           return
-        }
-      })
+        })
     },
     checkValidApprovers() {
       this.approver.status = DESTINATION_CHECK_CHECKING
@@ -203,15 +208,20 @@ export default {
     checkValidApproversSubmit() {
       const value = this.approver.value.replace(/,\s*$/, '')
       this.approver.value = value
-      this.$api.get(`/user/exists?userNames=${value}`).then((data) => {
-        if (data && data.length) {
-          this.approver.status = DESTINATION_CHECK_DONE
-          this.approver.ids = data.map((item) => item.id)
-          this.submitHandler()
-        } else {
+      this.$api
+        .get(`/user/exists?userNames=${value}`)
+        .then((data) => {
+          if (data && data.length) {
+            this.approver.status = DESTINATION_CHECK_DONE
+            this.approver.ids = data.map((item) => item.id)
+            this.submitHandler()
+          } else {
+            return
+          }
+        })
+        .catch((err) => {
           return
-        }
-      })
+        })
     },
     getList() {
       this.loading = true
