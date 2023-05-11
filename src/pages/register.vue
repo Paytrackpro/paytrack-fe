@@ -27,6 +27,19 @@
                       </q-input>
                     </div>
                     <div>
+                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name/Company Name</p>
+                      <q-input
+                        v-model="displayName"
+                        placeholder="Your Display Name (optional)"
+                        outlined
+                        dense
+                        lazy-rules
+                        stack-label
+                        hide-bottom-space
+                      >
+                      </q-input>
+                    </div>
+                    <div>
                       <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
                       <q-input
                         v-model="email"
@@ -88,19 +101,6 @@
                             @click="isPwd = !isPwd"
                           />
                         </template>
-                      </q-input>
-                    </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name/Company Name</p>
-                      <q-input
-                        v-model="displayName"
-                        placeholder="Your Display Name (optional)"
-                        outlined
-                        dense
-                        lazy-rules
-                        stack-label
-                        hide-bottom-space
-                      >
                       </q-input>
                     </div>
                     <p v-if="error" class="q-mb-none text-red">{{ error }}</p>

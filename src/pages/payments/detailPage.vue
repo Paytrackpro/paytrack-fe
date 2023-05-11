@@ -4,15 +4,12 @@
     <q-card-section>
       <div class="text-h6">
         Payment request
-        <template v-if="payment.status">
-          (<payment-status :payment="payment" />)
-          <q-icon name="info" color="red" v-if="payment.status === 'rejected'">
-            <q-tooltip class="bg-red rejection-reason" :offset="[10, 10]" max-width="40vw">
-              {{ payment.rejectionReason }}
-            </q-tooltip>
-          </q-icon>
-        </template>
+        <template v-if="payment.status"> (<payment-status :payment="payment" />) </template>
       </div>
+      <p class="text-red" v-if="payment.status === 'rejected'">
+        <q-icon name="info" color="red" />
+        <b>Rejected Reason:</b> {{ payment.rejectionReason }}
+      </p>
       <small>
         <em>Last Edited: <m-time :time="payment.updatedAt"></m-time></em>
       </small>
@@ -72,7 +69,15 @@ export default {
   },
   methods: {
     back() {
-      this.$router.back()
+      if (this.isApprover()) {
+        this.$router.back()
+        return
+      }
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
+    },
+    isApprover() {
+      return this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id
     },
     fetchData() {
       const token = this.$route.params.token || ''
