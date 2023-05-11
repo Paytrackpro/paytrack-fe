@@ -39,7 +39,7 @@
         <q-btn
           label="Save"
           class="q-mr-xs q-mt-lg"
-          :disable="!saveButtonReady"
+          :disable="loading"
           style="height: 40px"
           type="submit"
           color="primary"
@@ -148,7 +148,6 @@ export default {
   },
   methods: {
     checkValidSender() {
-      this.senderFocus = false
       this.sender.status = DESTINATION_CHECK_CHECKING
       this.$api
         .get(`/user/exist-checking?userName=${this.sender.value}`)
@@ -160,14 +159,26 @@ export default {
             this.sender.status = DESTINATION_CHECK_FAIL
             this.sender.error = data.message
           }
+          this.senderFocus = false
         })
         .catch(() => {
           this.sender.status = DESTINATION_CHECK_FAIL
           this.sender.error = 'the user name is not found'
+          this.senderFocus = false
         })
     },
+    checkValidSenderSubmit() {
+      this.$api.get(`/user/exist-checking?userName=${this.sender.value}`).then((data) => {
+        if (data.found) {
+          this.sender.status = DESTINATION_CHECK_DONE
+          this.sender.id = data.id
+          this.submitHandler()
+        } else {
+          return
+        }
+      })
+    },
     checkValidApprovers() {
-      this.approverFocus = false
       this.approver.status = DESTINATION_CHECK_CHECKING
       const value = this.approver.value.replace(/,\s*$/, '')
       this.approver.value = value
@@ -181,11 +192,26 @@ export default {
             this.approver.status = DESTINATION_CHECK_FAIL
             this.approver.error = data.message
           }
+          this.approverFocus = false
         })
         .catch((err) => {
           this.approver.status = DESTINATION_CHECK_FAIL
           this.approver.error = err.message || 'the user name is not found'
+          this.approverFocus = false
         })
+    },
+    checkValidApproversSubmit() {
+      const value = this.approver.value.replace(/,\s*$/, '')
+      this.approver.value = value
+      this.$api.get(`/user/exists?userNames=${value}`).then((data) => {
+        if (data && data.length) {
+          this.approver.status = DESTINATION_CHECK_DONE
+          this.approver.ids = data.map((item) => item.id)
+          this.submitHandler()
+        } else {
+          return
+        }
+      })
     },
     getList() {
       this.loading = true
@@ -202,6 +228,18 @@ export default {
         })
     },
     async submit() {
+      if (!this.checkDestinationDone()) {
+        if (this.senderFocus) {
+          this.checkValidSenderSubmit()
+        }
+        if (this.approverFocus) {
+          this.checkValidApproversSubmit()
+        }
+        return
+      }
+      this.submitHandler()
+    },
+    submitHandler() {
       this.loading = true
       let list = []
       if (this.rows) {
@@ -269,6 +307,14 @@ export default {
           this.loading = false
         })
     },
+    checkDestinationDone: function () {
+      return (
+        !this.senderFocus &&
+        !this.approverFocus &&
+        this.sender.status === DESTINATION_CHECK_DONE &&
+        this.approver.status === DESTINATION_CHECK_DONE
+      )
+    },
   },
 
   computed: {
@@ -277,15 +323,6 @@ export default {
     },
     approverError: function () {
       return this.approver.status === DESTINATION_CHECK_FAIL
-    },
-    saveButtonReady: function () {
-      return (
-        !this.senderFocus &&
-        !this.approverFocus &&
-        !this.loading &&
-        this.sender.status === DESTINATION_CHECK_DONE &&
-        this.approver.status === DESTINATION_CHECK_DONE
-      )
     },
   },
   created() {
