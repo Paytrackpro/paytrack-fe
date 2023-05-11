@@ -12,6 +12,7 @@
           :rules="[(val) => !!val || 'Sender is required']"
           :error="senderError"
           :error-message="sender.error"
+          @focus="senderFocus = true"
           hide-bottom-space
           v-model="sender.value"
           placeholder="Sender"
@@ -28,6 +29,7 @@
           :rules="[(val) => !!val || 'Approvers is required']"
           :error="approverError"
           :error-message="approver.error"
+          @focus="approverFocus = true"
           hide-bottom-space
           v-model="approver.value"
           placeholder="Separate with comma(,)"
@@ -37,7 +39,7 @@
         <q-btn
           label="Save"
           class="q-mr-xs q-mt-lg"
-          :disable="loading"
+          :disable="!saveButtonReady"
           style="height: 40px"
           type="submit"
           color="primary"
@@ -95,6 +97,8 @@ export default {
         error: '',
       },
       loading: false,
+      senderFocus: false,
+      approverFocus: false,
       pagination: {
         ...defaultPaging,
       },
@@ -144,6 +148,7 @@ export default {
   },
   methods: {
     checkValidSender() {
+      this.senderFocus = false
       this.sender.status = DESTINATION_CHECK_CHECKING
       this.$api
         .get(`/user/exist-checking?userName=${this.sender.value}`)
@@ -162,6 +167,7 @@ export default {
         })
     },
     checkValidApprovers() {
+      this.approverFocus = false
       this.approver.status = DESTINATION_CHECK_CHECKING
       const value = this.approver.value.replace(/,\s*$/, '')
       this.approver.value = value
@@ -195,11 +201,9 @@ export default {
           this.loading = false
         })
     },
-
     async submit() {
       this.loading = true
       let list = []
-
       if (this.rows) {
         list = this.rows
           .filter((item) => item.sendUserId != this.sender.id)
@@ -273,6 +277,15 @@ export default {
     },
     approverError: function () {
       return this.approver.status === DESTINATION_CHECK_FAIL
+    },
+    saveButtonReady: function () {
+      return (
+        !this.senderFocus &&
+        !this.approverFocus &&
+        !this.loading &&
+        this.sender.status === DESTINATION_CHECK_DONE &&
+        this.approver.status === DESTINATION_CHECK_DONE
+      )
     },
   },
   created() {
