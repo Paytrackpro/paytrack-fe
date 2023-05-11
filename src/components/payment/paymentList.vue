@@ -9,7 +9,10 @@
       v-model:pagination="pagination"
       :selection="isBulkPay ? 'multiple' : 'none'"
       v-model:selected="selected"
-      :hide-bottom="pagination.rowsNumber < 10"
+      :hide-pagination="pagination.rowsNumber < 10"
+      :no-data-label="
+        type === 'request' ? 'Click Create above to generate a payment request' : 'No payment requests received yet'
+      "
       flat
       bordered
       @row-click="(_, row) => goToDetail(row.id)"
@@ -32,6 +35,13 @@
         <q-td :props="props">
           <payment-status :payment="props.row" isShowApprover />
         </q-td>
+      </template>
+      <template v-slot:no-data="{ message }">
+        <div class="full-width row flex-center q-gutter-sm">
+          <span>
+            {{ message }}
+          </span>
+        </div>
       </template>
     </q-table>
     <q-dialog v-model="detailBulk">
