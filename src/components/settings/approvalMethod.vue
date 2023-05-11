@@ -12,6 +12,7 @@
           :rules="[(val) => !!val || 'Sender is required']"
           :error="senderError"
           :error-message="sender.error"
+          @focus="senderFocus = true"
           hide-bottom-space
           v-model="sender.value"
           placeholder="Sender"
@@ -28,6 +29,7 @@
           :rules="[(val) => !!val || 'Approvers is required']"
           :error="approverError"
           :error-message="approver.error"
+          @focus="approverFocus = true"
           hide-bottom-space
           v-model="approver.value"
           placeholder="Separate with comma(,)"
@@ -52,7 +54,7 @@
         :columns="columns"
         row-key="name"
         v-model:pagination="pagination"
-        :hide-bottom="pagination.rowsNumber < 10"
+        :hide-pagination="pagination.rowsNumber < 10"
         flat
         bordered
       >
@@ -95,6 +97,8 @@ export default {
         error: '',
       },
       loading: false,
+      senderFocus: false,
+      approverFocus: false,
       pagination: {
         ...defaultPaging,
       },
@@ -155,10 +159,28 @@ export default {
             this.sender.status = DESTINATION_CHECK_FAIL
             this.sender.error = data.message
           }
+          this.senderFocus = false
         })
         .catch(() => {
           this.sender.status = DESTINATION_CHECK_FAIL
           this.sender.error = 'the user name is not found'
+          this.senderFocus = false
+        })
+    },
+    checkValidSenderSubmit() {
+      this.$api
+        .get(`/user/exist-checking?userName=${this.sender.value}`)
+        .then((data) => {
+          if (data.found) {
+            this.sender.status = DESTINATION_CHECK_DONE
+            this.sender.id = data.id
+            this.submitHandler()
+          } else {
+            return
+          }
+        })
+        .catch((err) => {
+          return
         })
     },
     checkValidApprovers() {
@@ -175,10 +197,30 @@ export default {
             this.approver.status = DESTINATION_CHECK_FAIL
             this.approver.error = data.message
           }
+          this.approverFocus = false
         })
         .catch((err) => {
           this.approver.status = DESTINATION_CHECK_FAIL
           this.approver.error = err.message || 'the user name is not found'
+          this.approverFocus = false
+        })
+    },
+    checkValidApproversSubmit() {
+      const value = this.approver.value.replace(/,\s*$/, '')
+      this.approver.value = value
+      this.$api
+        .get(`/user/exists?userNames=${value}`)
+        .then((data) => {
+          if (data && data.length) {
+            this.approver.status = DESTINATION_CHECK_DONE
+            this.approver.ids = data.map((item) => item.id)
+            this.submitHandler()
+          } else {
+            return
+          }
+        })
+        .catch((err) => {
+          return
         })
     },
     getList() {
@@ -195,11 +237,21 @@ export default {
           this.loading = false
         })
     },
-
     async submit() {
+      if (!this.checkDestinationDone()) {
+        if (this.senderFocus) {
+          this.checkValidSenderSubmit()
+        }
+        if (this.approverFocus) {
+          this.checkValidApproversSubmit()
+        }
+        return
+      }
+      this.submitHandler()
+    },
+    submitHandler() {
       this.loading = true
       let list = []
-
       if (this.rows) {
         list = this.rows
           .filter((item) => item.sendUserId != this.sender.id)
@@ -264,6 +316,14 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    checkDestinationDone: function () {
+      return (
+        !this.senderFocus &&
+        !this.approverFocus &&
+        this.sender.status === DESTINATION_CHECK_DONE &&
+        this.approver.status === DESTINATION_CHECK_DONE
+      )
     },
   },
 
