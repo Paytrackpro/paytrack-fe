@@ -79,6 +79,28 @@
           </template>
         </q-field>
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div class="col">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
+        <q-input v-model="payment.description" readonly outlined type="textarea" />
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div v-if="isEditPaymentSetting" class="col-12">
+        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
+      </div>
+      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidSatus)" class="col-12">
+        <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
+      </div>
+      <div v-if="!isApprover && isPaidSatus" class="col-12">
+        <p>
+          <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
+          >{{ payment.paymentAddress }}
+        </p>
+      </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4">
         <PaymentRateInput
           :readonly="!processing"
@@ -100,26 +122,6 @@
             <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
           </template>
         </q-field>
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" />
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="isEditPaymentSetting" class="col-12">
-        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
-      </div>
-      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidSatus)" class="col-12">
-        <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
-      </div>
-      <div v-if="!isApprover && isPaidSatus" class="col-12">
-        <p>
-          <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
-          >{{ payment.paymentAddress }}
-        </p>
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
