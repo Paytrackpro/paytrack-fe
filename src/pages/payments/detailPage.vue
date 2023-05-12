@@ -7,9 +7,6 @@
         <q-icon name="info" color="red" />
         <b>Rejected Reason:</b> {{ payment.rejectionReason }}
       </p>
-      <small>
-        <em>Last Edited: <m-time :time="payment.updatedAt"></m-time></em>
-      </small>
     </q-card-section>
     <q-separator inset />
     <payment-detail
@@ -42,11 +39,10 @@
 <script>
 import { PaymentForm, PaymentDetail } from 'components/payment'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
-import MTime from 'components/common/mTime'
 import { mapGetters } from 'vuex'
 export default {
   name: 'detailPaymentPage',
-  components: { PaymentForm, PaymentDetail, MTime },
+  components: { PaymentForm, PaymentDetail },
   data() {
     return {
       loading: false,

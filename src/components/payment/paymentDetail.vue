@@ -1,8 +1,8 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row justify-between">
-      <div v-if="!isDraftSatus" class="col-3">
+    <div class="row justify-between q-mb-md q-col-gutter-md">
+      <div v-if="!isDraftSatus" class="col-12 col-sm-6 col-lg-4">
         <q-field :label="isSender ? 'Sent' : 'Received'" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -11,12 +11,21 @@
           </template>
         </q-field>
       </div>
-      <div class="col-3 q-mb-md">
+      <div class="col-12 col-sm-6 col-lg-4">
+        <q-field label="Last Edited" stack-label>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+              <m-time :time="payment.updatedAt"></m-time>
+            </div>
+          </template>
+        </q-field>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4">
         <approver-display v-if="displayApprovers" :approvers="payment.approvers" />
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4" v-if="payment.senderId !== user.id">
+      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.senderId !== user.id">
         <q-field label="Sender" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -25,7 +34,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4" v-if="payment.receiverId != user.id">
+      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.receiverId != user.id">
         <q-field label="Recipient" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -34,7 +43,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <q-select
           v-if="processing"
           v-model="paymentStatus"
@@ -58,7 +67,7 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <q-field label="Amount (USD)" stack-label>
           <template v-slot:prepend>
             <q-icon name="attach_money" />
@@ -70,7 +79,7 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <PaymentRateInput
           :readonly="!processing"
           :isShow="isShowExchangeRate"
@@ -80,7 +89,7 @@
           @update:modelValue="updateLocal"
         />
       </div>
-      <div v-if="isShowExchangeRate" class="col-4">
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-lg-4">
         <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
           <template v-slot:control>
             <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">

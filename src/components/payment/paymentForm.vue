@@ -1,7 +1,7 @@
 <template>
   <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
     <div class="row q-gutter-md">
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Recipient
           <q-icon name="info">
@@ -24,7 +24,7 @@
       </div>
     </div>
     <div class="row q-gutter-md">
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           class="no-control-button"
@@ -59,7 +59,7 @@
       <q-checkbox v-model="isInvoiceMode" label="Invoice mode" />
     </div>
     <div class="row q-gutter-md" v-if="isInvoiceMode">
-      <div class="col-3">
+      <div class="col-12 col-sm-6 col-lg-3">
         <q-input
           v-model="inPayment.hourlyRate"
           label="Hourly rate(USD/h)"
