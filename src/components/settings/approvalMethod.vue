@@ -18,7 +18,7 @@
           placeholder="Sender"
         />
       </div>
-      <div class="col-12 col-sm-6 col-lg-6">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approver Users</p>
         <q-input
           outlined
@@ -35,7 +35,10 @@
           placeholder="Separate with comma(,)"
         />
       </div>
-      <div class="col-2">
+      <div class="col-8 col-sm-10 col-lg-2">
+        <q-checkbox v-model="showCost" class="q-mr-xs q-mt-lg" label="Show Cost" />
+      </div>
+      <div class="col-4 col-sm-2 col-lg-2">
         <q-btn
           label="Save"
           class="q-mr-xs q-mt-lg"
@@ -58,6 +61,11 @@
         flat
         bordered
       >
+        <template v-slot:body-cell-showCost="props">
+          <q-td :props="props">
+            <q-checkbox :props="props" v-model="props.row.showCost" @click="updateShowCost(props)" />
+          </q-td>
+        </template>
         <template v-slot:body-cell-action="props">
           <q-td :props="props">
             <q-btn :props="props" dense round flat color="grey" @click="editRow(props)" icon="edit"></q-btn>
@@ -96,6 +104,7 @@ export default {
         status: DESTINATION_CHECK_NONE,
         error: '',
       },
+      showCost: false,
       loading: false,
       senderFocus: false,
       approverFocus: false,
@@ -121,6 +130,17 @@ export default {
           label: 'Approvers',
           field: (row) => {
             return row.approvers.map((item) => item.approverName).join(', ')
+          },
+          format: (val) => {
+            return val
+          },
+        },
+        {
+          name: 'showCost',
+          align: 'center',
+          label: 'Show cost',
+          field: (row) => {
+            return row.approvers.map((item) => item.showCost).join(', ')
           },
           format: (val) => {
             return val
@@ -259,17 +279,20 @@ export default {
             return {
               sendUserId: item.sendUserId,
               approverIds: item.approvers.map((item) => item.approverId),
+              showCost: item.showCost,
             }
           })
       }
       list.push({
         sendUserId: this.sender.id,
         approverIds: this.approver.ids,
+        showCost: this.showCost,
       })
       const data = {
         list,
       }
       this.save(data)
+      this.showCost = false
     },
     editRow(row) {
       const data = row.row
@@ -284,6 +307,7 @@ export default {
         status: DESTINATION_CHECK_DONE,
         error: '',
       }
+      this.showCost = data.showCost
     },
     deleteRow(row) {
       if (confirm('Are you sure to remove this?')) {
@@ -295,6 +319,7 @@ export default {
               return {
                 sendUserId: item.sendUserId,
                 approverIds: item.approvers.map((item) => item.approverId),
+                showCost: item.showCost,
               }
             })
         }
@@ -324,6 +349,22 @@ export default {
         this.sender.status === DESTINATION_CHECK_DONE &&
         this.approver.status === DESTINATION_CHECK_DONE
       )
+    },
+    updateShowCost(props) {
+      let list = []
+      if (this.rows) {
+        list = this.rows.map((item) => {
+          return {
+            sendUserId: item.sendUserId,
+            approverIds: item.approvers.map((item) => item.approverId),
+            showCost: item.showCost,
+          }
+        })
+      }
+      const data = {
+        list,
+      }
+      this.save(data)
     },
   },
 

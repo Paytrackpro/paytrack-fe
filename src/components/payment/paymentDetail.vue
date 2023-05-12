@@ -168,12 +168,17 @@
         </q-field>
       </div>
     </div>
-    <div class="row q-mt-md" v-if="isShowInvoice">
+    <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
       <p><b class="text-weight-medium">Hourly rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
     </div>
     <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
       <div class="col">
-        <invoices-mode v-model="payment.details" readonly :hourlyRate="Number(payment.hourlyRate)" />
+        <invoices-mode
+          v-model="payment.details"
+          readonly
+          :hourlyRate="Number(payment.hourlyRate)"
+          :showCost="isShowCost"
+        />
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -584,6 +589,17 @@ export default {
     },
     displayApprovers() {
       return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
+    },
+    isShowCost() {
+      var isShowCost = true
+      let approver = this.payment.approvers || []
+      approver.forEach((el) => {
+        if (el.approverId == this.user.id) {
+          isShowCost = el.showCost
+          return
+        }
+      })
+      return isShowCost
     },
   },
 }
