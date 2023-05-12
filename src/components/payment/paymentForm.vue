@@ -3,28 +3,6 @@
     <div class="row q-gutter-md">
       <div class="col-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
-          Sender
-          <q-icon name="info">
-            <q-tooltip> You are the sender of the payment request to the recipient </q-tooltip>
-          </q-icon>
-        </p>
-        <q-input
-          v-model="inPayment.senderName"
-          placeholder="Sender"
-          readonly
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">
           Recipient
           <q-icon name="info">
             <q-tooltip> The user who will be paying the payment request </q-tooltip>
