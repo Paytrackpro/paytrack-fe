@@ -78,6 +78,7 @@
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :hourlyRate="Number(inPayment.hourlyRate)"
+          :showCost="true"
         />
       </div>
     </div>
