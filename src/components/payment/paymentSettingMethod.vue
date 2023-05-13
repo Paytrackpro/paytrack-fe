@@ -1,9 +1,6 @@
 <template>
-  <div>
-    <div v-if="label" class="row q-my-md">
-      <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
-    </div>
-    <div v-if="label" class="row row q-my-md">
+  <q-field v-if="label" label-slot stack-label borderless>
+    <div class="row q-my-md">
       <q-option-group
         :disable="readonly"
         class="q-mr-md"
@@ -14,13 +11,19 @@
         inline
       />
     </div>
-    <div v-if="label" class="row row q-my-md">
-      <q-item-label lines="1">
-        <span>Address: </span>
-        <span class="text-weight-bold"> {{ address }}</span>
-        <q-btn v-if="value != ''" round dense flat icon="content_copy" @click="copyAddress" />
-      </q-item-label>
-    </div>
+    <br />
+    <template v-slot:label>
+      <div class="row">
+        <p class="q-mb-xs text-h6">{{ label }}</p>
+      </div>
+    </template>
+  </q-field>
+  <div class="row">
+    <q-item-label lines="1">
+      <span>Address: </span>
+      <span class="text-weight-bold"> {{ address }}</span>
+      <q-btn v-if="value != ''" round dense flat icon="content_copy" @click="copyAddress" />
+    </q-item-label>
   </div>
 </template>
 

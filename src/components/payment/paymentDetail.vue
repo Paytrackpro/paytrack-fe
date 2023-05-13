@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row justify-between q-mb-md q-col-gutter-md">
+    <div class="row q-mb-md q-col-gutter-md">
       <div v-if="!isDraftSatus" class="col-12 col-sm-6 col-lg-4">
-        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label>
+        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <m-time :time="payment.sentAt"></m-time>
@@ -12,7 +12,7 @@
         </q-field>
       </div>
       <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Last Edited" stack-label>
+        <q-field label="Last Edited" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <m-time :time="payment.updatedAt"></m-time>
@@ -20,13 +20,11 @@
           </template>
         </q-field>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <approver-display v-if="displayApprovers" :approvers="payment.approvers" />
+      <div class="col-12 col-sm-12 col-lg-4" v-if="displayApprovers">
+        <approver-display :approvers="payment.approvers" />
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4" v-if="payment.senderId !== user.id">
-        <q-field label="Sender" stack-label>
+        <q-field label="Sender" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.senderName || payment.externalEmail }}
@@ -35,7 +33,7 @@
         </q-field>
       </div>
       <div class="col-12 col-sm-6 col-lg-4" v-if="payment.receiverId != user.id">
-        <q-field label="Recipient" stack-label>
+        <q-field label="Recipient" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.receiverName || payment.externalEmail }}
@@ -50,14 +48,16 @@
           :options="statusOption"
           outlined
           dense
+          style="max-width: 300px"
           lazy-rules
           stack-label
           emit-value
           map-options
+          borderless
           label="Status"
           :rules="[(val) => !!val || 'Status is required']"
         />
-        <q-field v-else label="Status" stack-label>
+        <q-field v-else label="Status" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <payment-status :payment="payment" />
@@ -65,17 +65,10 @@
           </template>
         </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Amount (USD)" stack-label>
-          <template v-slot:prepend>
-            <q-icon name="attach_money" />
-          </template>
+        <q-field label="Amount (USD)" stack-label borderless>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ (payment.amount || 0).toFixed(2) }}
-            </div>
+            <div class="self-center full-width no-outline" tabindex="0">${{ (payment.amount || 0).toFixed(2) }}</div>
           </template>
         </q-field>
       </div>
@@ -83,7 +76,7 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col">
         <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" />
+        <q-input v-model="payment.description" readonly outlined type="textarea" borderless />
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
@@ -101,7 +94,19 @@
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div
+        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
+        class="col-12 col-sm-12 col-md-4"
+      >
+        <payment-setting-method
+          :defautMethod="payment.paymentMethod"
+          :readonly="!processing"
+          @change="methodChange"
+          :modelValue="payment.paymentSettings"
+          label="Accepted payment coins"
+        />
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
         <PaymentRateInput
           :readonly="!processing"
           :isShow="isShowExchangeRate"
@@ -111,10 +116,10 @@
           @update:modelValue="updateLocal"
         />
       </div>
-      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-lg-4">
-        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4">
+        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label borderless>
           <template v-slot:control>
-            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
+            <div class="self-center no-outline text-weight-bolder" tabindex="0">
               {{ payment.expectedAmount }}
             </div>
           </template>
@@ -122,20 +127,6 @@
             <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
           </template>
         </q-field>
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div
-        v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
-        class="col-12"
-      >
-        <payment-setting-method
-          :defautMethod="payment.paymentMethod"
-          :readonly="!processing"
-          @change="methodChange"
-          :modelValue="payment.paymentSettings"
-          label="Accepted payment coins"
-        />
       </div>
     </div>
     <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">

@@ -16,7 +16,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer show-if-above side="left" bordered>
+    <q-drawer show-if-above side="left" bordered :width="250">
       <q-scroll-area class="fit">
         <q-list>
           <template v-for="(menuItem, index) in menuList">
