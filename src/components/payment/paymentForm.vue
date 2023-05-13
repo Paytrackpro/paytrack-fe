@@ -1,29 +1,7 @@
 <template>
   <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
     <div class="row q-gutter-md">
-      <div class="col-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">
-          Sender
-          <q-icon name="info">
-            <q-tooltip> You are the sender of the payment request to the recipient </q-tooltip>
-          </q-icon>
-        </p>
-        <q-input
-          v-model="inPayment.senderName"
-          placeholder="Sender"
-          readonly
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          hide-bottom-space
-        >
-          <template v-slot:prepend>
-            <q-icon name="person" />
-          </template>
-        </q-input>
-      </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">
           Recipient
           <q-icon name="info">
@@ -46,7 +24,7 @@
       </div>
     </div>
     <div class="row q-gutter-md">
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
         <q-input
           class="no-control-button"
@@ -81,7 +59,7 @@
       <q-checkbox v-model="isInvoiceMode" label="Invoice mode" />
     </div>
     <div class="row q-gutter-md" v-if="isInvoiceMode">
-      <div class="col-3">
+      <div class="col-12 col-sm-6 col-lg-3">
         <q-input
           v-model="inPayment.hourlyRate"
           label="Hourly rate(USD/h)"
@@ -100,6 +78,7 @@
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :hourlyRate="Number(inPayment.hourlyRate)"
+          :showCost="true"
         />
       </div>
     </div>

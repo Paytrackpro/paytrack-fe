@@ -1,9 +1,9 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
-    <div class="row justify-between">
-      <div v-if="!isDraftSatus" class="col-3">
-        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div v-if="!isDraftSatus" class="col-12 col-sm-6 col-lg-4">
+        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <m-time :time="payment.sentAt"></m-time>
@@ -11,13 +11,20 @@
           </template>
         </q-field>
       </div>
-      <div class="col-3 q-mb-md">
-        <approver-display v-if="displayApprovers" :approvers="payment.approvers" />
+      <div class="col-12 col-sm-6 col-lg-4">
+        <q-field label="Last Edited" stack-label borderless>
+          <template v-slot:control>
+            <div class="self-center full-width no-outline" tabindex="0">
+              <m-time :time="payment.updatedAt"></m-time>
+            </div>
+          </template>
+        </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4" v-if="payment.senderId !== user.id">
-        <q-field label="Sender" stack-label>
+      <div class="col-12 col-sm-12 col-lg-4" v-if="displayApprovers">
+        <approver-display :approvers="payment.approvers" />
+      </div>
+      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.senderId !== user.id">
+        <q-field label="Sender" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.senderName || payment.externalEmail }}
@@ -25,8 +32,8 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4" v-if="payment.receiverId != user.id">
-        <q-field label="Recipient" stack-label>
+      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.receiverId != user.id">
+        <q-field label="Recipient" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.receiverName || payment.externalEmail }}
@@ -34,21 +41,23 @@
           </template>
         </q-field>
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <q-select
           v-if="processing"
           v-model="paymentStatus"
           :options="statusOption"
           outlined
           dense
+          style="max-width: 300px"
           lazy-rules
           stack-label
           emit-value
           map-options
+          borderless
           label="Status"
           :rules="[(val) => !!val || 'Status is required']"
         />
-        <q-field v-else label="Status" stack-label>
+        <q-field v-else label="Status" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <payment-status :payment="payment" />
@@ -56,39 +65,10 @@
           </template>
         </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col-4">
-        <q-field label="Amount (USD)" stack-label>
-          <template v-slot:prepend>
-            <q-icon name="attach_money" />
-          </template>
+      <div class="col-12 col-sm-6 col-lg-4">
+        <q-field label="Amount (USD)" stack-label borderless>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ (payment.amount || 0).toFixed(2) }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-4">
-        <PaymentRateInput
-          :readonly="!processing"
-          :isShow="isShowExchangeRate"
-          ref="rateInput"
-          v-model="payment"
-          v-model:loading="fetchingRate"
-          @update:modelValue="updateLocal"
-        />
-      </div>
-      <div v-if="isShowExchangeRate" class="col-4">
-        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline text-weight-bolder" tabindex="0">
-              {{ payment.expectedAmount }}
-            </div>
-          </template>
-          <template v-if="processing" v-slot:after>
-            <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
+            <div class="self-center full-width no-outline" tabindex="0">${{ (payment.amount || 0).toFixed(2) }}</div>
           </template>
         </q-field>
       </div>
@@ -96,7 +76,7 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col">
         <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" />
+        <q-input v-model="payment.description" readonly outlined type="textarea" borderless />
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
@@ -116,7 +96,7 @@
     <div class="row q-mb-md q-col-gutter-md">
       <div
         v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
-        class="col-12"
+        class="col-12 col-sm-12 col-md-4"
       >
         <payment-setting-method
           :defautMethod="payment.paymentMethod"
@@ -125,6 +105,28 @@
           :modelValue="payment.paymentSettings"
           label="Accepted payment coins"
         />
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
+        <PaymentRateInput
+          :readonly="!processing"
+          :isShow="isShowExchangeRate"
+          ref="rateInput"
+          v-model="payment"
+          v-model:loading="fetchingRate"
+          @update:modelValue="updateLocal"
+        />
+      </div>
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4">
+        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label borderless>
+          <template v-slot:control>
+            <div class="self-center no-outline text-weight-bolder" tabindex="0">
+              {{ payment.expectedAmount }}
+            </div>
+          </template>
+          <template v-if="processing" v-slot:after>
+            <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
+          </template>
+        </q-field>
       </div>
     </div>
     <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
@@ -159,12 +161,17 @@
         </q-field>
       </div>
     </div>
-    <div class="row q-mt-md" v-if="isShowInvoice">
+    <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
       <p><b class="text-weight-medium">Hourly rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
     </div>
     <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
       <div class="col">
-        <invoices-mode v-model="payment.details" readonly :hourlyRate="Number(payment.hourlyRate)" />
+        <invoices-mode
+          v-model="payment.details"
+          readonly
+          :hourlyRate="Number(payment.hourlyRate)"
+          :showCost="isShowCost"
+        />
       </div>
     </div>
     <div class="row justify-end q-mt-lg">
@@ -575,6 +582,17 @@ export default {
     },
     displayApprovers() {
       return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
+    },
+    isShowCost() {
+      var isShowCost = true
+      let approver = this.payment.approvers || []
+      approver.forEach((el) => {
+        if (el.approverId == this.user.id) {
+          isShowCost = el.showCost
+          return
+        }
+      })
+      return isShowCost
     },
   },
 }
