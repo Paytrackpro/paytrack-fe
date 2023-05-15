@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th class="text-right" style="width: 150px">Detail</th>
-          <th class="text-right" style="width: 120px">Cost (USD)</th>
+          <th class="text-right" style="width: 120px" v-if="showCost">Cost (USD)</th>
           <th class="text-left">Description</th>
           <th style="width: 100px" v-if="!readonly">#</th>
         </tr>
@@ -17,6 +17,7 @@
           :key="i"
           :i="i"
           :hourly-rate="hourlyRate"
+          :showCost="showCost"
           @delete="deleteInvoice"
           :readonly="readonly"
         />
@@ -50,6 +51,7 @@ export default {
     modelValue: [Array],
     hourlyRate: [Number, String],
     readonly: Boolean,
+    showCost: Boolean,
   },
   emits: ['update:modelValue'],
   data() {

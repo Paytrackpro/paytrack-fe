@@ -49,8 +49,9 @@ export default {
         this.disableDialog = true
       }
     },
-    hideDialog() {
+    hideDialog(ok) {
       this.enableDialog = false
+      this.enabled2FA = ok
     },
     hideOtpDialog(ok) {
       this.enabled2FA = !ok

@@ -3,7 +3,7 @@
     <div v-if="label" class="col-12">
       <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
     </div>
-    <div v-if="!readonly" class="col-3">
+    <div v-if="!readonly" class="col-12 col-sm-6 col-lg-3">
       <q-field
         :model-value="selectedCoins"
         label="Coins you accept"

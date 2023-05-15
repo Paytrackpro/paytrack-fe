@@ -1,13 +1,13 @@
 <template>
   <q-form @submit="submit">
     <div class="row q-mb-md q-col-gutter-md profile-padding">
-      <div class="col-3">
+      <div class="col-12 col-sm-6 col-lg-3">
         <p class="text-weight-medium q-mt-none">User name</p>
         <div class="q-mt-none">
           <span class="text-grey-5">{{ user.userName }}</span>
         </div>
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium col-4">Display name</p>
         <q-input
           outlined
@@ -19,7 +19,7 @@
           placeholder="Your display name"
         />
       </div>
-      <div class="col-4">
+      <div class="col-12 col-sm-6 col-lg-4">
         <p class="q-mt-none q-mb-xs text-weight-medium col-4">Email</p>
         <q-input
           outlined

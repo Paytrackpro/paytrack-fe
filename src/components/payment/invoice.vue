@@ -28,13 +28,15 @@
       </div>
       <template v-else>{{
         type === 'material'
-          ? `qty ${invoice.quantity} x $${invoice.price}`
+          ? showCost
+            ? `qty ${invoice.quantity} x $${invoice.price}`
+            : `qty ${invoice.quantity}`
           : invoice.quantity
           ? `${invoice.quantity} hour(s)`
           : '_'
       }}</template>
     </td>
-    <td class="text-right">
+    <td class="text-right" v-if="showCost">
       <q-input
         v-if="editing"
         label="Cost"
@@ -64,7 +66,7 @@
       <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
-      <span v-if="!editing" class="event-txt q-ma-xs text-secondary" @click="edit">Edit</span>
+      <span v-if="!editing" class="event-txt q-ma-xs text-blue" @click="edit">Edit</span>
       <span v-if="!editing" class="event-txt q-ma-xs text-red" @click="$emit('delete', i)">Delete</span>
       <span v-if="editing" class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
       <span v-if="editing" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
@@ -80,6 +82,7 @@ export default {
     modelValue: Object,
     hourlyRate: Number,
     readonly: Boolean,
+    showCost: Boolean,
   },
   emits: ['update:modelValue'],
   data() {
