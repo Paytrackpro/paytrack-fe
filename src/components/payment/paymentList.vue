@@ -46,8 +46,12 @@
     </q-table>
     <q-dialog v-model="detailBulk">
       <q-card style="width: 700px; max-width: 80vw">
-        <q-card-section>
+        <q-card-section class="row justify-between">
           <div class="text-h6">Bulk Pay BTC</div>
+          <q-btn v-if="!rateLoading" round dense flat icon="currency_exchange" @click="refreshExchangeRate">
+            <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
+          </q-btn>
+          <q-spinner-oval v-else color="primary" size="sm" />
         </q-card-section>
         <q-card-section class="q-pt-none">
           <q-input
@@ -76,7 +80,6 @@
                 <div class="row">
                   <q-item-label class="col q-my-sm" lines="1">
                     <span>Amount(USD): {{ item.amount }}</span>
-                    <q-btn round dense flat size="sm" icon="content_copy" @click="copy(item.amount || '')" />
                   </q-item-label>
                   <q-item-label class="col q-my-sm" lines="1">
                     <span>Amount(BTC): {{ item.expectedAmount }}</span>
@@ -91,7 +94,7 @@
           </q-list>
         </q-card-section>
         <q-card-actions align="right" class="bg-white text-teal">
-          <q-btn flat label="Paid" @click="handlePaid" :disable="paying" v-close-popup />
+          <q-btn flat label="Mark Paid" @click="handlePaid" :disable="paying" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -114,6 +117,7 @@ export default {
     return {
       isShowList: true,
       loading: false,
+      rateLoading: false,
       pagination: {
         ...defaultPaging,
       },
@@ -303,6 +307,7 @@ export default {
       this.isExist = true
     },
     getRate(p) {
+      this.rateLoading = true
       this.$api
         .get('/payment/rate', {
           params: p,
@@ -317,6 +322,9 @@ export default {
         .catch((err) => {
           responseError(err)
         })
+        .finally(() => {
+          this.rateLoading = false
+        })
     },
     getStatus() {
       return 'ssssss'
@@ -328,6 +336,9 @@ export default {
         message: 'copied.',
         position: 'bottom',
       })
+    },
+    refreshExchangeRate() {
+      this.getRate({ symbol: 'btc' })
     },
   },
   watch: {
