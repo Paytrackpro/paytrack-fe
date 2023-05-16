@@ -64,10 +64,24 @@
                 <q-item-label lines="1">
                   <span class="text-weight-medium">Address: </span>
                   <span class="text-grey-8"> {{ item.paymentSettings[0].address }}</span>
+                  <q-btn
+                    round
+                    dense
+                    flat
+                    size="sm"
+                    icon="content_copy"
+                    @click="copy(item.paymentSettings[0].address || '')"
+                  />
                 </q-item-label>
                 <div class="row">
-                  <q-item-label class="col q-my-sm" lines="1">Amount(USD): {{ item.amount }}</q-item-label>
-                  <q-item-label class="col q-my-sm" lines="1">Amount(BTC): {{ item.expectedAmount }}</q-item-label>
+                  <q-item-label class="col q-my-sm" lines="1">
+                    <span>Amount(USD): {{ item.amount }}</span>
+                    <q-btn round dense flat size="sm" icon="content_copy" @click="copy(item.amount || '')" />
+                  </q-item-label>
+                  <q-item-label class="col q-my-sm" lines="1">
+                    <span>Amount(BTC): {{ item.expectedAmount }}</span>
+                    <q-btn round dense flat size="sm" icon="content_copy" @click="copy(item.expectedAmount || '')" />
+                  </q-item-label>
                 </div>
                 <div class="row">
                   <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
@@ -306,6 +320,14 @@ export default {
     },
     getStatus() {
       return 'ssssss'
+    },
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
+      this.$q.notify({
+        type: 'positive',
+        message: 'copied.',
+        position: 'bottom',
+      })
     },
   },
   watch: {
