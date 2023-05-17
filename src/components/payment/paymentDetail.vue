@@ -2,7 +2,7 @@
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="!isDraftSatus" class="col-12 col-sm-6 col-lg-4">
+      <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4">
         <q-field :label="isSender ? 'Sent' : 'Received'" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
@@ -83,10 +83,10 @@
       <div v-if="isEditPaymentSetting" class="col-12">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
       </div>
-      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidSatus)" class="col-12">
+      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)" class="col-12">
         <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
       </div>
-      <div v-if="!isApprover && isPaidSatus" class="col-12">
+      <div v-if="!isApprover && isPaidStatus" class="col-12">
         <p>
           <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
           >{{ payment.paymentAddress }}
@@ -138,7 +138,7 @@
     <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
       <div class="col-12">
         <q-input
-          v-if="processing"
+          v-if="processing && !isConfirmedStatusChange"
           v-model="txId"
           label="Enter transaction ID of sent payment"
           ref="txId"
@@ -147,7 +147,12 @@
           lazy-rules
           stack-label
         />
-        <q-field v-if="isPaidSatus" label="Transaction id" stack-label>
+      </div>
+      <p v-if="processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
+        Use Bulk Pay BTC to enter a Transaction ID
+      </p>
+      <div v-if="isPaidStatus" class="col-12 col-sm-6 col-md-4">
+        <q-field label="Transaction id" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               {{ payment.txId }}
@@ -155,10 +160,8 @@
           </template>
         </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="!isApprover && isPaidSatus" class="col-3">
-        <q-field label="Paid At" stack-label>
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4">
+        <q-field label="Paid At" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
               <m-time :time="payment.paidAt"></m-time>
@@ -195,7 +198,7 @@
         label="mark paid"
         type="submit"
         color="primary"
-        :disable="fetchingRate || paying"
+        :disable="fetchingRate || paying || isConfirmedStatusChange"
         class="q-mr-sm"
       />
       <q-btn
@@ -224,7 +227,7 @@
         class="q-mr-sm"
       />
       <q-btn
-        v-if="isDraftSatus && editable"
+        v-if="isDraftStatus && editable"
         label="Delete Draft"
         type="button"
         color="white"
@@ -366,6 +369,9 @@ export default {
         ...this.payment,
         token: this.token,
         txId: this.txId,
+      }
+      if (this.isConfirmedStatusChange) {
+        form.txId = ''
       }
       form.status = this.paymentStatus
       this.paying = true
@@ -575,13 +581,16 @@ export default {
     },
     isEditPaymentSetting() {
       const isPaymentSettingExist = this.payment.paymentSettings && this.payment.paymentSettings.length
-      return isPaymentSettingExist && !this.isApprover && !this.isReceiver && !this.isPaidSatus
+      return isPaymentSettingExist && !this.isApprover && !this.isReceiver && !this.isPaidStatus
     },
-    isPaidSatus() {
+    isPaidStatus() {
       return this.payment.status == 'paid'
     },
-    isDraftSatus() {
+    isDraftStatus() {
       return this.payment.status == 'draft'
+    },
+    isConfirmedStatusChange() {
+      return this.paymentStatus == 'confirmed'
     },
     isShowExchangeRate() {
       return !this.isApprover && (this.payment.status == 'paid' || this.processing)
