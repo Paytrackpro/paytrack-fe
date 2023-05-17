@@ -119,12 +119,18 @@
       <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4">
         <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label borderless>
           <template v-slot:control>
-            <div class="self-center no-outline text-weight-bolder" tabindex="0">
+            <div class="self-center no-outline text-weight-bolder q-my-md rate-content" tabindex="0">
               {{ payment.expectedAmount }}
             </div>
-          </template>
-          <template v-if="processing" v-slot:after>
-            <q-btn round dense flat icon="content_copy" @click="copy(payment.expectedAmount || '')" />
+            <q-btn
+              v-if="processing"
+              round
+              dense
+              flat
+              class="q-ml-sm"
+              icon="content_copy"
+              @click="copy(payment.expectedAmount || '')"
+            />
           </template>
         </q-field>
       </div>
