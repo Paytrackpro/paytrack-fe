@@ -26,3 +26,8 @@
   height: 40px;
   align-items: center;
 }
+
+.q-btn,
+.q-field__label {
+  text-transform: capitalize !important;
+}
