@@ -2,7 +2,7 @@
   <q-btn label="Back" type="button" color="primary" class="q-mb-md" @click="back" />
   <q-card flat bordered class="q-pa-md">
     <q-card-section>
-      <div class="text-h6">Payment request</div>
+      <div class="text-h6 title-case">Payment request</div>
       <p class="text-red" v-if="payment.status === 'rejected'">
         <q-icon name="info" color="red" />
         <b>Rejected Reason:</b> {{ payment.rejectionReason }}
