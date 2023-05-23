@@ -1,5 +1,5 @@
 <template>
-  <payment-list ref="paymentList" type="request" label="Get paid" />
+  <payment-list ref="paymentList" type="request" class="title-case" label="Get paid" />
 </template>
 
 <script>

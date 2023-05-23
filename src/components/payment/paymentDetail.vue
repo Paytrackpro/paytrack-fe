@@ -81,10 +81,10 @@
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div v-if="isEditPaymentSetting" class="col-12">
-        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted payment settings" />
+        <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
       </div>
       <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)" class="col-12">
-        <p><b class="text-weight-medium">Accepted coins: </b>{{ coinsAccepted }}</p>
+        <p><b class="text-weight-medium">Accepted Coins: </b>{{ coinsAccepted }}</p>
       </div>
       <div v-if="!isApprover && isPaidStatus" class="col-12">
         <p>
@@ -171,7 +171,7 @@
       </div>
     </div>
     <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
-      <p><b class="text-weight-medium">Hourly rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
+      <p><b class="text-weight-medium">Hourly Rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
     </div>
     <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
       <div class="col">
