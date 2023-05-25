@@ -52,7 +52,7 @@
     </div>
     <div class="row q-pt-md">
       <div class="col">
-        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment setting" />
+        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment Settings" />
       </div>
     </div>
     <div class="row">

@@ -2,10 +2,10 @@
   <q-card class="q-px-lg">
     <q-card-section class="q-py-none">
       <q-tabs align="left" v-model="tab">
-        <q-tab label="Profile" name="profile" />
-        <q-tab label="Payment methods" name="payment_method" />
-        <q-tab label="Security" name="security" />
-        <q-tab label="Approval Settings" name="approval" />
+        <q-tab label="Profile" name="profile" no-caps />
+        <q-tab label="Payment Methods" name="payment_method" no-caps />
+        <q-tab label="Security" name="security" no-caps />
+        <q-tab label="Approvals" name="approval" no-caps />
       </q-tabs>
       <q-separator />
     </q-card-section>

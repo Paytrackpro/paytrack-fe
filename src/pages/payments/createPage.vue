@@ -1,7 +1,7 @@
 <template>
   <q-card flat bordered class="q-pa-md">
     <q-card-section>
-      <div class="text-h6">{{ title }}</div>
+      <div class="text-h6 title-case">{{ title }}</div>
     </q-card-section>
     <q-separator inset />
     <payment-form :payment="payment" :payment-type="paymentType" :user="user" @saved="saved" @cancel="cancel" />
