@@ -33,7 +33,7 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-    <q-drawer show-if-above side="left" bordered :width="250">
+    <q-drawer show-if-above side="left" class="left-sidebar" :width="280">
       <q-scroll-area class="fit">
         <q-list padding class="text-grey-2">
           <template v-for="(menuItem, index) in menuList">
@@ -60,7 +60,7 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="q-pa-md">
+      <q-page class="q-pa-lg">
         <router-view />
       </q-page>
     </q-page-container>
@@ -81,7 +81,7 @@ export default {
           to: '/dashboard',
         },
         {
-          icon: 'people',
+          icon: 'supervisor_account',
           label: 'User Management',
           to: '/users',
           role: role.ADMIN,

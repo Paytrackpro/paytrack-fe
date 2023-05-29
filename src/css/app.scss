@@ -1,4 +1,7 @@
 /* app global css */
+.q-layout {
+  background-color: #fcfdff;
+}
 
 .event-txt {
   cursor: pointer;
@@ -51,6 +54,12 @@
 .text-size-15 {
   font-size: 15px;
 }
+.q-btn {
+  padding: 4px 12px;
+}
+.q-btn .on-left {
+  margin-right: 6px;
+}
 
 .q-field--auto-height .q-field__control,
 .q-field--auto-height .q-field__native {
@@ -86,7 +95,6 @@
 .sidebar-active-item i {
   -webkit-text-stroke: 1px $cyan-2;
   color: $cyan-3;
-  opacity: 0.7;
 }
 .sidebar-active-item .sidebar-text {
   font-weight: bold;
@@ -106,4 +114,18 @@
   i {
     -webkit-text-stroke: 1px $cyan-2;
   }
+}
+.left-sidebar {
+  box-shadow: 7px 0px 60px rgba(0, 0, 0, 0.05);
+}
+.q-table tbody tr:nth-child(odd) {
+  background-color: #F7FBFC;
+}
+.q-table tr {
+  height: 55px;
+}
+.q-table__container {
+  box-shadow: 0px 6.5625px 30.625px rgba(4, 9, 20, 0.03), 0px 13.125px 19.6875px rgba(4, 9, 20, 0.03),
+    0px 3.5px 7.4375px rgba(4, 9, 20, 0.05), 0px 1.75px 2.625px rgba(4, 9, 20, 0.03);
+  border-radius: 10px;
 }
