@@ -33,7 +33,7 @@
       </template>
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
-          <payment-status :payment="props.row" isShowApprover />
+          <payment-status :paymentModel="props.row" isShowApprover :isShowIcon="false" />
         </q-td>
       </template>
       <template v-slot:no-data="{ message }">
