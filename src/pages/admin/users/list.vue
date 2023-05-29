@@ -14,6 +14,19 @@
       @request="onRequest"
       @row-click="(_, row) => goToDetail(row.id)"
     >
+      <template v-slot:pagination>
+        <custom-pagination :pagination="pagination" :color="'primary'" />
+      </template>
+      <template v-slot:body-cell-createdAt="props">
+        <q-td :props="props">
+          <m-time :time="props.row.createdAt"></m-time>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-lastSeen="props">
+        <q-td :props="props">
+          <m-time :time="props.row.lastSeen"></m-time>
+        </q-td>
+      </template>
       <template v-slot:top-left>
         <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
           <template v-slot:prepend>
@@ -34,11 +47,17 @@
 import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
 import { PAYMENT_TYPES } from '../../../consts/paymentType'
 import { date } from 'quasar'
+import customPagination from 'src/components/common/custom_pagination.vue'
+import MTime from 'components/common/mTime'
 
 export default {
   name: 'adminUserList',
   props: {
     type: String,
+  },
+  components: {
+    customPagination,
+    MTime,
   },
   data() {
     return {

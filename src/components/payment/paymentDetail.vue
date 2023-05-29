@@ -60,7 +60,7 @@
         <q-field v-else label="Status" stack-label borderless>
           <template v-slot:control>
             <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :payment="payment" />
+              <payment-status :paymentModel="payment" />
             </div>
           </template>
         </q-field>

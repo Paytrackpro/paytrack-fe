@@ -1,10 +1,28 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-primary text-white">
+    <q-header elevated class="bg-dark text-white shadow-4">
       <q-toolbar>
-        <q-toolbar-title> {{ $route.meta.title || 'MGMT' }} </q-toolbar-title>
+        <q-avatar rounded>
+          <img src="../assets/system-logo.png" />
+        </q-avatar>
+        <q-toolbar-title> MGMT-NG </q-toolbar-title>
         <q-btn flat no-caps>
-          {{ user.userName }}
+          <q-item class="q-pa-none">
+            <q-item-section avatar>
+              <q-avatar>
+                <img src="../assets/user-icon.png" />
+              </q-avatar>
+            </q-item-section>
+
+            <q-item-section class="text-left" no-caps>
+              <q-item-label lines="1" class="text-size-14 header-text">{{
+                user.displayName ? user.displayName : user.userName
+              }}</q-item-label>
+              <q-item-label v-if="user.displayName" lines="2">
+                <span class="text-size-12 header-text">{{ user.userName }}</span>
+              </q-item-label>
+            </q-item-section>
+          </q-item>
           <q-menu transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 100px">
               <q-item @click="logOut" clickable v-close-popup>
@@ -15,24 +33,24 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-
-    <q-drawer show-if-above side="left" bordered :width="250">
+    <q-drawer show-if-above side="left" class="left-sidebar" :width="280">
       <q-scroll-area class="fit">
-        <q-list>
+        <q-list padding class="text-grey-2">
           <template v-for="(menuItem, index) in menuList">
             <q-item
               :key="index"
               clickable
               :to="menuItem.to"
-              active-class="bg-grey-3"
+              active-class="bg-cyan-2 sidebar-active-item"
+              :class="'sidebar-item' + (menuItem.label == 'Settings' ? ' settings-sidebar' : '')"
               v-if="shouldDisplayRoute(menuItem)"
               v-ripple
             >
               <q-item-section avatar>
-                <q-icon :name="menuItem.icon" />
+                <q-icon size="md" class="sidebar-icon" :name="'o_' + menuItem.icon" />
               </q-item-section>
               <q-item-section>
-                {{ menuItem.label }}
+                <span class="sidebar-text">{{ menuItem.label }}</span>
               </q-item-section>
             </q-item>
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
@@ -42,7 +60,7 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="q-pa-md">
+      <q-page class="q-pa-lg">
         <router-view />
       </q-page>
     </q-page-container>
@@ -58,24 +76,24 @@ export default {
       drawer: false,
       menuList: [
         {
-          icon: 'home',
+          icon: 'dashboard',
           label: 'Dashboard',
           to: '/dashboard',
         },
         {
-          icon: 'people',
+          icon: 'supervisor_account',
           label: 'User Management',
           to: '/users',
           role: role.ADMIN,
         },
         {
-          icon: 'call_received',
+          icon: 'sticky_note_2',
           label: 'Get Paid',
           separator: false,
           to: '/get-paid',
         },
         {
-          icon: 'arrow_outward',
+          icon: 'payment',
           label: 'Pay',
           separator: false,
           to: '/pay',

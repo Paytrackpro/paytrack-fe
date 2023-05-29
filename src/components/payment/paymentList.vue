@@ -9,12 +9,12 @@
       v-model:pagination="pagination"
       :selection="isBulkPay ? 'multiple' : 'none'"
       v-model:selected="selected"
-      :hide-pagination="pagination.rowsNumber < 10"
       :no-data-label="
         type === 'request' ? 'Click Create above to generate a payment request' : 'No payment requests received yet'
       "
+      :hide-pagination="pagination.rowsNumber < 10"
+      separator="none"
       flat
-      bordered
       @row-click="(_, row) => goToDetail(row.id)"
       @request="onRequest"
     >
@@ -33,7 +33,12 @@
       </template>
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
-          <payment-status :payment="props.row" isShowApprover />
+          <payment-status :paymentModel="props.row" isShowApprover :isShowIcon="false" />
+        </q-td>
+      </template>
+      <template v-slot:body-cell-createdAt="props">
+        <q-td :props="props">
+          <m-time :time="props.row.createdAt"></m-time>
         </q-td>
       </template>
       <template v-slot:no-data="{ message }">
@@ -42,6 +47,9 @@
             {{ message }}
           </span>
         </div>
+      </template>
+      <template v-slot:pagination>
+        <custom-pagination :pagination="pagination" :color="'primary'" />
       </template>
     </q-table>
     <q-dialog v-model="detailBulk">
@@ -110,6 +118,8 @@ import { mapGetters } from 'vuex'
 import role from 'src/consts/role'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
+import MTime from 'components/common/mTime'
+import customPagination from '../common/custom_pagination.vue'
 
 export default {
   name: 'paymentList',
@@ -142,7 +152,7 @@ export default {
         },
         {
           name: 'amount',
-          align: 'center',
+          align: 'right',
           label: 'Amount(USD)',
           field: 'amount',
           format: (val) => {
@@ -154,6 +164,8 @@ export default {
   },
   components: {
     PaymentStatus,
+    MTime,
+    customPagination,
   },
   props: {
     type: String,
@@ -174,7 +186,7 @@ export default {
         this.type === PAYMENT_OBJECT_REQUEST
           ? {
               name: 'receiverName',
-              align: 'center',
+              align: 'left',
               label: 'Recipient',
               field: (row) => {
                 if (row.receiverDisplayName.length > 0) {
@@ -188,7 +200,7 @@ export default {
               name: 'senderName',
               required: true,
               label: 'Sender',
-              align: 'center',
+              align: 'left',
               field: (row) => {
                 if (row.senderDisplayName.length > 0) {
                   return row.senderDisplayName
@@ -325,9 +337,6 @@ export default {
         .finally(() => {
           this.rateLoading = false
         })
-    },
-    getStatus() {
-      return 'ssssss'
     },
     async copy(text) {
       await navigator.clipboard.writeText(text)
