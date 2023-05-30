@@ -28,9 +28,6 @@
           >
         </template>
       </template>
-      <template v-if="type === 'request'" v-slot:top-right>
-        <q-btn color="white" text-color="black" label="Create" to="/get-paid/create" />
-      </template>
       <template v-slot:body-cell-status="props">
         <q-td :props="props">
           <payment-status :paymentModel="props.row" isShowApprover :isShowIcon="false" />
