@@ -1,5 +1,8 @@
 <template>
-  <q-field v-if="isShow" label="Exchange Rate" class="justify-start" stack-label borderless>
+  <p class="q-mb-xs" v-if="isShow">
+    <b class="text-weight-medium">Exchange Rate </b>
+  </p>
+  <q-field v-if="isShow" class="justify-start field-text" stack-label borderless>
     <template v-slot:control>
       <div class="row self-center full-width no-outline q-my-md rate-content" tabindex="0">
         <q-item-label lines="1">

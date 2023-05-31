@@ -21,9 +21,9 @@
         </template>
       </q-field>
     </div>
-    <div class="col">
-      <q-markup-table v-if="settings && settings.length">
-        <thead v-if="!readonly">
+    <div class="col" v-if="settings && settings.length">
+      <q-markup-table v-if="!readonly">
+        <thead>
           <tr>
             <td style="width: 80px">Coin type</td>
             <td>Address</td>
@@ -49,14 +49,25 @@
           </tr>
         </tbody>
       </q-markup-table>
+      <div v-if="readonly">
+        <div class="row" v-for="(setting, i) of settings" :key="i">
+          <coin-label :type="setting.type" hasAddress :address="setting.address" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import { cloneObject } from 'src/helper/helper'
+import { COINS } from 'src/consts/common'
+import coinLabel from '../common/coin_label.vue'
+
 export default {
   name: 'paymentSetting',
+  components: {
+    coinLabel,
+  },
   props: {
     modelValue: Array,
     readonly: Boolean,
@@ -64,11 +75,7 @@ export default {
   },
   data() {
     return {
-      coins: [
-        { label: 'BTC', value: 'btc' },
-        { label: 'LTC', value: 'ltc' },
-        { label: 'DCR', value: 'dcr' },
-      ],
+      coins: COINS,
       selectedCoins: [],
       settings: [],
     }
@@ -104,6 +111,13 @@ export default {
       for (let coin of this.coins) {
         if (coin.value === type) {
           return coin
+        }
+      }
+    },
+    getCoinColor(type) {
+      for (let coin of this.coins) {
+        if (coin.value === type) {
+          return coin.color
         }
       }
     },

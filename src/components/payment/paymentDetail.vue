@@ -2,48 +2,38 @@
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4">
-        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.sentAt"></m-time>
-            </div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-mt-lg" v-if="payment.senderId !== user.id">
+        <custom-field :label="'Sender'" :value="payment.senderName || payment.externalEmail" />
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Last Edited" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.updatedAt"></m-time>
-            </div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-mt-lg" v-if="payment.receiverId != user.id">
+        <custom-field :label="'Recipient'" :value="payment.receiverName || payment.externalEmail" />
       </div>
-      <div class="col-12 col-sm-12 col-lg-4" v-if="displayApprovers">
+      <div class="col-12 col-sm-6 col-lg-4 q-mt-lg">
+        <custom-field
+          :label="'Amount (USD)'"
+          :value="(payment.amount || 0).toFixed(2)"
+          isChip
+          :chipColor="'teal-6'"
+          :chipIcon="'attach_money'"
+        />
+      </div>
+      <div class="col-12 col-sm-12 col-lg-4 q-mt-lg" v-if="displayApprovers">
         <approver-display :approvers="payment.approvers" />
       </div>
-      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.senderId !== user.id">
-        <q-field label="Sender" stack-label borderless>
+      <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4 q-mt-lg">
+        <q-field stack-label borderless class="no-field-margin">
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.senderName || payment.externalEmail }}
+            <div class="self-center full-width no-outline text-grey-2" tabindex="0">
+              <div>
+                <b>{{ isSender ? 'Sent' : 'Received' }}:&nbsp;</b><m-time :time="payment.sentAt"></m-time>
+              </div>
+              <div class="q-mt-sm"><b>Last Edited:&nbsp;</b><m-time :time="payment.updatedAt"></m-time></div>
             </div>
           </template>
         </q-field>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.receiverId != user.id">
-        <q-field label="Recipient" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.receiverName || payment.externalEmail }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-4 q-mt-lg" v-if="processing">
         <q-select
-          v-if="processing"
           v-model="paymentStatus"
           :options="statusOption"
           outlined
@@ -57,46 +47,35 @@
           label="Status"
           :rules="[(val) => !!val || 'Status is required']"
         />
-        <q-field v-else label="Status" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :paymentModel="payment" />
-            </div>
-          </template>
-        </q-field>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Amount (USD)" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">${{ (payment.amount || 0).toFixed(2) }}</div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-mt-lg">
+        <custom-field :label="'Description'" :value="payment.description" />
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" borderless />
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="isEditPaymentSetting" class="col-12">
+      <div v-if="isEditPaymentSetting" class="col-12 col-sm-6 col-lg-4 q-mt-lg">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
       </div>
-      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)" class="col-12">
-        <p><b class="text-weight-medium">Accepted Coins: </b>{{ coinsAccepted }}</p>
+      <div
+        v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)"
+        class="col-12 col-sm-6 col-lg-4 q-mt-lg"
+      >
+        <p><b class="text-weight-medium">Accepted Coins</b></p>
+        <q-field stack-label borderless>
+          <coin-label v-for="(setting, i) of payment.paymentSettings" :key="i" :type="setting.type" />
+        </q-field>
       </div>
-      <div v-if="!isApprover && isPaidStatus" class="col-12">
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-lg-4 q-mt-lg">
         <p>
-          <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
-          >{{ payment.paymentAddress }}
+          <b class="text-weight-medium">Paid in</b>
         </p>
+        <q-field stack-label borderless>
+          <coin-label :type="payment.paymentMethod" hasAddress :address="payment.paymentAddress" />
+        </q-field>
       </div>
     </div>
     <div class="row q-mb-md q-col-gutter-md">
       <div
         v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
-        class="col-12 col-sm-12 col-md-4"
+        class="col-12 col-sm-12 col-md-4 q-mt-lg"
       >
         <payment-setting-method
           :defautMethod="payment.paymentMethod"
@@ -106,7 +85,7 @@
           label="Accepted payment coins"
         />
       </div>
-      <div class="col-12 col-sm-6 col-md-4">
+      <div class="col-12 col-sm-6 col-md-4 q-mt-lg">
         <PaymentRateInput
           :readonly="!processing"
           :isShow="isShowExchangeRate"
@@ -116,21 +95,26 @@
           @update:modelValue="updateLocal"
         />
       </div>
-      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4">
-        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label borderless>
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4 q-mt-lg">
+        <p class="q-mb-xs">
+          <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }})</b>
+        </p>
+        <q-field class="justify-start" stack-label borderless>
           <template v-slot:control>
-            <div class="self-center no-outline text-weight-bolder q-my-md rate-content" tabindex="0">
-              {{ payment.expectedAmount }}
+            <div class="row self-center full-width no-outline q-my-md rate-content" tabindex="0">
+              <q-item-label lines="1">
+                <span class="text-weight-bolder">{{ payment.expectedAmount }}</span>
+                <q-btn
+                  v-if="processing"
+                  round
+                  dense
+                  flat
+                  class="q-ml-sm"
+                  icon="content_copy"
+                  @click="copy(payment.expectedAmount || '')"
+                />
+              </q-item-label>
             </div>
-            <q-btn
-              v-if="processing"
-              round
-              dense
-              flat
-              class="q-ml-sm"
-              icon="content_copy"
-              @click="copy(payment.expectedAmount || '')"
-            />
           </template>
         </q-field>
       </div>
@@ -224,7 +208,7 @@
         type="button"
         color="primary"
         @click="$emit('update:editing', true)"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-btn
         v-if="isDraftStatus && editable"
@@ -233,7 +217,7 @@
         color="white"
         text-color="black"
         @click="confirm = true"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-dialog v-model="confirm" persistent>
         <q-card>
@@ -254,9 +238,9 @@
         text-color="white"
         v-if="approvalable"
         @click="handlerApprovalAction()"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" class="btn btn-animated" />
     </div>
     <PaymentRejectDialog
       v-model="paymentRejectDialog"
@@ -273,23 +257,27 @@ import MTime from 'components/common/mTime'
 import PaymentSetting from 'components/payment/paymentSetting'
 import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
-import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
 import ApproverDisplay from 'components/payment/approverDisplay'
 import paymentSettingMethod from 'components/payment/paymentSettingMethod'
+import customField from 'src/components/common/custom_field.vue'
+import { COINS } from 'src/consts/common'
+import coinLabel from '../common/coin_label.vue'
+
 export default {
   name: 'paymentDetail',
   components: {
     MTime,
     PaymentSetting,
-    PaymentStatus,
     PaymentRateInput,
     PaymentRejectDialog,
     InvoicesMode,
     ApproverDisplay,
     paymentSettingMethod,
+    customField,
+    coinLabel,
   },
   data() {
     return {

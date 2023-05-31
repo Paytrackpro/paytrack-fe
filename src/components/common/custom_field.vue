@@ -5,7 +5,17 @@
     </p>
     <q-field :class="customClass" :style="customStyle" stack-label borderless>
       <template v-slot:control>
-        {{ value }}
+        <q-chip
+          v-if="isChip"
+          square
+          text-color="white"
+          :color="chipColor"
+          :icon="chipIcon"
+          :class="'field-chip' + (chipIcon ? '' : ' without-icon')"
+        >
+          {{ value }}
+        </q-chip>
+        <span class="field-text" v-else>{{ value }}</span>
       </template>
     </q-field>
   </div>
@@ -21,6 +31,9 @@ export default {
     value: { type: [String, Number, Date], default: '' },
     label: String,
     customContent: String,
+    isChip: Boolean,
+    chipColor: String,
+    chipIcon: String,
   },
 }
 </script>

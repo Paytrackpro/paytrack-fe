@@ -54,3 +54,9 @@ export const STATUS_INFO = Object.freeze({
     statusIcon: 'schedule',
   },
 })
+
+export const COINS = [
+  { label: 'BTC', value: 'btc', color: 'orange-7' },
+  { label: 'LTC', value: 'ltc', color: 'blue-grey-7' },
+  { label: 'DCR', value: 'dcr', color: 'cyan-8' },
+]
