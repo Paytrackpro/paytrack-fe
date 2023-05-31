@@ -135,7 +135,7 @@
     </div>
     <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
       <p>
-        <b class="text-weight-medium">Hourly Rate(USD/h): ${{ payment.hourlyRate }}</b>
+        <b class="text-weight-medium">Hourly Rate (USD/h): ${{ payment.hourlyRate.toFixed(2) }}</b>
       </p>
     </div>
     <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
@@ -178,7 +178,7 @@
         v-if="rejectable && !processing"
         label="reject"
         type="button"
-        color="primary"
+        color="accent"
         :disable="paying"
         @click="toggleRejectDialog(true)"
         class="q-mr-sm btn btn-animated"
