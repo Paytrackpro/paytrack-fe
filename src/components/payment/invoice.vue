@@ -1,6 +1,6 @@
 <template>
   <tr>
-    <td class="invoice-price-detail text-right">
+    <td class="invoice-price-detail text-left">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -36,7 +36,7 @@
           : '_'
       }}</template>
     </td>
-    <td class="text-right" v-if="showCost">
+    <td class="text-left" v-if="showCost">
       <q-input
         v-if="editing"
         label="Cost"
@@ -48,7 +48,7 @@
         type="number"
         :error="submitted && invoice.cost <= 0"
       />
-      <span v-else>{{ cost }}</span>
+      <span v-else>$ {{ cost }}</span>
     </td>
     <td class="text-left">
       <q-input

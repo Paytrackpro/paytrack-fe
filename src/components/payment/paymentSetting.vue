@@ -50,7 +50,7 @@
         </tbody>
       </q-markup-table>
       <div v-if="readonly">
-        <div class="row" v-for="(setting, i) of settings" :key="i">
+        <div class="row center-row" v-for="(setting, i) of settings" :key="i">
           <coin-label :type="setting.type" hasAddress :address="setting.address" />
         </div>
       </div>

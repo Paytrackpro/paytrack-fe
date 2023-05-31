@@ -13,10 +13,7 @@
         to="/get-paid/create"
       />
       <template v-if="showBulkPay">
-        <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" />
-        <q-btn @click="onBulkPay" v-show="isBulkPay && selected.length > 0" style="margin-left: 10px"
-          >Bulk Pay BTC</q-btn
-        >
+        <q-btn label="Bulk Pay BTC" class="q-mr-sm" color="primary" @click="onBulkPay" />
       </template>
     </div>
   </div>
@@ -30,7 +27,6 @@
         row-key="id"
         v-model:pagination="pagination"
         :selection="isBulkPay ? 'multiple' : 'none'"
-        v-model:selected="selected"
         :no-data-label="
           type === 'request' ? 'Click Create above to generate a payment request' : 'No payment requests received yet'
         "
@@ -143,6 +139,9 @@ export default {
       loading: false,
       rateLoading: false,
       pagination: {
+        ...defaultPaging,
+      },
+      bulkPagination: {
         ...defaultPaging,
       },
       txId: '',
@@ -274,8 +273,35 @@ export default {
           this.loading = false
         })
     },
+    getBulkBTCList() {
+      const filter = pathParamsToPaging(
+        {
+          query: {
+            sb: this.pagination.sortBy,
+            d: this.pagination.descending ? '1' : '',
+            p: 1,
+            r: this.pagination.rowsNumber,
+          },
+        },
+        this.bulkPagination
+      )
+      this.$api
+        .get('/payment/list', {
+          params: {
+            ...filter,
+            requestType: 'bulk_btc',
+          },
+        })
+        .then(({ payments, count }) => {
+          this.selected = payments
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
     onBulkPay() {
       this.detailBulk = true
+      this.getBulkBTCList()
       this.getRate({ symbol: 'btc' })
     },
     handlePaid() {

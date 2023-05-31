@@ -77,6 +77,11 @@ p {
 .q-field--auto-height .q-field__native {
   min-height: 20px !important;
 }
+.q-field--auto-height .q-field__native,
+.q-field--auto-height .q-field__prefix,
+.q-field--auto-height .q-field__suffix {
+  line-height: 30px;
+}
 
 .q-dialog__inner > div {
   border-radius: 20px;
@@ -142,6 +147,11 @@ p {
     0px 3.5px 7.4375px rgba(70, 132, 175, 0.1), 0px 1.75px 2.625px rgba(70, 132, 175, 0.07) !important;
   border-radius: 10px;
 }
+
+.field-shadow {
+  box-shadow: 0 3px 2px -2px rgba(70, 132, 175, 0.06);
+}
+
 .content-container {
   background-color: white;
 }
@@ -225,4 +235,17 @@ p {
   .q-chip__content {
     font-size: 13px;
   }
+}
+.custom-line {
+  height: 17px;
+}
+.center-row {
+  display: flex;
+  align-items: center;
+}
+.sm-chip {
+  font-size: 12px;
+}
+.q-chip__icon {
+  font-size: 1.3em;
 }

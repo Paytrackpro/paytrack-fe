@@ -15,7 +15,8 @@
         >
           {{ value }}
         </q-chip>
-        <span class="field-text" v-else>{{ value }}</span>
+        <m-time v-else-if="isTime" :time="value"></m-time>
+        <span v-else>{{ value }}</span>
       </template>
     </q-field>
   </div>
@@ -23,6 +24,7 @@
 
 <script>
 import { computed } from 'vue'
+import mTime from './mTime.vue'
 export default {
   name: 'customField',
   props: {
@@ -34,6 +36,10 @@ export default {
     isChip: Boolean,
     chipColor: String,
     chipIcon: String,
+    isTime: Boolean,
+  },
+  components: {
+    mTime,
   },
 }
 </script>
