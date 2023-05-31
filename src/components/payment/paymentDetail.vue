@@ -65,8 +65,6 @@
           </template>
         </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
       <div
         v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
         class="col-12 col-sm-12 col-md-4 q-py-sm q-my-sm field-shadow"
@@ -109,11 +107,8 @@
           </q-field>
         </div>
       </div>
-    </div>
-    <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
-      <div class="col-12">
+      <div class="col-12" v-if="!isApprover && processing && !isConfirmedStatusChange">
         <q-input
-          v-if="processing && !isConfirmedStatusChange"
           v-model="txId"
           label="Enter transaction ID of sent payment"
           ref="txId"
@@ -123,10 +118,10 @@
           stack-label
         />
       </div>
-      <p v-if="processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
+      <p v-if="!isApprover && processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
         Use Bulk Pay BTC to enter a Transaction ID
       </p>
-      <div v-if="isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Transaction id'" :value="payment.txId" />
       </div>
       <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
