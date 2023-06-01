@@ -25,18 +25,20 @@
         </q-field>
       </div>
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="processing">
+        <p class="q-mb-xs">
+          <b class="text-weight-medium">Status</b>
+        </p>
         <q-select
           v-model="paymentStatus"
           :options="statusOption"
           outlined
           dense
-          style="max-width: 300px"
+          style="max-width: 250px"
           lazy-rules
           stack-label
           emit-value
           map-options
           borderless
-          label="Status"
           :rules="[(val) => !!val || 'Status is required']"
         />
       </div>
@@ -67,7 +69,7 @@
       </div>
       <div
         v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
-        class="col-12 col-sm-12 col-md-4 q-py-sm q-my-sm field-shadow"
+        class="col-12 col-lg-4 q-py-sm q-my-sm field-shadow"
       >
         <payment-setting-method
           :defautMethod="payment.paymentMethod"
@@ -93,32 +95,24 @@
           </p>
           <q-field stack-label borderless>
             <template v-slot:control>
-              <span class="text-weight-bolder">{{ payment.expectedAmount }}</span>
-              <q-btn
-                v-if="processing"
-                round
-                dense
-                flat
-                class="q-ml-sm"
-                icon="content_copy"
-                @click="copy(payment.expectedAmount || '')"
-              />
+              <span class="text-weight-bolder text-blue-8">{{ payment.expectedAmount }}</span>
+              <q-btn v-if="processing" round dense flat class="q-ml-sm" @click="copy(payment.expectedAmount || '')">
+                <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
+                <q-tooltip>Copy Amount (BTC)</q-tooltip>
+              </q-btn>
             </template>
           </q-field>
         </div>
       </div>
-      <div class="col-12" v-if="!isApprover && processing && !isConfirmedStatusChange">
-        <q-input
-          v-model="txId"
-          label="Enter transaction ID of sent payment"
-          ref="txId"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-        />
+      <div class="col-12 q-py-sm q-my-sm" v-if="!isApprover && processing && !isConfirmedStatusChange">
+        <p class="q-mb-xs">
+          <b class="text-weight-medium">Enter transaction ID of sent payment</b>
+        </p>
+        <div class="row">
+          <q-input class="col-12 col-sm-6 col-md-4" v-model="txId" ref="txId" outlined dense lazy-rules stack-label />
+        </div>
       </div>
-      <p v-if="!isApprover && processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
+      <p v-if="!isApprover && processing && isConfirmedStatusChange" class="text-caption text-italic text-info col-12">
         Use Bulk Pay BTC to enter a Transaction ID
       </p>
       <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
@@ -157,7 +151,7 @@
         v-if="processable && processing"
         label="mark paid"
         type="submit"
-        color="primary"
+        color="secondary"
         :disable="fetchingRate || paying || isConfirmedStatusChange"
         class="q-mr-sm btn btn-animated"
       />
@@ -260,7 +254,6 @@ export default {
       txId: '',
       methods: [],
       expanded: false,
-      processing: false,
       fetchingRate: false,
       paying: false,
       payment: {},
@@ -275,6 +268,7 @@ export default {
     token: String,
     paymentType: String,
     editing: Boolean,
+    processing: Boolean,
   },
   methods: {
     ...mapActions({
@@ -282,14 +276,14 @@ export default {
     }),
     cancel() {
       if (this.processing) {
-        this.processing = false
+        this.$emit('update:processing', false)
         return
       }
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
     },
     processPayment() {
-      this.processing = true
+      this.$emit('update:processing', true)
       if (this.payment.paymentMethod !== 'none') {
         this.$refs.rateInput.fetchRate()
       }
