@@ -1,25 +1,26 @@
 <template>
-  <q-field v-if="isShow" label="Exchange Rate" class="justify-start" stack-label borderless>
-    <template v-slot:control>
-      <div class="row self-center full-width no-outline q-my-md rate-content" tabindex="0">
-        <q-item-label lines="1">
-          <span>{{ payment.convertRate }}</span>
-          <q-btn
-            v-if="!readonly && !loading"
-            class="q-ml-sm"
-            round
-            dense
-            flat
-            icon="currency_exchange"
-            @click="fetchRate"
-          >
-            <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
-          </q-btn>
-          <q-spinner-oval v-else-if="!readonly && loading" class="q-ml-sm" color="primary" size="sm" />
-        </q-item-label>
-      </div>
-    </template>
-  </q-field>
+  <div>
+    <p class="q-mb-xs">
+      <b class="text-weight-medium">Exchange Rate</b>
+    </p>
+    <q-field class="justify-start" stack-label borderless>
+      <template v-slot:control>
+        <span>{{ payment.convertRate }}</span>
+        <q-btn
+          v-if="!readonly && !loading"
+          class="q-ml-sm"
+          round
+          dense
+          flat
+          icon="currency_exchange"
+          @click="fetchRate"
+        >
+          <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
+        </q-btn>
+        <q-spinner-oval v-else-if="!readonly && loading" class="q-ml-sm" color="primary" size="sm" />
+      </template>
+    </q-field>
+  </div>
 </template>
 
 <script>
@@ -38,7 +39,6 @@ export default {
     modelValue: Object,
     readonly: Boolean,
     loading: Boolean,
-    isShow: Boolean,
   },
   methods: {
     fetchRate() {

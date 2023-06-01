@@ -60,7 +60,7 @@
     </q-drawer>
 
     <q-page-container>
-      <q-page class="q-pa-lg">
+      <q-page>
         <router-view />
       </q-page>
     </q-page-container>

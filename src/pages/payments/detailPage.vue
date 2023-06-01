@@ -1,15 +1,20 @@
 <template>
-  <q-btn label="Back" type="button" color="primary" class="q-mb-md" @click="back" />
-  <q-card flat bordered class="q-pa-md">
+  <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
+    <q-tooltip> Back to list page </q-tooltip>
+  </q-btn>
+  <q-card flat class="q-pa-md content-container">
     <q-card-section>
-      <div class="text-h6 title-case">Payment request</div>
+      <div class="row">
+        <div class="text-h6 title-case">Payment request</div>
+        <payment-status :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+      </div>
       <p class="text-red" v-if="payment.status === 'rejected'">
         <q-icon name="info" color="red" />
         <b>Rejected Reason:</b> {{ payment.rejectionReason }}
       </p>
     </q-card-section>
-    <q-separator inset />
     <payment-detail
+      class="q-px-lg"
       v-show="!loading && !isError && !editing"
       v-model="payment"
       v-model:editing="editing"
@@ -40,9 +45,10 @@
 import { PaymentForm, PaymentDetail } from 'components/payment'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { mapGetters } from 'vuex'
+import PaymentStatus from 'components/payment/paymentStatus'
 export default {
   name: 'detailPaymentPage',
-  components: { PaymentForm, PaymentDetail },
+  components: { PaymentForm, PaymentDetail, PaymentStatus },
   data() {
     return {
       loading: false,

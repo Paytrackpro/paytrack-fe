@@ -69,7 +69,7 @@
             <div v-if="!readonly" class="col-3">
               <q-input
                 v-model="invoicesAmount"
-                label="Amount(USD)"
+                label="Amount (USD)"
                 type="number"
                 outlined
                 readonly
