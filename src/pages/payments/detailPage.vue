@@ -6,7 +6,7 @@
     <q-card-section>
       <div class="row">
         <div class="text-h6 title-case">Payment request</div>
-        <payment-status :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+        <payment-status v-if="!processing" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
       </div>
       <p class="text-red" v-if="payment.status === 'rejected'">
         <q-icon name="info" color="red" />
@@ -18,6 +18,7 @@
       v-show="!loading && !isError && !editing"
       v-model="payment"
       v-model:editing="editing"
+      v-model:processing="processing"
       :payment-type="paymentType"
       :token="token"
       :user="user"
@@ -59,6 +60,7 @@ export default {
       payment: {},
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
+      processing: false,
     }
   },
   created() {
