@@ -1,15 +1,22 @@
 <template>
-  <q-field label="Approvers" stack-label borderless>
-    <q-chip
-      v-for="item in approvers"
-      :key="item.approverId"
-      :clickable="false"
-      dense
-      square
-      :icon="item.isApproved ? 'done' : 'pending_actions'"
-    >
-      {{ item.approverName }}
-    </q-chip>
+  <p>
+    <b class="text-weight-medium">Approvers</b>
+  </p>
+  <q-field stack-label borderless>
+    <template v-slot:control>
+      <q-chip
+        v-for="item in approvers"
+        :key="item.approverId"
+        :clickable="false"
+        square
+        dense
+        text-color="white"
+        :color="item.isApproved ? 'positive' : 'warning'"
+        :icon="item.isApproved ? 'check_circle_outline' : 'schedule'"
+      >
+        {{ item.approverName }}
+      </q-chip>
+    </template>
   </q-field>
 </template>
 

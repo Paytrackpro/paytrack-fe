@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-lg">
     <!--    <q-breadcrumbs>
       <q-breadcrumbs-el label="Home" to="/"/>
       <q-breadcrumbs-el label="Payment" to="/payment"/>

@@ -2,48 +2,30 @@
 <template>
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4">
-        <q-field :label="isSender ? 'Sent' : 'Received'" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.sentAt"></m-time>
-            </div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.senderId !== user.id">
+        <custom-field :label="'Sender'" :value="payment.senderName || payment.externalEmail" />
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Last Edited" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.updatedAt"></m-time>
-            </div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.receiverId != user.id">
+        <custom-field :label="'Recipient'" :value="payment.receiverName || payment.externalEmail" />
       </div>
-      <div class="col-12 col-sm-12 col-lg-4" v-if="displayApprovers">
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
+      </div>
+      <div class="col-12 col-sm-12 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="displayApprovers">
         <approver-display :approvers="payment.approvers" />
       </div>
-      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.senderId !== user.id">
-        <q-field label="Sender" stack-label borderless>
+      <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <p class="q-mb-xs">
+          <b>{{ isSender ? 'Sent' : 'Received' }}:&nbsp;&nbsp;</b><m-time :time="payment.sentAt"></m-time>
+        </p>
+        <q-field stack-label borderless>
           <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.senderName || payment.externalEmail }}
-            </div>
+            <b>Last Edited:&nbsp;&nbsp;</b><m-time :time="payment.updatedAt"></m-time>
           </template>
         </q-field>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4" v-if="payment.receiverId != user.id">
-        <q-field label="Recipient" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.receiverName || payment.externalEmail }}
-            </div>
-          </template>
-        </q-field>
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4">
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="processing">
         <q-select
-          v-if="processing"
           v-model="paymentStatus"
           :options="statusOption"
           outlined
@@ -57,46 +39,35 @@
           label="Status"
           :rules="[(val) => !!val || 'Status is required']"
         />
-        <q-field v-else label="Status" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <payment-status :paymentModel="payment" />
-            </div>
-          </template>
-        </q-field>
       </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <q-field label="Amount (USD)" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">${{ (payment.amount || 0).toFixed(2) }}</div>
-          </template>
-        </q-field>
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Description'" :value="payment.description" />
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div class="col">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="payment.description" readonly outlined type="textarea" borderless />
-      </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
-      <div v-if="isEditPaymentSetting" class="col-12">
+      <div v-if="isEditPaymentSetting" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
       </div>
-      <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)" class="col-12">
-        <p><b class="text-weight-medium">Accepted Coins: </b>{{ coinsAccepted }}</p>
+      <div
+        v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)"
+        class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow"
+      >
+        <p><b class="text-weight-medium">Accepted Coins</b></p>
+        <q-field stack-label borderless>
+          <coin-label v-for="(setting, i) of payment.paymentSettings" :key="i" :type="setting.type" />
+        </q-field>
       </div>
-      <div v-if="!isApprover && isPaidStatus" class="col-12">
-        <p>
-          <b class="text-weight-medium">Paid in {{ (payment.paymentMethod || '').toUpperCase() }}: </b
-          >{{ payment.paymentAddress }}
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <p class="q-mb-xs">
+          <b class="text-weight-medium">Paid in</b>
         </p>
+        <q-field :class="customClass" :style="customStyle" stack-label borderless>
+          <template v-slot:control>
+            <coin-label :type="payment.paymentMethod" hasAddress :address="payment.paymentAddress" />
+          </template>
+        </q-field>
       </div>
-    </div>
-    <div class="row q-mb-md q-col-gutter-md">
       <div
         v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing"
-        class="col-12 col-sm-12 col-md-4"
+        class="col-12 col-sm-12 col-md-4 q-py-sm q-my-sm field-shadow"
       >
         <payment-setting-method
           :defautMethod="payment.paymentMethod"
@@ -106,39 +77,38 @@
           label="Accepted payment coins"
         />
       </div>
-      <div class="col-12 col-sm-6 col-md-4">
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
         <PaymentRateInput
           :readonly="!processing"
-          :isShow="isShowExchangeRate"
           ref="rateInput"
           v-model="payment"
           v-model:loading="fetchingRate"
           @update:modelValue="updateLocal"
         />
       </div>
-      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4">
-        <q-field :label="`Amount to send (${(payment.paymentMethod || '').toUpperCase()})`" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center no-outline text-weight-bolder q-my-md rate-content" tabindex="0">
-              {{ payment.expectedAmount }}
-            </div>
-            <q-btn
-              v-if="processing"
-              round
-              dense
-              flat
-              class="q-ml-sm"
-              icon="content_copy"
-              @click="copy(payment.expectedAmount || '')"
-            />
-          </template>
-        </q-field>
+      <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
+        <div>
+          <p class="q-mb-xs">
+            <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }}) </b>
+          </p>
+          <q-field stack-label borderless>
+            <template v-slot:control>
+              <span class="text-weight-bolder">{{ payment.expectedAmount }}</span>
+              <q-btn
+                v-if="processing"
+                round
+                dense
+                flat
+                class="q-ml-sm"
+                icon="content_copy"
+                @click="copy(payment.expectedAmount || '')"
+              />
+            </template>
+          </q-field>
+        </div>
       </div>
-    </div>
-    <div v-if="!isApprover" class="row q-mb-md q-col-gutter-md">
-      <div class="col-12">
+      <div class="col-12" v-if="!isApprover && processing && !isConfirmedStatusChange">
         <q-input
-          v-if="processing && !isConfirmedStatusChange"
           v-model="txId"
           label="Enter transaction ID of sent payment"
           ref="txId"
@@ -148,32 +118,22 @@
           stack-label
         />
       </div>
-      <p v-if="processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
+      <p v-if="!isApprover && processing && isConfirmedStatusChange" class="text-caption text-italic col-12">
         Use Bulk Pay BTC to enter a Transaction ID
       </p>
-      <div v-if="isPaidStatus" class="col-12 col-sm-6 col-md-4">
-        <q-field label="Transaction id" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              {{ payment.txId }}
-            </div>
-          </template>
-        </q-field>
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Transaction id'" :value="payment.txId" />
       </div>
-      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4">
-        <q-field label="Paid At" stack-label borderless>
-          <template v-slot:control>
-            <div class="self-center full-width no-outline" tabindex="0">
-              <m-time :time="payment.paidAt"></m-time>
-            </div>
-          </template>
-        </q-field>
+      <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Paid At'" isTime :value="payment.paidAt" />
       </div>
     </div>
     <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
-      <p><b class="text-weight-medium">Hourly Rate(USD/h): </b> ${{ payment.hourlyRate }}</p>
+      <p>
+        <b class="text-weight-medium">Hourly Rate (USD/h): ${{ payment.hourlyRate.toFixed(2) }}</b>
+      </p>
     </div>
-    <div class="row q-mb-md q-col-gutter-md" v-if="isShowInvoice">
+    <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
       <div class="col">
         <invoices-mode
           v-model="payment.details"
@@ -190,7 +150,7 @@
         type="button"
         color="primary"
         :disable="fetchingRate || paying"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
         @click="update"
       />
       <q-btn
@@ -199,7 +159,7 @@
         type="submit"
         color="primary"
         :disable="fetchingRate || paying || isConfirmedStatusChange"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-btn
         v-if="processable && !processing"
@@ -207,16 +167,16 @@
         type="button"
         color="primary"
         @click="processPayment"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-btn
         v-if="rejectable && !processing"
         label="reject"
         type="button"
-        color="primary"
+        color="accent"
         :disable="paying"
         @click="toggleRejectDialog(true)"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-btn
         v-if="editable && !processing"
@@ -224,7 +184,7 @@
         type="button"
         color="primary"
         @click="$emit('update:editing', true)"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-btn
         v-if="isDraftStatus && editable"
@@ -233,17 +193,17 @@
         color="white"
         text-color="black"
         @click="confirm = true"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
       <q-dialog v-model="confirm" persistent>
         <q-card>
           <q-card-section class="row items-center">
-            <q-avatar icon="warning" color="primary" text-color="white" />
+            <q-avatar icon="warning" color="primary" text-color="white" size="md" />
             <span class="q-ml-sm">Are you sure to delete this draft payment request?</span>
           </q-card-section>
           <q-card-actions align="right">
-            <q-btn flat label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
-            <q-btn flat label="Cancel" color="primary" v-close-popup />
+            <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
+            <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -254,9 +214,9 @@
         text-color="white"
         v-if="approvalable"
         @click="handlerApprovalAction()"
-        class="q-mr-sm"
+        class="q-mr-sm btn btn-animated"
       />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" />
+      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" class="btn btn-animated" />
     </div>
     <PaymentRejectDialog
       v-model="paymentRejectDialog"
@@ -273,23 +233,27 @@ import MTime from 'components/common/mTime'
 import PaymentSetting from 'components/payment/paymentSetting'
 import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
-import PaymentStatus from 'components/payment/paymentStatus'
 import PaymentRateInput from 'components/payment/paymentRateInput'
 import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
 import ApproverDisplay from 'components/payment/approverDisplay'
 import paymentSettingMethod from 'components/payment/paymentSettingMethod'
+import customField from 'src/components/common/custom_field.vue'
+import { COINS } from 'src/consts/common'
+import coinLabel from '../common/coin_label.vue'
+
 export default {
   name: 'paymentDetail',
   components: {
     MTime,
     PaymentSetting,
-    PaymentStatus,
     PaymentRateInput,
     PaymentRejectDialog,
     InvoicesMode,
     ApproverDisplay,
     paymentSettingMethod,
+    customField,
+    coinLabel,
   },
   data() {
     return {

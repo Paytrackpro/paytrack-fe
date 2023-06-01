@@ -25,7 +25,7 @@
     </div>
     <div class="row q-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Amount(USD)</p>
+        <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
         <q-input
           class="no-control-button"
           v-model="this.inPayment.amount"

@@ -1,10 +1,10 @@
 <template>
-  <q-markup-table flat bordered separator="cell">
+  <q-markup-table flat>
     <table class="q-table">
       <thead>
         <tr>
-          <th class="text-right" style="width: 150px">Detail</th>
-          <th class="text-right" style="width: 120px" v-if="showCost">Cost (USD)</th>
+          <th class="text-left" style="width: 20%">Detail</th>
+          <th class="text-left" style="width: 20%" v-if="showCost">Cost (USD)</th>
           <th class="text-left">Description</th>
           <th style="width: 100px" v-if="!readonly">#</th>
         </tr>
