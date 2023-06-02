@@ -1,58 +1,45 @@
 <template>
-  <div class="row q-mb-md q-col-gutter-md">
+  <div class="row q-mb-md q-col-gutter-sm">
     <div v-if="label" class="col-12">
       <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
     </div>
-    <div v-if="!readonly" class="col-12 col-sm-6 col-lg-3">
+    <div v-if="!readonly" class="col-12">
       <q-field
-        :model-value="selectedCoins"
-        label="Coins you accept"
+        :model-value="settings"
         stack-label
+        borderless
         :rules="[(val) => (val !== null && val.length !== 0) || 'Please select the coin types you accept for payment']"
       >
         <template v-slot:control>
-          <q-option-group
-            :options="coins"
-            type="checkbox"
-            inline
-            v-model="selectedCoins"
-            @update:model-value="changeCoins"
-          />
+          <div class="row">
+            <div class="col-12 q-mt-sm" v-for="(coin, i) of coins" :key="i">
+              <div class="row center-row">
+                <q-checkbox v-model="coin.selected" @update:model-value="selectCoin" />
+                <div align="center" class="col-2 col-sm-1 col-md-2 col-lg-1">
+                  <coin-label :type="coin.data.value" />
+                </div>
+                <q-input
+                  class="q-ml-sm"
+                  style="width: 60%"
+                  v-model="coin.address"
+                  outlined
+                  dense
+                  lazy-rules
+                  stack-label
+                  :placeholder="coin.data.label + ' Address'"
+                  :disable="!coin.selected"
+                  @update:model-value="inputChange"
+                >
+                </q-input>
+              </div>
+            </div>
+          </div>
         </template>
       </q-field>
     </div>
-    <div class="col" v-if="settings && settings.length">
-      <q-markup-table v-if="!readonly">
-        <thead>
-          <tr>
-            <td style="width: 80px">Coin type</td>
-            <td>Address</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(setting, i) of settings" :key="i">
-            <td>
-              {{ getSelectedCoin(setting.type).label }}
-            </td>
-            <td>
-              <q-input
-                v-model="setting.address"
-                :label="`${getSelectedCoin(setting.type).label} address`"
-                :readonly="readonly"
-                dense
-                lazy-rules
-                stack-label
-                hide-bottom-space
-                @update:model-value="emit"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </q-markup-table>
-      <div v-if="readonly">
-        <div class="row center-row" v-for="(setting, i) of settings" :key="i">
-          <coin-label :type="setting.type" hasAddress :address="setting.address" />
-        </div>
+    <div class="col" v-if="settings && settings.length && readonly">
+      <div class="row center-row" v-for="(setting, i) of settings" :key="i">
+        <coin-label :type="setting.type" hasAddress :address="setting.address" />
       </div>
     </div>
   </div>
@@ -75,7 +62,7 @@ export default {
   },
   data() {
     return {
-      coins: COINS,
+      coins: [],
       selectedCoins: [],
       settings: [],
     }
@@ -84,57 +71,82 @@ export default {
     emit() {
       this.$emit('update:modelValue', this.settings)
     },
-    changeCoins(coins) {
+    selectCoin() {
       const settings = this.settings || []
       const newSettings = []
-      for (let coin of coins) {
-        let found = false
-        for (let setting of settings) {
-          if (setting.type === coin) {
-            found = true
+      for (let coin of this.coins) {
+        if (coin.selected) {
+          let found = false
+          for (let setting of settings) {
+            if (setting.type === coin.data.value) {
+              found = true
+              newSettings.push({
+                type: setting.type,
+                address: setting.address,
+              })
+            }
+          }
+          if (!found) {
             newSettings.push({
-              type: setting.type,
-              address: setting.address,
+              type: coin.data.value,
+              address: '',
             })
           }
-        }
-        if (!found) {
-          newSettings.push({
-            type: coin,
-            address: '',
-          })
         }
       }
       this.$emit('update:modelValue', newSettings)
     },
+    inputChange() {
+      const settings = this.settings || []
+      for (let coin of this.coins) {
+        if (coin.selected) {
+          for (let setting of settings) {
+            if (setting.type === coin.data.value && setting.address !== coin.address) {
+              setting.address = coin.address
+              this.$emit('update:modelValue', settings)
+            }
+          }
+        }
+      }
+    },
     getSelectedCoin(type) {
       for (let coin of this.coins) {
-        if (coin.value === type) {
+        if (coin.data.value === type) {
           return coin
         }
       }
     },
     getCoinColor(type) {
       for (let coin of this.coins) {
-        if (coin.value === type) {
+        if (coin.data.value === type) {
           return coin.color
         }
       }
+    },
+    getCoinData() {
+      if (this.coins && this.coins.length > 0) {
+        return this.coins
+      }
+      let result = []
+      for (let coin of COINS) {
+        result.push({ data: coin, selected: false, address: '' })
+      }
+      return result
     },
   },
   watch: {
     modelValue: {
       immediate: true,
       handler(newVal) {
+        this.coins = this.getCoinData()
         this.settings = cloneObject(newVal || [])
-        let selectedCoins = []
         for (let setting of this.settings) {
           const coin = this.getSelectedCoin(setting.type)
           if (coin) {
-            selectedCoins.push(coin.value)
+            coin.selected = true
+            coin.address = setting.address
           }
         }
-        this.selectedCoins = selectedCoins
       },
     },
   },
