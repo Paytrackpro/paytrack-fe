@@ -6,18 +6,11 @@
     <q-field class="justify-start" stack-label borderless>
       <template v-slot:control>
         <span>{{ payment.convertRate }}</span>
-        <q-btn
-          v-if="!readonly && !loading"
-          class="q-ml-sm"
-          round
-          dense
-          flat
-          icon="currency_exchange"
-          @click="fetchRate"
-        >
-          <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
+        <q-btn v-if="!readonly && !loading" class="q-ml-sm" round dense flat @click="fetchRate">
+          <q-tooltip>Refresh Exchange Rate</q-tooltip>
+          <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
         </q-btn>
-        <q-spinner-oval v-else-if="!readonly && loading" class="q-ml-sm" color="primary" size="sm" />
+        <q-spinner-oval v-else-if="!readonly && loading" class="q-ml-sm" size="sm" />
       </template>
     </q-field>
   </div>
