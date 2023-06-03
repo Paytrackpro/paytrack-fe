@@ -2,7 +2,7 @@
   <q-dialog no-backdrop-dismiss no-esc-dismiss @before-hide="clearForm">
     <q-card>
       <q-form @submit="onSubmit">
-        <q-card-section>
+        <q-card-section class="q-pt-lg q-px-lg">
           <div class="text-h6">Please confirm your OTP to disable this function</div>
           <q-input
             v-model="password"
@@ -22,9 +22,9 @@
           <q-input v-model="otp" type="text" hint="OTP" :rules="[(val) => !!val || 'OTP is required']" />
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" type="button" @click="cancel" />
-          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
+        <q-card-actions align="right" class="q-px-lg q-pb-lg">
+          <q-btn label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
+          <q-btn label="Cancel" text-color="black" color="white" type="button" @click="cancel" />
         </q-card-actions>
       </q-form>
     </q-card>

@@ -79,7 +79,7 @@
               :style="'height: ' + getScrollHeight() + 'px; max-width: 800px'"
             >
               <q-list>
-                <q-item v-for="item in selected" :key="item.id" clickable v-ripple class="q-mt-md bg-grey-5 rounded">
+                <q-item v-for="item in selected" :key="item.id" clickable v-ripple class="q-mt-md bg-grey-8 rounded">
                   <q-item-section>
                     <q-item-label lines="1" class="q-mt-sm">
                       <span class="text-weight-medium"
