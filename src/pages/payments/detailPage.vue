@@ -4,9 +4,12 @@
   </q-btn>
   <q-card flat class="q-pa-md content-container">
     <q-card-section>
-      <div class="row">
-        <div class="text-h6 title-case">Payment request</div>
-        <payment-status v-if="!processing" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+      <div class="row justify-between">
+        <div class="row">
+          <div class="text-h6 title-case">Payment request</div>
+          <payment-status v-if="!processing" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+        </div>
+        <q-toggle v-model="isInvoiceMode" color="primary" label="Invoice Mode" v-if="editing" />
       </div>
       <p class="text-red" v-if="payment.status === 'rejected'">
         <q-icon name="info" color="red" />
@@ -33,6 +36,7 @@
       :token="token"
       @saved="saved"
       @cancel="editing = false"
+      v-model:isInvoiceMode="isInvoiceMode"
     />
     <q-card-section v-show="isError">
       <div class="text-h6">{{ errorText }}</div>
@@ -61,6 +65,7 @@ export default {
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
       processing: false,
+      isInvoiceMode: false,
     }
   },
   created() {

@@ -1,53 +1,62 @@
 <template>
   <q-form @submit="submit">
-    <div class="row q-mb-md q-col-gutter-md profile-padding">
-      <div class="col-12 col-sm-4 col-lg-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Sender</p>
-        <q-input
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          @blur="checkValidSender"
-          :rules="[(val) => !!val || 'Sender is required']"
-          :error="senderError"
-          :error-message="sender.error"
-          @focus="senderFocus = true"
-          hide-bottom-space
-          v-model="sender.value"
-          placeholder="Sender"
-        />
-      </div>
-      <div class="col-12 col-sm-6 col-lg-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approver Users</p>
-        <q-input
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          @blur="checkValidApprovers"
-          :rules="[(val) => !!val || 'Approvers is required']"
-          :error="approverError"
-          :error-message="approver.error"
-          @focus="approverFocus = true"
-          hide-bottom-space
-          v-model="approver.value"
-          placeholder="Separate with comma(,)"
-        />
-      </div>
-      <div class="col-8 col-sm-10 col-lg-2">
-        <q-checkbox v-model="showCost" class="q-mr-xs q-mt-lg" label="Show Cost" />
-      </div>
-      <div class="col-4 col-sm-2 col-lg-2">
-        <q-btn
-          label="Save"
-          class="q-mr-xs q-mt-lg"
-          :disable="loading"
-          style="height: 40px"
-          type="submit"
-          color="primary"
-        />
-      </div>
+    <div class="row">
+      <q-card class="col-12 col-sm-6 col-lg-4 q-px-lg q-pb-lg shadow-primary">
+        <div class="q-table__title title-case">Add Approvers</div>
+        <div class="row q-mt-sm q-col-gutter-md profile-padding">
+          <div class="col-12">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Sender</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              @blur="checkValidSender"
+              :rules="[(val) => !!val || 'Sender is required']"
+              :error="senderError"
+              :error-message="sender.error"
+              @focus="senderFocus = true"
+              hide-bottom-space
+              v-model="sender.value"
+              placeholder="Sender"
+            />
+          </div>
+        </div>
+        <div class="row q-mt-sm q-col-gutter-md profile-padding">
+          <div class="col-12">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approver Users</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              @blur="checkValidApprovers"
+              :rules="[(val) => !!val || 'Approvers is required']"
+              :error="approverError"
+              :error-message="approver.error"
+              @focus="approverFocus = true"
+              hide-bottom-space
+              v-model="approver.value"
+              placeholder="Separate with comma(,)"
+            />
+          </div>
+        </div>
+        <div class="row q-col-gutter-md profile-padding">
+          <div class="col-12">
+            <div class="row justify-between">
+              <q-checkbox v-model="showCost" class="q-mr-xs q-mt-lg" label="Show Cost" />
+              <q-btn
+                label="Save"
+                class="q-mr-xs q-mt-lg"
+                :disable="loading"
+                style="height: 40px"
+                type="submit"
+                color="primary"
+              />
+            </div>
+          </div>
+        </div>
+      </q-card>
     </div>
     <div class="q-mt-md">
       <q-table
@@ -56,10 +65,11 @@
         :rows="rows"
         :columns="columns"
         row-key="name"
+        class="shadow-6"
         v-model:pagination="pagination"
         :hide-pagination="pagination.rowsNumber < 10"
         flat
-        bordered
+        separator="none"
       >
         <template v-slot:body-cell-showCost="props">
           <q-td :props="props">

@@ -1,92 +1,101 @@
 <template>
   <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
     <div class="row q-gutter-md">
-      <div class="col-12 col-sm-6 col-lg-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">
-          Recipient
-          <q-icon name="info">
-            <q-tooltip> The user who will be paying the payment request </q-tooltip>
-          </q-icon>
-        </p>
-        <q-input-system-user
-          v-model="partner"
-          placeholder="Recipient"
-          :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
-          outlined
-          dense
-          ref="inputReceiver"
-          lazy-rules
-          stack-label
-          hide-bottom-space
-          :rules="[(val) => !!val || 'Recipient is required']"
-          hint="expects a username on mgmt or an email address"
-        />
+      <div class="col-12 col-md-6">
+        <div class="row">
+          <div class="col-12 col-md-7">
+            <p class="q-mb-xs text-weight-medium">
+              Recipient
+              <q-icon name="info">
+                <q-tooltip> The user who will be paying the payment request </q-tooltip>
+              </q-icon>
+            </p>
+            <q-input-system-user
+              v-model="partner"
+              placeholder="Recipient"
+              :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
+              outlined
+              dense
+              ref="inputReceiver"
+              lazy-rules
+              stack-label
+              hide-bottom-space
+              :rules="[(val) => !!val || 'Recipient is required']"
+              hint="Expects a username on mgmt or an email address"
+            />
+          </div>
+          <div class="col-12 col-md-1"></div>
+          <div class="col-12 col-md-4">
+            <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
+            <q-input
+              class="no-control-button"
+              v-model="this.inPayment.amount"
+              placeholder="Amount"
+              type="number"
+              :readonly="isInvoiceMode"
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              :rules="[(val) => val > 0 || inputAmountMessage]"
+            >
+              <template v-slot:prepend>
+                <q-icon name="attach_money" />
+              </template>
+            </q-input>
+          </div>
+          <div class="col-12 q-my-lg">
+            <custom-input
+              :label="'Description'"
+              :rows="5"
+              v-model="inPayment.description"
+              :placeholder="'Description for Payment Request'"
+              :type="'textarea'"
+            />
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="row q-gutter-md">
-      <div class="col-12 col-sm-6 col-lg-4">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
-        <q-input
-          class="no-control-button"
-          v-model="this.inPayment.amount"
-          placeholder="Amount"
-          type="number"
-          :readonly="isInvoiceMode"
-          outlined
-          dense
-          lazy-rules
-          stack-label
-          :rules="[(val) => val > 0 || inputAmountMessage]"
-        >
-          <template v-slot:prepend>
-            <q-icon name="attach_money" />
-          </template>
-        </q-input>
-      </div>
-    </div>
-    <div class="row q-gutter-md">
-      <div class="col">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Description</p>
-        <q-input v-model="inPayment.description" outlined type="textarea" />
-      </div>
-    </div>
-    <div class="row q-pt-md">
-      <div class="col">
+      <div class="col-12 col-md-5 q-ml-lg">
         <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment Settings" />
       </div>
     </div>
-    <div class="row">
-      <q-checkbox v-model="isInvoiceMode" label="Invoice mode" />
+    <div class="row q-gutter-md q-mt-md" v-if="isInvoiceMode">
+      <div class="col-12"><p class="q-mt-none text-weight-medium text-subtitle1">Invoice Mode</p></div>
+      <custom-input
+        class="col-12 col-sm-4 col-lg-2"
+        :label="'Hourly Rate(USD/h)'"
+        v-model="inPayment.hourlyRate"
+        :type="'number'"
+        :rules="priceRules"
+      />
     </div>
-    <div class="row q-gutter-md" v-if="isInvoiceMode">
-      <div class="col-12 col-sm-6 col-lg-3">
-        <q-input
-          v-model="inPayment.hourlyRate"
-          label="Hourly rate(USD/h)"
-          type="number"
-          outlined
-          dense
-          stack-label
-          :rules="priceRules"
-        />
-      </div>
-    </div>
-    <div class="row q-py-md" v-if="isInvoiceMode">
+    <div class="row q-py-lg" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
           ref="invoiceMode"
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
-          :hourlyRate="Number(inPayment.hourlyRate)"
+          v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />
       </div>
     </div>
     <div class="row justify-end q-gutter-sm">
       <q-btn
+        v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
+        label="Send"
+        color="primary"
+        class="btn btn-animated"
+        :disable="submitting"
+        @click="submit(false)"
+      >
+        <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
+      </q-btn>
+      <q-btn
         :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
         type="button"
-        color="primary"
+        color="secondary"
+        class="btn btn-animated"
         @click="submit(true)"
         :disable="submitting"
       >
@@ -95,15 +104,13 @@
         </q-tooltip>
       </q-btn>
       <q-btn
-        v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
-        label="Send"
-        color="primary"
-        :disable="submitting"
-        @click="submit(false)"
-      >
-        <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
-      </q-btn>
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="$emit('cancel')" />
+        label="Cancel"
+        class="btn btn-animated"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="$emit('cancel')"
+      />
     </div>
   </q-form>
 </template>
@@ -113,21 +120,22 @@ import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
 import QInputSystemUser from 'components/common/qInputSystemUser'
 import PaymentSetting from 'components/payment/paymentSetting'
 import InvoicesMode from 'components/payment/invoicesMode'
+import customInput from '../common/custom_input.vue'
 import { mapActions } from 'vuex'
 
 export default {
   name: 'paymentForm',
-  components: { PaymentSetting, QInputSystemUser, InvoicesMode },
+  components: { PaymentSetting, QInputSystemUser, InvoicesMode, customInput },
   props: {
     payment: Object,
     user: Object,
     token: String,
     paymentType: String,
     isEdit: Boolean,
+    isInvoiceMode: Boolean,
   },
   data() {
     return {
-      isInvoiceMode: false,
       setting: {
         type: '',
         address: '',
@@ -169,8 +177,7 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
-        this.isInvoiceMode = payment.details.length > 0
-
+        this.$emit('update:isInvoiceMode', payment.details.length > 0)
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
@@ -221,11 +228,12 @@ export default {
 
       const inPutObject = await this.$refs.inputReceiver.validateAndGetValue()
       var valid
-      if (!isDraft) {
+      //if create and update, validate some require field
+      if (!isDraft || (isDraft && this.inPayment.status !== '' && this.inPayment.status !== 'draft')) {
         valid = await this.$refs.paymentForm.validate()
-      }
-      if (!isDraft && !valid) {
-        return
+        if (!valid) {
+          return
+        }
       }
 
       if (!isDraft && !this.inPayment.amount > 0) {

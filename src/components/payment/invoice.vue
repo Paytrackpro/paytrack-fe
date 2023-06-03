@@ -66,12 +66,24 @@
       <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
-      <span v-if="!editing" class="event-txt q-ma-xs text-blue" @click="edit">Edit</span>
-      <span v-if="!editing" class="event-txt q-ma-xs text-red" @click="$emit('delete', i)">Delete</span>
+      <q-btn v-if="!editing" size="sm" label="Edit" color="info" @click="edit" />
+      <q-btn v-if="!editing" size="sm" class="q-ml-xs" label="Delete" color="accent" @click="confirm = true" />
       <span v-if="editing" class="event-txt q-ma-xs text-secondary" @click="save">Save</span>
       <span v-if="editing" class="event-txt q-ma-xs" @click="cancel">Cancel</span>
     </td>
   </tr>
+  <q-dialog v-model="confirm" persistent>
+    <q-card>
+      <q-card-section class="row items-center">
+        <q-avatar icon="warning" color="primary" text-color="white" />
+        <span class="q-ml-sm">Are you sure to delete this row?</span>
+      </q-card-section>
+      <q-card-actions align="right">
+        <q-btn flat label="Delete" color="primary" v-close-popup @click="$emit('delete', i)" />
+        <q-btn flat label="Cancel" color="primary" v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script>
@@ -83,6 +95,11 @@ export default {
     hourlyRate: Number,
     readonly: Boolean,
     showCost: Boolean,
+    invoiceInput: Object,
+    invoiceDialog: Boolean,
+    isEdit: Boolean,
+    createType: String,
+    index: Number,
   },
   emits: ['update:modelValue'],
   data() {
@@ -96,12 +113,17 @@ export default {
         description: '',
       },
       type: 'labor',
+      confirm: false,
     }
   },
   methods: {
     edit: function () {
       this.invoice = { ...this.modelValue }
-      this.editing = true
+      this.$emit('update:invoiceInput', this.invoice)
+      this.$emit('update:invoiceDialog', true)
+      this.$emit('update:isEdit', true)
+      this.$emit('update:createType', this.type)
+      this.$emit('update:index', this.i)
     },
     save: function () {
       this.submitted = true
@@ -114,9 +136,6 @@ export default {
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
       })
-      this.editing = false
-    },
-    cancel: function () {
       this.editing = false
     },
     calculateCost() {

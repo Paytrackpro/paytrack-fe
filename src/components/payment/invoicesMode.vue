@@ -1,55 +1,77 @@
 <template>
-  <q-markup-table flat>
-    <table class="q-table">
-      <thead>
-        <tr>
-          <th class="text-left" style="width: 20%">Detail</th>
-          <th class="text-left" style="width: 20%" v-if="showCost">Cost (USD)</th>
-          <th class="text-left">Description</th>
-          <th style="width: 100px" v-if="!readonly">#</th>
-        </tr>
-      </thead>
-      <tbody>
-        <invoice
-          v-for="(_, i) of invoices"
-          v-model="invoices[i]"
-          @update:modelValue="$emit('update:modelValue', invoices)"
-          :key="i"
-          :i="i"
-          :hourly-rate="hourlyRate"
-          :showCost="showCost"
-          @delete="deleteInvoice"
-          :readonly="readonly"
-        />
-        <template v-if="!readonly">
-          <new-invoice
-            v-if="creating"
-            @save="newInvoice"
-            :hourly-rate="hourlyRate"
-            :type="createType"
-            @cancel="creating = false"
-          />
-          <tr v-if="!creating">
-            <td rowspan="4">
-              <q-btn label="Add Labor" class="q-mr-sm" outline color="secondary" @click="createInvoice('labor')" />
-              <q-btn label="Add Material" outline color="secondary" @click="createInvoice('material')" />
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+  <div class="row" v-if="!readonly">
+    <div class="col">
+      <q-btn
+        icon="add"
+        type="button"
+        color="primary"
+        label="Add Labor"
+        class="btn-animated btn q-mr-sm btn-radius"
+        @click="createInvoice('labor')"
+      >
+        <q-tooltip> Add Labor for Invoice </q-tooltip>
+      </q-btn>
+      <q-btn
+        icon="add"
+        type="button"
+        color="secondary"
+        label="Add Material"
+        class="btn-animated btn q-mr-sm btn-radius"
+        @click="createInvoice('material')"
+      >
+        <q-tooltip> Add Material for Invoice </q-tooltip>
+      </q-btn>
+    </div>
+  </div>
+  <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
+    <thead>
+      <tr>
+        <th class="text-left" style="width: 15%">Detail</th>
+        <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
+        <th class="text-left">Description</th>
+        <th style="width: 15%" v-if="!readonly"></th>
+      </tr>
+    </thead>
+    <tbody>
+      <invoice
+        v-for="(_, i) of invoices"
+        v-model="invoices[i]"
+        @update:modelValue="$emit('update:modelValue', invoices)"
+        :key="i"
+        :i="i"
+        :hourly-rate="Number(hourlyRate)"
+        :showCost="showCost"
+        v-model:invoiceInput="invoiceInput"
+        v-model:invoiceDialog="invoice_dialog"
+        v-model:isEdit="isEdit"
+        v-model:createType="createType"
+        v-model:index="index"
+        @delete="deleteInvoice"
+        :readonly="readonly"
+      />
+    </tbody>
   </q-markup-table>
+  <invoice-dialog
+    :readonly="readonly"
+    v-model:hourlyRate="hourlyRateUpdate"
+    v-model:dialogModelValue="invoice_dialog"
+    v-model:invoiceInput="invoiceInput"
+    v-model:isEdit="isEdit"
+    :type="createType"
+    @updateInvoice="updateInvoice"
+    @save="newInvoice"
+  />
 </template>
 
 <script>
-import NewInvoice from 'components/payment/newInvoice'
 import Invoice from 'components/payment/invoice'
+import InvoiceDialog from 'components/payment/invoiceDialog.vue'
 export default {
   name: 'InvoicesList',
-  components: { NewInvoice, Invoice },
+  components: { Invoice, InvoiceDialog },
   props: {
     modelValue: [Array],
-    hourlyRate: [Number, String],
+    hourlyRate: String,
     readonly: Boolean,
     showCost: Boolean,
   },
@@ -58,7 +80,17 @@ export default {
     return {
       invoices: [],
       creating: false,
+      invoice_dialog: false,
       createType: 'labor',
+      hourlyRateUpdate: this.hourlyRate,
+      isEdit: false,
+      invoiceInput: {
+        quantity: '',
+        price: '',
+        cost: 0,
+        description: '',
+      },
+      index: -1,
     }
   },
   methods: {
@@ -76,8 +108,14 @@ export default {
       this.$emit('update:modelValue', invoices)
     },
     createInvoice(type) {
+      this.isEdit = false
       this.createType = type
       this.creating = true
+      this.invoice_dialog = true
+    },
+    updateInvoice(invoice) {
+      this.invoices[this.index] = invoice
+      this.$emit('update:modelValue', this.invoices)
     },
   },
   watch: {
@@ -85,6 +123,12 @@ export default {
       immediate: true,
       handler(newVal) {
         this.invoices = newVal || []
+      },
+    },
+    hourlyRateUpdate: {
+      immediate: true,
+      handler(newVal) {
+        this.$emit('update:hourlyRate', newVal)
       },
     },
   },

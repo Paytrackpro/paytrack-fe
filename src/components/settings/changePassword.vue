@@ -1,22 +1,25 @@
 <template>
   <q-dialog no-backdrop-dismiss no-esc-dismiss>
-    <q-card style="width: 350px">
+    <q-card style="width: 400px">
       <q-form @submit="onSubmit">
-        <q-card-section>
+        <q-card-section class="q-pa-lg">
           <div class="text-h6">Change your password</div>
           <q-input-pw
+            class="q-mt-md"
             v-model="form.oldPassword"
             :autofocus="true"
             hint="Old Password"
             :rules="[(val) => !!val || 'Old password is required']"
           />
           <q-input-pw
+            class="q-mt-md"
             v-model="form.password"
             :autofocus="true"
             hint="Password"
             :rules="[(val) => !!val || 'Password is required']"
           />
           <q-input
+            class="q-mt-md"
             v-if="isOtp"
             v-model="form.otp"
             type="text"
@@ -24,17 +27,17 @@
             :rules="[(val) => !!val || 'OTP is required']"
           />
         </q-card-section>
-        <q-card-actions align="right">
+        <q-card-actions align="right" class="q-pa-lg">
+          <q-btn label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
           <q-btn
-            flat
             label="Cancel"
-            color="primary"
+            text-color="black"
+            color="white"
             type="button"
             @click="cancel"
             :loading="loading"
             :disable="loading"
           />
-          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
         </q-card-actions>
       </q-form>
     </q-card>

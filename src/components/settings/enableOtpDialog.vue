@@ -2,13 +2,15 @@
   <q-dialog no-backdrop-dismiss no-esc-dismiss @before-hide="clearForm">
     <q-card>
       <q-form @submit="onSubmit">
-        <q-card-section>
+        <q-card-section class="q-pt-lg q-px-lg">
           <div class="text-h6">Please confirm your password to active two-factor authentication</div>
           <q-input
             :autofocus="true"
+            outlined
             v-model="password"
             :type="pwdVisibility ? 'password' : 'text'"
-            :rules="[(val) => !!val || 'password is required']"
+            :rules="[(val) => !!val || 'Password is required']"
+            class="q-mt-lg"
           >
             <template v-slot:append>
               <q-icon
@@ -20,9 +22,9 @@
           </q-input>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="primary" type="button" @click="cancel" />
-          <q-btn flat label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
+        <q-card-actions align="right" class="q-px-lg q-pb-lg">
+          <q-btn label="Confirm" color="primary" type="submit" :loading="loading" :disable="loading" />
+          <q-btn label="Cancel" text-color="black" color="white" type="button" @click="cancel" />
         </q-card-actions>
       </q-form>
     </q-card>

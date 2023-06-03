@@ -1,7 +1,10 @@
 <template>
   <div>
-    <p>
-      <b class="text-weight-medium">{{ label }} </b>
+    <p v-if="label">
+      <b :class="'text-weight-medium' + (notitleCase ? '' : ' title-case')">{{ label }} </b>
+      <q-icon :name="labelIcon" v-if="labelIcon">
+        <q-tooltip> {{ labelTooltip }} </q-tooltip>
+      </q-icon>
     </p>
     <q-input
       :class="customClass"
@@ -16,7 +19,15 @@
       hide-bottom-space
       :type="type"
       :error="error"
-    />
+      :placeholder="placeholder"
+      :lazy-rules="lazyRules"
+      :rules="rules"
+      :step="step"
+    >
+      <template v-slot:append>
+        <slot name="append" />
+      </template>
+    </q-input>
   </div>
 </template>
 
@@ -33,6 +44,13 @@ export default {
     type: String,
     error: Boolean,
     rows: Number,
+    placeholder: String,
+    lazyRules: Boolean,
+    rules: Object,
+    labelIcon: String,
+    labelTooltip: String,
+    step: String,
+    notitleCase: Boolean,
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {

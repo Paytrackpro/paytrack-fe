@@ -1,12 +1,12 @@
 <template>
-  <div class="q-pa-md">
+  <div class="q-pa-lg">
     <q-table
-      title="Treats"
+      title="User List"
       :rows="rows"
       :columns="columns"
       row-key="name"
       flat
-      bordered
+      separator="none"
       v-model:pagination="pagination"
       :hide-pagination="pagination.rowsNumber < 10"
       :loading="loading"
@@ -27,7 +27,7 @@
           <m-time :time="props.row.lastSeen"></m-time>
         </q-td>
       </template>
-      <template v-slot:top-left>
+      <template v-slot:top-right>
         <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
           <template v-slot:prepend>
             <q-icon name="search" />
