@@ -2,6 +2,9 @@
   <div>
     <p>
       <b class="text-weight-medium">{{ label }} </b>
+      <q-icon :name="labelIcon" v-if="labelIcon">
+        <q-tooltip> {{ labelTooltip }} </q-tooltip>
+      </q-icon>
     </p>
     <q-input
       :class="customClass"
@@ -16,7 +19,14 @@
       hide-bottom-space
       :type="type"
       :error="error"
-    />
+      :placeholder="placeholder"
+      :lazy-rules="lazyRules"
+      :rules="rules"
+    >
+      <template v-slot:append>
+        <slot name="append" />
+      </template>
+    </q-input>
   </div>
 </template>
 
@@ -33,6 +43,11 @@ export default {
     type: String,
     error: Boolean,
     rows: Number,
+    placeholder: String,
+    lazyRules: Boolean,
+    rules: Object,
+    labelIcon: String,
+    labelTooltip: String,
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {

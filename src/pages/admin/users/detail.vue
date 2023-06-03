@@ -1,62 +1,42 @@
 <template>
-  <q-card flat bordered class="q-pa-md">
-    <q-form @submit="updateUserInfo">
+  <q-card flat class="q-ma-lg q-pb-lg q-pr-lg content-container">
+    <q-card-section>
+      <div class="row">
+        <div class="text-h6 title-case">User Update</div>
+      </div>
+    </q-card-section>
+    <q-form @submit="updateUserInfo" class="q-ml-lg">
       <div class="row q-mb-md q-col-gutter-md">
         <div class="col-12 col-sm-6 col-lg-4">
-          <p class="q-mt-none q-mb-xs text-weight-medium">User Name</p>
-          <q-input
+          <custom-input
+            :label="'User Name'"
             v-model="userName"
-            placeholder="Username"
-            outlined
-            dense
-            lazy-rules
-            stack-label
+            :placeholder="'Username'"
+            lazyRules
             :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
-            hide-bottom-space
-          >
-          </q-input>
+          />
         </div>
-        <div class="col-12 col-sm-6 col-lg-4">
-          <p class="q-mt-none q-mb-xs text-weight-medium">Display Name</p>
-          <q-input
-            v-model="displayName"
-            placeholder="Display name"
-            outlined
-            dense
-            lazy-rules
-            stack-label
-            hide-bottom-space
-          >
-          </q-input>
-        </div>
+
+        <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
       </div>
       <div class="row q-mb-md q-col-gutter-md">
         <div class="col-12 col-sm-6 col-lg-4">
-          <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
-          <q-input
+          <custom-input
+            :label="'Email'"
             v-model="email"
-            placeholder="Email"
-            outlined
-            dense
-            lazy-rules
-            stack-label
+            :placeholder="'Email'"
+            lazyRules
             :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address']"
-            hide-bottom-space
-          >
-          </q-input>
+          />
         </div>
         <div class="col-12 col-sm-6 col-lg-4">
-          <p class="q-mt-none q-mb-xs text-weight-medium">Password</p>
-          <q-input
-            :type="isPwd ? 'password' : 'text'"
+          <custom-input
+            :label="'Password'"
             v-model="password"
-            outlined
-            dense
-            placeholder="Password"
-            lazy-rules
-            stack-label
+            :type="isPwd ? 'password' : 'text'"
+            :placeholder="'Password'"
+            lazyRules
             :rules="[(val) => !val || val.length == 0 || (val && val.length >= 6) || 'Please use a valid password']"
-            hide-bottom-space
           >
             <template v-slot:append>
               <q-icon
@@ -66,7 +46,7 @@
                 @click="isPwd = !isPwd"
               />
             </template>
-          </q-input>
+          </custom-input>
         </div>
       </div>
       <div class="row">
@@ -74,7 +54,7 @@
         <q-checkbox class="col-12 col-md-4" v-model="lockUser" label="Lock User (Disable Login)" />
       </div>
       <div class="row justify-end q-gutter-sm">
-        <q-btn label="Save" type="submit" color="primary" />
+        <q-btn label="Save" class="btn btn-animated" type="submit" color="primary" />
       </div>
     </q-form>
   </q-card>
@@ -83,8 +63,12 @@
 <script>
 import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
+import customInput from 'src/components/common/custom_input.vue'
 export default {
   name: 'pageUserDetails',
+  components: {
+    customInput,
+  },
   data() {
     return {
       userName: '',

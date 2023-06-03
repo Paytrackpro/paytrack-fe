@@ -132,7 +132,7 @@
         <invoices-mode
           v-model="payment.details"
           readonly
-          :hourlyRate="Number(payment.hourlyRate)"
+          v-model:hourlyRate="payment.hourlyRate"
           :showCost="isShowCost"
         />
       </div>
