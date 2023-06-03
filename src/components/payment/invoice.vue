@@ -98,6 +98,8 @@ export default {
     invoiceInput: Object,
     invoiceDialog: Boolean,
     isEdit: Boolean,
+    createType: String,
+    index: Number,
   },
   emits: ['update:modelValue'],
   data() {
@@ -120,6 +122,8 @@ export default {
       this.$emit('update:invoiceInput', this.invoice)
       this.$emit('update:invoiceDialog', true)
       this.$emit('update:isEdit', true)
+      this.$emit('update:createType', this.type)
+      this.$emit('update:index', this.i)
     },
     save: function () {
       this.submitted = true

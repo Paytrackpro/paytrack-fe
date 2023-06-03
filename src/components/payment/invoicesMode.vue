@@ -44,6 +44,8 @@
         v-model:invoiceInput="invoiceInput"
         v-model:invoiceDialog="invoice_dialog"
         v-model:isEdit="isEdit"
+        v-model:createType="createType"
+        v-model:index="index"
         @delete="deleteInvoice"
         :readonly="readonly"
       />
@@ -51,12 +53,12 @@
   </q-markup-table>
   <invoice-dialog
     :readonly="readonly"
-    @update:mainModelValue="$emit('update:modelValue', invoices)"
     v-model:hourlyRate="hourlyRateUpdate"
     v-model:dialogModelValue="invoice_dialog"
     v-model:invoiceInput="invoiceInput"
     v-model:isEdit="isEdit"
     :type="createType"
+    @updateInvoice="updateInvoice"
     @save="newInvoice"
   />
 </template>
@@ -88,6 +90,7 @@ export default {
         cost: 0,
         description: '',
       },
+      index: -1,
     }
   },
   methods: {
@@ -109,6 +112,10 @@ export default {
       this.createType = type
       this.creating = true
       this.invoice_dialog = true
+    },
+    updateInvoice(invoice) {
+      this.invoices[this.index] = invoice
+      this.$emit('update:modelValue', this.invoices)
     },
   },
   watch: {

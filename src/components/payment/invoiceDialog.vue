@@ -2,7 +2,7 @@
   <q-dialog v-model="modelValue">
     <q-card style="width: 550px; max-width: 80vw">
       <q-card-section class="row">
-        <div class="text-h6">{{ type === 'labor' ? 'Add Labor' : 'Add Material' }}</div>
+        <div class="text-h6">{{ isEdit ? 'Edit' : 'Add' }}{{ type === 'labor' ? ' Labor' : ' Material' }}</div>
       </q-card-section>
       <q-card-section class="q-pt-xs q-px-lg">
         <div class="row items-start justify-between">
@@ -61,7 +61,6 @@ export default {
   name: 'InvoiceDialog',
   components: { customInput, customField },
   props: {
-    i: Number,
     mainModelValue: Object,
     hourlyRate: String,
     readonly: Boolean,
@@ -92,7 +91,7 @@ export default {
         return
       }
       if (this.isEdit) {
-        this.$emit('update:mainModelValue', {
+        this.$emit('updateInvoice', {
           quantity: Number(this.invoice.quantity),
           price: Number(this.invoice.price),
           cost: Number(this.invoice.cost),
@@ -113,12 +112,22 @@ export default {
     },
     cancel() {
       this.$emit('update:dialogModelValue', false)
-      this.$emit('update:invoiceInput', {
-        quantity: '',
-        price: '',
-        cost: 0,
-        description: '',
-      })
+      if (this.isEdit) {
+        this.invoice = {
+          quantity: '',
+          price: '',
+          cost: 0,
+          description: '',
+        }
+      }
+      if (!this.isEdit) {
+        this.$emit('update:invoiceInput', {
+          quantity: '',
+          price: '',
+          cost: 0,
+          description: '',
+        })
+      }
     },
     calculateCost() {
       let price = Number(this.invoice.price)
@@ -154,7 +163,10 @@ export default {
     invoiceInput: {
       immediate: true,
       handler(newVal) {
-        this.invoice = newVal
+        this.invoice.quantity = newVal.quantity
+        this.invoice.price = newVal.price
+        this.invoice.cost = newVal.cost
+        this.invoice.description = newVal.description
       },
     },
   },
