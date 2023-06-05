@@ -276,3 +276,269 @@ p {
   background-color: $cyan-2;
   color: $primary;
 }
+
+.login-form {
+  background-color: white;
+  width: 100%;
+  border-radius: 8px;
+  padding: 20px 40px;
+  box-shadow: 5px 10px 25px rgba(92, 99, 105, 0.2);
+}
+
+.inputContainer {
+  position: relative;
+  height: 60px;
+  width: 100%;
+  margin-top: 10px;
+}
+.input {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  border: 2px solid $primary;
+  border-radius: 7px;
+  font-size: 14px;
+  padding: 0 10px;
+  outline: none;
+  background: white !important;
+  color: $grey-3;
+  z-index: 1;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
+/* Hide the placeholder texts */
+
+::placeholder {
+  color: transparent;
+}
+
+.label {
+  position: absolute;
+  top: 20px;
+  left: 10px;
+  padding: 0 4px;
+  background-color: white;
+  color: $primary;
+  font-size: 14px;
+  transition: 0.5s;
+  z-index: 1;
+}
+
+.input:focus + .label {
+  top: -10px;
+  left: 3px;
+  z-index: 10;
+  font-size: 14px;
+  font-weight: 600;
+  color: $cyan-4;
+}
+
+.input:focus {
+  border: 2px solid $cyan-4;
+}
+
+.input:not(:placeholder-shown) + .label {
+  top: -10px;
+  left: 3px;
+  z-index: 10;
+  font-size: 13px;
+  font-weight: 600;
+}
+.msg-error {
+  font-size: 12px;
+}
+.input-icon {
+  font-size: 19px;
+}
+.after-input-icon {
+  position: relative;
+  padding-right: 10px;
+  height: 100%;
+  z-index: 100;
+  font-size: 25px;
+  color: $primary;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-transition: 0.3s;
+  -o-transition: 0.3s;
+  transition: 0.3s;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a {
+  -ms-word-wrap: break-word;
+  word-wrap: break-word;
+  text-decoration: none;
+}
+
+*:focus {
+  outline: none;
+}
+
+.bg-illustration {
+  position: relative;
+  height: 100vh;
+  width: 40%;
+  background: url('assets/login_bg.png') no-repeat center center scroll;
+  background-size: cover;
+  float: left;
+  -webkit-animation: bgslide 1s forwards;
+  animation: bgslide 1s forwards;
+}
+
+@-webkit-keyframes bgslide {
+  from {
+    left: -100%;
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    left: 0;
+    width: 40%;
+    opacity: 1;
+  }
+}
+
+@keyframes bgslide {
+  from {
+    left: -100%;
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    left: 0;
+    width: 40%;
+    opacity: 1;
+  }
+}
+
+.login {
+  max-height: 100vh;
+  overflow-y: auto;
+  float: left;
+  margin: 0 auto;
+  width: 60%;
+}
+.login .container {
+  width: 500px;
+  position: relative;
+}
+.login .container h1 {
+  font-size: 35px;
+  font-weight: bolder;
+  line-height: 4rem;
+}
+.login .container .login-form {
+  margin-top: 30px;
+}
+.login .container .login-form form {
+  display: -ms-grid;
+  display: grid;
+}
+
+.login .container button[type='submit'] {
+  background: -webkit-linear-gradient(110deg, #f794a4 0%, #fdd6bd 100%);
+  background: -o-linear-gradient(110deg, #f794a4 0%, #fdd6bd 100%);
+  background: linear-gradient(-20deg, #f794a4 0%, #fdd6bd 100%);
+  border: none;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  height: 40px;
+  text-transform: uppercase;
+  color: white;
+  border-radius: 10px;
+  position: relative;
+  z-index: 2;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+@media only screen and (min-width: 1024px) and (max-width: 1680px) {
+  .bg-illustration {
+    width: 40%;
+    -webkit-animation: none;
+    animation: none;
+  }
+
+  .login {
+    width: 60%;
+  }
+}
+/* Display 12", iPad PRO Portrait, iPad landscape */
+@media only screen and (max-width: 1024px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  @-webkit-keyframes slideIn {
+    from {
+      left: -100%;
+      opacity: 0;
+    }
+    to {
+      left: 0;
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      left: -100%;
+      opacity: 0;
+    }
+    to {
+      left: 0;
+      opacity: 1;
+    }
+  }
+  .bg-illustration {
+    float: none;
+    background: url('https://i.ibb.co/rwncw7s/bg-mobile.png') center center;
+    background-size: cover;
+    -webkit-animation: slideIn 0.8s ease-in-out forwards;
+    animation: slideIn 0.8s ease-in-out forwards;
+    width: 100%;
+    height: 190px;
+    text-align: center;
+  }
+  .login {
+    float: none;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .login .container {
+    -webkit-animation: slideIn 0.8s ease-in-out forwards;
+    animation: slideIn 0.8s ease-in-out forwards;
+    width: 85%;
+    float: none;
+  }
+}
+.login-subtitle {
+  font-size: 14px;
+}
+.form-area {
+  margin-top: 30px;
+}
+.between-area {
+  margin-bottom: 20px;
+}
