@@ -50,7 +50,7 @@
                           placeholder="Your Display Name (optional)"
                         />
                         <label for="display_name_id" class="label">
-                          <q-icon name="person" class="input-icon" />
+                          <q-icon name="badge" class="input-icon" />
                           <span class="input-label q-ml-xs">Display Name/Company Name (optional)</span>
                         </label>
                       </div>
@@ -66,7 +66,7 @@
                           placeholder="Your email (optional)"
                         />
                         <label for="email_id" class="label">
-                          <q-icon name="person" class="input-icon" />
+                          <q-icon name="mail" class="input-icon" />
                           <span class="input-label q-ml-xs">Email (optional)</span></label
                         >
                       </div>
@@ -109,7 +109,7 @@
                           required
                         />
                         <label for="password_cfm_id" class="label">
-                          <q-icon name="key" class="input-icon" />
+                          <q-icon name="join_left" class="input-icon" />
                           <span class="input-label q-ml-xs">Password Confirmation</span>
                         </label>
                         <q-icon
