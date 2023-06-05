@@ -2,116 +2,137 @@
   <q-layout>
     <q-page-container>
       <q-page>
-        <div class="position-relative">
-          <img class="absolute q-ma-md" v-bind:style="{ height: '2em' }" src="~assets/team_raedah.svg" />
-          <div v-bind:style="{ maxWidth: '28rem' }" class="flex flex-center q-mx-auto window-height">
-            <div class="column justify-center q-pa-xl col-grow">
-              <div class="flex items-center q-mb-md q-gutter-sm text-grey-7">
-                <span class="text-bold">Create Account</span>
+        <div class="parent clearfix">
+          <div class="bg-illustration">
+            <div class="flex flex-center q-mx-auto window-height">
+              <div class="justify-center row">
+                <q-avatar rounded>
+                  <img width="100" src="../assets/system-logo.png" />
+                </q-avatar>
+                <q-toolbar-title class="text-white text-bold text-h3 q-mt-xs q-ml-xs"> MGMT-NG </q-toolbar-title>
               </div>
-              <q-card class="col" flat bordered>
-                <q-card-section class="q-pa-lg">
-                  <q-form class="q-gutter-y-md" @submit="register">
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Username</p>
-                      <q-input
-                        v-model="username"
-                        placeholder="Your username"
-                        outlined
-                        dense
-                        lazy-rules
-                        stack-label
-                        :rules="[(val) => (val && val.length > 0) || 'Please enter your username']"
-                        hide-bottom-space
-                      >
-                      </q-input>
+            </div>
+          </div>
+          <div class="login">
+            <div class="position-relative">
+              <div class="flex flex-center q-mx-auto window-height">
+                <div class="container justify-center">
+                  <q-card-section class="q-pa-lg login-form">
+                    <p class="text-h5 text-primary"><b>Create Account</b></p>
+                    <p class="login-subtitle text-primary">Please fill register information below</p>
+                    <q-form class="form-area" @submit="register">
+                      <!-- begin username input -->
+                      <div class="inputContainer">
+                        <input
+                          id="username_id"
+                          v-model="username"
+                          type="text"
+                          class="input"
+                          placeholder="Username"
+                          required
+                        />
+                        <label for="username_id" class="label">
+                          <q-icon name="person" class="input-icon" />
+                          <span class="input-label q-ml-xs">Username</span>
+                        </label>
+                      </div>
+                      <div class="between-area">
+                        <span class="text-accent msg-error" v-if="msg.username">{{ msg.username }}</span>
+                      </div>
+                      <!-- end username input -->
+                      <!-- begin displayname/company name input -->
+                      <div class="inputContainer">
+                        <input
+                          id="display_name_id"
+                          v-model="displayName"
+                          type="text"
+                          class="input"
+                          placeholder="Your Display Name (optional)"
+                        />
+                        <label for="display_name_id" class="label">
+                          <q-icon name="person" class="input-icon" />
+                          <span class="input-label q-ml-xs">Display Name/Company Name (optional)</span>
+                        </label>
+                      </div>
+                      <div class="between-area"></div>
+                      <!-- end displayname/company name input -->
+                      <!-- begin email input -->
+                      <div class="inputContainer">
+                        <input
+                          id="email_id"
+                          v-model="email"
+                          type="text"
+                          class="input"
+                          placeholder="Your email (optional)"
+                        />
+                        <label for="email_id" class="label">
+                          <q-icon name="person" class="input-icon" />
+                          <span class="input-label q-ml-xs">Email (optional)</span></label
+                        >
+                      </div>
+                      <div class="between-area">
+                        <span class="text-accent msg-error" v-if="msg.email">{{ msg.email }}</span>
+                      </div>
+                      <!-- end email input -->
+                      <!-- begin password input -->
+                      <div class="inputContainer" align="right">
+                        <input
+                          id="password_id"
+                          v-model="password"
+                          :type="isPwd ? 'password' : 'text'"
+                          class="input"
+                          placeholder="Password"
+                          required
+                        />
+                        <label for="password_id" class="label">
+                          <q-icon name="key" class="input-icon" />
+                          <span class="input-label q-ml-xs">Password</span>
+                        </label>
+                        <q-icon
+                          :name="isPwd ? 'visibility_off' : 'visibility'"
+                          class="cursor-pointer after-input-icon"
+                          @click="isPwd = !isPwd"
+                        />
+                      </div>
+                      <div class="between-area">
+                        <span class="text-accent msg-error" v-if="msg.password">{{ msg.password }}</span>
+                      </div>
+                      <!-- end password input -->
+                      <!-- begin password Confirmation input -->
+                      <div class="inputContainer" align="right">
+                        <input
+                          id="password_cfm_id"
+                          v-model="passwordCfm"
+                          :type="isPwd ? 'password' : 'text'"
+                          class="input"
+                          placeholder="Password confirmation"
+                          required
+                        />
+                        <label for="password_cfm_id" class="label">
+                          <q-icon name="key" class="input-icon" />
+                          <span class="input-label q-ml-xs">Password Confirmation</span>
+                        </label>
+                        <q-icon
+                          v-if="passwordCfm && passwordCfm.length > 0"
+                          :name="isPwd ? 'visibility_off' : 'visibility'"
+                          class="cursor-pointer after-input-icon"
+                          @click="isPwd = !isPwd"
+                        />
+                      </div>
+                      <div class="between-area">
+                        <span class="text-accent msg-error" v-if="msg.passwordCfm">{{ msg.passwordCfm }}</span>
+                      </div>
+                      <!-- end password Confirmation input -->
+                      <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
+                      <q-btn label="Create" type="submit" color="primary" :loading="loading" />
+                    </q-form>
+                    <q-card class="col" flat bordered> </q-card>
+                    <div class="text-grey-3 q-mt-md row justify-between">
+                      <p>Already have an account?</p>
+                      <router-link class="link text-primary" to="/login">Sign in</router-link>
                     </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Display Name/Company Name</p>
-                      <q-input
-                        v-model="displayName"
-                        placeholder="Your Display Name (optional)"
-                        outlined
-                        dense
-                        lazy-rules
-                        stack-label
-                        hide-bottom-space
-                      >
-                      </q-input>
-                    </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Email</p>
-                      <q-input
-                        v-model="email"
-                        placeholder="Your email (optional)"
-                        outlined
-                        dense
-                        lazy-rules
-                        stack-label
-                        :rules="[
-                          (val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address',
-                        ]"
-                        hide-bottom-space
-                      >
-                      </q-input>
-                    </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Password</p>
-                      <q-input
-                        :type="isPwd ? 'password' : 'text'"
-                        v-model="password"
-                        outlined
-                        dense
-                        placeholder="Password"
-                        lazy-rules
-                        stack-label
-                        :rules="[(val) => (val && val.length >= 6) || 'Please use a valid password']"
-                        hide-bottom-space
-                      >
-                        <template v-slot:append>
-                          <q-icon
-                            v-if="password && password.length > 0"
-                            :name="isPwd ? 'visibility_off' : 'visibility'"
-                            class="cursor-pointer"
-                            @click="isPwd = !isPwd"
-                          />
-                        </template>
-                      </q-input>
-                    </div>
-                    <div>
-                      <p class="q-mt-none q-mb-xs text-weight-medium">Password Confirmation</p>
-                      <q-input
-                        :type="isPwd ? 'password' : 'text'"
-                        v-model="passwordCfm"
-                        outlined
-                        dense
-                        placeholder="Password confirmation"
-                        lazy-rules
-                        stack-label
-                        :rules="[
-                          (val) => !val || (val && val === this.password) || 'Password confirmation does not match',
-                        ]"
-                        hide-bottom-space
-                      >
-                        <template v-slot:append>
-                          <q-icon
-                            v-if="passwordCfm && passwordCfm.length > 0"
-                            :name="isPwd ? 'visibility_off' : 'visibility'"
-                            class="cursor-pointer"
-                            @click="isPwd = !isPwd"
-                          />
-                        </template>
-                      </q-input>
-                    </div>
-                    <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
-                    <q-btn label="Create" type="submit" color="primary" class="full-width" :loading="loading" />
-                  </q-form>
-                </q-card-section>
-              </q-card>
-              <div class="row justify-center text-grey-6 q-mt-md">
-                <p>Already have an account?</p>
-                &nbsp;
-                <router-link class="link text-light-blue-6" to="/login">Sign in</router-link>
+                  </q-card-section>
+                </div>
               </div>
             </div>
           </div>
@@ -134,10 +155,19 @@ export default {
       isPwd: true,
       loading: false,
       error: null,
+      msg: [],
     }
   },
   methods: {
     register() {
+      if (
+        !this.isValidUsername(this.username) ||
+        !this.isValidPassword(this.password) ||
+        !this.isValidEmail(this.email) ||
+        !this.isValidPasswordCfm(this.passwordCfm)
+      ) {
+        return
+      }
       this.$store
         .dispatch('user/register', {
           username: this.username,
@@ -156,6 +186,64 @@ export default {
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message
         })
+    },
+    validateUsername(value) {
+      if (this.isValidUsername(value)) {
+        this.msg['username'] = ''
+        return
+      }
+      this.msg['username'] = 'Please enter your username'
+    },
+    validatePasswordField(value) {
+      if (this.isValidPassword(value)) {
+        this.msg['password'] = ''
+        return
+      }
+      this.msg['password'] = 'Password must be at least 6 characters. Please re-enter your password'
+    },
+    validateEmail(value) {
+      if (this.isValidEmail(value)) {
+        this.msg['email'] = ''
+        return
+      }
+      this.msg['email'] = 'Please enter a valid email address'
+    },
+    validatePasswordConfirm(value) {
+      if (this.isValidPasswordCfm(value)) {
+        this.msg['passwordCfm'] = ''
+        return
+      }
+      this.msg['passwordCfm'] = 'Password confirmation does not match'
+    },
+    isValidEmail(value) {
+      return !value || (value && /^[^@]+@\w+(\.\w+)+\w$/.test(value))
+    },
+    isValidUsername(value) {
+      return value && value.length > 0
+    },
+    isValidPassword(value) {
+      return value && value.length >= 6
+    },
+    isValidPasswordCfm(value) {
+      return !value || (value && value === this.password)
+    },
+  },
+  watch: {
+    username(value) {
+      this.username = value
+      this.validateUsername(value)
+    },
+    password(value) {
+      this.password = value
+      this.validatePasswordField(value)
+    },
+    email(value) {
+      this.email = value
+      this.validateEmail(value)
+    },
+    passwordCfm(value) {
+      this.passwordCfm = value
+      this.validatePasswordConfirm(value)
     },
   },
 }
