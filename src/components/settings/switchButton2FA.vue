@@ -4,7 +4,7 @@
       v-show="!!!qrImage"
       v-model="model"
       @update:model-value="onUpdated"
-      color="green"
+      color="primary"
       label="Use two-factor authentication"
     />
     <input

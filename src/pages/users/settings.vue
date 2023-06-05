@@ -1,11 +1,11 @@
 <template>
-  <q-card class="q-px-lg">
+  <q-card class="q-pa-md q-ma-lg content-container">
     <q-card-section class="q-py-none">
-      <q-tabs align="left" v-model="tab">
-        <q-tab label="Profile" name="profile" no-caps />
-        <q-tab label="Payment Methods" name="payment_method" no-caps />
-        <q-tab label="Security" name="security" no-caps />
-        <q-tab label="Approvals" name="approval" no-caps />
+      <q-tabs align="left" v-model="tab" inline-label active-class="tab-active">
+        <q-tab label="Profile" icon="badge" name="profile" no-caps class="tab-item" />
+        <q-tab label="Payment Methods" icon="credit_card" name="payment_method" no-caps class="tab-item" />
+        <q-tab label="Security" icon="security" name="security" no-caps class="tab-item" />
+        <q-tab label="Approvals" icon="verified_user" name="approval" no-caps class="tab-item" />
       </q-tabs>
       <q-separator />
     </q-card-section>

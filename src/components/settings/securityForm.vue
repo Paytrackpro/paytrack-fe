@@ -6,7 +6,7 @@
     <QRCodeVerify @verified="verified" />
     <EnableOtpDialog v-model="enableDialog" @hideDialog="hideDialog" />
     <DisableOtpDialog v-model="disableDialog" @hideDialog="hideOtpDialog" />
-    <q-btn v-if="!qrImage" color="white" text-color="black" label="Change password" @click="changePassDialog = true" />
+    <q-btn v-if="!qrImage" color="primary" label="Change password" @click="changePassDialog = true" />
     <ChangePassword v-model="changePassDialog" :is-otp="user.otp || false" />
   </q-form>
 </template>

@@ -1,24 +1,23 @@
 <template>
   <q-form @submit="submit">
     <div class="row q-mb-md">
-      <q-input
-        type="number"
-        step="any"
-        dense
-        outlined
+      <custom-input
+        class="q-mt-md q-px-sm"
+        :label="'Hour Rate (USD/h)'"
+        notitleCase
+        :type="'number'"
         v-model="hourlyLaborRate"
-        label="Hour Rate (USD/h)"
+        :step="'any'"
         :rules="priceRules"
       />
     </div>
-    <div class="row q-mb-md q-col-gutter-md profile-padding">
+    <div class="row q-mb-xs q-col-gutter-md profile-padding">
       <div class="col-12">
         <PaymentSetting v-model="user.paymentSettings" />
       </div>
     </div>
-    <q-separator />
-    <div class="q-mt-md">
-      <q-btn label="Save" class="q-mr-xs" :disable="loading" type="submit" color="primary" />
+    <div>
+      <q-btn label="Save" class="q-mr-xs btn-animated btn" :disable="loading" type="submit" color="primary" />
     </div>
   </q-form>
 </template>
@@ -26,11 +25,12 @@
 <script>
 import { mapActions } from 'vuex'
 import PaymentSetting from 'components/payment/paymentSetting'
-
+import customInput from '../common/custom_input.vue'
 export default {
   name: 'paymentMethods',
   components: {
     PaymentSetting,
+    customInput,
   },
   props: {
     modelValue: Object,
