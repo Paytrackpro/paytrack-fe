@@ -473,8 +473,17 @@ export default {
         this.getPayments({
           ...filter,
           requestType: this.type,
+          hidePaid: this.hidePaid,
         })
       },
+    },
+    hidePaid(value) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      this.getPayments({
+        ...filter,
+        requestType: this.type,
+        hidePaid: value,
+      })
     },
   },
 }
