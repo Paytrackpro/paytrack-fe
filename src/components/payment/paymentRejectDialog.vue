@@ -43,7 +43,7 @@ export default {
           id: this.paymentId,
         })
         this.$q.notify({
-          message: 'payment has been rejected',
+          message: 'Payment has been rejected',
           color: 'positive',
           icon: 'check',
         })

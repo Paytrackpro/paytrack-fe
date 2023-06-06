@@ -66,7 +66,7 @@ export default {
       await navigator.clipboard.writeText(this.address || '')
       this.$q.notify({
         type: 'positive',
-        message: 'copied.',
+        message: 'Copied.',
         position: 'bottom',
       })
     },
