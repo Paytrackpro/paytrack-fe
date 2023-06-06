@@ -80,7 +80,7 @@ export default {
         .put('/user/change-password', this.form)
         .then((data) => {
           this.$q.notify({
-            message: 'your password is updated',
+            message: 'Your password is updated',
             color: 'positive',
             icon: 'check',
           })

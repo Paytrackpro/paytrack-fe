@@ -343,7 +343,7 @@ export default {
       if (data) {
         this.updateLocal(data.payment)
         this.$q.notify({
-          message: 'payment is updated',
+          message: 'Payment is updated',
           color: 'positive',
           icon: 'check',
         })
@@ -360,7 +360,7 @@ export default {
           if (data) {
             this.updateLocal(data)
             this.$q.notify({
-              message: 'payment is updated',
+              message: 'Payment is updated',
               color: 'positive',
               icon: 'check',
             })
@@ -415,7 +415,7 @@ export default {
       await navigator.clipboard.writeText(text)
       this.$q.notify({
         type: 'positive',
-        message: 'copied.',
+        message: 'Copied.',
         position: 'bottom',
       })
     },
