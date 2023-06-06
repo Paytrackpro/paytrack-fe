@@ -380,7 +380,7 @@ export default {
         .then((data) => {
           this.isBulkPay = false
           this.$q.notify({
-            message: 'payments made successfully',
+            message: 'Payments made successfully',
             color: 'positive',
             icon: 'check',
           })
@@ -430,7 +430,7 @@ export default {
       await navigator.clipboard.writeText(text)
       this.$q.notify({
         type: 'positive',
-        message: 'copied.',
+        message: 'Copied.',
         position: 'bottom',
       })
     },
@@ -473,8 +473,17 @@ export default {
         this.getPayments({
           ...filter,
           requestType: this.type,
+          hidePaid: this.hidePaid,
         })
       },
+    },
+    hidePaid(value) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      this.getPayments({
+        ...filter,
+        requestType: this.type,
+        hidePaid: value,
+      })
     },
   },
 }

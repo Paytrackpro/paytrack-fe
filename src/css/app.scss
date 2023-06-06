@@ -542,3 +542,34 @@ a {
 .between-area {
   margin-bottom: 20px;
 }
+.GNL__toolbar {
+  height: 64px;
+}
+
+.GNL__toolbar-input {
+  width: 55%;
+}
+
+.GNL__drawer-item {
+  line-height: 24px;
+  border-radius: 0 24px 24px 0;
+  margin-right: 12px;
+}
+
+.GNL__drawer-item .q-item__label {
+  letter-spacing: 0.01785714em;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+.GNL__drawer-footer-link {
+  color: inherit;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.75rem;
+}
+
+.GNL__drawer-footer-link:hover {
+  color: #434239;
+}
