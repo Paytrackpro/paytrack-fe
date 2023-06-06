@@ -1,7 +1,16 @@
 <template>
   <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-dark text-white shadow-4">
-      <q-toolbar>
+      <q-toolbar class="GNL__toolbar">
+        <q-btn
+          flat
+          dense
+          round
+          @click="$q.screen.gt.sm ? toogleMiniState() : toggleLeftDrawer()"
+          aria-label="Menu"
+          icon="menu"
+          class="q-mr-sm"
+        />
         <q-avatar rounded>
           <img src="../assets/system-logo.png" />
         </q-avatar>
@@ -33,7 +42,7 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-    <q-drawer show-if-above side="left" class="left-sidebar" :width="280">
+    <q-drawer show-if-above v-model="leftDrawerOpen" :mini="miniState" side="left" class="left-sidebar" :width="280">
       <q-scroll-area class="fit">
         <q-list padding class="text-grey-2">
           <template v-for="(menuItem, index) in menuList">
@@ -42,7 +51,7 @@
               clickable
               :to="menuItem.to"
               active-class="bg-cyan-2 sidebar-active-item"
-              :class="'sidebar-item' + (menuItem.label == 'Settings' ? ' settings-sidebar' : '')"
+              :class="'GNL__drawer-item sidebar-item' + (menuItem.label == 'Settings' ? ' settings-sidebar' : '')"
               v-if="shouldDisplayRoute(menuItem)"
               v-ripple
             >
@@ -70,6 +79,8 @@
 <script>
 import role from 'src/consts/role'
 import { mapGetters } from 'vuex'
+import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 export default {
   data() {
     return {
@@ -105,6 +116,21 @@ export default {
           to: '/settings',
         },
       ],
+    }
+  },
+  setup() {
+    const $q = useQuasar()
+    const leftDrawerOpen = ref(false)
+    const miniState = ref(false)
+    return {
+      leftDrawerOpen,
+      toggleLeftDrawer() {
+        leftDrawerOpen.value = !leftDrawerOpen.value
+      },
+      miniState,
+      toogleMiniState() {
+        miniState.value = !miniState.value
+      },
     }
   },
   computed: {
