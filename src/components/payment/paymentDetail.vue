@@ -279,6 +279,11 @@ export default {
         this.$emit('update:processing', false)
         return
       }
+      //if is approvals list, back to prev page (dashboard)
+      if (this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id) {
+        this.$router.back()
+        return
+      }
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
     },
