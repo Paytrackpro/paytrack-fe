@@ -131,6 +131,12 @@ export default {
         this.$emit('update:hourlyRate', newVal)
       },
     },
+    hourlyRate: {
+      immediate: true,
+      handler(newVal) {
+        this.hourlyRateUpdate = newVal
+      },
+    },
   },
 }
 </script>
