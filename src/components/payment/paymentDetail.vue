@@ -289,9 +289,6 @@ export default {
     },
     processPayment() {
       this.$emit('update:processing', true)
-      if (this.payment.paymentMethod !== 'none') {
-        this.$refs.rateInput.fetchRate()
-      }
     },
     markAsPaid() {
       const txId = this.txId.trim()
