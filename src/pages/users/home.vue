@@ -5,8 +5,8 @@
   <q-card v-else class="q-pa-md q-ma-lg content-container">
     <q-card-section class="q-py-none">
       <q-tabs align="left" v-model="tab" inline-label active-class="tab-active">
-        <q-tab label="Approval List" icon="badge" name="approval_list" no-caps class="tab-item" />
-        <q-tab label="Report" icon="credit_card" name="report" no-caps class="tab-item" />
+        <q-tab label="Approval List" icon="schedule" name="approval_list" no-caps class="tab-item" />
+        <q-tab label="Report" icon="summarize" name="report" no-caps class="tab-item" />
       </q-tabs>
       <q-separator />
     </q-card-section>
