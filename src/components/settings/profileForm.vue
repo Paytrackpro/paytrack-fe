@@ -33,7 +33,7 @@
         </div>
       </div>
     </div>
-    <q-checkbox label="Show Month Report" v-model="user.showMonthlyReport" />
+    <q-checkbox label="Show Monthly Report" v-model="user.showMonthlyReport" />
     <div class="q-mt-lg">
       <q-btn label="Save" class="q-mr-xs btn-animated btn" :disable="loading" type="submit" color="primary" />
     </div>
