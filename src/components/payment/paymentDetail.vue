@@ -137,6 +137,9 @@
         />
       </div>
     </div>
+    <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isDraftStatus && editable && payment.receiverId">
+      <q-checkbox label="Show Draft for Recipient" v-model="payment.showDraftRecipient" @click="update" />
+    </div>
     <div class="row justify-end q-mt-lg">
       <q-btn
         v-if="processable && processing"
@@ -156,7 +159,7 @@
         class="q-mr-sm btn btn-animated"
       />
       <q-btn
-        v-if="processable && !processing"
+        v-if="processable && !processing && !isDraftStatus"
         label="Process Payment"
         type="button"
         color="primary"
