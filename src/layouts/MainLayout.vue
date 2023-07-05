@@ -11,10 +11,7 @@
           icon="menu"
           class="q-mr-sm"
         />
-        <q-avatar rounded>
-          <img src="../assets/system-logo.png" />
-        </q-avatar>
-        <q-toolbar-title> MGMT-NG </q-toolbar-title>
+        <q-toolbar-title> PAYTRACK.PRO </q-toolbar-title>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
             <q-item-section avatar>
