@@ -22,12 +22,22 @@ const routes = [
         },
       },
       {
-        path: 'settings',
+        path: 'settings/',
         name: 'settings',
         component: () => import('pages/users/settings.vue'),
         meta: {
           title: 'Settings',
         },
+        children: [
+          {
+            path: ':settingTab',
+            name: 'settings.tab',
+            component: () => import('pages/users/settings.vue'),
+            meta: {
+              title: 'Settings',
+            },
+          },
+        ],
       },
       {
         path: 'users',
