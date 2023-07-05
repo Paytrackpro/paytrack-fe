@@ -92,12 +92,6 @@ export default {
           to: '/dashboard',
         },
         {
-          icon: 'supervisor_account',
-          label: 'User Management',
-          to: '/users',
-          role: role.ADMIN,
-        },
-        {
           icon: 'sticky_note_2',
           label: 'Get Paid',
           separator: false,
@@ -108,6 +102,12 @@ export default {
           label: 'Pay',
           separator: false,
           to: '/pay',
+        },
+        {
+          icon: 'supervisor_account',
+          label: 'User Management',
+          to: '/users',
+          role: role.ADMIN,
         },
         {
           icon: 'settings',
