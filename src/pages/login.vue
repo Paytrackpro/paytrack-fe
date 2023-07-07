@@ -121,7 +121,7 @@ export default {
         this.isOtp = true
         return
       }
-      this.$router.push({ path: '/dashboard' })
+      this.$router.push({ path: '/approvals' })
     },
     validateRequiredField(name, value) {
       if (value && value.length > 0) {

@@ -272,6 +272,7 @@ export default {
     paymentType: String,
     editing: Boolean,
     processing: Boolean,
+    approvalCount: Number,
   },
   methods: {
     ...mapActions({
@@ -284,6 +285,10 @@ export default {
       }
       //if is approvals list, back to prev page (dashboard)
       if (this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id) {
+        if (this.approvalCount < 1) {
+          this.$router.push({ path: `/get-paid` })
+          return
+        }
         this.$router.back()
         return
       }
@@ -371,6 +376,7 @@ export default {
         })
         .finally(() => {
           this.paying = false
+          window.location.reload()
         })
     },
     updateLocal(payment, editing) {

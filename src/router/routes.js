@@ -11,14 +11,14 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/dashboard',
+        redirect: '/approvals',
       },
       {
-        path: 'dashboard/',
-        name: 'dashboard',
-        component: () => import('src/pages/users/home.vue'),
+        path: 'approvals/',
+        name: 'approvals',
+        component: () => import('pages/payments/approvals.vue'),
         meta: {
-          title: 'Dashboard',
+          title: 'Approval List',
         },
       },
       {

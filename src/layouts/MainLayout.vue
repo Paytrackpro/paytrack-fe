@@ -48,7 +48,7 @@
               clickable
               :to="menuItem.to"
               active-class="bg-cyan-2 sidebar-active-item"
-              :class="'GNL__drawer-item sidebar-item' + (menuItem.label == 'Settings' ? ' settings-sidebar' : '')"
+              class="GNL__drawer-item sidebar-item"
               v-if="shouldDisplayRoute(menuItem)"
               v-ripple
             >
@@ -56,7 +56,14 @@
                 <q-icon size="md" class="sidebar-icon" :name="'o_' + menuItem.icon" />
               </q-item-section>
               <q-item-section>
-                <span class="sidebar-text">{{ menuItem.label }}</span>
+                <span class="sidebar-text"
+                  >{{ menuItem.label }}
+                  <q-badge
+                    :label="approvalCount"
+                    style="margin-left: 5px; padding-left: 8px; font-size: 12px; width: 22px; height: 20px"
+                    v-if="menuItem.label === 'Pending Approvals'"
+                  ></q-badge
+                ></span>
               </q-item-section>
             </q-item>
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
@@ -67,7 +74,7 @@
 
     <q-page-container>
       <q-page>
-        <router-view />
+        <router-view :approvalCount="approvalCount" />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -84,9 +91,10 @@ export default {
       drawer: false,
       menuList: [
         {
-          icon: 'dashboard',
-          label: 'Dashboard',
-          to: '/dashboard',
+          icon: 'schedule',
+          label: 'Pending Approvals',
+          separator: false,
+          to: '/approvals',
         },
         {
           icon: 'sticky_note_2',
@@ -113,7 +121,24 @@ export default {
           to: '/settings',
         },
       ],
+      approvalCount: 0,
     }
+  },
+  async created() {
+    this.$api
+      .get(`/payment/approval-count`)
+      .then((data) => {
+        this.approvalCount = data.count
+        if (this.approvalCount === 0) {
+          this.menuList.splice(0, 1)
+          if (this.$route.name.indexOf('approvals') > -1) {
+            this.$router.push({ path: `get-paid` })
+          }
+        }
+      })
+      .catch(() => {
+        return
+      })
   },
   setup() {
     const $q = useQuasar()
