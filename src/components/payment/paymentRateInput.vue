@@ -26,6 +26,7 @@ export default {
       payment: {
         convertRate: 0,
       },
+      fetchedRate: false,
     }
   },
   props: {
@@ -53,6 +54,7 @@ export default {
         .post('/payment/request-rate', reqData)
         .then((data) => {
           this.$emit('update:modelValue', data)
+          this.fetchedRate = true
         })
         .catch((err) => {
           responseError(err)
@@ -69,7 +71,7 @@ export default {
         this.payment = {
           ...newPayment,
         }
-        if (!this.readonly) {
+        if (!this.readonly && !this.fetchedRate) {
           this.fetchRate()
         }
       },
