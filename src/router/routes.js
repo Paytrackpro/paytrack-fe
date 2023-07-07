@@ -11,23 +11,33 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/dashboard',
+        redirect: '/approvals',
       },
       {
-        path: 'dashboard/',
-        name: 'dashboard',
-        component: () => import('src/pages/users/home.vue'),
+        path: 'approvals/',
+        name: 'approvals',
+        component: () => import('pages/payments/approvals.vue'),
         meta: {
-          title: 'Dashboard',
+          title: 'Approval List',
         },
       },
       {
-        path: 'settings',
+        path: 'settings/',
         name: 'settings',
         component: () => import('pages/users/settings.vue'),
         meta: {
           title: 'Settings',
         },
+        children: [
+          {
+            path: ':settingTab',
+            name: 'settings.tab',
+            component: () => import('pages/users/settings.vue'),
+            meta: {
+              title: 'Settings',
+            },
+          },
+        ],
       },
       {
         path: 'users',

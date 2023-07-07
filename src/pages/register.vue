@@ -6,10 +6,7 @@
           <div class="bg-illustration">
             <div class="flex flex-center q-mx-auto window-height">
               <div class="justify-center row">
-                <q-avatar rounded>
-                  <img width="100" src="../assets/system-logo.png" />
-                </q-avatar>
-                <q-toolbar-title class="text-white text-bold text-h3 q-mt-xs q-ml-xs"> MGMT-NG </q-toolbar-title>
+                <q-toolbar-title class="text-white text-bold text-h3 q-mt-xs q-ml-xs"> PAYTRACK.PRO </q-toolbar-title>
               </div>
             </div>
           </div>

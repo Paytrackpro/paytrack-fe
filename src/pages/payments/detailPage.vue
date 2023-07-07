@@ -22,6 +22,7 @@
       v-model="payment"
       v-model:editing="editing"
       v-model:processing="processing"
+      :approvalCount="approvalCount"
       :payment-type="paymentType"
       :token="token"
       :user="user"
@@ -54,6 +55,9 @@ import PaymentStatus from 'components/payment/paymentStatus'
 export default {
   name: 'detailPaymentPage',
   components: { PaymentForm, PaymentDetail, PaymentStatus },
+  props: {
+    approvalCount: Number,
+  },
   data() {
     return {
       loading: false,

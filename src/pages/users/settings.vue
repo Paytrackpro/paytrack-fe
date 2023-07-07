@@ -68,6 +68,19 @@ export default {
       this.user = user
       this.loading = false
     }
+    const currentTab = this.$route.params.settingTab
+    if (currentTab) {
+      this.tab = currentTab
+    } else {
+      this.$router.push({ path: '/settings/profile' })
+    }
+  },
+  watch: {
+    tab(value) {
+      if (value) {
+        this.$router.push({ path: '/settings/' + value })
+      }
+    },
   },
 }
 </script>

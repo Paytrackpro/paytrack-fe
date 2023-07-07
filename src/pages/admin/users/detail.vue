@@ -1,63 +1,68 @@
 <template>
-  <q-card flat class="q-ma-lg q-pb-lg q-pr-lg content-container">
-    <q-card-section>
-      <div class="row">
-        <div class="text-h6 title-case">User Update</div>
-      </div>
-    </q-card-section>
-    <q-form @submit="updateUserInfo" class="q-ml-lg">
-      <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-lg-4">
-          <custom-input
-            :label="'User Name'"
-            v-model="userName"
-            :placeholder="'Username'"
-            lazyRules
-            :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
-          />
+  <div class="q-ma-lg q-pb-lg q-pr-lg">
+    <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
+      <q-tooltip> Back to list page </q-tooltip>
+    </q-btn>
+    <q-card flat class="content-container q-pb-lg q-pr-lg">
+      <q-card-section>
+        <div class="row">
+          <div class="text-h6 title-case">User Update</div>
         </div>
+      </q-card-section>
+      <q-form @submit="updateUserInfo" class="q-ml-lg">
+        <div class="row q-mb-md q-col-gutter-md">
+          <div class="col-12 col-sm-6 col-lg-4">
+            <custom-input
+              :label="'User Name'"
+              v-model="userName"
+              :placeholder="'Username'"
+              lazyRules
+              :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
+            />
+          </div>
 
-        <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
-      </div>
-      <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-lg-4">
-          <custom-input
-            :label="'Email'"
-            v-model="email"
-            :placeholder="'Email'"
-            lazyRules
-            :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address']"
-          />
+          <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
         </div>
-        <div class="col-12 col-sm-6 col-lg-4">
-          <custom-input
-            :label="'Password'"
-            v-model="password"
-            :type="isPwd ? 'password' : 'text'"
-            :placeholder="'Password'"
-            lazyRules
-            :rules="[(val) => !val || val.length == 0 || (val && val.length >= 6) || 'Please use a valid password']"
-          >
-            <template v-slot:append>
-              <q-icon
-                v-if="password && password.length > 0"
-                :name="isPwd ? 'visibility_off' : 'visibility'"
-                class="cursor-pointer"
-                @click="isPwd = !isPwd"
-              />
-            </template>
-          </custom-input>
+        <div class="row q-mb-md q-col-gutter-md">
+          <div class="col-12 col-sm-6 col-lg-4">
+            <custom-input
+              :label="'Email'"
+              v-model="email"
+              :placeholder="'Email'"
+              lazyRules
+              :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address']"
+            />
+          </div>
+          <div class="col-12 col-sm-6 col-lg-4">
+            <custom-input
+              :label="'Password'"
+              v-model="password"
+              :type="isPwd ? 'password' : 'text'"
+              :placeholder="'Password'"
+              lazyRules
+              :rules="[(val) => !val || val.length == 0 || (val && val.length >= 6) || 'Please use a valid password']"
+            >
+              <template v-slot:append>
+                <q-icon
+                  v-if="password && password.length > 0"
+                  :name="isPwd ? 'visibility_off' : 'visibility'"
+                  class="cursor-pointer"
+                  @click="isPwd = !isPwd"
+                />
+              </template>
+            </custom-input>
+          </div>
         </div>
-      </div>
-      <div class="row">
-        <q-checkbox class="col-12 col-md-4" v-model="resetTOTP" label="Reset TOTP" />
-        <q-checkbox class="col-12 col-md-4" v-model="lockUser" label="Lock User (Disable Login)" />
-      </div>
-      <div class="row justify-end q-gutter-sm">
-        <q-btn label="Save" class="btn btn-animated" type="submit" color="primary" />
-      </div>
-    </q-form>
-  </q-card>
+        <div class="row">
+          <q-checkbox class="col-12 col-md-4" v-model="resetTOTP" label="Reset TOTP" />
+          <q-checkbox class="col-12 col-md-4" v-model="lockUser" label="Lock User (Disable Login)" />
+        </div>
+        <div class="row justify-end q-gutter-sm">
+          <q-btn label="Save" class="btn btn-animated" type="submit" color="primary" />
+        </div>
+      </q-form>
+    </q-card>
+  </div>
 </template>
 
 <script>
@@ -117,6 +122,9 @@ export default {
         .catch((err) => {
           responseError(err)
         })
+    },
+    back() {
+      this.$router.back()
     },
   },
 }
