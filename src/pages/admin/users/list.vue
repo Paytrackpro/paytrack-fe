@@ -105,7 +105,7 @@ export default {
           align: 'center',
           label: 'Created At',
           field: 'createdAt',
-          sortable: false,
+          sortable: true,
           format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
         },
         {
@@ -113,7 +113,7 @@ export default {
           align: 'center',
           label: 'Last Seen',
           field: 'lastSeen',
-          sortable: false,
+          sortable: true,
           format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
         },
       ],
