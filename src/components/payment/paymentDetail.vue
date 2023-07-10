@@ -213,7 +213,15 @@
         @click="handlerApprovalAction()"
         class="q-mr-sm btn btn-animated"
       />
-      <q-btn label="Cancel" type="button" color="white" text-color="black" @click="cancel" class="btn btn-animated" />
+      <q-btn
+        label="Cancel"
+        type="button"
+        color="white"
+        text-color="black"
+        @click="cancel"
+        class="btn btn-animated"
+        v-if="processable && processing"
+      />
     </div>
     <PaymentRejectDialog
       v-model="paymentRejectDialog"

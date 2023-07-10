@@ -78,7 +78,12 @@ export default {
   },
   methods: {
     back() {
+      //if is approvals list, back to prev page (dashboard)
       if (this.isApprover()) {
+        if (this.approvalCount < 1) {
+          this.$router.push({ path: `/get-paid` })
+          return
+        }
         this.$router.back()
         return
       }
