@@ -3,10 +3,10 @@
   <q-form class="q-ma-md" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.senderId !== user.id">
-        <custom-field :label="'Sender'" :value="payment.senderName || payment.externalEmail" />
+        <custom-field :label="'Sender'" :value="getSenderName" />
       </div>
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.receiverId != user.id">
-        <custom-field :label="'Recipient'" :value="payment.receiverName || payment.externalEmail" />
+        <custom-field :label="'Recipient'" :value="getRecipientName" />
       </div>
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
@@ -585,6 +585,18 @@ export default {
         }
       })
       return isShowCost
+    },
+    getRecipientName() {
+      if (this.payment.receiverDisplayName && this.payment.receiverDisplayName.length > 0) {
+        return this.payment.receiverDisplayName + ' (' + this.payment.receiverName + ')'
+      }
+      return this.payment.receiverName || this.payment.externalEmail
+    },
+    getSenderName() {
+      if (this.payment.senderDisplayName && this.payment.senderDisplayName.length > 0) {
+        return this.payment.senderDisplayName + ' (' + this.payment.senderName + ')'
+      }
+      return this.payment.senderName || this.payment.externalEmail
     },
   },
 }

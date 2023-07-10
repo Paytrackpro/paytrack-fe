@@ -260,7 +260,7 @@ export default {
               label: 'Recipient',
               field: (row) => {
                 if (row.receiverDisplayName.length > 0) {
-                  return row.receiverDisplayName
+                  return row.receiverDisplayName + ' (' + row.receiverName + ')'
                 } else {
                   return row.receiverName || row.externalEmail
                 }
@@ -273,7 +273,7 @@ export default {
               align: 'left',
               field: (row) => {
                 if (row.senderDisplayName.length > 0) {
-                  return row.senderDisplayName
+                  return row.senderDisplayName + ' (' + row.senderName + ')'
                 } else {
                   return row.senderName || row.externalEmail
                 }
