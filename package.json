@@ -1,8 +1,8 @@
 {
-  "name": "mgmt-fe",
+  "name": "paytrack-fe",
   "version": "0.0.2",
-  "description": "this is fe project for mgmt",
-  "productName": "mgmt",
+  "description": "This is fe project for paytrack.pro",
+  "productName": "paytrack.pro",
   "author": "justindo",
   "private": true,
   "scripts": {

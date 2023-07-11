@@ -18,7 +18,7 @@
 <script>
 import { PaymentForm } from 'components/payment'
 import { mapGetters } from 'vuex'
-import { PAYMENT_OBJECT_REMINDER } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 
 export default {
   name: 'createPayment',
@@ -59,7 +59,8 @@ export default {
   },
   methods: {
     cancel() {
-      this.$router.push({ path: `/` })
+      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
+      this.$router.push({ path: `/${path}` })
     },
     saved(data) {
       const path = this.paymentType === PAYMENT_OBJECT_REMINDER ? 'pay' : 'get-paid'

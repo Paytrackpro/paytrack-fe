@@ -11,7 +11,7 @@
           icon="menu"
           class="q-mr-sm"
         />
-        <q-toolbar-title> PAYTRACK.PRO </q-toolbar-title>
+        <q-toolbar-title> Paytrack.pro </q-toolbar-title>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
             <q-item-section avatar>

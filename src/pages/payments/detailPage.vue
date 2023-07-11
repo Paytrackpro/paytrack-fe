@@ -7,7 +7,12 @@
       <div class="row justify-between">
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
-          <payment-status v-if="!processing" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+          <payment-status
+            v-if="!processing && payment.status"
+            :paymentModel="payment"
+            class="q-ml-md"
+            :isShowIcon="true"
+          />
         </div>
         <q-toggle v-model="isInvoiceMode" color="primary" label="Invoice Mode" v-if="editing" />
       </div>
@@ -78,7 +83,12 @@ export default {
   },
   methods: {
     back() {
+      //if is approvals list, back to prev page (dashboard)
       if (this.isApprover()) {
+        if (this.approvalCount < 1) {
+          this.$router.push({ path: `/get-paid` })
+          return
+        }
         this.$router.back()
         return
       }
