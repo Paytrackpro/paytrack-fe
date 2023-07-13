@@ -1,4 +1,44 @@
 <template>
+  <q-card-section class="card-header">
+    <div class="row justify-between">
+      <div class="row">
+        <div class="text-h6 title-case">{{ isEdit ? 'Payment request' : 'Create payment request' }}</div>
+        <payment-status v-if="isEdit && payment.status" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
+      </div>
+      <div class="row q-gutter-sm">
+        <q-btn
+          v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
+          label="Send"
+          color="primary"
+          class="btn btn-animated"
+          :disable="submitting"
+          @click="submit(false)"
+        >
+          <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
+        </q-btn>
+        <q-btn
+          :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
+          type="button"
+          color="secondary"
+          class="btn btn-animated"
+          @click="submit(true)"
+          :disable="submitting"
+        >
+          <q-tooltip v-if="inPayment.status === ''">
+            'Save as draft' will not notify the payment to the recipient
+          </q-tooltip>
+        </q-btn>
+        <q-btn
+          label="Cancel"
+          class="btn btn-animated"
+          type="button"
+          color="white"
+          text-color="black"
+          @click="$emit('cancel')"
+        />
+      </div>
+    </div>
+  </q-card-section>
   <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
@@ -59,8 +99,10 @@
         <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment Settings" />
       </div>
     </div>
-    <div class="row q-gutter-md q-mt-md" v-if="isInvoiceMode">
-      <div class="col-12"><p class="q-mt-none text-weight-medium text-subtitle1">Invoice Mode</p></div>
+    <div class="row">
+      <q-toggle v-model="isInvoiceMode" color="primary" label="Invoice Mode" />
+    </div>
+    <div class="row q-gutter-md q-mt-xs" v-if="isInvoiceMode">
       <custom-input
         class="col-12 col-sm-4 col-lg-2"
         :label="'Hourly Rate(USD/h)'"
@@ -80,38 +122,6 @@
         />
       </div>
     </div>
-    <div class="row justify-end q-gutter-sm">
-      <q-btn
-        v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
-        label="Send"
-        color="primary"
-        class="btn btn-animated"
-        :disable="submitting"
-        @click="submit(false)"
-      >
-        <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
-      </q-btn>
-      <q-btn
-        :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
-        type="button"
-        color="secondary"
-        class="btn btn-animated"
-        @click="submit(true)"
-        :disable="submitting"
-      >
-        <q-tooltip v-if="inPayment.status === ''">
-          'Save as draft' will not notify the payment to the recipient
-        </q-tooltip>
-      </q-btn>
-      <q-btn
-        label="Cancel"
-        class="btn btn-animated"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="$emit('cancel')"
-      />
-    </div>
   </q-form>
 </template>
 
@@ -122,17 +132,17 @@ import PaymentSetting from 'components/payment/paymentSetting'
 import InvoicesMode from 'components/payment/invoicesMode'
 import customInput from '../common/custom_input.vue'
 import { mapActions } from 'vuex'
+import PaymentStatus from 'components/payment/paymentStatus'
 
 export default {
   name: 'paymentForm',
-  components: { PaymentSetting, QInputSystemUser, InvoicesMode, customInput },
+  components: { PaymentSetting, QInputSystemUser, InvoicesMode, PaymentStatus, customInput },
   props: {
     payment: Object,
     user: Object,
     token: String,
     paymentType: String,
     isEdit: Boolean,
-    isInvoiceMode: Boolean,
   },
   data() {
     return {
@@ -154,6 +164,7 @@ export default {
           (v && v.toString().split('.')[1].length <= 2) ||
           'No more than 2 digits after the decimal point',
       ],
+      isInvoiceMode: false,
     }
   },
   watch: {
@@ -177,7 +188,7 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
-        this.$emit('update:isInvoiceMode', payment.details.length > 0)
+        this.isInvoiceMode = payment.details.length > 0
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate

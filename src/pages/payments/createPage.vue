@@ -1,17 +1,6 @@
 <template>
   <q-card flat class="q-pa-md content-container">
-    <q-card-section class="row justify-between">
-      <div class="text-h6 title-case">{{ title }}</div>
-      <q-toggle v-model="isInvoiceMode" color="primary" label="Invoice Mode" />
-    </q-card-section>
-    <payment-form
-      :payment="payment"
-      :payment-type="paymentType"
-      :user="user"
-      @saved="saved"
-      @cancel="cancel"
-      :isInvoiceMode="isInvoiceMode"
-    />
+    <payment-form :payment="payment" :payment-type="paymentType" :user="user" @saved="saved" @cancel="cancel" />
   </q-card>
 </template>
 
@@ -45,7 +34,6 @@ export default {
         paymentSettings: [],
         details: [],
       },
-      isInvoiceMode: false,
     }
   },
   computed: {
@@ -53,9 +41,6 @@ export default {
       role: 'user/getRole',
       user: 'user/getUser',
     }),
-    title() {
-      return 'Create payment request'
-    },
   },
   methods: {
     cancel() {

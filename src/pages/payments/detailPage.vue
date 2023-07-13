@@ -2,28 +2,10 @@
   <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
     <q-tooltip> Back to list page </q-tooltip>
   </q-btn>
-  <q-card flat class="q-pa-md content-container">
-    <q-card-section>
-      <div class="row justify-between">
-        <div class="row">
-          <div class="text-h6 title-case">Payment request</div>
-          <payment-status
-            v-if="!processing && payment.status"
-            :paymentModel="payment"
-            class="q-ml-md"
-            :isShowIcon="true"
-          />
-        </div>
-        <q-toggle v-model="isInvoiceMode" color="primary" label="Invoice Mode" v-if="editing" />
-      </div>
-      <p class="text-red" v-if="payment.status === 'rejected'">
-        <q-icon name="info" color="red" />
-        <b>Rejected Reason:</b> {{ payment.rejectionReason }}
-      </p>
-    </q-card-section>
+  <q-card flat class="q-pb-md content-container">
     <payment-detail
       class="q-px-lg"
-      v-show="!loading && !isError && !editing"
+      v-if="!loading && !isError && !editing"
       v-model="payment"
       v-model:editing="editing"
       v-model:processing="processing"
@@ -42,7 +24,6 @@
       :token="token"
       @saved="saved"
       @cancel="editing = false"
-      v-model:isInvoiceMode="isInvoiceMode"
     />
     <q-card-section v-show="isError">
       <div class="text-h6">{{ errorText }}</div>
@@ -56,10 +37,9 @@
 import { PaymentForm, PaymentDetail } from 'components/payment'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { mapGetters } from 'vuex'
-import PaymentStatus from 'components/payment/paymentStatus'
 export default {
   name: 'detailPaymentPage',
-  components: { PaymentForm, PaymentDetail, PaymentStatus },
+  components: { PaymentForm, PaymentDetail },
   props: {
     approvalCount: Number,
   },
@@ -74,7 +54,6 @@ export default {
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
       processing: false,
-      isInvoiceMode: false,
     }
   },
   created() {
