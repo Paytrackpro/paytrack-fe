@@ -1,6 +1,106 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
-  <q-form class="q-ma-md" @submit="markAsPaid">
+  <q-card-section class="card-header">
+    <div class="row justify-between">
+      <div class="row">
+        <div class="text-h6 title-case">Payment request</div>
+        <payment-status
+          v-if="!processing && payment.status"
+          :paymentModel="payment"
+          class="q-ml-md"
+          :isShowIcon="true"
+        />
+      </div>
+      <div class="row justify-end">
+        <q-btn
+          v-if="processable && processing"
+          label="save"
+          type="button"
+          color="primary"
+          :disable="fetchingRate || paying"
+          class="q-mr-sm btn btn-animated"
+          @click="update"
+        />
+        <q-btn
+          v-if="processable && processing"
+          label="mark paid"
+          type="submit"
+          color="secondary"
+          :disable="fetchingRate || paying || isConfirmedStatusChange"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-btn
+          v-if="processable && !processing && !isDraftStatus"
+          label="Process Payment"
+          type="button"
+          color="primary"
+          @click="processPayment"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-btn
+          v-if="rejectable && !processing"
+          label="reject"
+          type="button"
+          color="accent"
+          :disable="paying"
+          @click="toggleRejectDialog(true)"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-btn
+          v-if="editable && !processing"
+          label="Edit"
+          type="button"
+          color="primary"
+          @click="$emit('update:editing', true)"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-btn
+          v-if="isDraftStatus && editable"
+          label="Delete Draft"
+          type="button"
+          color="white"
+          text-color="black"
+          @click="confirm = true"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-dialog v-model="confirm" persistent>
+          <q-card>
+            <q-card-section class="row items-center">
+              <q-avatar icon="warning" color="primary" text-color="white" size="md" />
+              <span class="q-ml-sm">Are you sure to delete this draft payment request?</span>
+            </q-card-section>
+            <q-card-actions align="right">
+              <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
+              <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+        <q-btn
+          label="Approve"
+          type="button"
+          color="teal"
+          text-color="white"
+          v-if="approvalable"
+          @click="handlerApprovalAction()"
+          class="q-mr-sm btn btn-animated"
+        />
+        <q-btn
+          label="Cancel"
+          type="button"
+          color="white"
+          text-color="black"
+          @click="cancel"
+          class="btn btn-animated"
+          v-if="processable && processing"
+        />
+      </div>
+    </div>
+    <p class="text-red" v-if="payment.status === 'rejected'">
+      <q-icon name="info" color="red" />
+      <b>Rejected Reason:</b> {{ payment.rejectionReason }}
+    </p>
+  </q-card-section>
+  <q-form class="q-ma-lg" @submit="markAsPaid">
     <div class="row q-mb-md q-col-gutter-md">
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.senderId !== user.id">
         <custom-field :label="'Sender'" :value="getSenderName" />
@@ -11,8 +111,8 @@
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
       </div>
-      <div class="col-12 col-sm-12 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="displayApprovers">
-        <approver-display :approvers="payment.approvers" />
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Description'" :value="payment.description" />
       </div>
       <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <p class="q-mb-xs">
@@ -39,12 +139,15 @@
           emit-value
           map-options
           borderless
-          :rules="[(val) => !!val || 'Status is required']"
         />
       </div>
-      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
-        <custom-field :label="'Description'" :value="payment.description" />
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
+      <div class="col-12 col-sm-12 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="displayApprovers">
+        <approver-display :approvers="payment.approvers" />
       </div>
+    </div>
+    <div class="row q-mb-md q-col-gutter-md">
       <div v-if="isEditPaymentSetting" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
       </div>
@@ -140,89 +243,6 @@
     <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isDraftStatus && editable && payment.receiverId">
       <q-checkbox label="Show Draft for Recipient" v-model="payment.showDraftRecipient" @click="update" />
     </div>
-    <div class="row justify-end q-mt-lg">
-      <q-btn
-        v-if="processable && processing"
-        label="save"
-        type="button"
-        color="primary"
-        :disable="fetchingRate || paying"
-        class="q-mr-sm btn btn-animated"
-        @click="update"
-      />
-      <q-btn
-        v-if="processable && processing"
-        label="mark paid"
-        type="submit"
-        color="secondary"
-        :disable="fetchingRate || paying || isConfirmedStatusChange"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-btn
-        v-if="processable && !processing && !isDraftStatus"
-        label="Process Payment"
-        type="button"
-        color="primary"
-        @click="processPayment"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-btn
-        v-if="rejectable && !processing"
-        label="reject"
-        type="button"
-        color="accent"
-        :disable="paying"
-        @click="toggleRejectDialog(true)"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-btn
-        v-if="editable && !processing"
-        label="Edit"
-        type="button"
-        color="primary"
-        @click="$emit('update:editing', true)"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-btn
-        v-if="isDraftStatus && editable"
-        label="Delete Draft"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="confirm = true"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-dialog v-model="confirm" persistent>
-        <q-card>
-          <q-card-section class="row items-center">
-            <q-avatar icon="warning" color="primary" text-color="white" size="md" />
-            <span class="q-ml-sm">Are you sure to delete this draft payment request?</span>
-          </q-card-section>
-          <q-card-actions align="right">
-            <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
-            <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-      <q-btn
-        label="Approve"
-        type="button"
-        color="teal"
-        text-color="white"
-        v-if="approvalable"
-        @click="handlerApprovalAction()"
-        class="q-mr-sm btn btn-animated"
-      />
-      <q-btn
-        label="Cancel"
-        type="button"
-        color="white"
-        text-color="black"
-        @click="cancel"
-        class="btn btn-animated"
-        v-if="processable && processing"
-      />
-    </div>
     <PaymentRejectDialog
       v-model="paymentRejectDialog"
       @toggle="toggleRejectDialog"
@@ -246,6 +266,7 @@ import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 import customField from 'src/components/common/custom_field.vue'
 import { COINS } from 'src/consts/common'
 import coinLabel from '../common/coin_label.vue'
+import PaymentStatus from 'components/payment/paymentStatus'
 
 export default {
   name: 'paymentDetail',
@@ -259,6 +280,7 @@ export default {
     paymentSettingMethod,
     customField,
     coinLabel,
+    PaymentStatus,
   },
   data() {
     return {
