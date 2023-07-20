@@ -26,6 +26,7 @@
   <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
     <thead>
       <tr>
+        <th class="text-left" style="width: 15%" v-if="user.showDateOnInvoiceLine">Date</th>
         <th class="text-left" style="width: 15%">Detail</th>
         <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
         <th class="text-left">Description</th>
@@ -66,6 +67,8 @@
 <script>
 import Invoice from 'components/payment/invoice'
 import InvoiceDialog from 'components/payment/invoiceDialog.vue'
+import { ref } from 'vue'
+import { mapGetters } from 'vuex'
 export default {
   name: 'InvoicesList',
   components: { Invoice, InvoiceDialog },
@@ -89,6 +92,7 @@ export default {
         price: '',
         cost: 0,
         description: '',
+        date: this.getRefDateFormat(new Date()),
       },
       index: -1,
     }
@@ -117,6 +121,15 @@ export default {
       this.invoices[this.index] = invoice
       this.$emit('update:modelValue', this.invoices)
     },
+    getRefDateFormat(date) {
+      return ref(
+        date.getFullYear() +
+          '/' +
+          (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
+          '/' +
+          date.getDate()
+      )
+    },
   },
   watch: {
     modelValue: {
@@ -137,6 +150,11 @@ export default {
         this.hourlyRateUpdate = newVal
       },
     },
+  },
+  computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
   },
 }
 </script>
