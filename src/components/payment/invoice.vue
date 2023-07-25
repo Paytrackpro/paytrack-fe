@@ -1,6 +1,9 @@
 <template>
   <tr>
-    <td class="invoice-price-detail text-left">
+    <td class="invoice-price-detail text-left" v-if="user.showDateOnInvoiceLine">
+      {{ invoice.date.replaceAll('/', '-') }}
+    </td>
+    <td class="text-left">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -87,6 +90,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 export default {
   name: 'invoiceRow',
   props: {
@@ -111,6 +115,7 @@ export default {
         price: '',
         cost: 0,
         description: '',
+        date: '',
       },
       type: 'labor',
       confirm: false,
@@ -135,6 +140,7 @@ export default {
         price: Number(this.invoice.price),
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
+        date: this.invoice.date,
       })
       this.editing = false
     },
@@ -155,6 +161,9 @@ export default {
         this.invoice.cost = parseFloat(value)
       },
     },
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
   },
   watch: {
     hourlyRate: {
@@ -166,6 +175,7 @@ export default {
             quantity: Number(this.modelValue.quantity),
             cost: Number(this.modelValue.quantity) * Number(newHR),
             description: this.modelValue.description,
+            date: this.modelValue.date,
           })
         }
       },

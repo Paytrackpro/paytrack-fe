@@ -5,6 +5,26 @@
         <div class="text-h6">{{ isEdit ? 'Edit' : 'Add' }}{{ type === 'labor' ? ' Labor' : ' Material' }}</div>
       </q-card-section>
       <q-card-section class="q-pt-xs q-px-lg">
+        <div class="row items-start" v-if="user.showDateOnInvoiceLine">
+          <div>
+            <p>
+              <b class="text-weight-medium title-case">Date </b>
+            </p>
+            <q-input filled v-model="invoice.date" :rules="['date']">
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer">
+                  <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                    <q-date v-model="invoice.date">
+                      <div class="row items-center justify-end">
+                        <q-btn v-close-popup label="Close" color="primary" flat />
+                      </div>
+                    </q-date>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+          </div>
+        </div>
         <div class="row items-start justify-between">
           <custom-input
             class="col-3"
@@ -57,6 +77,8 @@
 <script>
 import customInput from 'src/components/common/custom_input.vue'
 import customField from 'src/components/common/custom_field.vue'
+import { ref } from 'vue'
+import { mapGetters } from 'vuex'
 export default {
   name: 'InvoiceDialog',
   components: { customInput, customField },
@@ -96,6 +118,7 @@ export default {
           price: Number(this.invoice.price),
           cost: Number(this.invoice.cost),
           description: this.invoice.description,
+          date: this.invoice.date,
         })
       } else {
         this.$emit('save', {
@@ -103,6 +126,7 @@ export default {
           price: Number(this.invoice.price),
           cost: Number(this.invoice.cost),
           description: this.invoice.description,
+          date: this.invoice.date,
         })
       }
       if (this.hourlyRateInput !== this.hourlyRate) {
@@ -112,12 +136,14 @@ export default {
     },
     cancel() {
       this.$emit('update:dialogModelValue', false)
+      const now = new Date()
       if (this.isEdit) {
         this.invoice = {
           quantity: '',
           price: '',
           cost: 0,
           description: '',
+          date: this.getRefDateFormat(now),
         }
       }
       if (!this.isEdit) {
@@ -126,6 +152,7 @@ export default {
           price: '',
           cost: 0,
           description: '',
+          date: this.getRefDateFormat(now),
         })
       }
     },
@@ -135,6 +162,15 @@ export default {
         price = this.hourlyRateInput
       }
       this.invoice.cost = Number(this.invoice.quantity) * price
+    },
+    getRefDateFormat(date) {
+      return ref(
+        date.getFullYear() +
+          '/' +
+          (date.getMonth() < 9 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) +
+          '/' +
+          date.getDate()
+      )
     },
   },
   computed: {
@@ -146,6 +182,9 @@ export default {
         this.invoice.cost = parseFloat(value)
       },
     },
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
   },
   watch: {
     hourlyRate: {
@@ -167,6 +206,7 @@ export default {
         this.invoice.price = newVal.price
         this.invoice.cost = newVal.cost
         this.invoice.description = newVal.description
+        this.invoice.date = newVal.date
       },
     },
   },
