@@ -225,7 +225,11 @@
           Use Bulk Pay BTC to enter a Transaction ID
         </p>
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
-          <custom-field :label="'Transaction id'" :value="payment.txId" />
+          <!-- <custom-field :label="'Transaction id'" :value="payment.txId" /> -->
+          <p class="q-mb-xs">
+            <b class="text-weight-medium">Transaction id</b>
+          </p>
+          <p>${{ payment.txId }}</p>
         </div>
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Paid At'" isTime :value="payment.paidAt" />
