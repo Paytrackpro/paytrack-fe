@@ -49,7 +49,7 @@
               :to="menuItem.to"
               active-class="bg-cyan-2 sidebar-active-item"
               class="GNL__drawer-item sidebar-item"
-              v-if="shouldDisplayRoute(menuItem)"
+              v-if="shouldDisplayRoute(menuItem) && !isMyShop(menuItem.label)"
               v-ripple
             >
               <q-item-section avatar>
@@ -66,6 +66,32 @@
                 ></span>
               </q-item-section>
             </q-item>
+            <q-expansion-item
+              :key="index"
+              class="my-shop-expansion"
+              icon="o_shopping_bag"
+              label="My Shop"
+              v-if="isMyShop(menuItem.label)"
+            >
+              <q-list class="q-pl-lg">
+                <q-item to="/shop/products/list" active-class="q-item-no-link-highlighting">
+                  <q-item-section avatar>
+                    <q-icon name="o_inventory_2" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>My Products</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item to="/shop/orders/list" active-class="q-item-no-link-highlighting">
+                  <q-item-section avatar>
+                    <q-icon name="o_list_alt" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label>Orders Management</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
           </template>
         </q-list>
@@ -107,6 +133,12 @@ export default {
           label: 'Pay',
           separator: false,
           to: '/pay',
+        },
+        {
+          icon: 'payment',
+          label: 'My Shop',
+          separator: false,
+          to: '/my-shop',
         },
         {
           icon: 'supervisor_account',
@@ -181,6 +213,9 @@ export default {
         /^\s*$/.test(str) ||
         str.replace(/\s/g, '') === ''
       )
+    },
+    isMyShop(label) {
+      return label == 'My Shop'
     },
   },
   watch: {

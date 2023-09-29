@@ -120,6 +120,52 @@ const routes = [
           },
         ],
       },
+      {
+        path: 'shop/',
+        name: 'shop',
+        component: () => import('pages/payments/layout.vue'),
+        meta: {
+          title: 'My Shop',
+        },
+        children: [
+          {
+            path: 'products',
+            name: 'products',
+            meta: {
+              title: 'My Products',
+            },
+            children: [
+              {
+                path: 'list',
+                name: 'products.list',
+                component: () => import('pages/shop/products/list.vue'),
+                meta: {
+                  title: 'Product List',
+                },
+              },
+              {
+                path: 'create',
+                name: 'products.create',
+                component: () => import('pages/shop/products/create.vue'),
+                meta: {
+                  title: 'Create Product',
+                },
+              },
+            ],
+          },
+          {
+            path: 'orders',
+            name: 'shop.orders.list',
+            component: () => import('pages/shop/orders/list.vue'),
+            meta: {
+              title: 'My Orders',
+            },
+            props: {
+              paymentType: PAYMENT_OBJECT_REQUEST,
+            },
+          },
+        ],
+      },
     ],
   },
   {

@@ -60,3 +60,9 @@ export const COINS = [
   { label: 'LTC', value: 'ltc', color: 'blue-grey-7' },
   { label: 'DCR', value: 'dcr', color: 'cyan-8' },
 ]
+
+export const CURRENCY = [
+  { name: 'US Dollar', label: 'USD', Symbol: '$', icon: 'attach_money' },
+  { name: 'Euros', label: 'EURO', Symbol: '€', icon: 'euro' },
+  { name: 'Bitcoin', label: 'BTC', Symbol: 'BTC', icon: 'currency_bitcoin' },
+]

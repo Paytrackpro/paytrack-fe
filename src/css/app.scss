@@ -104,11 +104,17 @@ p {
   opacity: 80%;
   text-transform: none;
 }
-.sidebar-icon {
+.sidebar-icon,
+.my-shop-expansion i {
   font-weight: lighter;
   -webkit-text-stroke: 1px white;
   color: $grey-2;
 }
+
+.my-shop-expansion i {
+  font-size: 32px !important;
+}
+
 .sidebar-active-item i {
   -webkit-text-stroke: 1px $cyan-2;
   color: $cyan-3;
@@ -583,7 +589,7 @@ a {
 }
 .card-header {
   background-color: #dcf2ff;
-  border-bottom: 1px solid #EFEFEF;
+  border-bottom: 1px solid #efefef;
 }
 
 @media only screen and (max-width: 575px) {
@@ -596,4 +602,33 @@ a {
   .address_breakline {
     display: none;
   }
+}
+
+.align-center-field .q-field__control-container {
+  align-items: center;
+  color: $grey-2;
+}
+
+.image-uploader .items-center > div {
+  margin-top: 20px;
+}
+
+.image-uploader .q-field__inner {
+  border-style: dashed;
+  border-width: 0.5px;
+}
+
+.image-uploader .q-field__prepend {
+  margin-left: 10px;
+}
+.cursor-pointer {
+  cursor: pointer;
+}
+.zoom-hover-1-1:hover {
+  transform: scale(1.1);
+}
+.white-blur .q-img__image{
+  width: 100%;
+  filter: blur(1px);
+  -webkit-filter: blur(1px);
 }
