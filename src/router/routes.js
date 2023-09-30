@@ -11,7 +11,15 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/approvals',
+        redirect: '/home',
+      },
+      {
+        path: 'home/',
+        name: 'Homepage',
+        component: () => import('pages/common/homepage.vue'),
+        meta: {
+          title: 'Homepage Products',
+        },
       },
       {
         path: 'approvals/',

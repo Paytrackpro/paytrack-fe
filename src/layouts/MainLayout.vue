@@ -117,6 +117,12 @@ export default {
       drawer: false,
       menuList: [
         {
+          icon: 'home',
+          label: 'Homepage',
+          separator: false,
+          to: '/home',
+        },
+        {
           icon: 'schedule',
           label: 'Pending Approvals',
           separator: false,
@@ -162,7 +168,8 @@ export default {
       .then((data) => {
         this.approvalCount = data.count
         if (this.approvalCount === 0) {
-          this.menuList.splice(0, 1)
+          let approvalsIndex = this.getApprovalPendingIndex()
+          this.menuList.splice(approvalsIndex, 1)
           if (this.$route.name.indexOf('approvals') > -1) {
             this.$router.push({ path: `get-paid` })
           }
@@ -216,6 +223,16 @@ export default {
     },
     isMyShop(label) {
       return label == 'My Shop'
+    },
+    getApprovalPendingIndex() {
+      let result = 1
+      this.menuList.forEach((item, index) => {
+        if (item.to.includes('/approvals')) {
+          result = index
+          return
+        }
+      })
+      return result
     },
   },
   watch: {

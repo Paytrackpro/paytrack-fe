@@ -76,6 +76,7 @@ import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helpe
 import { date } from 'quasar'
 import customPagination from 'src/components/common/custom_pagination.vue'
 import MTime from 'components/common/mTime'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'productList',
@@ -160,6 +161,7 @@ export default {
         filter.KeySearch = this.KeySearch
         this.getProductList({
           ...filter,
+          OwnerId: this.user.id,
         })
       },
     },
@@ -249,6 +251,11 @@ export default {
           return ''
       }
     },
+  },
+  computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
   },
 }
 </script>
