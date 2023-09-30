@@ -121,6 +121,7 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
+          format: (val) => `${this.getStatusView(val)}`,
           sortable: false,
         },
         {
@@ -235,6 +236,18 @@ export default {
     setDeleteId(id) {
       this.currentDeleteId = id
       this.confirm = true
+    },
+    getStatusView(status) {
+      switch (status) {
+        case 0:
+          return 'Hidden'
+        case 1:
+          return 'Active'
+        case 2:
+          return 'Deleted'
+        default:
+          return ''
+      }
     },
   },
 }
