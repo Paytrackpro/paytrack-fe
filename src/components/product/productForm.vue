@@ -113,7 +113,7 @@
           <div class="col-12">
             <q-file
               bottom-slots
-              v-model="images"
+              v-model="uploadedImages"
               label="Upload or drop file here"
               counter
               multiple
@@ -128,9 +128,9 @@
               </template>
               <template v-slot:append>
                 <q-icon
-                  v-if="images != null && images.length != 0"
+                  v-if="uploadedImages != null && uploadedImages.length != 0"
                   name="close"
-                  @click.stop.prevent="clearAllFile()"
+                  @click.stop.prevent="clearUploadFile()"
                   class="cursor-pointer"
                 />
               </template>
@@ -138,15 +138,15 @@
           </div>
         </div>
         <div class="row">
-          <p v-if="images != null && images.length != 0" class="text-caption text-info">
+          <p v-if="imageUrls != null && imageUrls.length != 0" class="text-caption text-info">
             Click on an image below to choose as your avatar
           </p>
         </div>
         <div class="row">
           <q-img
-            v-for="(image, i) of images"
+            v-for="(imageUrl, i) of imageUrls"
             :key="i"
-            :src="imageUrl(image)"
+            :src="imageUrl"
             spinner-color="white"
             style="height: 100px; max-width: 100px; display: flex; justify-content: center; align-items: center"
             :class="'q-mx-xs cursor-pointer zoom-hover-1-1' + (avatarIndex == i ? ' white-blur' : '')"
@@ -159,6 +159,7 @@
               color="accent"
               style="top: 8px; right: 8px"
               @click="removeImg(i)"
+              v-on:click.stop
             >
               <q-tooltip> Click to remove image </q-tooltip>
             </q-icon>
@@ -190,8 +191,6 @@ export default {
   components: { customInput },
   props: {
     product: Object,
-    user: Object,
-    token: String,
     isEdit: Boolean,
   },
   data() {
@@ -205,19 +204,46 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       currency: 'USD',
-      images: ref(null),
+      uploadedImages: ref(null),
       imageUrls: [],
       avatarIndex: 0,
       descriptionEditor: ref(''),
       imageNewNameArr: [],
+      storageGalleryArr: [],
     }
   },
   watch: {
     product: {
       immediate: true,
       handler(newProduct) {
+        if (!this.isEdit) {
+          return
+        }
         const product = { ...newProduct }
+        if (product.id < 1) {
+          return
+        }
         this.inProduct = product
+        this.descriptionEditor = ref(this.inProduct.description)
+        if (
+          (this.inProduct.images != null && this.inProduct.images != '') ||
+          (this.inProduct.avatar != null && this.inProduct.avatar != '')
+        ) {
+          //get Image Base64 list
+          this.setImagesBase64()
+        }
+      },
+    },
+    uploadedImages: {
+      immediate: true,
+      handler(newUploadedImages) {
+        if (newUploadedImages == null || newUploadedImages.length == 0) {
+          return
+        }
+        newUploadedImages.forEach((uploadImage) => {
+          this.imageUrls.push(this.imageUrl(uploadImage))
+          this.imageNewNameArr.push(this.getImageNewName(uploadImage))
+        })
       },
     },
   },
@@ -237,8 +263,7 @@ export default {
       product.description = this.descriptionEditor
       this.submitting = true
       let successNotify = 'Product created successfully'
-      if (this.images != null && this.images.length > 0) {
-        this.createImageNewNames()
+      if (this.imageNewNameArr != null && this.imageNewNameArr.length > 0) {
         product.avatar = this.imageNewNameArr[this.avatarIndex]
         product.images = this.getGalleryImageNames()
         this.uploadImages()
@@ -260,27 +285,24 @@ export default {
     },
     getGalleryImageNames() {
       let galleryNames = []
-      this.images.forEach((image, index) => {
+      this.imageNewNameArr.forEach((imageName, index) => {
         if (index != this.avatarIndex) {
-          galleryNames.push(this.imageNewNameArr[index])
+          galleryNames.push(imageName)
         }
       })
       return galleryNames.join(',')
     },
-    createImageNewNames() {
-      this.imageNewNameArr = []
-      this.images.forEach((image) => {
-        let nameArr = image.name.split('.')
-        if (nameArr.length < 2) return
-        this.imageNewNameArr.push(this.randomString(64, '#aA') + '.' + nameArr[1])
-      })
+    getImageNewName(image) {
+      let nameArr = image.name.split('.')
+      if (nameArr.length < 2) return
+      return this.randomString(64, '#aA') + '.' + nameArr[1]
     },
     getImageUrls() {
-      if (this.images == null || this.images.length == 0) {
+      if (this.uploadedImages == null || this.uploadedImages.length == 0) {
         return ''
       }
       let urls = ''
-      this.images.forEach((image, index) => {
+      this.uploadedImages.forEach((image, index) => {
         if (this.avatarIndex != index) {
           urls += this.imageUrl(image) + ','
         }
@@ -298,14 +320,27 @@ export default {
       })
       return ''
     },
-    clearAllFile() {
-      this.images = null
+    clearUploadFile() {
+      let imageCount = this.imageNewNameArr.length
+      let uploadedCount = this.uploadedImages.length
+      for (var i = imageCount - 1; i >= imageCount - uploadedCount; i--) {
+        this.imageUrls.splice(i, 1)
+        this.imageNewNameArr.splice(i, 1)
+      }
+      this.uploadedImages = null
     },
     imageUrl(image) {
       return URL.createObjectURL(image)
     },
     removeImg(index) {
-      this.images.splice(index, 1)
+      if (this.uploadedImages != null && index >= this.imageUrls.length - this.uploadedImages.length) {
+        this.uploadedImages.splice(this.uploadedImages.length + index - this.imageUrls.length, 1)
+      }
+      if (index == this.avatarIndex) {
+        this.avatarIndex = 0
+      }
+      this.imageUrls.splice(index, 1)
+      this.imageNewNameArr.splice(index, 1)
     },
     onRejected() {
       this.$q.notify({
@@ -319,7 +354,18 @@ export default {
     async saveProduct(product) {
       let url = 'shop/product/create'
       if (product.id > 0) {
-        url = `/product/update/${product.id}`
+        url = `shop/product/update`
+      }
+      if (this.isEdit) {
+        return api
+          .put(url, product)
+          .then((data) => {
+            return { data }
+          })
+          .catch((err) => {
+            responseError(err)
+            return { error: err }
+          })
       }
       return api
         .post(url, product)
@@ -332,15 +378,24 @@ export default {
         })
     },
     async uploadImages() {
-      let formData = new FormData()
-      for (var i = 0; i < this.images.length; i++) {
-        formData.append('files[' + i + ']', this.images[i])
+      if (this.uploadedImages == null || this.uploadedImages.length == 0) {
+        return
       }
-      formData.set('newImagesName', this.imageNewNameArr.join(';'))
+      let formData = new FormData()
+      for (var i = 0; i < this.uploadedImages.length; i++) {
+        formData.append('files[' + i + ']', this.uploadedImages[i])
+      }
+
+      let uploadNewImageNameArr = []
+      for (var j = this.imageNewNameArr.length - this.uploadedImages.length; j < this.imageNewNameArr.length; j++) {
+        uploadNewImageNameArr.push(this.imageNewNameArr[j])
+      }
+
+      formData.set('newImagesName', uploadNewImageNameArr.join(';'))
       let headers = {
         'Content-Type': 'multipart/form-data',
       }
-      await api.post('/shop/product/upload', formData, headers)
+      await api.post('/file/upload', formData, headers)
     },
     randomString(length, chars) {
       var mask = ''
@@ -350,6 +405,47 @@ export default {
       var result = ''
       for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)]
       return result
+    },
+    async setImagesBase64() {
+      this.$api
+        .get(`/file/base64`, {
+          params: {
+            avatar: this.inProduct.avatar,
+            images: this.inProduct.images,
+          },
+        })
+        .then((data) => {
+          //add avatar
+          if (this.inProduct.avatar != null && this.inProduct.avatar != '') {
+            this.imageUrls.push(this.getBase64Src(this.inProduct.avatar, data))
+            this.imageNewNameArr.push(this.inProduct.avatar)
+            this.avatarIndex = 0
+          }
+          //add gallery images
+          if (this.inProduct.images != null && this.inProduct.images != '') {
+            let imageArr = this.inProduct.images.split(',')
+            imageArr.forEach((image) => {
+              this.imageUrls.push(this.getBase64Src(image, data))
+              this.imageNewNameArr.push(image)
+            })
+          }
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
+    },
+    emptyImage() {
+      if (this.inProduct == null) {
+        return true
+      }
+      return (
+        (this.inProduct.avatar == null || this.inProduct.avatar == '') &&
+        (this.inProduct.images == null || this.inProduct.images == '')
+      )
+    },
+    getBase64Src(imageName, imageBase64Map) {
+      return 'data:image/png;base64,' + imageBase64Map[imageName]
     },
   },
   computed: {

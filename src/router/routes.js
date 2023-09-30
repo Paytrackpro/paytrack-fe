@@ -151,6 +151,14 @@ const routes = [
                   title: 'Create Product',
                 },
               },
+              {
+                path: 'update/:id(\\d+)',
+                name: 'products.update',
+                component: () => import('pages/shop/products/update.vue'),
+                meta: {
+                  title: 'Update Product',
+                },
+              },
             ],
           },
           {

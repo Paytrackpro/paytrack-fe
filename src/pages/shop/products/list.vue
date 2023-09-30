@@ -34,22 +34,40 @@
           </template>
         </q-input>
       </template>
-      <template v-slot:body-cell-online="props">
+      <template v-slot:body-cell-avatar="props">
         <q-td :props="props">
-          <q-badge rounded :color="props.value ? 'green' : 'grey'" />
+          <q-img :src="getAvatarSrc(props.value)" style="height: 80px; max-width: 80px" class="q-mx-xs"></q-img>
         </q-td>
       </template>
       <template v-slot:body-cell-action="props">
         <q-td :props="props">
-          <q-btn :props="props" dense round flat color="primary" @click="editProduct(props)" icon="edit">
-            <q-tooltip> Edit Product </q-tooltip>
-          </q-btn>
-          <q-btn :props="props" dense round flat color="accent" @click="deleteProduct(props)" icon="delete">
+          <q-btn
+            :props="props"
+            dense
+            round
+            flat
+            color="accent"
+            @click="setDeleteId(props.row.id)"
+            icon="delete"
+            v-on:click.stop
+          >
             <q-tooltip> Hide Or Delete Product </q-tooltip>
           </q-btn>
         </q-td>
       </template>
     </q-table>
+    <q-dialog v-model="confirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="warning" color="primary" text-color="white" size="md" />
+          <span class="q-ml-sm">Are you sure to delete this product?</span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteProduct()" />
+          <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -82,6 +100,14 @@ export default {
           field: (row) => row.productName,
           format: (val) => `${val}`,
           sortable: true,
+        },
+        {
+          name: 'avatar',
+          required: true,
+          label: 'Avatar',
+          align: 'center',
+          field: (row) => row.avatar,
+          format: (val) => `${val}`,
         },
         {
           name: 'price',
@@ -120,6 +146,9 @@ export default {
         },
       ],
       rows: [],
+      productImgBase64s: {},
+      currentDeleteId: 0,
+      confirm: false,
     }
   },
   watch: {
@@ -130,7 +159,6 @@ export default {
         filter.KeySearch = this.KeySearch
         this.getProductList({
           ...filter,
-          requestType: this.type,
         })
       },
     },
@@ -146,13 +174,22 @@ export default {
           this.rows = products || []
           this.pagination.rowsNumber = count
           this.loading = false
+          this.setAvatarImageMap()
         })
         .catch((err) => {
           this.loading = false
         })
     },
+    setAvatarImageMap() {
+      if (this.rows.length < 1) return
+      let avatars = []
+      this.rows.forEach((product) => {
+        if (product.avatar != null && product.avatar != '') avatars.push(product.avatar)
+      })
+      this.getImagesBase64(avatars.join(','))
+    },
     goToDetail(id) {
-      this.$router.push({ name: 'product.detail', params: { id } })
+      this.$router.push({ name: 'products.update', params: { id } })
     },
     onRequest(props) {
       const query = pagingToPathParams(props)
@@ -162,8 +199,43 @@ export default {
         query,
       })
     },
-    editProduct(props) {},
-    deleteProduct(props) {},
+    getImagesBase64(imageNames) {
+      this.$api
+        .get(`/file/img-base64`, {
+          params: {
+            imageNames: imageNames,
+          },
+        })
+        .then((data) => {
+          this.productImgBase64s = data
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
+    },
+    getAvatarSrc(imageName) {
+      return 'data:image/png;base64,' + this.productImgBase64s[imageName]
+    },
+    deleteProduct() {
+      this.$api
+        .delete(`/shop/product/delete/${this.currentDeleteId}`)
+        .then(() => {
+          this.$q.notify({
+            message: 'Product has been deleted',
+            color: 'positive',
+            icon: 'check',
+          })
+          window.location.reload()
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    setDeleteId(id) {
+      this.currentDeleteId = id
+      this.confirm = true
+    },
   },
 }
 </script>
