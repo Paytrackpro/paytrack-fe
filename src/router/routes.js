@@ -22,6 +22,14 @@ const routes = [
         },
       },
       {
+        path: 'product-detail/:id(\\d+)',
+        name: 'product.detail',
+        component: () => import('pages/common/product_detail.vue'),
+        meta: {
+          title: 'Homepage Detail',
+        },
+      },
+      {
         path: 'approvals/',
         name: 'approvals',
         component: () => import('pages/payments/approvals.vue'),

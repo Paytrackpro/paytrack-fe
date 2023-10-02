@@ -67,10 +67,10 @@ p {
   font-size: 15px;
 }
 .text-size-20 {
-  font-size: 15px;
+  font-size: 20px;
 }
 .text-size-23 {
-  font-size: 15px;
+  font-size: 23px;
 }
 
 .q-btn {
@@ -674,6 +674,9 @@ a {
 .product-search .q-field--outlined.q-field--rounded .q-field__control {
   background-color: white;
 }
-.product-search{
+.product-search {
   padding: 0px !important;
+}
+.product-detail-area {
+  border-left: #bcbcbc solid 1px;
 }
