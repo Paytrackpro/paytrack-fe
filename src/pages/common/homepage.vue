@@ -1,16 +1,38 @@
 <template>
   <div class="q-pa-lg">
-    <div class="row q-pb-md">
-      <q-card class="col-12 no-border no-shadow bg-transparent">
-        <q-card-section class="q-pa-sm">
-          <q-input rounded v-model="KeySearch" outlined placeholder="Search Product">
-            <template v-slot:append>
-              <q-icon v-if="KeySearch === ''" name="search" />
-              <q-icon v-else name="clear" class="cursor-pointer" @click="KeySearch = ''" />
-            </template>
-          </q-input>
-        </q-card-section>
-      </q-card>
+    <q-card-section class="card-header q-mb-md q-pa-sm">
+      <div class="row justify-between">
+        <div class="text-h6 title-case q-pt-sm">Product List</div>
+        <div class="row">
+          <q-card class="col-12 no-border no-shadow bg-transparent">
+            <q-card-section class="product-search">
+              <q-input
+                rounded
+                v-model="KeySearch"
+                outlined
+                placeholder="Search Product"
+                v-on:keyup.enter="searchProduct()"
+              >
+                <template v-slot:append>
+                  <q-icon v-if="KeySearch === ''" name="search" />
+                  <q-icon v-else name="clear" class="cursor-pointer" @click="clearSearch()" />
+                </template>
+              </q-input>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+    </q-card-section>
+    <div class="row q-mb-md justify-between">
+      <span class="q-pt-xs">Total of {{ pagination.rowsNumber }} products </span>
+      <q-pagination
+        v-model="pagination.page"
+        :max="Math.ceil(pagination.rowsNumber / pagination.rowsPerPage)"
+        direction-links
+        outline
+        color="primary"
+        active-design="unelevated"
+      />
     </div>
     <div class="row q-col-gutter-sm">
       <div class="col-md-3 col-lg-2 col-sm-4 col-xs-6" v-for="(product, index) in rows" :key="index">
@@ -27,7 +49,6 @@
 
 <script>
 import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
-import { date } from 'quasar'
 import CardProduct from 'components/cards/CardProduct.vue'
 
 export default {
@@ -45,6 +66,7 @@ export default {
       productImgBase64s: {},
       currentDeleteId: 0,
       confirm: false,
+      currentPage: 1,
     }
   },
   watch: {
@@ -54,13 +76,23 @@ export default {
         this.getProductList()
       },
     },
+    pageChange: {
+      handler: function (newVal) {
+        this.pagination.page = newVal
+        this.getProductList()
+      },
+    },
   },
   methods: {
     async getProductList() {
       this.loading = true
+      const filter = pathParamsToPaging({ query: { r: 18, p: this.pagination.page } }, this.pagination)
       this.$api
         .get('/shop/product/list', {
-          params: {},
+          params: {
+            ...filter,
+            KeySearch: this.KeySearch,
+          },
         })
         .then(({ products, count }) => {
           this.rows = products || []
@@ -141,6 +173,18 @@ export default {
       }
     },
     toProductDetail(id) {},
+    searchProduct() {
+      this.getProductList()
+    },
+    clearSearch() {
+      this.KeySearch = ''
+      this.getProductList()
+    },
+  },
+  computed: {
+    pageChange() {
+      return this.pagination.page
+    },
   },
 }
 </script>
