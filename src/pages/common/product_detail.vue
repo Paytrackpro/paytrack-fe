@@ -36,32 +36,61 @@
         <span class="text-size-23 text-weight-medium text-accent">{{ priceDisplay() }}</span>
         <div class="row q-mt-lg">
           <p class="q-pt-sm q-mr-sm">Quantity</p>
-          <q-input color="primary" class="q-mr-sm" outlined lazy-rules v-model="quantity" auto type="number" dense />
+          <q-input
+            color="primary"
+            class="q-mr-sm"
+            outlined
+            lazy-rules
+            v-model="quantity"
+            auto
+            type="number"
+            dense
+            :disable="isMyProduct()"
+            :rules="[(val) => val <= product.stock || 'Order quantity cannot be greater than stock']"
+          />
           <p class="q-pt-sm">{{ product.stock }} in stock</p>
         </div>
-        <div class="row q-mt-lg">
-          <q-btn label="Add To Cart" color="primary" class="btn btn-animated q-mr-sm" icon="add_shopping_cart">
+        <div class="row q-mt-lg align-center">
+          <q-btn
+            label="Add To Cart"
+            color="primary"
+            class="btn btn-animated q-mr-sm"
+            icon="add_shopping_cart"
+            :disable="quantity > product.stock || isMyProduct()"
+            @click="addToCart()"
+          >
             <q-tooltip> Add product to your cart</q-tooltip>
           </q-btn>
-          <q-btn label="Buy Now" type="button" color="accent" class="btn btn-animated">
+          <q-btn
+            label="Buy Now"
+            type="button"
+            color="accent"
+            class="btn btn-animated"
+            :disable="quantity > product.stock || isMyProduct()"
+          >
             <q-tooltip> Buy now. Go to checkout page immediately </q-tooltip>
           </q-btn>
+          <span class="text-accent q-ml-sm" v-if="isMyProduct()">Cannot order your own products</span>
         </div>
         <p class="text-weight-medium text-size-20 q-mt-lg">Description</p>
         <p v-html="product.description"></p>
       </div>
     </div>
     <q-separator class="q-mt-lg" />
-    <p class="text-weight-regular text-size-20 q-mt-md">Products From The Same Owner</p>
-    <product-list :productPerPage="12" :ownerId="product.ownerId" />
+    <div>
+      <p class="text-weight-regular text-size-20 q-mt-md">Products From The Same Owner</p>
+      <product-list :productPerPage="12" :ownerId="product.ownerId" />
+    </div>
   </div>
 </template>
 
 <script>
 import { CURRENCY } from 'src/consts/common'
 import productList from 'components/product/productList'
+import { api } from 'boot/axios'
+import { mapGetters } from 'vuex'
 export default {
-  name: 'createProduct',
+  name: 'productDetail',
   components: { productList },
   data() {
     return {
@@ -159,6 +188,39 @@ export default {
     },
     showCurrentImage(imageUrl) {
       this.currentShowImgUrl = imageUrl
+    },
+    async addToCart() {
+      api
+        .post('cart/add-to-cart', {
+          OwnerId: this.product.ownerId,
+          OwnerName: this.product.ownerName,
+          ProductId: this.product.id,
+          Quantity: Number(this.quantity),
+        })
+        .then((data) => {
+          this.$q.notify({
+            message: 'The product was added to the cart successfully',
+            color: 'positive',
+            icon: 'check',
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
+    },
+    isMyProduct() {
+      return this.user.id == this.product.ownerId
+    },
+  },
+  computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
+  },
+  watch: {
+    $route(to, from) {
+      this.fetchData()
     },
   },
 }

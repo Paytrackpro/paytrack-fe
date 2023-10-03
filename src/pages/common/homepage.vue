@@ -1,5 +1,5 @@
 <template>
-  <product-list hasHeader :title="'Product List'" hasSearch hasPagination :productPerPage="18" />
+  <product-list hasHeader :title="'Product List'" hasSearch hasPagination :productPerPage="18" isHomePage />
 </template>
 
 <script>

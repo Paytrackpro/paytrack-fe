@@ -40,8 +40,6 @@
           class="product-card shadow-primary zoom-hover-1-02"
           :data="product"
           :productImage="getAvatarSrc(product.avatar)"
-          @click="toProductDetail(product.id)"
-          v-on:click.stop
         ></card-product>
       </div>
     </div>
@@ -61,6 +59,7 @@ export default {
     hasPagination: Boolean,
     productPerPage: Number,
     ownerId: Number,
+    isHomePage: Boolean,
   },
   components: { CardProduct },
   data() {
@@ -76,14 +75,6 @@ export default {
     }
   },
   watch: {
-    $route: {
-      immediate: true,
-      handler(to) {
-        if (this.ownerId < 1) {
-          this.getProductList(0)
-        }
-      },
-    },
     pageChange: {
       handler: function (newVal) {
         this.pagination.page = newVal
@@ -93,7 +84,19 @@ export default {
     ownerId: {
       immediate: true,
       handler(newOwnerId) {
+        if (newOwnerId == undefined) {
+          return
+        }
         this.getProductList(newOwnerId)
+      },
+    },
+    isHomePage: {
+      immediate: true,
+      handler(isHomePage) {
+        if (!isHomePage) {
+          return
+        }
+        this.getProductList(undefined)
       },
     },
   },
@@ -186,9 +189,6 @@ export default {
         default:
           return ''
       }
-    },
-    toProductDetail(id) {
-      this.$router.push({ name: 'product.detail', params: { id } })
     },
     searchProduct() {
       this.getProductList(0)

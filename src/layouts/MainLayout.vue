@@ -12,6 +12,10 @@
           class="q-mr-sm"
         />
         <q-toolbar-title> Paytrack.pro </q-toolbar-title>
+        <q-btn dense color="cyan-10" round icon="shopping_cart" class="q-mr-sm" @click="toCartPage()">
+          <q-badge color="red" floating>{{ cartCount }}</q-badge>
+          <q-tooltip>Go to your cart</q-tooltip>
+        </q-btn>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
             <q-item-section avatar>
@@ -160,6 +164,7 @@ export default {
         },
       ],
       approvalCount: 0,
+      cartCount: 0,
     }
   },
   async created() {
@@ -178,6 +183,7 @@ export default {
       .catch(() => {
         return
       })
+    this.getCartCount()
   },
   setup() {
     const $q = useQuasar()
@@ -233,6 +239,19 @@ export default {
         }
       })
       return result
+    },
+    getCartCount() {
+      this.$api
+        .get(`/cart/count`)
+        .then((data) => {
+          this.cartCount = data
+        })
+        .catch(() => {
+          return
+        })
+    },
+    toCartPage() {
+      this.$router.push({ name: 'cart', params: {} })
     },
   },
   watch: {
