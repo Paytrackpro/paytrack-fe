@@ -29,7 +29,7 @@ export default {
   watch: {
     approvalCount(value) {
       if (value < 1) {
-        this.$router.push({ path: `get-paid` })
+        this.$router.push({ path: `home` })
       }
     },
   },

@@ -39,6 +39,16 @@
           <q-img :src="getAvatarSrc(props.value)" style="height: 80px; max-width: 80px" class="q-mx-xs"></q-img>
         </q-td>
       </template>
+      <template v-slot:body-cell-productName="props">
+        <q-td :props="props">
+          <span class="product-list-title"
+            >{{ props.value }}
+            <q-tooltip>
+              {{ props.value }}
+            </q-tooltip></span
+          >
+        </q-td>
+      </template>
       <template v-slot:body-cell-action="props">
         <q-td :props="props">
           <q-btn

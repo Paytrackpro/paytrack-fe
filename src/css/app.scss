@@ -660,6 +660,14 @@ a {
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
 }
+.product-list-title {
+  margin: auto;
+  overflow: hidden;
+  display: block;
+  max-width: 300px;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
 .product-card {
   cursor: pointer;
   border: none;
