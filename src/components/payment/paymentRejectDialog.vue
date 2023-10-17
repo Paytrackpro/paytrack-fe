@@ -48,7 +48,7 @@ export default {
           icon: 'check',
         })
         this.closeDialog()
-        this.$router.back()
+        window.location.reload()
       } catch (error) {
         responseError(err)
       }

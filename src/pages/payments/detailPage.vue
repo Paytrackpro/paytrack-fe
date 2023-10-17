@@ -4,7 +4,6 @@
   </q-btn>
   <q-card flat class="q-pb-md content-container">
     <payment-detail
-      class="q-px-lg"
       v-if="!loading && !isError && !editing"
       v-model="payment"
       v-model:editing="editing"
