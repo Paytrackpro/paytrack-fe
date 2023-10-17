@@ -29,7 +29,7 @@ export const STATUS_INFO = Object.freeze({
     statusIcon: 'disabled_by_default',
   },
   ready_bulk_pay_btc: {
-    statusShow: 'Ready for Bulk BTC Payment',
+    statusShow: 'Ready for Payment',
     statusColor: 'warning',
     statusIcon: 'schedule',
   },

@@ -15,19 +15,10 @@
         <div class="row justify-end">
           <q-btn
             v-if="processable && processing"
-            label="save"
-            type="button"
-            color="primary"
-            :disable="fetchingRate || paying"
-            class="q-mr-sm btn btn-animated"
-            @click="update"
-          />
-          <q-btn
-            v-if="processable && processing"
             label="mark paid"
             type="submit"
             color="secondary"
-            :disable="fetchingRate || paying || isConfirmedStatusChange"
+            :disable="fetchingRate || paying || isUnavailableMarkPaid"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -210,20 +201,23 @@
             </q-field>
           </div>
         </div>
-        <div class="col-12 q-py-sm q-my-sm" v-if="!isApprover && processing && !isConfirmedStatusChange">
+        <div class="col-12 q-py-sm q-my-sm" v-if="!isApprover && processing">
           <p class="q-mb-xs">
             <b class="text-weight-medium">Enter transaction ID of sent payment</b>
           </p>
           <div class="row">
-            <q-input class="col-12 col-sm-6 col-md-4" v-model="txId" ref="txId" outlined dense lazy-rules stack-label />
+            <q-input
+              class="col-12 col-sm-6 col-md-4"
+              v-model="txId"
+              @blur="saveTxIdAuto"
+              ref="txId"
+              outlined
+              dense
+              lazy-rules
+              stack-label
+            />
           </div>
         </div>
-        <p
-          v-if="!isApprover && processing && isConfirmedStatusChange"
-          class="text-caption text-italic text-info col-12"
-        >
-          Use Bulk Pay BTC to enter a Transaction ID
-        </p>
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Transaction id'" :value="payment.txId" />
         </div>
@@ -376,9 +370,6 @@ export default {
         token: this.token,
         txId: this.txId,
       }
-      if (this.isConfirmedStatusChange) {
-        form.txId = ''
-      }
       form.status = this.paymentStatus
       this.paying = true
       const { data } = await this.savePayment(form)
@@ -391,6 +382,12 @@ export default {
           icon: 'check',
         })
       }
+    },
+    async saveTxIdAuto() {
+      if (this.txId == this.payment.txId) {
+        return
+      }
+      this.update()
     },
     handlerApprovalAction(status) {
       const reqData = {
@@ -507,6 +504,15 @@ export default {
         }
       },
     },
+    paymentStatus: {
+      immediate: true,
+      handler(newStatus) {
+        if (newStatus == this.payment.status) {
+          return
+        }
+        this.update()
+      },
+    },
   },
   computed: {
     ...mapGetters({
@@ -514,17 +520,15 @@ export default {
     }),
     statusOption() {
       let status = []
-      if (this.payment.paymentMethod == 'btc') {
-        status.push({
-          label: 'Ready for Bulk BTC Payment',
-          value: 'confirmed',
-        })
-      }
       if (this.payment.approvers && this.payment.approvers.length > 0) {
         if (this.isPaymentApproved()) {
           status.push({
             label: 'Approved',
             value: 'sent',
+          })
+          status.push({
+            label: 'Ready for Payment',
+            value: 'confirmed',
           })
         } else {
           status.push({
@@ -536,6 +540,10 @@ export default {
         status.push({
           label: 'Received',
           value: 'sent',
+        })
+        status.push({
+          label: 'Ready for Payment',
+          value: 'confirmed',
         })
       }
       return status
@@ -598,6 +606,9 @@ export default {
     },
     isConfirmedStatusChange() {
       return this.paymentStatus == 'confirmed'
+    },
+    isUnavailableMarkPaid() {
+      return this.txId == ''
     },
     isShowExchangeRate() {
       return !this.isApprover && (this.payment.status == 'paid' || this.processing)
