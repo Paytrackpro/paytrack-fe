@@ -585,3 +585,15 @@ a {
   background-color: #dcf2ff;
   border-bottom: 1px solid #EFEFEF;
 }
+
+@media only screen and (max-width: 575px) {
+  .address_breakline {
+    display: block;
+  }
+}
+
+@media only screen and (min-width: 576px) {
+  .address_breakline {
+    display: none;
+  }
+}

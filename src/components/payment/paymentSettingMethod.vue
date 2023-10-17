@@ -25,7 +25,7 @@
   </q-field>
   <div class="row q-mt-xs">
     <q-item-label lines="1">
-      <span>Address: </span>
+      <span>Address: </span><br class="address_breakline" />
       <u class="text-weight-bold text-blue-8">
         <em> {{ address }}</em></u
       >
