@@ -48,7 +48,7 @@ export default {
           icon: 'check',
         })
         this.closeDialog()
-        this.$router.back()
+        this.$router.push({ path: `/pay/${this.paymentId}` })
       } catch (error) {
         responseError(err)
       }
