@@ -5,7 +5,7 @@
     </p>
     <q-field class="justify-start" stack-label borderless>
       <template v-slot:control>
-        <span>{{ payment.convertRate }}</span>
+        <span>${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD</span>
         <q-btn v-if="!readonly && !loading" class="q-ml-sm" round dense flat @click="fetchRate">
           <q-tooltip>Refresh Exchange Rate</q-tooltip>
           <q-icon size="md" class="custom-icon" :name="'o_refresh'" />

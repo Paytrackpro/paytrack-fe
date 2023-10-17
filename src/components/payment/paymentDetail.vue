@@ -5,40 +5,19 @@
       <div class="row justify-between">
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
-          <payment-status
-            v-if="!processing && payment.status"
-            :paymentModel="payment"
-            class="q-ml-md"
-            :isShowIcon="true"
-          />
+          <payment-status v-if="payment.status" :paymentModel="payment" class="q-ml-md" :isShowIcon="true" />
         </div>
         <div class="row justify-end">
-          <q-btn
-            v-if="processable && processing"
-            label="mark paid"
-            type="submit"
-            color="secondary"
-            :disable="fetchingRate || paying || isUnavailableMarkPaid"
-            class="q-mr-sm btn btn-animated"
-          />
           <q-btn
             v-if="processable && !isRejectedStatus"
             label="Pay"
             type="button"
             color="primary"
-            @click="processPayment"
+            @click="payDialog = true"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
-            v-if="processable && !processing && !isDraftStatus"
-            label="Process Payment"
-            type="button"
-            color="primary"
-            @click="processPayment"
-            class="q-mr-sm btn btn-animated"
-          />
-          <q-btn
-            v-if="editable && !processing"
+            v-if="editable"
             label="Edit"
             type="button"
             color="primary"
@@ -74,15 +53,6 @@
             v-if="approvalable"
             @click="handlerApprovalAction()"
             class="q-mr-sm btn btn-animated"
-          />
-          <q-btn
-            label="Cancel"
-            type="button"
-            color="white"
-            text-color="black"
-            @click="cancel"
-            class="btn btn-animated"
-            v-if="processable && processing"
           />
         </div>
       </div>
@@ -161,23 +131,9 @@
             </template>
           </q-field>
         </div>
-        <div
-          v-if="
-            payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId && processing
-          "
-          class="col-12 col-lg-4 q-py-sm q-my-sm field-shadow"
-        >
-          <payment-setting-method
-            :defautMethod="payment.paymentMethod"
-            :readonly="!processing"
-            @change="methodChange"
-            :modelValue="payment.paymentSettings"
-            label="Accepted payment coins"
-          />
-        </div>
         <div v-if="isShowExchangeRate" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
           <PaymentRateInput
-            :readonly="!processing"
+            :readonly="true"
             ref="rateInput"
             v-model="payment"
             v-model:loading="fetchingRate"
@@ -192,29 +148,8 @@
             <q-field stack-label borderless>
               <template v-slot:control>
                 <span class="text-weight-bolder text-blue-8">{{ payment.expectedAmount }}</span>
-                <q-btn v-if="processing" round dense flat class="q-ml-sm" @click="copy(payment.expectedAmount || '')">
-                  <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
-                  <q-tooltip>Copy Amount (BTC)</q-tooltip>
-                </q-btn>
               </template>
             </q-field>
-          </div>
-        </div>
-        <div class="col-12 q-py-sm q-my-sm" v-if="!isApprover && processing">
-          <p class="q-mb-xs">
-            <b class="text-weight-medium">Enter transaction ID of sent payment</b>
-          </p>
-          <div class="row">
-            <q-input
-              class="col-12 col-sm-6 col-md-4"
-              v-model="txId"
-              @blur="saveTxIdAuto"
-              ref="txId"
-              outlined
-              dense
-              lazy-rules
-              stack-label
-            />
           </div>
         </div>
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
@@ -249,6 +184,62 @@
         :token="token"
       />
     </div>
+    <q-dialog v-model="payDialog">
+      <q-card style="width: 550px; max-width: 80vw">
+        <q-card-section class="row">
+          <div class="text-h6">Pay For Payment Request</div>
+        </q-card-section>
+        <q-card-section class="q-pt-xs q-px-lg row">
+          <div
+            v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
+            class="col-12 q-py-md field-shadow"
+          >
+            <payment-setting-method
+              :defautMethod="payment.paymentMethod"
+              @change="methodChange"
+              :modelValue="payment.paymentSettings"
+              label="Accepted payment coins"
+            />
+          </div>
+          <div class="col-6 q-py-md field-shadow">
+            <PaymentRateInput
+              ref="rateInput"
+              v-model="payment"
+              v-model:loading="fetchingRate"
+              @update:modelValue="updateLocal"
+            />
+          </div>
+          <div class="col-6 q-py-md field-shadow">
+            <div>
+              <p class="q-mb-xs">
+                <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }}) </b>
+              </p>
+              <q-field stack-label borderless>
+                <template v-slot:control>
+                  <span class="text-weight-bolder text-blue-8">{{ payment.expectedAmount }}</span>
+                  <q-btn round dense flat class="q-ml-sm" @click="copy(payment.expectedAmount || '')">
+                    <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
+                    <q-tooltip>Copy Amount (BTC)</q-tooltip>
+                  </q-btn>
+                </template>
+              </q-field>
+            </div>
+          </div>
+          <div class="col-12 q-py-md">
+            <p class="q-mb-xs">
+              <b class="text-weight-medium">Enter transaction ID of sent payment</b>
+            </p>
+            <div class="row">
+              <q-input class="col-12" v-model="txId" ref="txId" outlined dense lazy-rules stack-label />
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="center" class="q-pb-md">
+          <q-btn color="secondary" label="Mark paid" @click="markAsPaid" :disable="fetchingRate || txId == ''" />
+          <q-btn label="Cancel" type="button" color="white" text-color="black" @click="payDialog = false" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-form>
 </template>
 
@@ -293,6 +284,7 @@ export default {
       paymentRejectDialog: false,
       paymentStatus: '',
       confirm: false,
+      payDialog: false,
     }
   },
   props: {
@@ -357,6 +349,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
+          this.payDialog = false
         })
         .catch((err) => {
           this.paying = false
@@ -604,7 +597,7 @@ export default {
       return this.txId == ''
     },
     isShowExchangeRate() {
-      return !this.isApprover && (this.payment.status == 'paid' || this.processing)
+      return !this.isApprover && this.payment.status == 'paid'
     },
     displayApprovers() {
       return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
