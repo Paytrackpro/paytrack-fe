@@ -22,20 +22,19 @@
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
-            v-if="processable && !processing && !isDraftStatus"
-            label="Process Payment"
+            v-if="processable && !isRejectedStatus"
+            label="Pay"
             type="button"
             color="primary"
             @click="processPayment"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
-            v-if="rejectable && !processing"
-            label="reject"
+            v-if="processable && !processing && !isDraftStatus"
+            label="Process Payment"
             type="button"
-            color="accent"
-            :disable="paying"
-            @click="toggleRejectDialog(true)"
+            color="primary"
+            @click="processPayment"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -116,7 +115,7 @@
             </template>
           </q-field>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="processing">
+        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="isReceiver && !isPaidStatus">
           <p class="q-mb-xs">
             <b class="text-weight-medium">Status</b>
           </p>
@@ -510,7 +509,11 @@ export default {
         if (newStatus == this.payment.status) {
           return
         }
-        this.update()
+        if (newStatus == 'rejected') {
+          this.toggleRejectDialog(true)
+        } else {
+          this.update()
+        }
       },
     },
   },
@@ -520,32 +523,19 @@ export default {
     }),
     statusOption() {
       let status = []
-      if (this.payment.approvers && this.payment.approvers.length > 0) {
-        if (this.isPaymentApproved()) {
-          status.push({
-            label: 'Approved',
-            value: 'sent',
-          })
-          status.push({
-            label: 'Ready for Payment',
-            value: 'confirmed',
-          })
-        } else {
-          status.push({
-            label: 'Waiting for Approval',
-            value: 'sent',
-          })
-        }
-      } else {
-        status.push({
-          label: 'Received',
-          value: 'sent',
-        })
-        status.push({
-          label: 'Ready for Payment',
-          value: 'confirmed',
-        })
-      }
+      //17/10 - Status changes are not affected by the approver. Always display 3 editing statuses: Received, Rejected, Payable
+      status.push({
+        label: 'Received',
+        value: 'sent',
+      })
+      status.push({
+        label: 'Payable',
+        value: 'confirmed',
+      })
+      status.push({
+        label: 'Rejected',
+        value: 'rejected',
+      })
       return status
     },
     coinsAccepted() {
@@ -580,7 +570,7 @@ export default {
       }
     },
     rejectable() {
-      return this.user.id == this.payment.receiverId && ['sent', 'confirmed'].includes(this.payment.status)
+      return this.user.id == this.payment.receiverId && ['sent'].includes(this.payment.status)
     },
     isShowInvoice() {
       if (!this.payment.details) {
@@ -600,6 +590,9 @@ export default {
     },
     isPaidStatus() {
       return this.payment.status == 'paid'
+    },
+    isRejectedStatus() {
+      return this.payment.status == 'rejected'
     },
     isDraftStatus() {
       return this.payment.status == 'draft'
