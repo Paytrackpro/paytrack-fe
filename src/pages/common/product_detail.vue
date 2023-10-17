@@ -73,7 +73,7 @@
           <span class="text-accent q-ml-sm" v-if="isMyProduct()">Cannot order your own products</span>
         </div>
         <p class="text-weight-medium text-size-20 q-mt-lg">Description</p>
-        <p v-html="product.description"></p>
+        <p v-html="product.description" class="q-pa-md"></p>
       </div>
     </div>
     <q-separator class="q-mt-lg" />

@@ -2,10 +2,10 @@
   <div class="q-pa-lg">
     <q-card-section class="card-header q-pa-sm">
       <div class="row">
-        <div class="text-h6 title-case q-pt-sm">Cart Page</div>
+        <div class="text-h6 title-case q-pt-sm q-mb-sm">Cart Page</div>
       </div>
     </q-card-section>
-    <div class="row q-col-gutter-sm">
+    <div class="row q-col-gutter-sm cart-products-area">
       <div class="col-12 q-pa-sm" v-for="(ownerId, index) in ownerIds" :key="index">
         <div class="row shadow-primary">
           <div class="col-12 cart-owner-header q-pa-sm">
@@ -18,12 +18,12 @@
               <q-checkbox v-model="checkbox" size="sm" />
               <q-img
                 :src="getAvatarSrc(cart.avatarBase64)"
-                style="height: 100px; max-width: 100px"
-                class="q-ml-md col-1"
+                style="width: 100%; max-width: 70px"
+                class="q-ml-md col-4 col-lg-1 col-sm-1 col-md-3 col-xs-6"
               ></q-img>
-              <p class="q-ml-lg col-4">{{ cart.productName }}</p>
-              <p class="q-ml-lg col-1">{{ priceDisplay(cart.price, cart.currency) }}</p>
-              <div class="col-2">
+              <p class="q-ml-lg col-8 col-lg-4 col-sm-3 col-md-4 product-title">{{ cart.productName }}</p>
+              <p class="q-ml-lg col-3 col-sm-1 col-md-1">{{ priceDisplay(cart.price, cart.currency) }}</p>
+              <div class="col-2 col-sm-2 col-md-2">
                 <q-input
                   color="primary"
                   class="q-mr-sm"
@@ -34,7 +34,7 @@
                   type="number"
                   style="max-width: 150px"
                   dense
-                  v-on:blur="updateCart(cart)"
+                  v-on:blur="updateCart(cart, index, cartIndex)"
                   @focus="saveBeforeQuantity(cart)"
                   :rules="[
                     (val) =>
@@ -42,8 +42,17 @@
                   ]"
                 />
               </div>
-              <p class="q-ml-lg col-2 text-accent">{{ priceDisplay(cart.price * cart.quantity, cart.currency) }}</p>
-              <q-btn class="col-1" dense flat color="accent" icon="delete" @click="setDeleteCart(cart)">
+              <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
+                {{ priceDisplay(cart.price * cart.quantity, cart.currency) }}
+              </p>
+              <q-btn
+                class="col-1 col-md-1 col-sm-1"
+                dense
+                flat
+                color="accent"
+                icon="delete"
+                @click="setDeleteCart(cart)"
+              >
                 <q-tooltip> Delete Product </q-tooltip>
               </q-btn>
             </div>
@@ -51,6 +60,7 @@
         </div>
       </div>
     </div>
+    <!-- <div class="row shadow-primary summary-area">sdgsdg</div> -->
   </div>
   <q-dialog v-model="confirm" persistent>
     <q-card>
@@ -59,7 +69,15 @@
         <span class="q-ml-sm">Are you sure to delete this product in your cart?</span>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteCart()" />
+        <q-btn
+          flat
+          unelevated
+          rounded
+          label="Delete"
+          color="primary"
+          v-close-popup
+          @click="deleteCart(deleteProductId)"
+        />
         <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
       </q-card-actions>
     </q-card>
@@ -75,10 +93,11 @@ export default {
     return {
       ownerIds: [],
       cartData: {},
-      checkbox: false,
       beforeQuantity: 0,
       confirm: false,
+      checkbox: false,
       deleteProductId: 0,
+      selectedProductIds: [],
     }
   },
   created() {
@@ -130,8 +149,12 @@ export default {
     getAvatarSrc(imageBase64) {
       return 'data:image/png;base64,' + imageBase64
     },
-    updateCart(cart) {
+    updateCart(cart, ownerIndex, cartIndex) {
       if (cart.quantity > cart.stock || this.beforeQuantity == cart.quantity) {
+        return
+      }
+      if (cart.quantity <= 0) {
+        this.deleteCart(cart.productId)
         return
       }
       this.$api
@@ -154,10 +177,10 @@ export default {
     saveBeforeQuantity(cart) {
       this.beforeQuantity = cart.quantity
     },
-    deleteCart() {
+    deleteCart(delProductId) {
       this.$api
         .delete(`/cart/delete`, {
-          params: { productId: this.deleteProductId },
+          params: { productId: delProductId },
         })
         .then(() => {
           this.$q.notify({

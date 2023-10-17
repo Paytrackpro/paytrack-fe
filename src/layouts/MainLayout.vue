@@ -78,20 +78,28 @@
               v-if="isMyShop(menuItem.label)"
             >
               <q-list class="q-pl-lg">
-                <q-item to="/shop/products/list" active-class="q-item-no-link-highlighting">
+                <q-item
+                  to="/shop/products/list"
+                  active-class="bg-cyan-2 sidebar-active-item"
+                  class="GNL__drawer-item sidebar-item"
+                >
                   <q-item-section avatar>
                     <q-icon name="o_inventory_2" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>My Products</q-item-label>
+                    <q-item-label class="sidebar-text">My Products</q-item-label>
                   </q-item-section>
                 </q-item>
-                <q-item to="/shop/orders/list" active-class="q-item-no-link-highlighting">
+                <q-item
+                  to="/shop/orders/list"
+                  active-class="bg-cyan-2 sidebar-active-item"
+                  clickableclass="GNL__drawer-item sidebar-item"
+                >
                   <q-item-section avatar>
                     <q-icon name="o_list_alt" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Orders Management</q-item-label>
+                    <q-item-label class="sidebar-text">Orders Management</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -176,7 +184,7 @@ export default {
           let approvalsIndex = this.getApprovalPendingIndex()
           this.menuList.splice(approvalsIndex, 1)
           if (this.$route.name.indexOf('approvals') > -1) {
-            this.$router.push({ path: `get-paid` })
+            this.$router.push({ path: `home` })
           }
         }
       })
