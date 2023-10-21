@@ -157,7 +157,7 @@
           <p class="q-mb-xs">
             <b class="text-weight-medium">Transaction id</b>
           </p>
-          <p>${{ payment.txId }}</p>
+          <p>{{ payment.txId }}</p>
         </div>
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Paid At'" isTime :value="payment.paidAt" />
@@ -299,6 +299,7 @@ export default {
     editing: Boolean,
     processing: Boolean,
     approvalCount: Number,
+    unpaidCount: Number,
   },
   methods: {
     ...mapActions({
@@ -354,6 +355,7 @@ export default {
             icon: 'check',
           })
           this.payDialog = false
+          this.$emit('updateUnpaidCount', this.unpaidCount - 1)
         })
         .catch((err) => {
           this.paying = false

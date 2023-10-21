@@ -12,7 +12,9 @@
       :payment-type="paymentType"
       :token="token"
       :user="user"
+      :unpaidCount="unpaidCount"
       @update:modelValue="saved"
+      @updateUnpaidCount="updateUnpaidCount"
     />
     <payment-form
       v-if="editing"
@@ -41,6 +43,7 @@ export default {
   components: { PaymentForm, PaymentDetail },
   props: {
     approvalCount: Number,
+    unpaidCount: Number,
   },
   data() {
     return {
@@ -53,6 +56,7 @@ export default {
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
       processing: false,
+      unpaidTmpCount: 0,
     }
   },
   created() {
@@ -101,6 +105,9 @@ export default {
     saved(data) {
       this.payment = data
       this.editing = false
+    },
+    updateUnpaidCount(count) {
+      this.$emit('updateUnpaidCount', count)
     },
   },
   computed: {

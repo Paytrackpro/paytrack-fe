@@ -43,6 +43,20 @@
       <q-scroll-area class="fit">
         <q-list padding class="text-grey-2">
           <template v-for="(menuItem, index) in menuList">
+            <div
+              class="row center-row q-my-sm separator-full-display"
+              :key="'separator_' + index"
+              v-if="menuItem.label === 'User Management' && isAdmin"
+            >
+              <q-separator class="width-40" />
+              <span class="width-20 text-weight-medium q-pl-sm">Admin</span>
+              <q-separator class="width-40" />
+            </div>
+            <q-separator
+              class="separator-mini-display"
+              :key="'sepa_no_text_' + index"
+              v-if="menuItem.label === 'User Management' && isAdmin"
+            />
             <q-item
               :key="index"
               clickable
@@ -56,14 +70,23 @@
                 <q-icon size="md" class="sidebar-icon" :name="'o_' + menuItem.icon" />
               </q-item-section>
               <q-item-section>
-                <span class="sidebar-text"
+                <span class="row sidebar-text justify-between"
                   >{{ menuItem.label }}
                   <q-badge
                     :label="approvalCount"
-                    style="margin-left: 5px; padding-left: 8px; font-size: 12px; width: 22px; height: 20px"
+                    style="font-size: 12px; height: 20px"
                     v-if="menuItem.label === 'Pending Approvals'"
-                  ></q-badge
-                ></span>
+                  >
+                    <q-tooltip>Number of invoices that need to be approved</q-tooltip>
+                  </q-badge>
+                  <q-badge
+                    :label="unpaidCount"
+                    style="font-size: 12px; height: 20px"
+                    v-if="menuItem.label === 'Pay' && unpaidCount > 0"
+                  >
+                    <q-tooltip>Number of unpaid invoices</q-tooltip>
+                  </q-badge></span
+                >
               </q-item-section>
             </q-item>
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
@@ -74,7 +97,7 @@
 
     <q-page-container>
       <q-page>
-        <router-view :approvalCount="approvalCount" />
+        <router-view :approvalCount="approvalCount" :unpaidCount="unpaidCount" @updateUnpaidCount="updateUnpaidCount" />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -97,22 +120,16 @@ export default {
           to: '/approvals',
         },
         {
-          icon: 'sticky_note_2',
-          label: 'Get Paid',
-          separator: false,
-          to: '/get-paid',
-        },
-        {
           icon: 'payment',
           label: 'Pay',
           separator: false,
           to: '/pay',
         },
         {
-          icon: 'supervisor_account',
-          label: 'User Management',
-          to: '/users',
-          role: role.ADMIN,
+          icon: 'sticky_note_2',
+          label: 'Get Paid',
+          separator: false,
+          to: '/get-paid',
         },
         {
           icon: 'settings',
@@ -120,19 +137,29 @@ export default {
           separator: false,
           to: '/settings',
         },
+        {
+          icon: 'supervisor_account',
+          label: 'User Management',
+          separator: false,
+          role: role.ADMIN,
+          to: '/users',
+        },
       ],
       approvalCount: 0,
+      unpaidCount: 0,
+      displayAdminSeparator: true,
     }
   },
   async created() {
     this.$api
-      .get(`/payment/approval-count`)
+      .get(`/payment/initialization-count`)
       .then((data) => {
-        this.approvalCount = data.count
+        this.approvalCount = data.approvalCount
+        this.unpaidCount = data.unpaidCount
         if (this.approvalCount === 0) {
           this.menuList.splice(0, 1)
           if (this.$route.name.indexOf('approvals') > -1) {
-            this.$router.push({ path: `get-paid` })
+            this.$router.push({ path: `pay` })
           }
         }
       })
@@ -152,6 +179,7 @@ export default {
       miniState,
       toogleMiniState() {
         miniState.value = !miniState.value
+        this.displayAdminSeparator = !this.displayAdminSeparator
       },
     }
   },
@@ -181,6 +209,9 @@ export default {
         /^\s*$/.test(str) ||
         str.replace(/\s/g, '') === ''
       )
+    },
+    updateUnpaidCount(count) {
+      this.unpaidCount = count
     },
   },
   watch: {
