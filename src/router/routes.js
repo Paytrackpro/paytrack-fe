@@ -11,7 +11,31 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/approvals',
+        redirect: '/home',
+      },
+      {
+        path: 'home/',
+        name: 'Homepage',
+        component: () => import('pages/common/homepage.vue'),
+        meta: {
+          title: 'Homepage Products',
+        },
+      },
+      {
+        path: 'cart/',
+        name: 'cart',
+        component: () => import('pages/common/cart.vue'),
+        meta: {
+          title: 'Cart Page',
+        },
+      },
+      {
+        path: 'product-detail/:id(\\d+)',
+        name: 'product.detail',
+        component: () => import('pages/common/product_detail.vue'),
+        meta: {
+          title: 'Homepage Detail',
+        },
       },
       {
         path: 'approvals/',
@@ -116,6 +140,60 @@ const routes = [
             component: () => import('pages/payments/detailPage.vue'),
             meta: {
               title: 'Get Paid/ detail',
+            },
+          },
+        ],
+      },
+      {
+        path: 'shop/',
+        name: 'shop',
+        component: () => import('pages/payments/layout.vue'),
+        meta: {
+          title: 'My Shop',
+        },
+        children: [
+          {
+            path: 'products',
+            name: 'products',
+            meta: {
+              title: 'My Products',
+            },
+            children: [
+              {
+                path: 'list',
+                name: 'products.list',
+                component: () => import('pages/shop/products/list.vue'),
+                meta: {
+                  title: 'Product List',
+                },
+              },
+              {
+                path: 'create',
+                name: 'products.create',
+                component: () => import('pages/shop/products/create.vue'),
+                meta: {
+                  title: 'Create Product',
+                },
+              },
+              {
+                path: 'update/:id(\\d+)',
+                name: 'products.update',
+                component: () => import('pages/shop/products/update.vue'),
+                meta: {
+                  title: 'Update Product',
+                },
+              },
+            ],
+          },
+          {
+            path: 'orders',
+            name: 'shop.orders.list',
+            component: () => import('pages/shop/orders/list.vue'),
+            meta: {
+              title: 'My Orders',
+            },
+            props: {
+              paymentType: PAYMENT_OBJECT_REQUEST,
             },
           },
         ],

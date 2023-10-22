@@ -12,6 +12,10 @@
           class="q-mr-sm"
         />
         <q-toolbar-title> Paytrack.pro </q-toolbar-title>
+        <q-btn dense color="cyan-10" round icon="shopping_cart" class="q-mr-sm" @click="toCartPage()">
+          <q-badge color="red" floating>{{ cartCount }}</q-badge>
+          <q-tooltip>Go to your cart</q-tooltip>
+        </q-btn>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
             <q-item-section avatar>
@@ -63,7 +67,7 @@
               :to="menuItem.to"
               active-class="bg-cyan-2 sidebar-active-item"
               class="GNL__drawer-item sidebar-item"
-              v-if="shouldDisplayRoute(menuItem)"
+              v-if="shouldDisplayRoute(menuItem) && !isMyShop(menuItem.label)"
               v-ripple
             >
               <q-item-section avatar>
@@ -89,6 +93,40 @@
                 >
               </q-item-section>
             </q-item>
+            <q-expansion-item
+              :key="index"
+              class="my-shop-expansion"
+              icon="o_shopping_bag"
+              label="My Shop"
+              v-if="isMyShop(menuItem.label)"
+            >
+              <q-list class="q-pl-lg">
+                <q-item
+                  to="/shop/products/list"
+                  active-class="bg-cyan-2 sidebar-active-item"
+                  class="GNL__drawer-item sidebar-item"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="o_inventory_2" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="sidebar-text">My Products</q-item-label>
+                  </q-item-section>
+                </q-item>
+                <q-item
+                  to="/shop/orders/list"
+                  active-class="bg-cyan-2 sidebar-active-item"
+                  clickableclass="GNL__drawer-item sidebar-item"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="o_list_alt" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label class="sidebar-text">Orders Management</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
             <q-separator :key="'sep' + index" v-if="menuItem.separator" />
           </template>
         </q-list>
@@ -97,7 +135,13 @@
 
     <q-page-container>
       <q-page>
-        <router-view :approvalCount="approvalCount" :unpaidCount="unpaidCount" @updateUnpaidCount="updateUnpaidCount" />
+        <router-view
+          :approvalCount="approvalCount"
+          :unpaidCount="unpaidCount"
+          @updateUnpaidCount="updateUnpaidCount"
+          :cartCount="cartCount"
+          @updateCartCount="updateCartCount"
+        />
       </q-page>
     </q-page-container>
   </q-layout>
@@ -113,6 +157,12 @@ export default {
     return {
       drawer: false,
       menuList: [
+        {
+          icon: 'home',
+          label: 'Homepage',
+          separator: false,
+          to: '/home',
+        },
         {
           icon: 'schedule',
           label: 'Pending Approvals',
@@ -132,6 +182,12 @@ export default {
           to: '/get-paid',
         },
         {
+          icon: 'payment',
+          label: 'My Shop',
+          separator: false,
+          to: '/my-shop',
+        },
+        {
           icon: 'settings',
           label: 'Settings',
           separator: false,
@@ -148,6 +204,7 @@ export default {
       approvalCount: 0,
       unpaidCount: 0,
       displayAdminSeparator: true,
+      cartCount: 0,
     }
   },
   async created() {
@@ -157,15 +214,17 @@ export default {
         this.approvalCount = data.approvalCount
         this.unpaidCount = data.unpaidCount
         if (this.approvalCount === 0) {
-          this.menuList.splice(0, 1)
+          let approvalsIndex = this.getApprovalPendingIndex()
+          this.menuList.splice(approvalsIndex, 1)
           if (this.$route.name.indexOf('approvals') > -1) {
-            this.$router.push({ path: `pay` })
+            this.$router.push({ path: `home` })
           }
         }
       })
       .catch(() => {
         return
       })
+    this.getCartCount()
   },
   setup() {
     const $q = useQuasar()
@@ -212,6 +271,35 @@ export default {
     },
     updateUnpaidCount(count) {
       this.unpaidCount = count
+    },
+    updateCartCount(count) {
+      this.cartCount = count
+    },
+    isMyShop(label) {
+      return label == 'My Shop'
+    },
+    getApprovalPendingIndex() {
+      let result = 1
+      this.menuList.forEach((item, index) => {
+        if (item.to.includes('/approvals')) {
+          result = index
+          return
+        }
+      })
+      return result
+    },
+    getCartCount() {
+      this.$api
+        .get(`/cart/count`)
+        .then((data) => {
+          this.cartCount = data
+        })
+        .catch(() => {
+          return
+        })
+    },
+    toCartPage() {
+      this.$router.push({ name: 'cart', params: {} })
     },
   },
   watch: {
