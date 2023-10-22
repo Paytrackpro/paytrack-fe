@@ -55,6 +55,7 @@
             </div>
           </div>
           <div class="row">
+            <q-checkbox class="col-12" v-model="setAsAdmin" label="Administrator role" />
             <q-checkbox class="col-12 col-md-4" v-model="resetTOTP" label="Reset TOTP" />
             <q-checkbox class="col-12 col-md-4" v-model="lockUser" label="Lock User (Disable Login)" />
           </div>
@@ -80,6 +81,7 @@ export default {
       email: '',
       displayName: '',
       isPwd: true,
+      setAsAdmin: false,
       resetTOTP: false,
       lockUser: false,
       confirm: false,
@@ -97,6 +99,7 @@ export default {
         this.userName = data.userName
         this.displayName = data.displayName
         this.lockUser = data.locked
+        this.setAsAdmin = data.role == 1
       })
     },
     updateUserInfo() {
@@ -109,6 +112,7 @@ export default {
           displayName: this.displayName,
           otp: this.resetTOTP,
           locked: this.lockUser,
+          role: this.setAsAdmin ? 1 : 0,
         })
         .then(() => {
           this.$q.notify({
