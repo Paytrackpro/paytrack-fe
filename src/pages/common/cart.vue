@@ -1,21 +1,33 @@
 <template>
   <div class="q-pa-lg">
     <q-card-section class="card-header q-pa-sm">
-      <div class="row">
+      <div class="row justify-between">
         <div class="text-h6 title-case q-pt-sm q-mb-sm">Cart Page</div>
+        <div class="row align-center">
+          <p class="text-weight-medium text-primary">Total:</p>
+          <p class="text-weight-medium text-primary" v-for="(currency, i) in currencyChoose" :key="i">
+            <span class="q-ml-sm" v-if="i > 0">|</span>
+            &nbsp;{{ totalPriceDisplay(currency) }}
+          </p>
+          <q-btn label="Checkout" type="button" color="primary" class="q-mx-sm btn btn-animated" />
+        </div>
       </div>
     </q-card-section>
     <div class="row q-col-gutter-sm cart-products-area">
       <div class="col-12 q-pa-sm" v-for="(ownerId, index) in ownerIds" :key="index">
         <div class="row shadow-primary">
           <div class="col-12 cart-owner-header q-pa-sm">
-            <q-checkbox v-model="checkbox" size="sm" />
+            <q-checkbox v-model="ownerCheckboxs[index]" size="sm" @click="ownerCheckAll(ownerId, index)" />
             <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
             <span class="q-ml-xs text-size-15 text-grey-3">{{ getOwnerName(cartData[ownerId]) }}</span>
           </div>
           <div class="col-12" v-for="(cart, cartIndex) in cartData[ownerId]" :key="cartIndex">
-            <div class="row q-my-sm q-py-md cart-row">
-              <q-checkbox v-model="checkbox" size="sm" />
+            <div class="row q-my-sm q-pa-sm cart-row">
+              <q-checkbox
+                v-model="productCheckbox[ownerId][cartIndex]"
+                size="sm"
+                @click="oneProductChecked(ownerId, index)"
+              />
               <q-img
                 :src="getAvatarSrc(cart.avatarBase64)"
                 style="width: 100%; max-width: 70px"
@@ -92,12 +104,15 @@ export default {
   data() {
     return {
       ownerIds: [],
+      ownerCheckboxs: [],
       cartData: {},
+      productCheckbox: {},
       beforeQuantity: 0,
       confirm: false,
       checkbox: false,
       deleteProductId: 0,
       selectedProductIds: [],
+      currencyChoose: [],
     }
   },
   created() {
@@ -112,6 +127,17 @@ export default {
           this.loading = false
           this.ownerIds = data.ownerIdArr
           this.cartData = data.cartData
+          this.ownerIds.forEach((v, i) => {
+            this.ownerCheckboxs.push(false)
+            let products = []
+            this.cartData[v].forEach((cart, j) => {
+              if (!this.currencyChoose.includes(cart.currency)) {
+                this.currencyChoose.push(cart.currency)
+              }
+              products.push(false)
+            })
+            this.productCheckbox[v] = products
+          })
         })
         .catch((err) => {
           this.loading = false
@@ -120,6 +146,20 @@ export default {
             type: 'negative',
           })
         })
+    },
+    ownerCheckAll(ownerId, index) {
+      this.productCheckbox[ownerId].forEach((v, i) => {
+        this.productCheckbox[ownerId][i] = this.ownerCheckboxs[index]
+      })
+    },
+    oneProductChecked(ownerId, index) {
+      let notAll = false
+      this.productCheckbox[ownerId].forEach((v, i) => {
+        if (!v) {
+          notAll = true
+        }
+      })
+      this.ownerCheckboxs[index] = !notAll
     },
     getBase64Src(base64) {
       return 'data:image/png;base64,' + base64
@@ -198,11 +238,33 @@ export default {
       this.deleteProductId = cart.productId
       this.confirm = true
     },
+    totalPriceDisplay(currency) {
+      let sum = 0
+      this.ownerIds.forEach((v, i) => {
+        this.cartData[v].forEach((cart, cartIndex) => {
+          if (this.productCheckbox[v][cartIndex] && cart.currency == currency) {
+            sum += cart.price * cart.quantity
+          }
+        })
+      })
+      return this.priceDisplay(sum, currency)
+    },
   },
   computed: {
     ...mapGetters({
       user: 'user/getUser',
     }),
+    totalPay() {
+      let sum = 0
+      this.ownerIds.forEach((v, i) => {
+        this.cartData[v].forEach((cart, cartIndex) => {
+          if (this.productCheckbox[v][cartIndex]) {
+            sum += cart.price * cart.quantity
+          }
+        })
+      })
+      return sum
+    },
   },
 }
 </script>
