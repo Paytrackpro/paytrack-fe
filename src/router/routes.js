@@ -187,14 +187,28 @@ const routes = [
           },
           {
             path: 'orders',
-            name: 'shop.orders.list',
-            component: () => import('pages/shop/orders/list.vue'),
+            name: 'orders',
             meta: {
-              title: 'My Orders',
+              title: 'Order Management',
             },
-            props: {
-              paymentType: PAYMENT_OBJECT_REQUEST,
-            },
+            children: [
+              {
+                path: 'list',
+                name: 'orders.list',
+                component: () => import('pages/shop/orders/list.vue'),
+                meta: {
+                  title: 'Order List',
+                },
+              },
+              {
+                path: 'detail/:id(\\d+)',
+                name: 'orders.detail',
+                component: () => import('pages/shop/orders/detail.vue'),
+                meta: {
+                  title: 'Order Detail',
+                },
+              },
+            ],
           },
         ],
       },

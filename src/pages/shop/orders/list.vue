@@ -1,174 +1,154 @@
 <template>
   <div class="q-pa-lg">
-    <q-table
-      title="User List"
-      :rows="rows"
-      :columns="columns"
-      row-key="name"
-      flat
-      separator="none"
-      v-model:pagination="pagination"
-      :hide-pagination="pagination.rowsNumber < 10"
-      :loading="loading"
-      :filter="KeySearch"
-      @request="onRequest"
-      @row-click="(_, row) => goToDetail(row.id)"
-    >
-      <template v-slot:pagination>
-        <custom-pagination :pagination="pagination" :color="'primary'" />
-      </template>
-      <template v-slot:body-cell-createdAt="props">
-        <q-td :props="props">
-          <m-time :time="props.row.createdAt"></m-time>
-        </q-td>
-      </template>
-      <template v-slot:body-cell-lastSeen="props">
-        <q-td :props="props">
-          <m-time :time="props.row.lastSeen"></m-time>
-        </q-td>
-      </template>
-      <template v-slot:top-right>
-        <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-      <template v-slot:body-cell-online="props">
-        <q-td :props="props">
-          <q-badge rounded :color="props.value ? 'green' : 'grey'" />
-        </q-td>
-      </template>
-    </q-table>
+    <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
+      <q-tooltip> Back to Homepage </q-tooltip>
+    </q-btn>
+    <q-card-section class="card-header q-pa-sm">
+      <div class="row justify-between">
+        <div class="text-h6 title-case q-pt-sm q-mb-sm">Order Management</div>
+      </div>
+    </q-card-section>
+    <div class="row q-col-gutter-sm cart-products-area">
+      <div v-for="(order, index) in orderData" :key="index" class="owner-card">
+        <div class="col-12 q-pa-sm shadow-primary">
+          <div class="row justify-between">
+            <div class="q-pa-sm">
+              <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
+              <span class="q-ml-xs text-size-15 text-grey-3">{{ order.userName }}</span>
+            </div>
+            <div class="q-pa-sm row">
+              <p class="text-size-15 text-weight-medium">Total Payment:</p>
+              <p
+                class="text-weight-medium text-primary"
+                v-for="(orderCurrency, currencyIndex) in orderCurrencies[order.orderId]"
+                :key="currencyIndex"
+              >
+                <span class="q-ml-sm" v-if="currencyIndex > 0">|</span>
+                &nbsp;{{ orderAmount(orderCurrency, order.productPaymentsDisplay) }}
+              </p>
+            </div>
+          </div>
+          <q-separator />
+          <div class="col-12">
+            <div v-for="(product, proIndex) in order.productPaymentsDisplay" :key="proIndex">
+              <div class="row q-my-sm q-pa-sm cart-row">
+                <q-img
+                  :src="getAvatarSrc(product.avatarBase64)"
+                  style="width: 100%; max-width: 70px"
+                  class="q-ml-md col-4 col-lg-1 col-sm-1 col-md-3 col-xs-6"
+                ></q-img>
+                <p class="q-ml-lg col-8 col-lg-4 col-sm-3 col-md-4 product-title">{{ product.productName }}</p>
+                <p class="q-ml-lg col-3 col-sm-1 col-md-1">{{ priceDisplay(product.price, product.currency) }}</p>
+                <p class="col-2 col-sm-1 col-md-1">{{ product.quantity }}</p>
+                <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
+                  {{ priceDisplay(product.price * product.quantity, product.currency) }}
+                </p>
+                <div class="col-2 col-sm-1 col-md-1" v-if="proIndex == 0">
+                  <q-btn
+                    label="Detail"
+                    type="button"
+                    color="primary"
+                    class="btn btn-animated detail-btn"
+                    @click="goDetail(order.orderId)"
+                  />
+                </div>
+                <div class="col-2 col-sm-1 col-md-1" v-if="proIndex != 0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
-import { PAYMENT_TYPES } from '../../../consts/paymentType'
-import { date } from 'quasar'
-import customPagination from 'src/components/common/custom_pagination.vue'
-import MTime from 'components/common/mTime'
-
+import { CURRENCY } from 'src/consts/common'
+import { mapGetters } from 'vuex'
 export default {
-  name: 'adminUserList',
-  props: {
-    type: String,
-  },
-  components: {
-    customPagination,
-    MTime,
-  },
+  name: 'cartPage',
   data() {
     return {
-      loading: false,
-      KeySearch: '',
-      pagination: { ...defaultPaging },
-      columns: [
-        {
-          name: 'userName',
-          required: true,
-          label: 'User Name',
-          align: 'center',
-          field: (row) => row.userName,
-          format: (val) => `${val}`,
-          sortable: true,
-        },
-        {
-          name: 'displayName',
-          align: 'center',
-          label: 'Dislay Name',
-          field: 'displayName',
-          sortable: true,
-        },
-        {
-          name: 'email',
-          align: 'center',
-          label: 'Email',
-          field: 'email',
-          sortable: true,
-        },
-        {
-          name: 'paymentType',
-          align: 'center',
-          label: 'Payment Type',
-          field: 'paymentType',
-          sortable: false,
-          format: (val) => {
-            if (val == PAYMENT_TYPES.BTC) return 'BTC'
-            if (val == PAYMENT_TYPES.LTC) return 'LTC'
-            if (val == PAYMENT_TYPES.DCR) return 'DCR'
-          },
-        },
-        {
-          name: 'createdAt',
-          align: 'center',
-          label: 'Created At',
-          field: 'createdAt',
-          sortable: true,
-          format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
-        },
-        {
-          name: 'lastSeen',
-          align: 'center',
-          label: 'Last Seen',
-          field: 'lastSeen',
-          sortable: true,
-          format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
-        },
-      ],
-      rows: [],
+      orderData: [],
+      orderCurrencies: {},
     }
   },
-  watch: {
-    $route: {
-      immediate: true,
-      handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
-        filter.KeySearch = this.KeySearch
-        this.getUserList({
-          ...filter,
-          requestType: this.type,
-        })
-      },
-    },
+  created() {
+    this.fetchData()
   },
   methods: {
-    async getUserList(f) {
+    fetchData() {
       this.loading = true
       this.$api
-        .get('/admin/user/list', {
-          params: f,
-        })
-        .then(({ users, count }) => {
-          this.rows = users || []
-          this.pagination.rowsNumber = count
+        .get(`/order/order-management`)
+        .then((data) => {
           this.loading = false
+          this.orderData = data
+          this.initOrderCurrencies(data)
         })
         .catch((err) => {
           this.loading = false
+          this.$q.notify({
+            message: 'Error: ' + err.status,
+            type: 'negative',
+          })
         })
     },
-    goToDetail(id) {
-      this.$router.push({ name: 'user.detail', params: { id } })
-    },
-    onRequest(props) {
-      const query = pagingToPathParams(props)
-      query.s = props.filter
-      this.$router.push({
-        path: this.$route.fullPath,
-        query,
+    initOrderCurrencies(data) {
+      data.forEach((order, index) => {
+        let currencies = []
+        order.productPaymentsDisplay.forEach((productPayment, i) => {
+          if (!currencies.includes(productPayment.currency)) {
+            currencies.push(productPayment.currency)
+          }
+        })
+        this.orderCurrencies[order.orderId] = currencies
       })
     },
+    getBase64Src(base64) {
+      return 'data:image/png;base64,' + base64
+    },
+    priceDisplay(price, currency) {
+      if (currency == 'USD' || currency == 'EURO') {
+        return this.getCurrencySymbol(currency) + ' ' + price
+      }
+      return price + ' ' + this.getCurrencySymbol(currency)
+    },
+    getCurrencySymbol(currency) {
+      let symbol = ''
+      CURRENCY.forEach((tmpCurrency) => {
+        if (currency === tmpCurrency.label) {
+          symbol = tmpCurrency.Symbol
+          return
+        }
+      })
+      return symbol
+    },
+    getAvatarSrc(imageBase64) {
+      return 'data:image/png;base64,' + imageBase64
+    },
+    back() {
+      this.$router.push({ path: `/home` })
+    },
+    orderAmount(orderCurrency, productPayment) {
+      let sum = 0
+      productPayment.forEach((v, i) => {
+        if (v.currency == orderCurrency) {
+          sum += v.price * v.quantity
+        }
+      })
+      return this.priceDisplay(sum, orderCurrency)
+    },
+    goDetail(orderId) {
+      this.$router.push({ path: `/shop/orders/detail/${orderId}` })
+    },
+  },
+  computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
   },
 }
 </script>
-<style lang="scss">
-.list-user-header .list-user-icon-sort {
-  display: flex;
-  width: 100px;
-}
-.list-user-header:hover .list-user-icon-sort {
-  display: block;
-}
-</style>
+
+<style scoped></style>

@@ -124,7 +124,7 @@
                   </div>
                   <p class="col-2 col-sm-2 col-md-2" v-if="isCheckout">{{ cart.quantity }}</p>
                   <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
-                    {{ priceDisplay(cart.price * cart.quantity, cart.currency) }}
+                    {{ priceDisplay(cart.price * Number(cart.quantity), cart.currency) }}
                   </p>
                   <q-btn
                     class="col-1 col-md-1 col-sm-1"
@@ -289,7 +289,7 @@ export default {
       return symbol
     },
     getOwnerName(cartArr) {
-      if (cartArr == null || cartArr.lenght == 0) {
+      if (cartArr == null || cartArr.length == 0) {
         return ''
       }
       return cartArr[0].ownerName
@@ -298,10 +298,10 @@ export default {
       return 'data:image/png;base64,' + imageBase64
     },
     updateCart(cart, ownerIndex, cartIndex) {
-      if (cart.quantity > cart.stock || this.beforeQuantity == cart.quantity) {
+      if (Number(cart.quantity) > cart.stock || this.beforeQuantity == Number(cart.quantity)) {
         return
       }
-      if (cart.quantity <= 0) {
+      if (Number(cart.quantity) <= 0) {
         this.deleteCart(cart.productId)
         return
       }
@@ -323,7 +323,7 @@ export default {
         })
     },
     saveBeforeQuantity(cart) {
-      this.beforeQuantity = cart.quantity
+      this.beforeQuantity = Number(cart.quantity)
     },
     deleteCart(delProductId) {
       this.$api
@@ -351,7 +351,7 @@ export default {
       this.ownerIds.forEach((v, i) => {
         this.cartData[v].forEach((cart, cartIndex) => {
           if (this.productCheckbox[v][cartIndex] && cart.currency == currency) {
-            sum += cart.price * cart.quantity
+            sum = sum + cart.price * Number(cart.quantity)
           }
         })
       })
@@ -411,21 +411,26 @@ export default {
       let prepareData = []
       this.ownerIds.forEach((ownerId, index) => {
         let ownerProductData = []
+        let ownerName = ''
         this.productCheckbox[ownerId].forEach((v, i) => {
           if (v) {
             let cart = this.cartData[ownerId][i]
+            ownerName = cart.ownerName
             ownerProductData.push({
               ProductId: cart.productId,
+              ProductName: cart.productName,
+              Avatar: cart.avatarName,
               Price: cart.price,
-              Quantity: cart.quantity,
+              Quantity: Number(cart.quantity),
               Currency: cart.currency,
-              Amount: cart.price * cart.quantity,
+              Amount: cart.price * Number(cart.quantity),
             })
           }
         })
         if (ownerProductData.length > 0) {
           prepareData.push({
             OwnerId: ownerId,
+            OwnerName: ownerName,
             ProductPayments: ownerProductData,
             PhoneNumber: this.phoneNumber,
             Address: this.address,
@@ -458,7 +463,7 @@ export default {
       this.ownerIds.forEach((v, i) => {
         this.cartData[v].forEach((cart, cartIndex) => {
           if (this.productCheckbox[v][cartIndex]) {
-            sum += cart.price * cart.quantity
+            sum += cart.price * Number(cart.quantity)
           }
         })
       })

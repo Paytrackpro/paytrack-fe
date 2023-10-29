@@ -74,9 +74,10 @@
                   :rules="[(val) => !!val || 'Price is required']"
                 >
                   <template v-slot:prepend>
-                    <q-icon
-                      :name="currency == 'USD' ? 'attach_money' : currency == 'EURO' ? 'euro' : 'currency_bitcoin'"
-                    />
+                    <q-icon class="text-size-23" name="attach_money" v-if="currency == 'USD'" />
+                  </template>
+                  <template v-slot:append>
+                    <p class="text-size-14 text-weight-medium" v-if="currency != 'USD'">{{ currency }}</p>
                   </template>
                 </q-input>
               </template>
