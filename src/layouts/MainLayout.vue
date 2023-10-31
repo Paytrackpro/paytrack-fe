@@ -164,6 +164,12 @@ export default {
           to: '/home',
         },
         {
+          icon: 'sell',
+          label: 'My Order',
+          separator: false,
+          to: '/my-orders',
+        },
+        {
           icon: 'schedule',
           label: 'Pending Approvals',
           separator: false,

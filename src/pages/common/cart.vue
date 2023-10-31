@@ -447,6 +447,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
+          this.$router.push({ path: `/my-orders` })
         })
         .catch((err) => {
           responseError(err)

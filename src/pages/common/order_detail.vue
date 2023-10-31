@@ -5,12 +5,12 @@
     </q-btn>
     <q-card-section class="card-header q-pa-sm">
       <div class="row justify-between">
-        <div class="text-h6 title-case q-pt-sm q-mb-sm">Order Detail</div>
+        <div class="text-h6 title-case q-pt-sm q-mb-sm">My Order Detail</div>
       </div>
     </q-card-section>
     <div class="row q-col-gutter-sm cart-products-area">
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
-        <custom-field :label="'Buyer'" :value="orderData.userName" />
+        <custom-field :label="'Seller'" :value="orderData.ownerName" />
       </div>
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Phone Number'" :value="orderData.phoneNumber" />
@@ -129,7 +129,7 @@ export default {
       return 'data:image/png;base64,' + imageBase64
     },
     back() {
-      this.$router.push({ path: `/shop/orders/list` })
+      this.$router.push({ path: `/my-orders` })
     },
     orderAmount(orderCurrency, productPayment) {
       let sum = 0

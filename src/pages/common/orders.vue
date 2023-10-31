@@ -5,7 +5,7 @@
     </q-btn>
     <q-card-section class="card-header q-pa-sm">
       <div class="row justify-between">
-        <div class="text-h6 title-case q-pt-sm q-mb-sm">Order Management</div>
+        <div class="text-h6 title-case q-pt-sm q-mb-sm">My Orders</div>
       </div>
     </q-card-section>
     <div class="row q-col-gutter-sm cart-products-area" v-if="orderData.length > 0">
@@ -14,7 +14,7 @@
           <div class="row justify-between">
             <div class="q-pa-sm">
               <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
-              <span class="q-ml-xs text-size-15 text-grey-3 text-weight-medium">{{ order.userName }}</span>
+              <span class="q-ml-xs text-size-15 text-grey-3 text-weight-medium">{{ order.ownerName }}</span>
               <m-time :time="order.createdAt" class="q-ml-sm"></m-time>
             </div>
             <div class="q-pa-sm row">
@@ -70,7 +70,9 @@ import { mapGetters } from 'vuex'
 import MTime from 'components/common/mTime'
 export default {
   name: 'cartPage',
-  components: { MTime },
+  components: {
+    MTime,
+  },
   data() {
     return {
       orderData: [],
@@ -84,10 +86,10 @@ export default {
     fetchData() {
       this.loading = true
       this.$api
-        .get(`/order/order-management`)
+        .get(`/order/my-orders`)
         .then((data) => {
           this.loading = false
-          if (data) {
+          if (data != null) {
             this.orderData = data
             this.initOrderCurrencies(data)
           }
@@ -146,7 +148,7 @@ export default {
       return this.priceDisplay(sum, orderCurrency)
     },
     goDetail(orderId) {
-      this.$router.push({ path: `/shop/orders/detail/${orderId}` })
+      this.$router.push({ path: `/order-detail/${orderId}` })
     },
   },
   computed: {

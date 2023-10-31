@@ -22,6 +22,22 @@ const routes = [
         },
       },
       {
+        path: 'my-orders/',
+        name: 'myorders',
+        component: () => import('pages/common/orders.vue'),
+        meta: {
+          title: 'My Orders',
+        },
+      },
+      {
+        path: 'order-detail/:id(\\d+)',
+        name: 'orderdetail',
+        component: () => import('pages/common/order_detail.vue'),
+        meta: {
+          title: 'My Order Detail',
+        },
+      },
+      {
         path: 'cart/',
         name: 'cart',
         component: () => import('pages/common/cart.vue'),
