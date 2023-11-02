@@ -102,7 +102,7 @@
             >
               <q-list class="q-pl-lg">
                 <q-item
-                  to="/shop/products/list"
+                  to="/shop/products"
                   active-class="bg-cyan-2 sidebar-active-item"
                   class="GNL__drawer-item sidebar-item"
                 >
@@ -114,7 +114,7 @@
                   </q-item-section>
                 </q-item>
                 <q-item
-                  to="/shop/orders/list"
+                  to="/shop/orders"
                   active-class="bg-cyan-2 sidebar-active-item"
                   clickableclass="GNL__drawer-item sidebar-item"
                 >
@@ -305,7 +305,7 @@ export default {
         })
     },
     toCartPage() {
-      this.$router.push({ name: 'cart', params: {} })
+      this.$router.push({ name: 'home.cart', params: {} })
     },
   },
   watch: {

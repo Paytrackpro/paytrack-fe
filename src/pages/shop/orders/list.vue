@@ -1,67 +1,74 @@
 <template>
-  <div class="q-pa-lg">
-    <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
-      <q-tooltip> Back to Homepage </q-tooltip>
-    </q-btn>
-    <q-card-section class="card-header q-pa-sm">
-      <div class="row justify-between">
-        <div class="text-h6 title-case q-pt-sm q-mb-sm">Order Management</div>
-      </div>
-    </q-card-section>
-    <div class="row q-col-gutter-sm cart-products-area" v-if="orderData.length > 0">
-      <div v-for="(order, index) in orderData" :key="index" class="owner-card">
-        <div class="col-12 q-pa-sm shadow-primary">
-          <div class="row justify-between">
-            <div class="q-pa-sm">
-              <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
-              <span class="q-ml-xs text-size-15 text-grey-3 text-weight-medium">{{ order.userName }}</span>
-              <m-time :time="order.createdAt" class="q-ml-sm"></m-time>
-            </div>
-            <div class="q-pa-sm row">
-              <p class="text-size-15 text-weight-medium">Total Payment:</p>
-              <p
-                class="text-weight-medium text-primary"
-                v-for="(orderCurrency, currencyIndex) in orderCurrencies[order.orderId]"
-                :key="currencyIndex"
-              >
-                <span class="q-ml-sm" v-if="currencyIndex > 0">|</span>
-                &nbsp;{{ orderAmount(orderCurrency, order.productPaymentsDisplay) }}
-              </p>
-            </div>
+  <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
+    <q-tooltip> Back to Homepage </q-tooltip>
+  </q-btn>
+  <q-card-section class="card-header q-pa-sm">
+    <div class="row justify-between">
+      <div class="text-h6 title-case q-pt-sm q-mb-sm">Order Management</div>
+    </div>
+  </q-card-section>
+  <div class="row q-col-gutter-sm cart-products-area" v-if="orderData.length > 0">
+    <div v-for="(order, index) in orderData" :key="index" class="owner-card">
+      <div class="col-12 q-pa-sm shadow-primary">
+        <div class="row justify-between">
+          <div class="q-pa-sm">
+            <q-icon name="account_circle" class="q-ml-sm" color="primary" size="sm" />
+            <span class="q-ml-xs text-size-15 text-primary text-weight-medium">{{ order.userName }}</span> &nbsp;|
+            <m-time :time="order.createdAt" class="q-ml-sm"></m-time>
+            <q-chip
+              class="sm-chip q-ml-sm"
+              square
+              text-color="white"
+              :color="order.paymentStatus == 1 ? 'positive' : 'warning'"
+              :icon="order.paymentStatus == 1 ? 'check_circle' : 'schedule'"
+            >
+              {{ order.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}
+            </q-chip>
           </div>
-          <q-separator />
-          <div class="col-12">
-            <div v-for="(product, proIndex) in order.productPaymentsDisplay" :key="proIndex">
-              <div class="row q-my-sm q-pa-sm cart-row">
-                <q-img
-                  :src="getAvatarSrc(product.avatarBase64)"
-                  style="width: 100%; max-width: 70px"
-                  class="q-ml-md col-4 col-lg-1 col-sm-1 col-md-3 col-xs-6"
-                ></q-img>
-                <p class="q-ml-lg col-8 col-lg-4 col-sm-3 col-md-4 product-title">{{ product.productName }}</p>
-                <p class="q-ml-lg col-3 col-sm-1 col-md-1">{{ priceDisplay(product.price, product.currency) }}</p>
-                <p class="col-2 col-sm-1 col-md-1">{{ product.quantity }}</p>
-                <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
-                  {{ priceDisplay(product.price * product.quantity, product.currency) }}
-                </p>
-                <div class="col-2 col-sm-1 col-md-1" v-if="proIndex == 0">
-                  <q-btn
-                    label="Detail"
-                    type="button"
-                    color="primary"
-                    class="btn btn-animated detail-btn"
-                    @click="goDetail(order.orderId)"
-                  />
-                </div>
-                <div class="col-2 col-sm-1 col-md-1" v-if="proIndex != 0"></div>
+          <div class="q-pa-sm row">
+            <p class="text-size-16 text-primary text-weight-medium">Total Payment:</p>
+            <p
+              class="text-size-16 text-accent"
+              v-for="(orderCurrency, currencyIndex) in orderCurrencies[order.orderId]"
+              :key="currencyIndex"
+            >
+              <span class="q-ml-sm" v-if="currencyIndex > 0">|</span>
+              &nbsp;{{ orderAmount(orderCurrency, order.productPaymentsDisplay) }}
+            </p>
+          </div>
+        </div>
+        <q-separator />
+        <div class="col-12">
+          <div v-for="(product, proIndex) in order.productPaymentsDisplay" :key="proIndex">
+            <div class="row q-my-sm q-pa-sm cart-row">
+              <q-img
+                :src="getAvatarSrc(product.avatarBase64)"
+                style="width: 100%; max-width: 70px"
+                class="q-ml-md col-4 col-lg-1 col-sm-1 col-md-3 col-xs-6"
+              ></q-img>
+              <p class="q-ml-lg col-8 col-lg-4 col-sm-3 col-md-4 product-title">{{ product.productName }}</p>
+              <p class="q-ml-lg col-3 col-sm-1 col-md-1">{{ priceDisplay(product.price, product.currency) }}</p>
+              <p class="col-2 col-sm-1 col-md-1">{{ product.quantity }}</p>
+              <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
+                {{ priceDisplay(product.price * product.quantity, product.currency) }}
+              </p>
+              <div class="col-2 col-sm-1 col-md-1" v-if="proIndex == 0">
+                <q-btn
+                  label="Detail"
+                  type="button"
+                  color="primary"
+                  class="btn btn-animated detail-btn"
+                  @click="goDetail(order.orderId)"
+                />
               </div>
+              <div class="col-2 col-sm-1 col-md-1" v-if="proIndex != 0"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="row q-col-gutter-sm q-ma-sm" v-if="orderData.length == 0">There are no orders displayed</div>
   </div>
+  <div class="row q-col-gutter-sm q-ma-sm" v-if="orderData.length == 0">There are no orders displayed</div>
 </template>
 
 <script>

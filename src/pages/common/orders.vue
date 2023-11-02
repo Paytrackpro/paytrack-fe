@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-lg">
+  <div>
     <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
       <q-tooltip> Back to Homepage </q-tooltip>
     </q-btn>
@@ -13,14 +13,23 @@
         <div class="col-12 q-pa-sm shadow-primary">
           <div class="row justify-between">
             <div class="q-pa-sm">
-              <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
-              <span class="q-ml-xs text-size-15 text-grey-3 text-weight-medium">{{ order.ownerName }}</span>
+              <q-icon name="account_circle" class="q-ml-sm" color="primary" size="sm" />
+              <span class="q-ml-xs text-size-15 text-primary text-weight-medium">{{ order.ownerName }}</span> &nbsp;|
               <m-time :time="order.createdAt" class="q-ml-sm"></m-time>
+              <q-chip
+                class="sm-chip q-ml-sm"
+                square
+                text-color="white"
+                :color="order.paymentStatus == 1 ? 'positive' : 'warning'"
+                :icon="order.paymentStatus == 1 ? 'check_circle' : 'schedule'"
+              >
+                {{ order.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}
+              </q-chip>
             </div>
             <div class="q-pa-sm row">
-              <p class="text-size-15 text-weight-medium">Total Payment:</p>
+              <p class="text-size-16 text-primary text-weight-medium">Total Payment:</p>
               <p
-                class="text-weight-medium text-primary"
+                class="text-size-16 text-accent"
                 v-for="(orderCurrency, currencyIndex) in orderCurrencies[order.orderId]"
                 :key="currencyIndex"
               >
@@ -148,7 +157,7 @@ export default {
       return this.priceDisplay(sum, orderCurrency)
     },
     goDetail(orderId) {
-      this.$router.push({ path: `/order-detail/${orderId}` })
+      this.$router.push({ path: `/my-orders/order-detail/${orderId}` })
     },
   },
   computed: {

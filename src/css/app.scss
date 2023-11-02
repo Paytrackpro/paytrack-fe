@@ -66,6 +66,12 @@ p {
 .text-size-15 {
   font-size: 15px;
 }
+.text-size-16 {
+  font-size: 16px;
+}
+.text-size-17 {
+  font-size: 17px;
+}
 .text-size-20 {
   font-size: 20px;
 }
@@ -737,4 +743,16 @@ a {
 }
 .detail-btn {
   width: 70px;
+}
+.custom-field-text > a {
+  text-decoration: underline;
+}
+.price-input {
+  width: 170px;
+}
+.stock-input {
+  width: 120px;
+}
+.quantity-input {
+  width: 120px;
 }

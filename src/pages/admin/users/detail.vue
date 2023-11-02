@@ -120,7 +120,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
-          this.$router.push({ name: 'user.list' })
+          this.$router.push({ name: 'users.list' })
         })
         .catch((err) => {
           responseError(err)

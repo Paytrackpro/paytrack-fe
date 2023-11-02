@@ -73,7 +73,7 @@
           <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
         </div>
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
-          <custom-field :label="'Description'" :value="payment.description" />
+          <custom-field :label="'Description'" isHtml :value="getDescription()" />
         </div>
         <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
           <p class="q-mb-xs">
@@ -476,6 +476,19 @@ export default {
     back() {
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
+    },
+    getDescription() {
+      if (!this.payment.productPay) {
+        return this.payment.description
+      }
+
+      let descResult = this.payment.description
+      if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
+        descResult = descResult.replace('{{{', '/shop/orders/detail/')
+      } else {
+        descResult = descResult.replace('{{{', '/my-orders/order-detail/')
+      }
+      return descResult.replace('}}}', '')
     },
   },
   watch: {

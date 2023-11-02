@@ -1,14 +1,32 @@
 <template>
-  <div class="q-pa-lg">
-    <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
-      <q-tooltip> Back to Order List </q-tooltip>
-    </q-btn>
+  <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
+    <q-tooltip> Back to Order List </q-tooltip>
+  </q-btn>
+  <q-card flat class="q-pb-md content-container">
     <q-card-section class="card-header q-pa-sm">
       <div class="row justify-between">
-        <div class="text-h6 title-case q-pt-sm q-mb-sm">My Order Detail</div>
+        <div class="text-h6 title-case q-pt-sm q-mb-sm q-ml-sm">
+          My Order Detail ({{ orderData.orderCode }})
+          <q-chip
+            class="sm-chip q-ml-sm"
+            square
+            text-color="white"
+            :color="orderData.paymentStatus == 1 ? 'positive' : 'warning'"
+            :icon="orderData.paymentStatus == 1 ? 'check_circle' : 'schedule'"
+          >
+            {{ orderData.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}
+          </q-chip>
+        </div>
+        <div class="row align-center q-pr-sm">
+          <p class="text-size-16 text-weight-medium">Total Payment:</p>
+          <p class="text-accent text-size-16" v-for="(currency, curIndex) in orderCurrencies" :key="curIndex">
+            <span class="q-ml-sm" v-if="curIndex > 0">|</span>
+            &nbsp;{{ orderAmount(currency, orderData.productPaymentsDisplay) }}
+          </p>
+        </div>
       </div>
     </q-card-section>
-    <div class="row q-col-gutter-sm cart-products-area">
+    <div class="row q-col-gutter-sm cart-products-area q-pa-md">
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Seller'" :value="orderData.ownerName" />
       </div>
@@ -21,8 +39,11 @@
       <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
         <custom-field :label="'Ordered At'" isTime :value="orderData.createdAt" />
       </div>
+      <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <custom-field :label="'Note'" :value="orderData.memo" />
+      </div>
     </div>
-    <div class="col-12">
+    <div class="col-12 q-pa-md">
       <p class="q-mb-xs">
         <b class="text-weight-medium">Billing Information</b>
       </p>
@@ -41,27 +62,8 @@
           </p>
         </div>
       </div>
-      <q-separator />
-      <div class="row justify-between">
-        <div class="col-8 q-pa-sm">
-          <div class="row align-center">
-            <p class="text-weight-medium">Note:</p>
-            &nbsp;
-            <p>{{ orderData.memo }}</p>
-          </div>
-        </div>
-        <div class="q-pa-sm">
-          <p class="text-size-15 text-weight-medium">Total Amount</p>
-          <div class="row">
-            <p class="text-weight-medium text-primary" v-for="(currency, curIndex) in orderCurrencies" :key="curIndex">
-              <span class="q-ml-sm" v-if="curIndex > 0">|</span>
-              &nbsp;{{ orderAmount(currency, orderData.productPaymentsDisplay) }}
-            </p>
-          </div>
-        </div>
-      </div>
     </div>
-  </div>
+  </q-card>
 </template>
 
 <script>

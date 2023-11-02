@@ -150,7 +150,7 @@ export default {
         })
     },
     goToDetail(id) {
-      this.$router.push({ name: 'user.detail', params: { id } })
+      this.$router.push({ path: `/users/${id}` })
     },
     onRequest(props) {
       const query = pagingToPathParams(props)

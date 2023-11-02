@@ -63,7 +63,7 @@ export const COINS = [
 
 export const CURRENCY = [
   { name: 'US Dollar', label: 'USD', Symbol: '$', icon: 'attach_money', symbolPrefix: true },
-  { name: 'Bitcoin', label: 'BTC', Symbol: 'BTC', icon: 'currency_bitcoin', symbolPrefix: false },
-  { name: 'Litecoin', label: 'LTC', Symbol: 'LTC', icon: 'currency_bitcoin', symbolPrefix: false },
-  { name: 'Decred', label: 'DCR', Symbol: 'DCR', icon: 'currency_bitcoin', symbolPrefix: false },
+  // { name: 'Bitcoin', label: 'BTC', Symbol: 'BTC', icon: 'currency_bitcoin', symbolPrefix: false },
+  // { name: 'Litecoin', label: 'LTC', Symbol: 'LTC', icon: 'currency_bitcoin', symbolPrefix: false },
+  // { name: 'Decred', label: 'DCR', Symbol: 'DCR', icon: 'currency_bitcoin', symbolPrefix: false },
 ]

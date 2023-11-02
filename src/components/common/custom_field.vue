@@ -16,7 +16,7 @@
           {{ value }}
         </q-chip>
         <m-time v-else-if="isTime" :time="value"></m-time>
-        <span v-else>{{ value }}</span>
+        <span v-html="value" class="custom-field-text" v-else></span>
       </template>
     </q-field>
   </div>
@@ -37,6 +37,7 @@ export default {
     chipColor: String,
     chipIcon: String,
     isTime: Boolean,
+    isHtml: Boolean,
   },
   components: {
     mTime,

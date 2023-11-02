@@ -1,49 +1,47 @@
 <template>
-  <div class="q-pa-lg">
-    <q-card-section class="card-header q-mb-md q-pa-sm" v-if="hasHeader">
-      <div class="row justify-between">
-        <div class="text-h6 title-case q-pt-sm" v-if="title">{{ title }}</div>
-        <div class="row" v-if="hasSearch">
-          <q-card class="col-12 no-border no-shadow bg-transparent">
-            <q-card-section class="product-search">
-              <q-input
-                rounded
-                v-model="KeySearch"
-                outlined
-                placeholder="Search Product"
-                v-on:keyup.enter="searchProduct()"
-              >
-                <template v-slot:append>
-                  <q-icon v-if="KeySearch === ''" name="search" />
-                  <q-icon v-else name="clear" class="cursor-pointer" @click="clearSearch()" />
-                </template>
-              </q-input>
-            </q-card-section>
-          </q-card>
-        </div>
+  <q-card-section class="card-header q-mb-md q-pa-sm" v-if="hasHeader">
+    <div class="row justify-between">
+      <div class="text-h6 title-case q-pt-sm" v-if="title">{{ title }}</div>
+      <div class="row" v-if="hasSearch">
+        <q-card class="col-12 no-border no-shadow bg-transparent">
+          <q-card-section class="product-search">
+            <q-input
+              rounded
+              v-model="KeySearch"
+              outlined
+              placeholder="Search Product"
+              v-on:keyup.enter="searchProduct()"
+            >
+              <template v-slot:append>
+                <q-icon v-if="KeySearch === ''" name="search" />
+                <q-icon v-else name="clear" class="cursor-pointer" @click="clearSearch()" />
+              </template>
+            </q-input>
+          </q-card-section>
+        </q-card>
       </div>
-    </q-card-section>
-    <div class="row q-mb-md justify-between" v-if="hasPagination">
-      <span class="q-pt-xs">Total of {{ pagination.rowsNumber }} products </span>
-      <q-pagination
-        v-model="pagination.page"
-        :max="Math.ceil(pagination.rowsNumber / pagination.rowsPerPage)"
-        direction-links
-        outline
-        color="primary"
-        active-design="unelevated"
-      />
     </div>
-    <div class="row q-col-gutter-sm">
-      <div class="col-md-3 col-lg-2 col-sm-4 col-xs-6 q-pa-sm" v-for="(product, index) in rows" :key="index">
-        <card-product
-          class="product-card shadow-primary zoom-hover-1-02"
-          :data="product"
-          :productImage="getAvatarSrc(product.avatar)"
-          :cartCount="cartCount"
-          @updateCartCount="updateCartCount"
-        ></card-product>
-      </div>
+  </q-card-section>
+  <div class="row q-mb-md justify-between" v-if="hasPagination">
+    <span class="q-pt-xs">Total of {{ pagination.rowsNumber }} products </span>
+    <q-pagination
+      v-model="pagination.page"
+      :max="Math.ceil(pagination.rowsNumber / pagination.rowsPerPage)"
+      direction-links
+      outline
+      color="primary"
+      active-design="unelevated"
+    />
+  </div>
+  <div class="row q-col-gutter-sm">
+    <div class="col-md-3 col-lg-2 col-sm-4 col-xs-6 q-pa-sm" v-for="(product, index) in rows" :key="index">
+      <card-product
+        class="product-card shadow-primary zoom-hover-1-02"
+        :data="product"
+        :productImage="getAvatarSrc(product.avatar)"
+        :cartCount="cartCount"
+        @updateCartCount="updateCartCount"
+      ></card-product>
     </div>
   </div>
 </template>

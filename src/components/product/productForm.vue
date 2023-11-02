@@ -5,7 +5,7 @@
         <div class="text-h6 title-case">{{ isEdit ? 'Update Product' : 'Create New Product' }}</div>
       </div>
       <div class="row q-gutter-sm">
-        <q-btn label="Save" color="primary" class="btn btn-animated" :disable="submitting" @click="submit()" />
+        <q-btn label="Save" color="primary" class="btn btn-animated" :disable="saveDisable" @click="submit()" />
         <q-btn
           label="Cancel"
           class="btn btn-animated"
@@ -51,7 +51,12 @@
           emit-value
           map-options
           borderless
+          :disable="paymentSettings.length == 0"
         />
+        <p class="text-accent text-size-12" v-if="paymentSettings.length == 0">
+          You haven't set up a payment address yet. Set up
+          <router-link class="link text-primary" to="/settings/payment_method">here</router-link>
+        </p>
       </div>
       <div class="col-12 col-sm-6 col-lg-8">
         <p class="q-mb-xs">
@@ -64,6 +69,7 @@
                 <b>Price&nbsp;&nbsp;</b>
                 <q-input
                   color="primary"
+                  class="price-input"
                   outlined
                   lazy-rules
                   v-model="inProduct.price"
@@ -89,6 +95,7 @@
                 <b>Stock&nbsp;&nbsp;</b>
                 <q-input
                   color="primary"
+                  class="stock-input"
                   outlined
                   lazy-rules
                   v-model="inProduct.stock"
@@ -186,6 +193,7 @@ import customInput from '../common/custom_input.vue'
 import { api, axios } from 'boot/axios'
 import { CURRENCY } from 'src/consts/common'
 import { ref } from 'vue'
+import { mapGetters } from 'vuex'
 
 export default {
   name: 'productForm',
@@ -211,6 +219,7 @@ export default {
       descriptionEditor: ref(''),
       imageNewNameArr: [],
       storageGalleryArr: [],
+      paymentSettings: [],
     }
   },
   watch: {
@@ -233,6 +242,12 @@ export default {
           //get Image Base64 list
           this.setImagesBase64()
         }
+      },
+    },
+    user: {
+      immediate: true,
+      handler(user) {
+        this.paymentSettings = user.paymentSettings || []
       },
     },
     uploadedImages: {
@@ -281,7 +296,7 @@ export default {
           color: 'positive',
           icon: 'check',
         })
-        this.$router.push({ path: `/shop/products/list` })
+        this.$router.push({ path: `/shop/products` })
       }
     },
     getGalleryImageNames() {
@@ -350,7 +365,7 @@ export default {
       })
     },
     cancel() {
-      this.$router.push({ path: `/shop/products/list` })
+      this.$router.push({ path: `/shop/products` })
     },
     async saveProduct(product) {
       let url = 'shop/product/create'
@@ -450,6 +465,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
     currencyOption() {
       let currencies = []
       CURRENCY.forEach((tmpCurrency) => {
@@ -459,6 +477,9 @@ export default {
         })
       })
       return currencies
+    },
+    saveDisable() {
+      return this.submitting || this.paymentSettings.length == 0
     },
   },
 }

@@ -89,7 +89,7 @@ export default {
         })
     },
     toProductDetail(id) {
-      this.$router.push({ name: 'product.detail', params: { id } })
+      this.$router.push({ path: `/home/product-detail/${id}` })
     },
     getTitleClass() {
       if (this.user.id == this.data.ownerId) {
