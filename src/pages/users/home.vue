@@ -23,6 +23,7 @@
         transition-next="jump-down"
       >
         <q-tab-panel class="q-pa-none" name="approval_list">
+          <payment-list></payment-list>
           <payment-list ref="paymentList" type="approval" label="Pending Approvals" />
         </q-tab-panel>
         <q-tab-panel class="q-pa-none" name="report">

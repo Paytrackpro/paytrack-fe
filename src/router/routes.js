@@ -11,14 +11,14 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/home',
+        redirect: '/approvals',
       },
       {
-        path: 'home/',
+        path: 'product/',
         name: 'home',
         component: () => import('pages/payments/layout.vue'),
         meta: {
-          title: 'Homepage Products',
+          title: 'Homepage',
         },
         children: [
           {
@@ -82,6 +82,14 @@ const routes = [
             },
           },
         ],
+      },
+      {
+        path: '/store-list',
+        name: 'stores',
+        component: () => import('pages/common/store_list.vue'),
+        meta: {
+          title: 'Store List',
+        },
       },
       {
         path: 'approvals/',

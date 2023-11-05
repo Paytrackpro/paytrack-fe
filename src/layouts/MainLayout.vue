@@ -3,6 +3,7 @@
     <q-header elevated class="bg-dark text-white shadow-4">
       <q-toolbar class="GNL__toolbar">
         <q-btn
+          v-if="drawer"
           flat
           dense
           round
@@ -43,7 +44,15 @@
         </q-btn>
       </q-toolbar>
     </q-header>
-    <q-drawer show-if-above v-model="leftDrawerOpen" :mini="miniState" side="left" class="left-sidebar" :width="280">
+    <q-drawer
+      show-if-above
+      v-model="leftDrawerOpen"
+      :mini="miniState"
+      side="left"
+      class="left-sidebar"
+      :width="280"
+      v-if="drawer"
+    >
       <q-scroll-area class="fit">
         <q-list padding class="text-grey-2">
           <template v-for="(menuItem, index) in menuList">
@@ -141,6 +150,7 @@
           @updateUnpaidCount="updateUnpaidCount"
           :cartCount="cartCount"
           @updateCartCount="updateCartCount"
+          @setSidebarDrawer="setSidebarDrawer"
         />
       </q-page>
     </q-page-container>
@@ -155,7 +165,7 @@ import { useQuasar } from 'quasar'
 export default {
   data() {
     return {
-      drawer: false,
+      drawer: true,
       menuList: [
         {
           icon: 'home',
@@ -280,6 +290,9 @@ export default {
     },
     updateCartCount(count) {
       this.cartCount = count
+    },
+    setSidebarDrawer(value) {
+      this.drawer = value
     },
     isMyShop(label) {
       return label == 'My Shop'
