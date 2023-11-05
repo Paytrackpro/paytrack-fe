@@ -188,7 +188,7 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
-        this.isInvoiceMode = payment.details.length > 0
+        this.isInvoiceMode = payment.details && payment.details.length > 0
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
