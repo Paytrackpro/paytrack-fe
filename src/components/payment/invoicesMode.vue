@@ -51,6 +51,16 @@
         :readonly="readonly"
       />
     </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="10">
+          <q-separator />
+          <p class="q-pb-sm q-pt-md text-size-16 text-weight-medium" v-if="isDisplayHours()">
+            Total: {{ getTotalHours() }}&nbsp;hour(s)
+          </p>
+        </td>
+      </tr>
+    </tfoot>
   </q-markup-table>
   <invoice-dialog
     :readonly="readonly"
@@ -129,6 +139,30 @@ export default {
           '/' +
           date.getDate()
       )
+    },
+    getTotalHours() {
+      let count = 0
+      if (this.invoices && this.invoices.length > 0) {
+        this.invoices.forEach((detail) => {
+          if (detail.price == 0) {
+            count += detail.quantity
+          }
+        })
+      }
+      return count
+    },
+    isDisplayHours() {
+      if (this.invoices && this.invoices.length > 0) {
+        let hasLabor = false
+        this.invoices.forEach((detail) => {
+          if (detail.price == 0) {
+            hasLabor = true
+            return
+          }
+        })
+        return hasLabor
+      }
+      return false
     },
   },
   watch: {

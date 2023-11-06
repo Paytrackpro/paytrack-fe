@@ -72,9 +72,6 @@
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="isDisplayHours()">
-          <custom-field :label="'Total Hours'" :value="getTotalHours() + ' hour(s)'" />
-        </div>
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Description'" :value="payment.description" />
         </div>
@@ -479,33 +476,6 @@ export default {
     back() {
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
-    },
-    isDisplayHours() {
-      if (!this.isShowInvoice) {
-        return false
-      }
-      if (this.payment.details && this.payment.details.length > 0) {
-        let hasLabor = false
-        this.payment.details.forEach((detail) => {
-          if (detail.price == 0) {
-            hasLabor = true
-            return
-          }
-        })
-        return hasLabor
-      }
-      return false
-    },
-    getTotalHours() {
-      let count = 0
-      if (this.payment.details && this.payment.details.length > 0) {
-        this.payment.details.forEach((detail) => {
-          if (detail.price == 0) {
-            count += detail.quantity
-          }
-        })
-      }
-      return count
     },
   },
   watch: {
