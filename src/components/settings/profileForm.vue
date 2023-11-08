@@ -24,6 +24,18 @@
           <div class="col-12 col-sm-6 col-lg-3">
             <custom-input
               class="q-mt-md q-px-sm"
+              :label="'Shop name'"
+              v-model="user.shopName"
+              :placeholder="'Your Shop name'"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="row">
+          <div class="col-12 col-sm-6 col-lg-3">
+            <custom-input
+              class="q-mt-md q-px-sm"
               :label="'Email'"
               v-model="user.email"
               :placeholder="'Email'"

@@ -1,8 +1,5 @@
 <template>
   <div class="q-pa-sm">
-    <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
-      <q-tooltip> Back to Homepage </q-tooltip>
-    </q-btn>
     <q-card flat class="q-pb-md content-container">
       <q-card-section class="card-header q-pa-sm">
         <div class="row">
@@ -19,6 +16,7 @@
                 class="q-my-sm col-6 col-sm-4 col-lg-3"
                 clickable
                 v-ripple
+                @click="toStoreProductList(store.ownerId)"
               >
                 <q-item-section avatar>
                   <q-avatar color="primary" text-color="white">
@@ -53,7 +51,6 @@ export default {
     }
   },
   created() {
-    this.$emit('setSidebarDrawer', false)
     this.fetchData()
   },
   methods: {
@@ -70,6 +67,9 @@ export default {
     },
     back() {
       this.$router.push({ path: `home` })
+    },
+    toStoreProductList(ownerId) {
+      this.$router.push({ path: `/stores/${ownerId}` })
     },
   },
   computed: {

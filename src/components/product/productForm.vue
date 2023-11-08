@@ -1,4 +1,7 @@
 <template>
+  <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="cancel()">
+    <q-tooltip>Back to Product list</q-tooltip>
+  </q-btn>
   <q-card-section class="card-header">
     <div class="row justify-between">
       <div class="row">
@@ -6,14 +9,6 @@
       </div>
       <div class="row q-gutter-sm">
         <q-btn label="Save" color="primary" class="btn btn-animated" :disable="saveDisable" @click="submit()" />
-        <q-btn
-          label="Cancel"
-          class="btn btn-animated"
-          type="button"
-          color="white"
-          text-color="black"
-          @click="cancel()"
-        />
       </div>
     </div>
   </q-card-section>

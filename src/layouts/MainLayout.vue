@@ -12,8 +12,10 @@
           icon="menu"
           class="q-mr-sm"
         />
-        <q-toolbar-title> Paytrack.pro </q-toolbar-title>
-        <q-btn dense color="cyan-10" round icon="shopping_cart" class="q-mr-sm" @click="toCartPage()">
+        <q-toolbar-title class="row">
+          <p class="site-title col-8 col-sm-3 col-md-1" @click="goHome()">Paytrack.pro</p>
+        </q-toolbar-title>
+        <q-btn dense color="cyan-10" round icon="shopping_cart" class="q-mr-sm" @click="toCartPage()" v-if="!drawer">
           <q-badge color="red" floating>{{ cartCount }}</q-badge>
           <q-tooltip>Go to your cart</q-tooltip>
         </q-btn>
@@ -150,7 +152,6 @@
           @updateUnpaidCount="updateUnpaidCount"
           :cartCount="cartCount"
           @updateCartCount="updateCartCount"
-          @setSidebarDrawer="setSidebarDrawer"
         />
       </q-page>
     </q-page-container>
@@ -165,20 +166,8 @@ import { useQuasar } from 'quasar'
 export default {
   data() {
     return {
-      drawer: true,
+      drawer: false,
       menuList: [
-        {
-          icon: 'home',
-          label: 'Homepage',
-          separator: false,
-          to: '/home',
-        },
-        {
-          icon: 'sell',
-          label: 'My Order',
-          separator: false,
-          to: '/my-orders',
-        },
         {
           icon: 'schedule',
           label: 'Pending Approvals',
@@ -233,7 +222,7 @@ export default {
           let approvalsIndex = this.getApprovalPendingIndex()
           this.menuList.splice(approvalsIndex, 1)
           if (this.$route.name.indexOf('approvals') > -1) {
-            this.$router.push({ path: `home` })
+            this.$router.push({ path: `pay` })
           }
         }
       })
@@ -267,6 +256,9 @@ export default {
     },
   },
   methods: {
+    toHomePage() {
+      this.$router.push({ path: '/' })
+    },
     shouldDisplayRoute(menuItem) {
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
@@ -290,9 +282,6 @@ export default {
     },
     updateCartCount(count) {
       this.cartCount = count
-    },
-    setSidebarDrawer(value) {
-      this.drawer = value
     },
     isMyShop(label) {
       return label == 'My Shop'
@@ -318,13 +307,21 @@ export default {
         })
     },
     toCartPage() {
-      this.$router.push({ name: 'home.cart', params: {} })
+      this.$router.push({ name: 'stores.cart', params: {} })
+    },
+    goHome() {
+      if (this.approvalCount > 0) {
+        this.$router.push({ path: '/approvals' })
+      } else {
+        this.$router.push({ path: '/pay' })
+      }
     },
   },
   watch: {
     $route: {
       immediate: true,
       handler(to) {
+        this.drawer = !window.location.href.includes('/stores')
         if (to.meta.requiresAuth && this.user.id === 0) {
           this.$router.push({
             path: '/login',

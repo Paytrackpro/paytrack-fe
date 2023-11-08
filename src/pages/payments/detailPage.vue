@@ -9,12 +9,14 @@
       v-model:editing="editing"
       v-model:processing="processing"
       :approvalCount="approvalCount"
+      :orderData="orderData"
       :payment-type="paymentType"
       :token="token"
       :user="user"
       :unpaidCount="unpaidCount"
       @update:modelValue="saved"
       @updateUnpaidCount="updateUnpaidCount"
+      @removeProductFromOrder="removeProductFromOrder"
     />
     <payment-form
       v-if="editing"
@@ -53,6 +55,7 @@ export default {
       isNotfound: false,
       isUnknownError: false,
       payment: {},
+      orderData: {},
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
       processing: false,
@@ -87,7 +90,8 @@ export default {
         .get(`/payment/${this.$route.params.id}?token=${token}`)
         .then((data) => {
           this.loading = false
-          this.payment = data
+          this.payment = data.payment
+          this.orderData = data.orderData
         })
         .catch((err) => {
           this.loading = false
@@ -108,6 +112,9 @@ export default {
     },
     updateUnpaidCount(count) {
       this.$emit('updateUnpaidCount', count)
+    },
+    removeProductFromOrder(productIndex) {
+      this.orderData.productPaymentsDisplay.splice(productIndex, 1)
     },
   },
   computed: {

@@ -82,6 +82,13 @@ export default {
           sortable: true,
         },
         {
+          name: 'shopName',
+          align: 'center',
+          label: 'Shop Name',
+          field: 'shopName',
+          sortable: false,
+        },
+        {
           name: 'email',
           align: 'center',
           label: 'Email',
@@ -168,6 +175,7 @@ export default {
   display: flex;
   width: 100px;
 }
+
 .list-user-header:hover .list-user-icon-sort {
   display: block;
 }

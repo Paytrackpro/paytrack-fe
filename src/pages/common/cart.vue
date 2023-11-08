@@ -1,6 +1,6 @@
 <template>
   <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
-    <q-tooltip> {{ isCheckout ? 'Back to Cart Page' : 'Back to Homepage' }} </q-tooltip>
+    <q-tooltip> {{ isCheckout ? 'Back to Cart Page' : 'Back to Store List' }} </q-tooltip>
   </q-btn>
   <q-card-section class="card-header q-pa-sm">
     <div class="row justify-between">
@@ -77,7 +77,7 @@
               v-model="ownerCheckboxs[index]"
               size="sm"
               @click="ownerCheckAll(ownerId, index)"
-              v-if="!isCheckout"
+              v-if="!isCheckout && !ownerCheckboxDisabled[index]"
             />
             <q-icon name="account_circle" class="q-ml-sm" color="grey-4" size="sm" />
             <span class="q-ml-xs text-size-15 text-grey-3">{{ getOwnerName(cartData[ownerId]) }}</span>
@@ -90,7 +90,7 @@
                   v-model="productCheckbox[ownerId][cartIndex]"
                   size="sm"
                   @click="oneProductChecked(ownerId, index)"
-                  v-if="!isCheckout"
+                  v-if="!isCheckout && !ownerCheckboxDisabled[index]"
                 />
                 <q-img
                   :src="getAvatarSrc(cart.avatarBase64)"
@@ -217,6 +217,7 @@ export default {
       isCheckout: false,
       phoneNumber: '',
       address: '',
+      ownerCheckboxDisabled: [],
     }
   },
   created() {
@@ -236,6 +237,7 @@ export default {
           this.cartData = data.cartData || {}
           this.ownerIds.forEach((v, i) => {
             this.ownerCheckboxs.push(false)
+            this.ownerCheckboxDisabled.push(false)
             let products = []
             this.cartData[v].forEach((cart, j) => {
               if (!this.currencyChoose.includes(cart.currency)) {
@@ -273,6 +275,7 @@ export default {
       this.productCheckbox[ownerId].forEach((v, i) => {
         this.productCheckbox[ownerId][i] = this.ownerCheckboxs[index]
       })
+      this.handlerDisableCheckbox()
     },
     oneProductChecked(ownerId, index) {
       let notAll = false
@@ -282,6 +285,34 @@ export default {
         }
       })
       this.ownerCheckboxs[index] = !notAll
+      this.handlerDisableCheckbox()
+    },
+    getCheckIndex() {
+      let checkIndex = -1
+      this.ownerIds.forEach((v, i) => {
+        let localHasCheck = false
+        this.productCheckbox[v].forEach((check, j) => {
+          if (check) {
+            checkIndex = i
+            localHasCheck = true
+            return
+          }
+        })
+        if (localHasCheck) {
+          return
+        }
+      })
+      return checkIndex
+    },
+    handlerDisableCheckbox() {
+      let checkIndex = this.getCheckIndex()
+      this.ownerIds.forEach((id, i) => {
+        if (checkIndex < 0 || checkIndex == i) {
+          this.ownerCheckboxDisabled[i] = false
+        } else {
+          this.ownerCheckboxDisabled[i] = true
+        }
+      })
     },
     getBase64Src(base64) {
       return 'data:image/png;base64,' + base64
@@ -410,7 +441,7 @@ export default {
         this.isCheckout = false
         return
       }
-      this.$router.push({ path: `/home` })
+      this.$router.push({ path: `/stores` })
     },
     updateOwnerCurrency(ownerId) {
       let ownerCurrencies = []
@@ -439,10 +470,12 @@ export default {
       this.ownerIds.forEach((ownerId, index) => {
         let ownerProductData = []
         let ownerName = ''
+        let shopName = ''
         this.productCheckbox[ownerId].forEach((v, i) => {
           if (v) {
             let cart = this.cartData[ownerId][i]
             ownerName = cart.ownerName
+            shopName = cart.shopName
             ownerProductData.push({
               ProductId: cart.productId,
               ProductName: cart.productName,
@@ -459,6 +492,7 @@ export default {
             OrderCode: this.createOrderCode(ownerId),
             OwnerId: ownerId,
             OwnerName: ownerName,
+            Shopname: shopName,
             ProductPayments: ownerProductData,
             PhoneNumber: this.phoneNumber,
             Address: this.address,
@@ -475,7 +509,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
-          this.$router.push({ path: `/my-orders` })
+          this.$router.push({ path: `/pay` })
         })
         .catch((err) => {
           responseError(err)

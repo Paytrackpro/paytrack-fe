@@ -22,9 +22,12 @@
                 :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
               />
             </div>
-            <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
-          </div>
-          <div class="row q-mb-md q-col-gutter-md">
+            <div class="col-12 col-sm-6 col-lg-4">
+              <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
+            </div>
+            <div class="col-12 col-sm-6 col-lg-4">
+              <custom-input :label="'Shop Name'" v-model="shopName" :placeholder="'Shop name'" />
+            </div>
             <div class="col-12 col-sm-6 col-lg-4">
               <custom-input
                 :label="'Email'"
@@ -80,6 +83,7 @@ export default {
       password: '',
       email: '',
       displayName: '',
+      shopName: '',
       isPwd: true,
       setAsAdmin: false,
       resetTOTP: false,
@@ -97,6 +101,7 @@ export default {
       this.$api.get(`/admin/user/info/${id}`).then((data) => {
         this.email = data.email
         this.userName = data.userName
+        this.shopName = data.shopName
         this.displayName = data.displayName
         this.lockUser = data.locked
         this.setAsAdmin = data.role == 1
@@ -110,6 +115,7 @@ export default {
           password: this.password,
           email: this.email,
           displayName: this.displayName,
+          shopName: this.shopName,
           otp: this.resetTOTP,
           locked: this.lockUser,
           role: this.setAsAdmin ? 1 : 0,

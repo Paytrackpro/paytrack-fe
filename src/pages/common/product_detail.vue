@@ -1,4 +1,14 @@
 <template>
+  <q-btn
+    flat
+    icon="undo"
+    type="button"
+    color="primary"
+    class="btn-animated btn q-mb-md btn-radius"
+    @click="toShopProducts()"
+  >
+    <q-tooltip>Go to {{ product.shopName }} page</q-tooltip>
+  </q-btn>
   <q-card-section class="card-header q-pa-sm">
     <div class="row">
       <div class="text-h6 title-case q-pt-sm">Product Detail</div>
@@ -30,7 +40,9 @@
       <p class="text-weight-regular text-size-20 q-mb-lg">{{ product.productName }}</p>
       <div class="q-mb-lg">
         <q-icon name="o_account_circle" color="grey-4" size="xs" />
-        <span class="q-ml-xs text-size-13 text-grey-4">{{ product.ownerName }}</span>
+        <span class="q-ml-xs text-size-13 text-grey-4 detail-shop-name" @click="toShopProducts()"
+          >{{ product.shopName }} <q-tooltip>Go to {{ product.shopName }} page</q-tooltip></span
+        >
       </div>
       <span class="text-size-23 text-weight-medium text-accent">{{ priceDisplay() }}</span>
       <div class="row q-mt-lg">
@@ -91,6 +103,9 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'productDetail',
   components: { productList },
+  props: {
+    cartCount: Number,
+  },
   data() {
     return {
       product: {},
@@ -193,19 +208,23 @@ export default {
         .post('cart/add-to-cart', {
           OwnerId: this.product.ownerId,
           OwnerName: this.product.ownerName,
+          ShopName: this.product.shopName,
           ProductId: this.product.id,
           Quantity: Number(this.quantity),
         })
         .then((data) => {
           if (isBuyNow) {
             let buyNowParam = this.product.ownerId + '-' + this.product.id
-            this.$router.push({ path: `/home/cart/${buyNowParam}` })
+            this.$router.push({ path: `/stores/cart/${buyNowParam}` })
           } else {
             this.$q.notify({
               message: 'The product was added to the cart successfully',
               color: 'positive',
               icon: 'check',
             })
+            if (!data.isExist) {
+              this.$emit('updateCartCount', this.cartCount + 1)
+            }
           }
         })
         .catch((err) => {
@@ -215,6 +234,9 @@ export default {
     },
     isMyProduct() {
       return this.user.id == this.product.ownerId
+    },
+    toShopProducts() {
+      this.$router.push({ path: `/stores/${this.product.ownerId}` })
     },
   },
   computed: {

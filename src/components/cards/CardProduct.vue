@@ -6,7 +6,7 @@
       </span>
       <q-tooltip v-if="user.id == data.ownerId">You cannot add to cart with your own products</q-tooltip>
     </q-img>
-    <q-card-section v-if="user.id != data.ownerId">
+    <q-card-section v-if="false">
       <q-btn
         fab
         color="primary"
@@ -19,7 +19,7 @@
         <q-tooltip>Add product to cart</q-tooltip>
       </q-btn>
     </q-card-section>
-    <q-card-section :class="getTitleClass()">
+    <q-card-section class="product-title title-no-cart-icon">
       <div class="text-size-14">
         {{ data.productName }}
       </div>
@@ -31,7 +31,7 @@
     </q-card-section>
     <q-card-section class="product-owner-icon">
       <q-icon name="account_circle" color="grey-4" size="sm" />
-      <span class="q-ml-xs text-size-13 text-grey-3">{{ data.ownerName }}</span>
+      <span class="q-ml-xs text-size-13 text-grey-3">{{ data.shopName }}</span>
     </q-card-section>
   </q-card>
 </template>
@@ -89,7 +89,7 @@ export default {
         })
     },
     toProductDetail(id) {
-      this.$router.push({ path: `/home/product-detail/${id}` })
+      this.$router.push({ path: `/stores/product-detail/${id}` })
     },
     getTitleClass() {
       if (this.user.id == this.data.ownerId) {

@@ -1,7 +1,7 @@
 <template>
   <q-card-section class="card-header q-mb-md q-pa-sm" v-if="hasHeader">
     <div class="row justify-between">
-      <div class="text-h6 title-case q-pt-sm" v-if="title">{{ title }}</div>
+      <div class="text-h6 title-case q-pt-sm" v-if="title">{{ title }} {{ ownerId ? '- ' + shopName : '' }}</div>
       <div class="row" v-if="hasSearch">
         <q-card class="col-12 no-border no-shadow bg-transparent">
           <q-card-section class="product-search">
@@ -25,6 +25,7 @@
   <div class="row q-mb-md justify-between" v-if="hasPagination">
     <span class="q-pt-xs">Total of {{ pagination.rowsNumber }} products </span>
     <q-pagination
+      v-if="pagination.rowsNumber > pagination.rowsPerPage"
       v-model="pagination.page"
       :max="Math.ceil(pagination.rowsNumber / pagination.rowsPerPage)"
       direction-links
@@ -59,7 +60,6 @@ export default {
     hasPagination: Boolean,
     productPerPage: Number,
     ownerId: Number,
-    isHomePage: Boolean,
     cartCount: Number,
   },
   components: { CardProduct },
@@ -73,6 +73,7 @@ export default {
       currentDeleteId: 0,
       confirm: false,
       currentPage: 1,
+      shopName: '',
     }
   },
   watch: {
@@ -89,15 +90,6 @@ export default {
           return
         }
         this.getProductList(newOwnerId)
-      },
-    },
-    isHomePage: {
-      immediate: true,
-      handler(isHomePage) {
-        if (!isHomePage) {
-          return
-        }
-        this.getProductList(undefined)
       },
     },
   },
@@ -118,6 +110,12 @@ export default {
           this.pagination.rowsNumber = count
           this.loading = false
           this.setAvatarImageMap()
+          if (this.rows && this.rows.length > 0) {
+            this.shopName = this.rows[0].shopName
+            if (!this.shopName) {
+              this.shopName = this.rows[0].ownerName
+            }
+          }
         })
         .catch((err) => {
           this.loading = false
@@ -192,11 +190,11 @@ export default {
       }
     },
     searchProduct() {
-      this.getProductList(0)
+      this.getProductList(this.ownerId)
     },
     clearSearch() {
       this.KeySearch = ''
-      this.getProductList(0)
+      this.getProductList(this.ownerId)
     },
     updateCartCount(count) {
       this.$emit('updateCartCount', count)
@@ -214,6 +212,7 @@ export default {
   display: flex;
   width: 100px;
 }
+
 .list-user-header:hover .list-user-icon-sort {
   display: block;
 }

@@ -14,24 +14,40 @@ const routes = [
         redirect: '/approvals',
       },
       {
-        path: 'product/',
-        name: 'home',
+        path: 'product-detail/:id(\\d+)',
+        name: 'productDetail',
+        component: () => import('pages/common/product_detail.vue'),
+        meta: {
+          title: 'Homepage Detail',
+        },
+      },
+      {
+        path: '/stores',
+        name: 'stores',
         component: () => import('pages/payments/layout.vue'),
         meta: {
-          title: 'Homepage',
+          title: 'Stores',
         },
         children: [
           {
             path: '',
-            name: 'home.products',
-            component: () => import('pages/common/homepage.vue'),
+            name: 'stores.list',
+            component: () => import('pages/common/store_list.vue'),
             meta: {
-              title: 'Homepage Products',
+              title: 'Store List',
+            },
+          },
+          {
+            path: ':id(\\d+)',
+            name: 'stores.products',
+            component: () => import('pages/common/store_products.vue'),
+            meta: {
+              title: 'Store Products',
             },
           },
           {
             path: 'product-detail/:id(\\d+)',
-            name: 'home.productDetail',
+            name: 'stores.productDetail',
             component: () => import('pages/common/product_detail.vue'),
             meta: {
               title: 'Homepage Detail',
@@ -39,7 +55,7 @@ const routes = [
           },
           {
             path: 'cart/',
-            name: 'home.cart',
+            name: 'stores.cart',
             component: () => import('pages/common/cart.vue'),
             meta: {
               title: 'Cart Page',
@@ -56,40 +72,6 @@ const routes = [
             ],
           },
         ],
-      },
-      {
-        path: 'my-orders/',
-        name: 'myorders',
-        component: () => import('pages/payments/layout.vue'),
-        meta: {
-          title: 'My Orders',
-        },
-        children: [
-          {
-            path: '',
-            name: 'myorders.list',
-            component: () => import('pages/common/orders.vue'),
-            meta: {
-              title: 'My Orders',
-            },
-          },
-          {
-            path: 'order-detail/:id(\\d+)',
-            name: 'myorders.orderdetail',
-            component: () => import('pages/common/order_detail.vue'),
-            meta: {
-              title: 'My Order Detail',
-            },
-          },
-        ],
-      },
-      {
-        path: '/store-list',
-        name: 'stores',
-        component: () => import('pages/common/store_list.vue'),
-        meta: {
-          title: 'Store List',
-        },
       },
       {
         path: 'approvals/',

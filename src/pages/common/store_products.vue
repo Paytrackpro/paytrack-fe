@@ -1,12 +1,12 @@
 <template>
   <product-list
     hasHeader
-    :title="'Product List'"
+    :title="'Products'"
     hasSearch
     hasPagination
     :productPerPage="18"
-    isHomePage
     :cartCount="cartCount"
+    :ownerId="$route.params.id"
     @updateCartCount="updateCartCount"
   />
 </template>

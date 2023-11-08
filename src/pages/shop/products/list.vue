@@ -1,12 +1,10 @@
 <template>
   <div class="q-pa-lg">
-    <div class="row q-pb-md">
-      <div class="col" align="right">
-        <q-btn label="Add Product" icon="add" class="q-mr-sm" color="primary" to="/shop/products/create" />
-      </div>
+    <div class="row q-pb-md justify-between">
+      <p></p>
+      <q-btn label="Add Product" icon="add" class="q-mr-sm" color="primary" to="/shop/products/create" />
     </div>
     <q-table
-      title="Product List"
       :rows="rows"
       :columns="columns"
       row-key="name"
@@ -19,6 +17,19 @@
       @request="onRequest"
       @row-click="(_, row) => goToDetail(row.id)"
     >
+      <template v-slot:top-left>
+        <div class="row align-center">
+          <q-icon name="storefront" class="sidebar-icon" size="md"></q-icon>
+          <p class="q-ml-sm q-table__title">Product List</p>
+          &nbsp;(<a :href="baseUrl" class="q-ml-sm text-size-13"
+            >{{ baseUrl }} <q-tooltip>Go to store page</q-tooltip></a
+          >
+          <q-btn round dense flat class="q-ml-xs" @click="copy(baseUrl)">
+            <q-icon size="xs" class="custom-icon" name="o_content_copy" />
+            <q-tooltip>Copy Store URL</q-tooltip> </q-btn
+          >)
+        </div>
+      </template>
       <template v-slot:pagination>
         <custom-pagination :pagination="pagination" :color="'primary'" />
       </template>
@@ -261,11 +272,22 @@ export default {
           return ''
       }
     },
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
+      this.$q.notify({
+        type: 'positive',
+        message: 'Copied.',
+        position: 'bottom',
+      })
+    },
   },
   computed: {
     ...mapGetters({
       user: 'user/getUser',
     }),
+    baseUrl() {
+      return window.location.origin + '/stores/' + this.user.id
+    },
   },
 }
 </script>
@@ -274,6 +296,7 @@ export default {
   display: flex;
   width: 100px;
 }
+
 .list-user-header:hover .list-user-icon-sort {
   display: block;
 }

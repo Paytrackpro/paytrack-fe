@@ -73,7 +73,7 @@
           <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
         </div>
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
-          <custom-field :label="'Description'" isHtml :value="getDescription()" />
+          <custom-field :label="'Description'" :value="payment.description" />
         </div>
         <div v-if="!isDraftStatus" class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
           <p class="q-mb-xs">
@@ -188,6 +188,69 @@
         :token="token"
       />
     </div>
+    <q-card class="q-ma-lg" v-if="payment.productPay">
+      <p class="q-table__title text-size-20 q-pt-md q-pl-md">Order Detail - {{ orderData.orderCode }}</p>
+      <q-separator />
+      <div class="row q-col-gutter-sm cart-products-area q-pa-md">
+        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+          <div>
+            <p class="q-mb-xs">
+              <b class="text-weight-medium">Store </b>
+            </p>
+            <q-field stack-label borderless>
+              <template v-slot:control>
+                <span class="q-ml-xs custom-field-text link-style" @click="toShopProducts()"
+                  >{{ orderData.shopName }} <q-tooltip>Go to {{ orderData.shopName }} page</q-tooltip></span
+                >
+              </template>
+            </q-field>
+          </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+          <custom-field :label="'Delivery Address'" isHtml :value="getAddressDisplay()" />
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+          <custom-field :label="'Note'" :value="orderData.memo" />
+        </div>
+      </div>
+      <div class="col-12 q-pa-md">
+        <p class="q-mb-xs">
+          <b class="text-weight-medium">Billing Information</b>
+        </p>
+        <div v-for="(product, proIndex) in orderData.productPaymentsDisplay" :key="proIndex">
+          <div class="row q-my-sm q-pa-sm cart-row">
+            <q-img
+              :src="getAvatarSrc(product.avatarBase64)"
+              style="width: 100%; max-width: 70px"
+              class="q-ml-md col-4 col-lg-1 col-sm-1 col-md-3 col-xs-6 zoom-hover-1-05 cursor-pointer"
+              @click="toProductDetail(product.productId)"
+            ></q-img>
+            <p
+              class="q-ml-lg col-8 col-lg-4 col-sm-3 col-md-4 product-title zoom-hover-1-05 cursor-pointer link-style"
+              @click="toProductDetail(product.productId)"
+            >
+              {{ product.productName }}
+            </p>
+            <p class="q-ml-lg col-3 col-sm-1 col-md-1">{{ priceDisplay(product.price, product.currency) }}</p>
+            <p class="col-2 col-sm-1 col-md-1">{{ product.quantity }}</p>
+            <p class="q-ml-lg col-2 col-sm-1 col-md-1 text-accent">
+              {{ priceDisplay(product.price * product.quantity, product.currency) }}
+            </p>
+            <q-btn
+              class="col-1 col-md-1 col-sm-1"
+              v-if="isReceiver"
+              dense
+              flat
+              color="accent"
+              icon="delete"
+              @click="setDeleteProduct(product.productId, proIndex)"
+            >
+              <q-tooltip>Delete product and resend payment request</q-tooltip>
+            </q-btn>
+          </div>
+        </div>
+      </div>
+    </q-card>
     <q-dialog v-model="payDialog">
       <q-card style="width: 550px; max-width: 80vw">
         <q-card-section class="row">
@@ -244,6 +307,30 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="deleteProductConfirm" persistent>
+      <q-card>
+        <div class="q-pa-md">
+          <div class="row">
+            <q-avatar icon="warning" class="margin-auto" color="primary" text-color="white" size="md" />
+          </div>
+          <div class="row q-pt-sm">
+            <span>{{ getDeleteProductNotice() }}</span>
+          </div>
+        </div>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            unelevated
+            rounded
+            label="Delete"
+            color="primary"
+            v-close-popup
+            @click="deleteProductFromInvoice()"
+          />
+          <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-form>
 </template>
 
@@ -262,6 +349,7 @@ import customField from 'src/components/common/custom_field.vue'
 import { COINS } from 'src/consts/common'
 import coinLabel from '../common/coin_label.vue'
 import PaymentStatus from 'components/payment/paymentStatus'
+import { CURRENCY } from 'src/consts/common'
 
 export default {
   name: 'paymentDetail',
@@ -289,6 +377,10 @@ export default {
       paymentStatus: '',
       confirm: false,
       payDialog: false,
+      deleteProductConfirm: false,
+      deleteProductId: 0,
+      deleteProductIndex: 0,
+      deleteAllBill: false,
     }
   },
   props: {
@@ -300,6 +392,7 @@ export default {
     processing: Boolean,
     approvalCount: Number,
     unpaidCount: Number,
+    orderData: Object,
   },
   methods: {
     ...mapActions({
@@ -477,18 +570,78 @@ export default {
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
     },
-    getDescription() {
-      if (!this.payment.productPay) {
-        return this.payment.description
+    getAvatarSrc(imageBase64) {
+      return 'data:image/png;base64,' + imageBase64
+    },
+    priceDisplay(price, currency) {
+      if (currency == 'USD' || currency == 'EURO') {
+        return this.getCurrencySymbol(currency) + ' ' + price
       }
-
-      let descResult = this.payment.description
-      if (this.paymentType === PAYMENT_OBJECT_REQUEST) {
-        descResult = descResult.replace('{{{', '/shop/orders/detail/')
-      } else {
-        descResult = descResult.replace('{{{', '/my-orders/order-detail/')
+      return price + ' ' + this.getCurrencySymbol(currency)
+    },
+    getCurrencySymbol(currency) {
+      let symbol = ''
+      CURRENCY.forEach((tmpCurrency) => {
+        if (currency === tmpCurrency.label) {
+          symbol = tmpCurrency.Symbol
+          return
+        }
+      })
+      return symbol
+    },
+    getAddressDisplay() {
+      return '<b class="text-size-16">(' + this.orderData.phoneNumber + ')</b>&nbsp;&nbsp;' + this.orderData.address
+    },
+    toShopProducts() {
+      this.$router.push({ path: `/stores/${this.orderData.ownerId}` })
+    },
+    toProductDetail(productId) {
+      this.$router.push({ path: `/stores/product-detail/${productId}` })
+    },
+    setDeleteProduct(productId, index) {
+      //if product count is 1, ask delete invoice complete
+      this.deleteAllBill = this.orderData.productPaymentsDisplay.length < 2
+      this.deleteProductId = productId
+      this.deleteProductIndex = index
+      this.deleteProductConfirm = true
+    },
+    deleteProductFromInvoice() {
+      this.$api
+        .post('/payment/delete-payment-product', {
+          DeleteAll: this.deleteAllBill,
+          Id: this.payment.id,
+          OrderId: this.payment.orderId,
+          ProductId: this.deleteProductId,
+        })
+        .then((data) => {
+          if (this.deleteAllBill) {
+            this.$q.notify({
+              message: 'Payment has been removed',
+              color: 'positive',
+              icon: 'check',
+            })
+            this.back()
+            return
+          }
+          if (data && data.id) {
+            this.payment = data
+            this.$emit('removeProductFromOrder', this.deleteProductIndex)
+          }
+          this.$q.notify({
+            message: 'Product has been removed',
+            color: 'positive',
+            icon: 'check',
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    getDeleteProductNotice() {
+      if (this.deleteAllBill) {
+        return 'There is only one product in your invoice. If you delete the product, the invoice will also be permanently deleted. Are you sure?'
       }
-      return descResult.replace('}}}', '')
+      return 'Are you sure to delete this product in your invoice?'
     },
   },
   watch: {
@@ -566,7 +719,7 @@ export default {
       let isAllowStatus =
         ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1
       let isSender = this.payment.senderId === this.user.id
-      return isAllowStatus && isSender
+      return isAllowStatus && isSender && !this.payment.productPay
     },
     processable() {
       return (
