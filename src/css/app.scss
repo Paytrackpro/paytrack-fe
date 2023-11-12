@@ -627,3 +627,10 @@ a {
 .q-drawer--mobile .separator-mini-display {
   display: none;
 }
+
+.receipt-input-file .q-field__control-container .q-field__native > div {
+  margin-top: 15px;
+}
+.zoom-hover-1-05:hover {
+  transform: scale(1.05);
+}

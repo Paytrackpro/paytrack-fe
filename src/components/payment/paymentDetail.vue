@@ -17,6 +17,14 @@
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
+            v-if="isUploadDisplay"
+            label="Upload"
+            type="button"
+            color="secondary"
+            @click="uploadReceipt()"
+            class="q-mr-sm btn btn-animated"
+          />
+          <q-btn
             v-if="editable"
             label="Edit"
             type="button"
@@ -162,6 +170,41 @@
         <div v-if="!isApprover && isPaidStatus" class="col-12 col-sm-6 col-md-4 q-py-sm q-my-sm field-shadow">
           <custom-field :label="'Paid At'" isTime :value="payment.paidAt" />
         </div>
+        <div class="col-12" v-if="displayAttachReceipt">
+          <p class="q-mb-xs">
+            <b class="text-weight-medium">{{ isSender ? 'Attach Receipt' : 'Receipt' }}</b>
+          </p>
+          <q-field borderless v-if="isSender">
+            <template v-slot:control>
+              <q-file
+                v-model="receiptAttachFile"
+                accept=".jpg, .png, image/*"
+                class="receipt-input-file"
+                label="Pick files"
+                filled
+                @rejected="onRejected"
+                style="max-width: 300px"
+              >
+                <template v-slot:prepend>
+                  <q-icon name="attach_file" />
+                </template>
+              </q-file>
+            </template>
+          </q-field>
+          <q-img
+            style="height: 100px; max-width: 100px; justify-content: center; align-items: center"
+            class="q-mt-sm"
+            v-if="receiptAttachFile != null"
+            :src="getImageUrl()"
+          />
+          <q-img
+            style="height: 100px; max-width: 100px; justify-content: center; align-items: center"
+            class="cursor-pointer zoom-hover-1-05 q-mt-sm"
+            v-if="imageBase64 != '' && receiptAttachFile == null"
+            @click="receiptImageDialog = true"
+            :src="imageBase64"
+          />
+        </div>
       </div>
       <div class="row q-mt-md" v-if="isShowInvoice && isShowCost">
         <p>
@@ -188,6 +231,12 @@
         :token="token"
       />
     </div>
+    <q-dialog v-model="receiptImageDialog">
+      <q-card style="width: 550px; max-width: 80vw">
+        <q-img style="justify-content: center; align-items: center" :src="imageBase64" />
+      </q-card>
+    </q-dialog>
+
     <q-dialog v-model="payDialog">
       <q-card style="width: 550px; max-width: 80vw">
         <q-card-section class="row">
@@ -259,9 +308,10 @@ import InvoicesMode from 'components/payment/invoicesMode'
 import ApproverDisplay from 'components/payment/approverDisplay'
 import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 import customField from 'src/components/common/custom_field.vue'
-import { COINS } from 'src/consts/common'
 import coinLabel from '../common/coin_label.vue'
 import PaymentStatus from 'components/payment/paymentStatus'
+import { ref } from 'vue'
+import { api, axios } from 'boot/axios'
 
 export default {
   name: 'paymentDetail',
@@ -289,6 +339,10 @@ export default {
       paymentStatus: '',
       confirm: false,
       payDialog: false,
+      receiptAttachFile: ref(null),
+      imageNewName: '',
+      imageBase64: '',
+      receiptImageDialog: false,
     }
   },
   props: {
@@ -368,6 +422,7 @@ export default {
         token: this.token,
         txId: this.txId,
       }
+
       form.status = this.paymentStatus
       this.paying = true
       const { data } = await this.savePayment(form)
@@ -477,6 +532,56 @@ export default {
       const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
       this.$router.push({ path: `/${path}` })
     },
+    onRejected() {
+      this.$q.notify({
+        type: 'negative',
+        message: `Image extensions are not allowed`,
+      })
+    },
+    uploadReceipt() {
+      if (this.receiptAttachFile == null) {
+        this.$q.notify({
+          type: 'negative',
+          message: `Image has not been uploaded yet. Try again`,
+        })
+        return
+      }
+      this.createImageNewName()
+      this.uploadImage()
+      //create receipt upload handler
+      this.payment.receiptImg = this.imageNewName
+      this.update()
+    },
+    async uploadImage() {
+      let formData = new FormData()
+      formData.append('receipt', this.receiptAttachFile)
+      formData.set('newImageName', this.imageNewName)
+      let headers = {
+        'Content-Type': 'multipart/form-data',
+      }
+      await api.post('/file/upload-one', formData, headers)
+    },
+    createImageNewName() {
+      let nameArr = this.receiptAttachFile.name.split('.')
+      if (nameArr.length < 2) return
+      this.imageNewName = this.randomString(64, '#aA') + '.' + nameArr[1]
+    },
+    randomString(length, chars) {
+      var mask = ''
+      if (chars.indexOf('a') > -1) mask += 'abcdefghijklmnopqrstuvwxyz'
+      if (chars.indexOf('A') > -1) mask += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      if (chars.indexOf('#') > -1) mask += '0123456789'
+      var result = ''
+      for (var i = length; i > 0; --i) result += mask[Math.floor(Math.random() * mask.length)]
+      return result
+    },
+    getImageUrl() {
+      if (this.receiptAttachFile == null) {
+        return ''
+      }
+      return URL.createObjectURL(this.receiptAttachFile)
+    },
+    getReceiptImageUrl() {},
   },
   watch: {
     modelValue: {
@@ -499,6 +604,21 @@ export default {
           }
           this.payment.paymentMethod = setting.type
           this.payment.paymentAddress = setting.address
+        }
+        if (this.payment.receiptImg != null && this.payment.receiptImg != '') {
+          this.$api
+            .get(`/file/base64-one`, {
+              params: {
+                image: this.payment.receiptImg,
+              },
+            })
+            .then((data) => {
+              this.imageBase64 = 'data:image/png;base64,' + data
+            })
+            .catch((err) => {
+              responseError(err)
+              return { error: err }
+            })
         }
       },
     },
@@ -631,8 +751,12 @@ export default {
       }
       return this.payment.senderName || this.payment.externalEmail
     },
+    displayAttachReceipt() {
+      return (this.isPaidStatus && this.isSender) || (this.imageBase64 != '' && this.isReceiver)
+    },
+    isUploadDisplay() {
+      return this.isPaidStatus && this.isSender && this.receiptAttachFile != null
+    },
   },
 }
 </script>
-
-<style scoped></style>
