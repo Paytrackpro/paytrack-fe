@@ -291,7 +291,7 @@ export default {
           color: 'positive',
           icon: 'check',
         })
-        this.$router.push({ path: `/shop/products` })
+        this.$router.push({ path: `/my-shop` })
       }
     },
     getGalleryImageNames() {
@@ -360,7 +360,7 @@ export default {
       })
     },
     cancel() {
-      this.$router.push({ path: `/shop/products` })
+      this.$router.push({ path: `/my-shop` })
     },
     async saveProduct(product) {
       let url = 'shop/product/create'

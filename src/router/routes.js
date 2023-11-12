@@ -191,70 +191,36 @@ const routes = [
         ],
       },
       {
-        path: 'shop/',
-        name: 'shop',
+        path: 'my-shop/',
+        name: 'myShop',
         component: () => import('pages/payments/layout.vue'),
         meta: {
           title: 'My Shop',
         },
         children: [
           {
-            path: 'products',
-            name: 'products',
+            path: '',
+            name: 'myShop.products',
+            component: () => import('pages/shop/products/list.vue'),
             meta: {
               title: 'My Products',
             },
-            children: [
-              {
-                path: '',
-                name: 'products.list',
-                component: () => import('pages/shop/products/list.vue'),
-                meta: {
-                  title: 'Product List',
-                },
-              },
-              {
-                path: 'create',
-                name: 'products.create',
-                component: () => import('pages/shop/products/create.vue'),
-                meta: {
-                  title: 'Create Product',
-                },
-              },
-              {
-                path: 'update/:id(\\d+)',
-                name: 'products.update',
-                component: () => import('pages/shop/products/update.vue'),
-                meta: {
-                  title: 'Update Product',
-                },
-              },
-            ],
           },
           {
-            path: 'orders',
-            name: 'orders',
+            path: 'create',
+            name: 'myShop.create',
+            component: () => import('pages/shop/products/create.vue'),
             meta: {
-              title: 'Order Management',
+              title: 'Create Product',
             },
-            children: [
-              {
-                path: '',
-                name: 'orders.list',
-                component: () => import('pages/shop/orders/list.vue'),
-                meta: {
-                  title: 'Order List',
-                },
-              },
-              {
-                path: 'detail/:id(\\d+)',
-                name: 'orders.detail',
-                component: () => import('pages/shop/orders/detail.vue'),
-                meta: {
-                  title: 'Order Detail',
-                },
-              },
-            ],
+          },
+          {
+            path: 'update/:id(\\d+)',
+            name: 'myShop.update',
+            component: () => import('pages/shop/products/update.vue'),
+            meta: {
+              title: 'Update Product',
+            },
           },
         ],
       },

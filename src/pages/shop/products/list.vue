@@ -2,7 +2,7 @@
   <div class="q-pa-lg">
     <div class="row q-pb-md justify-between">
       <p></p>
-      <q-btn label="Add Product" icon="add" class="q-mr-sm" color="primary" to="/shop/products/create" />
+      <q-btn label="Add Product" icon="add" class="q-mr-sm" color="primary" to="/my-shop/create" />
     </div>
     <q-table
       :rows="rows"
@@ -213,7 +213,7 @@ export default {
       this.getImagesBase64(avatars.join(','))
     },
     goToDetail(id) {
-      this.$router.push({ name: 'products.update', params: { id } })
+      this.$router.push({ name: 'myShop.update', params: { id } })
     },
     onRequest(props) {
       const query = pagingToPathParams(props)

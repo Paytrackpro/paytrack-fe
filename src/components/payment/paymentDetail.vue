@@ -188,9 +188,9 @@
         :token="token"
       />
     </div>
-    <q-card class="q-ma-lg" v-if="payment.productPay">
+    <q-card class="q-ma-lg content-container" v-if="payment.productPay">
       <p class="q-table__title text-size-20 q-pt-md q-pl-md">Order Detail - {{ orderData.orderCode }}</p>
-      <q-separator />
+      <q-separator color="primary opacity-0-3" />
       <div class="row q-col-gutter-sm cart-products-area q-pa-md">
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
           <div>
