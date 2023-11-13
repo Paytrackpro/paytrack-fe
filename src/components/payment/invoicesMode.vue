@@ -26,10 +26,10 @@
   <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
     <thead>
       <tr>
+        <th class="text-left" style="width: 30%">Description</th>
         <th class="text-left" style="width: 15%" v-if="user.showDateOnInvoiceLine">Date</th>
         <th class="text-left" style="width: 15%">Detail</th>
         <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
-        <th class="text-left">Description</th>
         <th style="width: 15%" v-if="!readonly"></th>
       </tr>
     </thead>
@@ -51,14 +51,17 @@
         :readonly="readonly"
       />
     </tbody>
-    <tfoot>
+    <tfoot class="card-footer">
       <tr>
-        <td colspan="10">
-          <q-separator />
-          <p class="q-pb-sm q-pt-md text-size-16 text-weight-medium" v-if="isDisplayHours()">
-            Total: {{ getTotalHours() }}&nbsp;hour(s)
-          </p>
+        <td>
+          <p class="q-pb-sm q-pt-md text-size-16 text-weight-medium">Total</p>
         </td>
+        <td v-if="user.showDateOnInvoiceLine"></td>
+        <td class="text-weight-medium">
+          <span v-if="isDisplayHours()">{{ getTotalHours() }}&nbsp;hour(s)</span>
+        </td>
+        <td v-if="showCost" class="text-weight-medium">$&nbsp;{{ readonly ? amount.toFixed(2) : amount }}</td>
+        <td v-if="!readonly"></td>
       </tr>
     </tfoot>
   </q-markup-table>
@@ -87,6 +90,7 @@ export default {
     hourlyRate: String,
     readonly: Boolean,
     showCost: Boolean,
+    amount: Number,
   },
   emits: ['update:modelValue'],
   data() {

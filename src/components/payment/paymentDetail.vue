@@ -77,7 +77,7 @@
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="payment.receiverId != user.id">
           <custom-field :label="'Recipient'" :value="getRecipientName" />
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="!isShowInvoice">
           <custom-field :label="'Amount (USD)'" :value="'$ ' + (payment.amount || 0).toFixed(2)" />
         </div>
         <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
@@ -215,6 +215,7 @@
         <div class="col">
           <invoices-mode
             v-model="payment.details"
+            :amount="payment.amount"
             readonly
             v-model:hourlyRate="payment.hourlyRate"
             :showCost="isShowCost"

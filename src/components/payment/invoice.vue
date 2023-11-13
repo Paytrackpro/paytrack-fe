@@ -1,5 +1,20 @@
 <template>
   <tr>
+    <td class="text-left">
+      <q-input
+        v-if="editing"
+        label="Description"
+        v-model="invoice.description"
+        autogrow
+        dense
+        stack-label
+        hide-bottom-space
+        rows="1"
+        type="textarea"
+        :error="submitted && !invoice.description"
+      />
+      <span class="content-wrap" v-else>{{ modelValue.description }}</span>
+    </td>
     <td class="invoice-price-detail text-left" v-if="user.showDateOnInvoiceLine">
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
@@ -52,21 +67,6 @@
         :error="submitted && invoice.cost <= 0"
       />
       <span v-else>$ {{ cost }}</span>
-    </td>
-    <td class="text-left">
-      <q-input
-        v-if="editing"
-        label="Description"
-        v-model="invoice.description"
-        autogrow
-        dense
-        stack-label
-        hide-bottom-space
-        rows="1"
-        type="textarea"
-        :error="submitted && !invoice.description"
-      />
-      <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
       <q-btn v-if="!editing" size="sm" label="Edit" color="info" @click="edit" />
