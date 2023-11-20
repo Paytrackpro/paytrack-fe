@@ -11,50 +11,28 @@
               dense
               lazy-rules
               stack-label
-              :rules="[(val) => !!val || 'Project name is required']"
+              @blur="checkValidProjectName"
+              :error="projectNameError"
+              :error-message="project.error"
+              @focus="projectNameFocus = true"
               hide-bottom-space
               v-model="project.name"
               placeholder="Project Name"
             />
           </div>
           <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Client</p>
-            <q-input
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members Select</p>
+            <q-select
+              v-model="memberModel"
+              use-input
+              use-chips
+              multiple
               outlined
-              dense
-              lazy-rules
-              stack-label
-              hide-bottom-space
-              v-model="project.client"
-              placeholder="Client"
-            />
-          </div>
-          <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members</p>
-            <q-input
-              outlined
-              dense
-              lazy-rules
-              stack-label
-              @blur="checkValidMemberIds"
-              :error="memberInputError"
-              :error-message="project.error"
-              @focus="memberFocus = true"
-              hide-bottom-space
-              v-model="project.membersInput"
-              placeholder="Separate with comma(,)"
-            />
-          </div>
-          <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Proposal Token</p>
-            <q-input
-              outlined
-              dense
-              lazy-rules
-              stack-label
-              hide-bottom-space
-              v-model="project.proposalToken"
-              placeholder="Proposal Token"
+              input-debounce="0"
+              @new-value="createValue"
+              :options="memberFilterOptions"
+              @filter="filterFn"
+              @update:model-value="modelValueChange()"
             />
           </div>
         </div>
@@ -62,14 +40,26 @@
           <div class="col-12">
             <div class="row justify-between">
               <div></div>
-              <q-btn
-                label="Create Project"
-                class="q-mr-xs q-mt-lg"
-                :disable="loading"
-                style="height: 40px"
-                type="submit"
-                color="primary"
-              />
+              <div>
+                <q-btn
+                  :label="isEdit ? 'Update Project' : 'Create Project'"
+                  class="q-mr-xs q-mt-lg"
+                  :disable="projectNameError"
+                  style="height: 40px"
+                  type="submit"
+                  color="primary"
+                />
+                <q-btn
+                  v-if="isEdit"
+                  label="Cancel Update"
+                  class="q-ml-xs q-mt-lg"
+                  style="height: 40px"
+                  type="button"
+                  color="white"
+                  text-color="black"
+                  @click="cancelEdit()"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -87,15 +77,42 @@
         :hide-pagination="pagination.rowsNumber < 10"
         flat
         separator="none"
+        @row-click="(_, row) => editProject(row.projectId)"
       >
+        <template v-slot:body-cell-action="props">
+          <q-td :props="props">
+            <q-btn
+              :props="props"
+              dense
+              round
+              flat
+              color="grey"
+              @click="setDeleteProject(props.row.projectId)"
+              icon="delete"
+            ></q-btn>
+          </q-td>
+        </template>
       </q-table>
     </div>
+    <q-dialog v-model="deleteConfirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="warning" color="primary" text-color="white" size="md" />
+          <span class="q-ml-sm">Are you sure to delete the project??</span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteProject()" />
+          <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </q-form>
 </template>
 
 <script>
 import { defaultPaging } from 'src/helper/paging'
 import { responseError } from 'src/helper/error'
+import { ref } from 'vue'
 import {
   DESTINATION_CHECK_NONE,
   DESTINATION_CHECK_DONE,
@@ -103,20 +120,60 @@ import {
   DESTINATION_CHECK_FAIL,
 } from 'src/consts/common'
 
+let memberStringOptions = []
+
 export default {
+  setup() {
+    const memberModel = ref(null)
+    const memberFilterOptions = ref(memberStringOptions)
+
+    return {
+      memberModel,
+      memberFilterOptions,
+
+      createValue(val, done) {
+        if (val.length > 0) {
+          const modelValue = (memberModel.value || []).slice()
+
+          val
+            .split(/[,;|]+/)
+            .map((v) => v.trim())
+            .filter((v) => v.length > 0)
+            .forEach((v) => {
+              if (memberStringOptions.includes(v) === false) {
+                memberStringOptions.push(v)
+              }
+              if (modelValue.includes(v) === false) {
+                modelValue.push(v)
+              }
+            })
+          done(null)
+          memberModel.value = modelValue
+        }
+      },
+
+      filterFn(val, update) {
+        update(() => {
+          if (val === '') {
+            memberFilterOptions.value = memberStringOptions
+          } else {
+            const needle = val.toLowerCase()
+            memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
+          }
+        })
+      },
+    }
+  },
   data() {
     return {
       user: {},
       project: {
         name: '',
-        client: '',
         members: [],
-        membersInput: '',
-        proposalToken: '',
         error: '',
         status: DESTINATION_CHECK_NONE,
       },
-      memberFocus: false,
+      projectNameFocus: false,
       loading: false,
       pagination: {
         ...defaultPaging,
@@ -135,15 +192,6 @@ export default {
           },
         },
         {
-          name: 'client',
-          required: true,
-          label: 'Client',
-          align: 'center',
-          field: (row) => {
-            return row.client
-          },
-        },
-        {
           name: 'members',
           align: 'center',
           label: 'Members',
@@ -156,15 +204,18 @@ export default {
           },
         },
         {
-          name: 'proposalToken',
+          name: 'action',
           align: 'center',
-          label: 'Proposal Token',
-          field: (row) => {
-            return row.proposalToken
-          },
+          label: 'Action',
+          field: '',
         },
       ],
       rows: [],
+      userSelection: [],
+      currentEditProject: {},
+      isEdit: false,
+      deleteConfirm: false,
+      deleteId: 0,
     }
   },
   name: 'projectForm',
@@ -178,106 +229,96 @@ export default {
     },
   },
   methods: {
-    checkValidMemberIds() {
-      if (this.project.membersInput == '') {
-        this.project.error = ''
-        this.project.status = DESTINATION_CHECK_DONE
+    modelValueChange() {
+      this.project.members = []
+      if (this.memberModel == null) {
         return
       }
-      this.project.status = DESTINATION_CHECK_CHECKING
-      const value = this.project.membersInput.replace(/,\s*$/, '')
-      this.project.membersInput = value
-      this.$api
-        .get(`/user/member-exist?userNames=${value}`)
-        .then((data) => {
-          if (data && data.length) {
-            this.project.status = DESTINATION_CHECK_DONE
-            this.project.members = []
-            data.forEach((item) => {
-              let userInfo = { MemberId: item.id, UserName: item.userName, DisplayName: item.displayName, Role: 1 }
-              this.project.members.push(userInfo)
-            })
-          } else {
-            this.project.status = DESTINATION_CHECK_FAIL
-            this.project.error = data.message
-          }
-          this.memberFocus = false
-        })
-        .catch((err) => {
-          this.project.status = DESTINATION_CHECK_FAIL
-          this.project.error = err.message || 'the user name is not found'
-          this.memberFocus = false
-        })
-    },
-    checkValidMemberIdsSubmit() {
-      if (this.project.membersInput == '') {
-        this.project.error = ''
-        this.project.status = DESTINATION_CHECK_DONE
-        this.submitHandler()
-        return
-      }
-      const value = this.project.membersInput.replace(/,\s*$/, '')
-      this.project.membersInput = value
-      this.$api
-        .get(`/user/member-exist?userNames=${value}`)
-        .then((data) => {
-          if (data && data.length) {
-            this.project.members = []
-            this.project.status = DESTINATION_CHECK_DONE
-            data.forEach((item) => {
-              let userInfo = { MemberId: item.id, UserName: item.userName, DisplayName: item.displayName, Role: 1 }
-              this.project.members.push(userInfo)
-            })
-            this.submitHandler()
-          } else {
+      let newSelectedUsers = String(this.memberModel)
+      this.project.members = []
+      newSelectedUsers
+        .split(/[,;|]+/)
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0)
+        .forEach((v) => {
+          let userInfo = this.getUserInfo(v)
+          if (userInfo == null) {
             return
           }
+          this.project.members.push({
+            MemberId: userInfo.id,
+            UserName: userInfo.userName,
+            DisplayName: userInfo.displayName,
+            Role: 1,
+          })
         })
-        .catch((err) => {
+    },
+    getUserInfo(userName) {
+      let result = null
+      this.userSelection.forEach((userInfo) => {
+        if (userInfo.userName == userName) {
+          result = userInfo
           return
-        })
+        }
+      })
+      return result
     },
     async submit() {
       if (!this.checkDestinationDone()) {
-        if (this.memberFocus) {
-          this.checkValidMemberIdsSubmit()
+        if (this.projectNameFocus) {
+          this.checkValidProjectNameSubmit()
         }
         return
       }
       this.submitHandler()
     },
     submitHandler() {
-      this.loading = true
-      this.$api
-        .post('project/create', {
-          ProjectName: this.project.name,
-          Client: this.project.client,
-          Members: this.project.members,
-          ProposalToken: this.project.proposalToken,
-        })
-        .then((res) => {
-          this.resetProject()
-          this.getList()
-        })
-        .catch((err) => {
-          responseError(err)
-        })
-        .finally(() => {
-          this.loading = false
-        })
+      let params = { ProjectName: this.project.name, Members: this.project.members }
+      if (this.isEdit) {
+        params.ProjectId = this.currentEditProject.projectId
+        this.$api
+          .put('project/edit', params)
+          .then((res) => {
+            this.resetProject()
+            this.getList()
+            this.$q.notify({
+              type: 'positive',
+              message: 'Project has been updated',
+              position: 'bottom',
+            })
+          })
+          .catch((err) => {
+            responseError(err)
+          })
+      } else {
+        this.$api
+          .post('project/create', params)
+          .then((res) => {
+            this.resetProject()
+            this.getList()
+            this.$q.notify({
+              type: 'positive',
+              message: 'Project has been created',
+              position: 'bottom',
+            })
+          })
+          .catch((err) => {
+            responseError(err)
+          })
+      }
     },
     resetProject() {
       this.project = {
         name: '',
-        client: '',
-        membersInput: '',
-        proposalToken: '',
+        members: [],
+        status: DESTINATION_CHECK_DONE,
         error: '',
-        status: DESTINATION_CHECK_NONE,
       }
+      this.memberModel = ref(null)
+      this.isEdit = false
     },
     checkDestinationDone: function () {
-      return !this.memberFocus && this.project.status === DESTINATION_CHECK_DONE
+      return !this.projectNameFocus && this.project.status === DESTINATION_CHECK_DONE
     },
     getList() {
       this.loading = true
@@ -293,16 +334,109 @@ export default {
           this.loading = false
         })
     },
+    initUserList() {
+      this.$api
+        .get('/user/get-user-list', {})
+        .then((res) => {
+          this.userSelection = res
+          memberStringOptions = []
+          this.userSelection.forEach((userInfo) => {
+            memberStringOptions.push(userInfo.userName)
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+          this.loading = false
+        })
+    },
+    handlerValidProjectName(isSubmit) {
+      if (this.project.name == '') {
+        this.project.status = DESTINATION_CHECK_FAIL
+        this.project.error = 'Project name is required'
+        return
+      }
+      this.project.status = DESTINATION_CHECK_CHECKING
+      let isExist = false
+      if (!this.isEdit || (this.isEdit && this.currentEditProject.projectName != this.project.name)) {
+        this.rows.forEach((tmpProject) => {
+          if (tmpProject.projectName == this.project.name.trim()) {
+            isExist = true
+            return
+          }
+        })
+      }
+      if (isExist) {
+        this.project.status = DESTINATION_CHECK_FAIL
+        this.project.error = 'Project name already exists'
+      } else {
+        this.project.status = DESTINATION_CHECK_DONE
+        if (isSubmit) {
+          this.submitHandler()
+        }
+      }
+    },
+    checkValidProjectName() {
+      this.handlerValidProjectName(false)
+    },
+    checkValidProjectNameSubmit() {
+      this.handlerValidProjectName(true)
+    },
+    editProject(projectId) {
+      this.rows.forEach((tmpProject) => {
+        if (tmpProject.projectId == projectId) {
+          this.currentEditProject = tmpProject
+          this.project = {
+            name: tmpProject.projectName,
+            members: tmpProject.members,
+            status: DESTINATION_CHECK_DONE,
+            error: '',
+          }
+          this.isEdit = true
+          let memberArr = []
+          if (this.project.members) {
+            this.project.members.forEach((member) => {
+              memberArr.push(member.userName)
+            })
+          }
+          this.memberModel = ref(memberArr)
+          return
+        }
+      })
+    },
+    deleteProject() {
+      this.$api
+        .delete(`/project/delete/${this.deleteId}`)
+        .then(() => {
+          this.$q.notify({
+            message: 'Project has been deleted',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.getList()
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    setDeleteProject(projectId) {
+      this.deleteConfirm = true
+      this.deleteId = projectId
+    },
+    cancelEdit() {
+      this.isEdit = false
+      this.resetProject()
+    },
   },
 
   computed: {
-    memberInputError: function () {
+    projectNameError: function () {
       return this.project.status === DESTINATION_CHECK_FAIL
     },
   },
   created() {
     this.getList()
     this.user = { ...this.modelValue }
+    this.initUserList()
   },
 }
 </script>

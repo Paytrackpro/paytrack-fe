@@ -26,8 +26,9 @@
   <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
     <thead>
       <tr>
-        <th class="text-left" style="width: 30%">Description</th>
+        <th class="text-left" style="width: 25%">Description</th>
         <th class="text-left" style="width: 15%" v-if="user.showDateOnInvoiceLine">Date</th>
+        <th class="text-left" style="width: 15%">Project</th>
         <th class="text-left" style="width: 15%">Detail</th>
         <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
         <th style="width: 15%" v-if="!readonly"></th>
@@ -109,6 +110,8 @@ export default {
         cost: 0,
         description: '',
         date: this.getRefDateFormat(new Date()),
+        projectId: 0,
+        projectName: '',
       },
       index: -1,
     }

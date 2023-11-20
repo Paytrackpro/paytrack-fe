@@ -19,6 +19,9 @@
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
     <td class="text-left">
+      {{ invoice.projectName }}
+    </td>
+    <td class="text-left">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -116,6 +119,8 @@ export default {
         cost: 0,
         description: '',
         date: '',
+        projectId: 0,
+        projectName: '',
       },
       type: 'labor',
       confirm: false,
@@ -141,6 +146,8 @@ export default {
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
         date: this.invoice.date,
+        projectId: this.invoice.projectId,
+        projectName: this.invoice.projectName,
       })
       this.editing = false
     },
@@ -176,6 +183,8 @@ export default {
             cost: Number(this.modelValue.quantity) * Number(newHR),
             description: this.modelValue.description,
             date: this.modelValue.date,
+            projectId: this.modelValue.projectId,
+            projectName: this.modelValue.projectName,
           })
         }
       },
