@@ -1,10 +1,6 @@
 <template>
   <div class="q-pa-lg">
-    <!--    <q-breadcrumbs>
-      <q-breadcrumbs-el label="Home" to="/"/>
-      <q-breadcrumbs-el label="Payment" to="/payment"/>
-    </q-breadcrumbs>-->
-    <router-view :approvalCount="approvalCount" />
+    <router-view :approvalCount="approvalCount" :unpaidCount="unpaidCount" @updateUnpaidCount="updateUnpaidCount" />
   </div>
 </template>
 
@@ -13,6 +9,12 @@ export default {
   name: 'pagePayment',
   props: {
     approvalCount: Number,
+    unpaidCount: Number,
+  },
+  methods: {
+    updateUnpaidCount(count) {
+      this.$emit('updateUnpaidCount', count)
+    },
   },
 }
 </script>

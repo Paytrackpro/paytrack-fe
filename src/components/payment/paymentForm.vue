@@ -65,7 +65,7 @@
             />
           </div>
           <div class="col-12 col-md-1"></div>
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-4" v-if="!isInvoiceMode">
             <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
             <q-input
               class="no-control-button"
@@ -117,6 +117,7 @@
           ref="invoiceMode"
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
+          :amount="inPayment.amount"
           v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />
@@ -188,7 +189,7 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
-        this.isInvoiceMode = payment.details.length > 0
+        this.isInvoiceMode = payment.details && payment.details.length > 0
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate

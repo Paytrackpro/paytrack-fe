@@ -1,6 +1,6 @@
 <template>
   <div class="row q-mt-lg">
-    <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval'">
+    <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
       <q-checkbox label="Hide Paid" v-model="hidePaid" />
     </div>
     <div class="col" align="right">
@@ -19,7 +19,8 @@
           class="q-mr-sm"
           color="primary"
           @click="onBulkPay"
-          v-show="isBulkPay && selected.length > 0"
+          v-show="isBulkPay"
+          :disable="selected.length == 0"
           style="margin-left: 10px"
         />
       </template>
@@ -229,7 +230,21 @@ export default {
         width: '9px',
         opacity: 0.2,
       },
+      showBulkPay: false,
     }
+  },
+  created() {
+    if (this.type !== PAYMENT_OBJECT_REMINDER) {
+      return
+    }
+    this.$api
+      .get('/payment/bulk-pay-count')
+      .then((count) => {
+        this.showBulkPay = count > 1
+      })
+      .catch((err) => {
+        responseError(err)
+      })
   },
   components: {
     PaymentStatus,
@@ -247,9 +262,6 @@ export default {
     }),
     isUser() {
       return this.user.role === role.USER
-    },
-    showBulkPay() {
-      return this.type === PAYMENT_OBJECT_REMINDER
     },
     columns() {
       let flexibleCol = [
@@ -442,6 +454,7 @@ export default {
         this.getPayments({
           ...filter,
           requestType: this.type,
+          hidePaid: this.hidePaid,
         })
       }
     },

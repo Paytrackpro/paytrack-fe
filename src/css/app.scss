@@ -583,7 +583,7 @@ a {
 }
 .card-header {
   background-color: #dcf2ff;
-  border-bottom: 1px solid #EFEFEF;
+  border-bottom: 1px solid #efefef;
 }
 
 @media only screen and (max-width: 575px) {
@@ -596,4 +596,46 @@ a {
   .address_breakline {
     display: none;
   }
+}
+
+.width-20 {
+  width: 20%;
+}
+.width-40 {
+  width: 40%;
+}
+.width-auto {
+  width: auto;
+}
+
+.q-drawer--standard .separator-full-display {
+  display: flex;
+}
+
+.q-drawer--standard .separator-mini-display {
+  display: none;
+}
+
+.q-drawer--mini .separator-full-display {
+  display: none;
+}
+
+.q-drawer--mini .separator-mini-display {
+  display: block;
+}
+
+.q-drawer--mobile .separator-mini-display {
+  display: none;
+}
+
+.receipt-input-file .q-field__control-container .q-field__native > div {
+  margin-top: 15px;
+}
+.zoom-hover-1-05:hover {
+  transform: scale(1.05);
+}
+
+.card-footer {
+  background-color: #e9f0ee;
+  border-bottom: 1px solid #efefef;
 }
