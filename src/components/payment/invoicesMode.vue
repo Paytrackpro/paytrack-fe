@@ -54,13 +54,15 @@
     <tfoot class="card-footer">
       <tr>
         <td>
-          <p class="q-pb-sm q-pt-md text-size-16 text-weight-medium">Total</p>
+          <p class="q-pb-sm q-pt-md text-size-13 text-weight-medium">Total</p>
         </td>
         <td v-if="user.showDateOnInvoiceLine"></td>
-        <td class="text-weight-medium">
+        <td class="text-weight-medium text-size-13">
           <span v-if="isDisplayHours()">{{ getTotalHours() }}&nbsp;hour(s)</span>
         </td>
-        <td v-if="showCost" class="text-weight-medium">$&nbsp;{{ readonly ? amount.toFixed(2) : amount }}</td>
+        <td v-if="showCost" class="text-weight-medium text-size-13">
+          $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
+        </td>
         <td v-if="!readonly"></td>
       </tr>
     </tfoot>
