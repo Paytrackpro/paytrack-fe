@@ -98,7 +98,7 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="warning" color="primary" text-color="white" size="md" />
-          <span class="q-ml-sm">Are you sure to delete the project??</span>
+          <span class="q-ml-sm">Are you sure to delete the project?</span>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteProject()" />

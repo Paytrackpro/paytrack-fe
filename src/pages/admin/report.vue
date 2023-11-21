@@ -1,12 +1,10 @@
 <template>
-  <div class="q-pa-lg" v-if="!user.showMonthlyReport">
-    <payment-list ref="paymentList" type="approval" label="Pending Approvals" />
-  </div>
-  <q-card v-else class="q-pa-md q-ma-lg content-container">
+  <q-card class="q-pa-md q-ma-lg content-container">
     <q-card-section class="q-py-none">
       <q-tabs align="left" v-model="tab" inline-label active-class="tab-active">
-        <q-tab label="Approval List" icon="schedule" name="approval_list" no-caps class="tab-item" />
-        <q-tab label="Report" icon="summarize" name="report" no-caps class="tab-item" />
+        <q-tab label="Payment Report" icon="analytics" name="payment" no-caps class="tab-item" />
+        <q-tab label="Invoice Summary" icon="summarize" name="invoice" no-caps class="tab-item" />
+        <q-tab label="Payment Address" icon="sports_score" name="address" no-caps class="tab-item" />
       </q-tabs>
       <q-separator />
     </q-card-section>
@@ -22,10 +20,23 @@
         transition-prev="jump-up"
         transition-next="jump-down"
       >
-        <q-tab-panel class="q-pa-none" name="approval_list">
-          <payment-list ref="paymentList" type="approval" label="Pending Approvals" />
+        <q-tab-panel class="q-pa-none" name="payment">
+          <div class="row q-mb-md q-col-gutter-md">
+            <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
+              <q-field outlined>
+                <span>{{ `${paymentDateRange.from} - ${paymentDateRange.to}` }}</span>
+                <q-popup-proxy transition-show="scale" transition-hide="scale">
+                  <q-date v-model="paymentDateRange" range>
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-field>
+            </div>
+          </div>
         </q-tab-panel>
-        <q-tab-panel class="q-pa-none" name="report">
+        <q-tab-panel class="q-pa-none" name="invoice">
           <p class="text-h6">Summary</p>
           <div class="row q-mb-md q-col-gutter-md">
             <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
@@ -92,6 +103,9 @@
             </div>
           </div>
         </q-tab-panel>
+        <q-tab-panel class="q-pa-none" name="address">
+          <payment-list ref="paymentList" type="approval" label="Pending Approvals" />
+        </q-tab-panel>
       </q-tab-panels>
     </q-card-section>
   </q-card>
@@ -110,7 +124,7 @@ import {
   DESTINATION_CHECK_FAIL,
 } from 'src/consts/common'
 export default {
-  name: 'userHome',
+  name: 'reportPage',
   components: {
     PaymentList,
   },
@@ -128,6 +142,7 @@ export default {
         status: DESTINATION_CHECK_NONE,
         error: '',
       },
+      paymentDateRange: ref({ from: '2022/01/01', to: '2022/01/05' }),
     }
   },
   methods: {

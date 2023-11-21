@@ -62,7 +62,7 @@
           />
           <custom-field :label="'Total Cost (USD)'" class="col-3" :value="'$ ' + cost" />
         </div>
-        <div class="items-start">
+        <div class="items-start" v-if="projectList.length > 0">
           <p class="q-mt-lg text-weight-medium title-case">Project</p>
           <q-select
             v-model="invoice.projectId"

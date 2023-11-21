@@ -144,6 +144,13 @@ export default {
           role: role.ADMIN,
           to: '/users',
         },
+        {
+          icon: 'summarize',
+          label: 'Report',
+          separator: false,
+          role: role.ADMIN,
+          to: '/report',
+        },
       ],
       approvalCount: 0,
       unpaidCount: 0,
