@@ -397,6 +397,9 @@ export default {
         token: this.token,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
+        convertRate: this.payment.convertRate,
+        convertTime: this.payment.convertTime,
+        expectedAmount: this.payment.expectedAmount,
       }
       this.$api
         .post('/payment/process', reqData)

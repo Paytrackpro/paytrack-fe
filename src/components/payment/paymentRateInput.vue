@@ -53,7 +53,11 @@ export default {
       this.$api
         .post('/payment/request-rate', reqData)
         .then((data) => {
-          this.$emit('update:modelValue', data)
+          let newPayment = { ...this.modelValue }
+          newPayment.convertRate = data.rate
+          newPayment.convertTime = data.convertTime
+          newPayment.expectedAmount = data.expectedAmount
+          this.$emit('update:modelValue', newPayment)
           this.fetchedRate = true
         })
         .catch((err) => {
