@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="modelValue">
+  <q-dialog v-model="modelValue" persistent>
     <q-card style="width: 550px; max-width: 80vw">
       <q-card-section class="row">
         <div class="text-h6">{{ isEdit ? 'Edit' : 'Add' }}{{ type === 'labor' ? ' Labor' : ' Material' }}</div>
