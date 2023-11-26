@@ -642,3 +642,30 @@ a {
 .q-field__marginal {
   height: 40px;
 }
+.date-range-field .q-field__control {
+  height: 40px;
+}
+
+.date-range-field .q-field__control .q-field__control-container > span {
+  padding-top: 10px;
+}
+.no-pm-top {
+  margin-top: 0px;
+  padding-top: 0px;
+}
+.report-header-table {
+  height: 40px;
+  padding-top: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  background-color: #e7faee;
+}
+.report-row-header .q-item{
+  background-color: #f3f3f3;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+.padding-80 {
+  padding-left: 80px;
+}
+.padding-30 {
+  padding-left: 30px;
+}
