@@ -58,7 +58,7 @@
         </td>
         <td v-if="user.showDateOnInvoiceLine"></td>
         <td class="text-weight-medium text-size-13">
-          <span v-if="isDisplayHours()">{{ getTotalHours() }}&nbsp;hour(s)</span>
+          <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
         </td>
         <td v-if="showCost" class="text-weight-medium text-size-13">
           $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
