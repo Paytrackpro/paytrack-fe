@@ -14,7 +14,12 @@
               <template v-slot:append>
                 <q-icon name="event" class="cursor-pointer">
                   <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                    <q-date v-model="invoice.date">
+                    <q-date
+                      v-model="invoice.date"
+                      v-close-popup="dateClosePopup"
+                      @navigation="dateClosePopup = false"
+                      @update:model-value="updateInvoiceDate"
+                    >
                       <div class="row items-center justify-end">
                         <q-btn v-close-popup label="Close" color="primary" flat />
                       </div>
@@ -105,6 +110,7 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       modelValue: false,
+      dateClosePopup: ref(true),
     }
   },
   methods: {
@@ -171,6 +177,9 @@ export default {
           '/' +
           date.getDate()
       )
+    },
+    updateInvoiceDate($e) {
+      this.dateClosePopup = true
     },
   },
   computed: {
