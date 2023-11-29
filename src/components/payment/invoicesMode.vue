@@ -118,7 +118,7 @@ export default {
       return this.creating
     },
     newInvoice(newInv) {
-      const invoices = [...this.invoices, newInv]
+      let invoices = this.addNewInvoiceToList(newInv)
       this.$emit('update:modelValue', invoices)
       this.creating = false
     },
@@ -134,8 +134,46 @@ export default {
       this.invoice_dialog = true
     },
     updateInvoice(invoice) {
-      this.invoices[this.index] = invoice
-      this.$emit('update:modelValue', this.invoices)
+      this.invoices.splice(this.index, 1)
+      let invoices = this.addNewInvoiceToList(invoice)
+      this.$emit('update:modelValue', invoices)
+    },
+    addNewInvoiceToList(newInv) {
+      let invoices = []
+      if (this.user.showDateOnInvoiceLine) {
+        let isDateAdded = false
+        this.invoices.forEach((tmpInvoice, index) => {
+          if (isDateAdded) {
+            invoices.push(tmpInvoice)
+          } else {
+            let tmpDate = new Date(tmpInvoice.date.replace(/-/g, '/'))
+            let invDate = new Date(newInv.date.replace(/-/g, '/'))
+            if (tmpDate > invDate) {
+              invoices.push(newInv)
+              isDateAdded = true
+              invoices.push(tmpInvoice)
+            } else {
+              invoices.push(tmpInvoice)
+              if (index == this.invoices.length - 1) {
+                invoices.push(newInv)
+                isDateAdded = true
+              } else {
+                let afterDate = new Date(this.invoices[index + 1].date.replace(/-/g, '/'))
+                if (afterDate > invDate) {
+                  invoices.push(newInv)
+                  isDateAdded = true
+                }
+              }
+            }
+          }
+        })
+        if (!isDateAdded) {
+          invoices.push(newInv)
+        }
+      } else {
+        invoices = [...this.invoices, newInv]
+      }
+      return invoices
     },
     getRefDateFormat(date) {
       return ref(
