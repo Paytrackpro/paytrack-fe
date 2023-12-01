@@ -132,6 +132,12 @@ export default {
           to: '/get-paid',
         },
         {
+          icon: 'summarize',
+          label: 'Report',
+          separator: false,
+          to: '/report',
+        },
+        {
           icon: 'settings',
           label: 'Settings',
           separator: false,
@@ -143,13 +149,6 @@ export default {
           separator: false,
           role: role.ADMIN,
           to: '/users',
-        },
-        {
-          icon: 'summarize',
-          label: 'Report',
-          separator: false,
-          role: role.ADMIN,
-          to: '/report',
         },
       ],
       approvalCount: 0,
