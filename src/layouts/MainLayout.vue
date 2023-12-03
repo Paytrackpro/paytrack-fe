@@ -132,6 +132,12 @@ export default {
           to: '/get-paid',
         },
         {
+          icon: 'summarize',
+          label: 'Report',
+          separator: false,
+          to: '/report',
+        },
+        {
           icon: 'settings',
           label: 'Settings',
           separator: false,

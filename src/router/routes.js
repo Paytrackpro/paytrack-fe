@@ -49,6 +49,14 @@ const routes = [
         },
       },
       {
+        path: 'report/',
+        name: 'report',
+        component: () => import('pages/admin/report.vue'),
+        meta: {
+          title: 'Report',
+        },
+      },
+      {
         path: 'users/:id',
         name: 'user.detail',
         component: () => import('pages/admin/users/detail.vue'),
