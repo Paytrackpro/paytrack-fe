@@ -58,6 +58,7 @@
           <p class="q-pb-sm q-pt-md text-size-13 text-weight-medium">Total</p>
         </td>
         <td v-if="user.showDateOnInvoiceLine"></td>
+        <td></td>
         <td class="text-weight-medium text-size-13">
           <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
         </td>

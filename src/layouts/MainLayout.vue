@@ -154,6 +154,7 @@ export default {
       approvalCount: 0,
       unpaidCount: 0,
       displayAdminSeparator: true,
+      displayReport: true,
     }
   },
   async created() {
@@ -168,6 +169,14 @@ export default {
             this.$router.push({ path: `pay` })
           }
         }
+      })
+      .catch(() => {
+        return
+      })
+    this.$api
+      .get(`/payment/has-report`)
+      .then((data) => {
+        this.displayReport = data
       })
       .catch(() => {
         return
@@ -199,6 +208,9 @@ export default {
   },
   methods: {
     shouldDisplayRoute(menuItem) {
+      if (menuItem.to == '/report') {
+        return this.displayReport
+      }
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
     logOut() {
