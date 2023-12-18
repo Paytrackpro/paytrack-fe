@@ -53,7 +53,7 @@
             ? `qty ${invoice.quantity} x $${invoice.price}`
             : `qty ${invoice.quantity}`
           : invoice.quantity
-          ? `${invoice.quantity} hour(s)`
+          ? `${invoice.quantity} hour${invoice.quantity > 1.0 ? 's' : ''}`
           : '_'
       }}</template>
     </td>
