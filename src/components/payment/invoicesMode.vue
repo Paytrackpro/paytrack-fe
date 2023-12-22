@@ -35,6 +35,20 @@
       </tr>
     </thead>
     <tbody>
+      <tr class="top-total-row">
+        <td>
+          <p class="text-size-13 text-weight-medium">Total</p>
+        </td>
+        <td v-if="user.showDateOnInvoiceLine"></td>
+        <td></td>
+        <td class="text-weight-medium text-size-13">
+          <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
+        </td>
+        <td v-if="showCost" class="text-weight-medium text-size-13">
+          $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
+        </td>
+        <td v-if="!readonly"></td>
+      </tr>
       <invoice
         v-for="(_, i) of invoices"
         v-model="invoices[i]"
@@ -55,7 +69,7 @@
     <tfoot class="card-footer">
       <tr>
         <td>
-          <p class="q-pb-sm q-pt-md text-size-13 text-weight-medium">Total</p>
+          <p class="text-size-13 text-weight-medium">Total</p>
         </td>
         <td v-if="user.showDateOnInvoiceLine"></td>
         <td></td>
