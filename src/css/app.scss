@@ -669,3 +669,7 @@ a {
 .padding-30 {
   padding-left: 30px;
 }
+
+.hide-pagination-number .q-pagination {
+  display: none;
+}

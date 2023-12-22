@@ -42,6 +42,7 @@
         "
         :hide-pagination="pagination.rowsNumber < 10"
         separator="none"
+        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
         flat
         @row-click="(_, row) => goToDetail(row.id)"
         @request="onRequest"
@@ -55,9 +56,9 @@
             <payment-status :paymentModel="props.row" isShowApprover :isShowIcon="false" />
           </q-td>
         </template>
-        <template v-slot:body-cell-createdAt="props">
+        <template v-slot:body-cell-updatedAt="props">
           <q-td :props="props">
-            <m-time :time="props.row.createdAt"></m-time>
+            <m-time :time="props.row.updatedAt"></m-time>
           </q-td>
         </template>
         <template v-slot:no-data="{ message }">
@@ -298,10 +299,10 @@ export default {
 
       let lastColum = [
         {
-          name: 'createdAt',
+          name: 'updatedAt',
           align: 'center',
-          label: 'Created At',
-          field: 'createdAt',
+          label: 'Last Edited',
+          field: 'updatedAt',
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },

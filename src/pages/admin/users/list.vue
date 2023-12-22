@@ -9,6 +9,7 @@
       separator="none"
       v-model:pagination="pagination"
       :hide-pagination="pagination.rowsNumber < 10"
+      :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
       :loading="loading"
       :filter="KeySearch"
       @request="onRequest"
