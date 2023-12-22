@@ -1,7 +1,7 @@
 <template>
   <div class="row q-mt-lg">
     <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
-      <q-checkbox label="Hide Paid" v-model="hidePaid" />
+      <q-checkbox label="Hide Paid" v-model="hidePaid" @click="hidePaidHandler()" />
     </div>
     <div class="col" align="right">
       <q-btn
@@ -164,7 +164,7 @@ import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helpe
 import PaymentStatus from 'components/payment/paymentStatus'
 import { date } from 'quasar'
 import { MDateFormat } from 'src/consts/common'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import role from 'src/consts/role'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
@@ -234,9 +234,11 @@ export default {
     }
   },
   created() {
+    this.hidePaid = this.user.hidePaid
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
+    this.hidePaidFilter(this.hidePaid)
     this.$api
       .get('/payment/bulk-pay-count')
       .then((count) => {
@@ -322,6 +324,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      setGlobalUser: 'user/setGlobalUser',
+    }),
     async getPayments(f) {
       this.loading = true
       this.$api
@@ -441,6 +446,31 @@ export default {
           return 400
       }
     },
+    hidePaidHandler() {
+      this.$api
+        .put('/user/hide-paid')
+        .then((data) => {
+          let newUser = { ...this.user }
+          newUser.hidePaid = this.hidePaid
+          this.setGlobalUser(newUser)
+          this.$q.notify({
+            message: 'Hide Paid status has been changed',
+            color: 'positive',
+            icon: 'check',
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    hidePaidFilter(value) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      this.getPayments({
+        ...filter,
+        requestType: this.type,
+        hidePaid: value,
+      })
+    },
   },
   watch: {
     isBulkPay(newVal) {
@@ -473,12 +503,7 @@ export default {
       },
     },
     hidePaid(value) {
-      const filter = pathParamsToPaging({ query: {} }, this.pagination)
-      this.getPayments({
-        ...filter,
-        requestType: this.type,
-        hidePaid: value,
-      })
+      this.hidePaidFilter(value)
     },
   },
 }
