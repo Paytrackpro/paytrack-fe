@@ -27,7 +27,7 @@
     <thead>
       <tr>
         <th class="text-left" style="width: 25%">Description</th>
-        <th class="text-left" style="width: 15%" v-if="user.showDateOnInvoiceLine">Date</th>
+        <th class="text-left" style="width: 15%" v-if="showDateOnInvoiceLine">Date</th>
         <th class="text-left" style="width: 15%">Project</th>
         <th class="text-left" style="width: 15%">Detail</th>
         <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
@@ -39,7 +39,7 @@
         <td>
           <p class="text-size-13 text-weight-medium">Total</p>
         </td>
-        <td v-if="user.showDateOnInvoiceLine"></td>
+        <td v-if="showDateOnInvoiceLine"></td>
         <td></td>
         <td class="text-weight-medium text-size-13">
           <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
@@ -64,6 +64,7 @@
         v-model:index="index"
         @delete="deleteInvoice"
         :readonly="readonly"
+        :showDateOnInvoiceLine="showDateOnInvoiceLine"
       />
     </tbody>
     <tfoot class="card-footer">
@@ -71,7 +72,7 @@
         <td>
           <p class="text-size-13 text-weight-medium">Total</p>
         </td>
-        <td v-if="user.showDateOnInvoiceLine"></td>
+        <td v-if="showDateOnInvoiceLine"></td>
         <td></td>
         <td class="text-weight-medium text-size-13">
           <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
@@ -90,6 +91,7 @@
     v-model:invoiceInput="invoiceInput"
     v-model:isEdit="isEdit"
     :type="createType"
+    :showDateOnInvoiceLine="showDateOnInvoiceLine"
     @updateInvoice="updateInvoice"
     @save="newInvoice"
   />
@@ -109,6 +111,7 @@ export default {
     readonly: Boolean,
     showCost: Boolean,
     amount: Number,
+    showDateOnInvoiceLine: Boolean,
   },
   emits: ['update:modelValue'],
   data() {
@@ -158,7 +161,7 @@ export default {
     },
     addNewInvoiceToList(newInv) {
       let invoices = []
-      if (this.user.showDateOnInvoiceLine) {
+      if (this.showDateOnInvoiceLine) {
         let isDateAdded = false
         this.invoices.forEach((tmpInvoice, index) => {
           if (isDateAdded) {

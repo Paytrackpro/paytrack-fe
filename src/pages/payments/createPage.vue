@@ -33,6 +33,7 @@ export default {
         txId: '',
         paymentSettings: [],
         details: [],
+        showDateOnInvoiceLine: false,
       },
     }
   },
@@ -60,6 +61,7 @@ export default {
       immediate: true,
       handler(user) {
         this.payment.paymentSettings = user.paymentSettings || []
+        this.payment.showDateOnInvoiceLine = user.showDateOnInvoiceLine
       },
     },
     paymentType: {

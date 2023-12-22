@@ -218,6 +218,7 @@
             :amount="payment.amount"
             readonly
             v-model:hourlyRate="payment.hourlyRate"
+            :showDateOnInvoiceLine="payment.showDateOnInvoiceLine"
             :showCost="isShowCost"
           />
         </div>

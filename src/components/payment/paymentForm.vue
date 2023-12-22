@@ -111,6 +111,12 @@
         :rules="priceRules"
       />
     </div>
+    <q-checkbox
+      class="row q-mt-xs"
+      v-if="isInvoiceMode"
+      label="Show Date on Invoice Line"
+      v-model="inPayment.showDateOnInvoiceLine"
+    />
     <div class="row q-py-lg" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
@@ -118,6 +124,7 @@
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :amount="inPayment.amount"
+          :showDateOnInvoiceLine="inPayment.showDateOnInvoiceLine"
           v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />

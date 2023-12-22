@@ -15,7 +15,7 @@
       />
       <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
-    <td class="invoice-price-detail text-left" v-if="user.showDateOnInvoiceLine">
+    <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
     <td class="text-left">
@@ -107,6 +107,7 @@ export default {
     isEdit: Boolean,
     createType: String,
     index: Number,
+    showDateOnInvoiceLine: Boolean,
   },
   emits: ['update:modelValue'],
   data() {

@@ -73,7 +73,7 @@
         </template>
       </q-table>
       <q-dialog v-model="detailBulk">
-        <q-card style="width: 800px; max-width: 80vw">
+        <q-card :style="'width: ' + getDialogWidth() + 'px; max-width: 80vw'">
           <q-card-section class="row justify-between">
             <div class="text-h6">Bulk Pay BTC</div>
             <q-btn v-if="!rateLoading" round dense flat @click="refreshExchangeRate">
@@ -87,7 +87,7 @@
               class="q-mt-md q-px-sm"
               :thumb-style="thumbStyle"
               :bar-style="barStyle"
-              :style="'height: ' + getScrollHeight() + 'px; max-width: 800px'"
+              :style="'height: ' + getScrollHeight() + 'px; max-width: ' + getDialogWidth() + 'px'"
             >
               <q-list>
                 <q-item v-for="item in selected" :key="item.id" clickable v-ripple class="q-mt-md bg-grey-8 rounded">
@@ -139,6 +139,10 @@
                 </q-item>
               </q-list>
             </q-scroll-area>
+            <p class="total-bulk-row text-size-15">
+              <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
+              <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
+            </p>
             <custom-input class="q-mt-lg q-px-sm" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
           </q-card-section>
           <q-card-actions v-else align="center" class="bg-white q-pb-md">
@@ -232,6 +236,8 @@ export default {
         opacity: 0.2,
       },
       showBulkPay: false,
+      totalBulkBTC: '',
+      totalBulkUSD: '',
     }
   },
   created() {
@@ -413,11 +419,19 @@ export default {
           params: p,
         })
         .then((data) => {
+          //calc total of btc and usd for display on dialog
+          let totalBTC = 0.0
+          let totalUSD = 0.0
           this.selected.forEach((ele) => {
-            ele.expectedAmount = (ele.amount / data.rate).toFixed(8)
+            const exAmount = ele.amount / data.rate
+            ele.expectedAmount = exAmount.toFixed(8)
             ele.convertRate = data.rate
             ele.convertTime = data.convertTime
+            totalBTC += exAmount
+            totalUSD += ele.amount
           })
+          this.totalBulkBTC = totalBTC.toFixed(8)
+          this.totalBulkUSD = totalUSD.toFixed(2)
         })
         .catch((err) => {
           responseError(err)
@@ -442,9 +456,23 @@ export default {
         case 1:
           return 200
         case 2:
-          return 300
+          return 350
+        case 3:
+          return 500
         default:
-          return 400
+          return 600
+      }
+    },
+    getDialogWidth() {
+      switch (this.selected.length) {
+        case 1:
+          return 750
+        case 2:
+          return 800
+        case 3:
+          return 850
+        default:
+          return 900
       }
     },
     hidePaidHandler() {
