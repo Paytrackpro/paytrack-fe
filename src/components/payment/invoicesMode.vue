@@ -25,30 +25,16 @@
   </div>
   <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
     <thead>
-      <tr>
-        <th class="text-left" style="width: 25%">Description</th>
+      <tr class="title-row">
         <th class="text-left" style="width: 15%" v-if="showDateOnInvoiceLine">Date</th>
         <th class="text-left" style="width: 15%">Project</th>
-        <th class="text-left" style="width: 15%">Detail</th>
-        <th class="text-left" style="width: 15%" v-if="showCost">Cost (USD)</th>
+        <th class="text-left" style="width: 25%">Description</th>
+        <th class="text-right" style="width: 15%">Amount</th>
+        <th class="text-right" style="width: 15%" v-if="showCost">Cost (USD)</th>
         <th style="width: 15%" v-if="!readonly"></th>
       </tr>
     </thead>
     <tbody>
-      <tr class="top-total-row">
-        <td>
-          <p class="text-size-13 text-weight-medium">Total</p>
-        </td>
-        <td v-if="showDateOnInvoiceLine"></td>
-        <td></td>
-        <td class="text-weight-medium text-size-13">
-          <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
-        </td>
-        <td v-if="showCost" class="text-weight-medium text-size-13">
-          $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
-        </td>
-        <td v-if="!readonly"></td>
-      </tr>
       <invoice
         v-for="(_, i) of invoices"
         v-model="invoices[i]"
@@ -74,10 +60,14 @@
         </td>
         <td v-if="showDateOnInvoiceLine"></td>
         <td></td>
-        <td class="text-weight-medium text-size-13">
-          <span v-if="isDisplayHours()">{{ getTotalHours().toFixed(2) }}&nbsp;hour(s)</span>
+        <td class="text-weight-medium text-right text-size-13">
+          <span v-if="isDisplayHours()"
+            >{{ totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours }}&nbsp;hour{{
+              totalHours > 1.0 ? 's' : ''
+            }}</span
+          >
         </td>
-        <td v-if="showCost" class="text-weight-medium text-size-13">
+        <td v-if="showCost" class="text-weight-medium text-size-13 text-right">
           $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
         </td>
         <td v-if="!readonly"></td>
@@ -132,6 +122,7 @@ export default {
         projectName: '',
       },
       index: -1,
+      totalHours: 0,
     }
   },
   methods: {
@@ -205,16 +196,16 @@ export default {
           date.getDate()
       )
     },
-    getTotalHours() {
+    setTotalHours(invoices) {
       let count = 0
-      if (this.invoices && this.invoices.length > 0) {
-        this.invoices.forEach((detail) => {
+      if (invoices && invoices.length > 0) {
+        invoices.forEach((detail) => {
           if (detail.price == 0) {
             count += detail.quantity
           }
         })
       }
-      return count
+      this.totalHours = count
     },
     isDisplayHours() {
       if (this.invoices && this.invoices.length > 0) {
@@ -247,6 +238,15 @@ export default {
       immediate: true,
       handler(newVal) {
         this.hourlyRateUpdate = newVal
+      },
+    },
+    invoices: {
+      immediate: true,
+      handler(newVal) {
+        if (this.invoices.length == 0) {
+          return
+        }
+        this.setTotalHours(newVal)
       },
     },
   },

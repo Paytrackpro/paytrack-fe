@@ -68,7 +68,7 @@
                       </div>
                     </q-card-section>
                   </div>
-                  <Otp v-show="isOtp" @login="goLogin" :error="error" />
+                  <Otp v-show="isOtp" :isOtp="isOtp" @login="goLogin" :error="error" />
                 </div>
               </div>
             </div>

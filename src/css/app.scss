@@ -69,6 +69,9 @@ p {
 .text-size-16 {
   font-size: 16px;
 }
+.text-size-18 {
+  font-size: 18px;
+}
 .q-btn {
   padding: 4px 12px;
 }
@@ -639,9 +642,10 @@ a {
 }
 
 .card-footer {
-  background-color: #cedad7 ;
+  background-color: #ebebeb;
   border-bottom: 1px solid #efefef;
 }
+
 .q-field__marginal {
   height: 40px;
 }
@@ -662,7 +666,7 @@ a {
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
   background-color: #e7faee;
 }
-.report-row-header .q-item{
+.report-row-header .q-item {
   background-color: #f3f3f3;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
@@ -678,11 +682,51 @@ a {
 }
 
 .top-total-row {
-  background-color: #cedad7  !important;
+  background-color: #cedad7 !important;
 }
 
 .total-bulk-row {
-  border-top: 1px solid #d1d0d0;
-  padding-top: 10px;
+  padding-top: 20px;
   padding-left: 10px;
+}
+
+.status-select {
+  width: 150px;
+
+  .q-field__control-container {
+    .q-field__native {
+      span {
+        color: white;
+      }
+    }
+  }
+}
+
+.refresh-btn .q-focus-helper {
+  display: none;
+}
+
+.header-row {
+  background-color: #ebebeb;
+}
+
+.title-row {
+  background-color: #d9d9d9;
+}
+
+.amount-text {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.bulk-pay-row {
+  border-radius: 0;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.w-100 {
+  width: 100%;
 }

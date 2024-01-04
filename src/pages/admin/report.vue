@@ -1,5 +1,5 @@
 <template>
-  <q-card class="q-pa-md q-ma-lg content-container">
+  <q-card class="q-ma-lg content-container">
     <q-card-section class="card-header">
       <div class="row justify-between">
         <div class="row">

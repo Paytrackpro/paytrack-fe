@@ -1,5 +1,11 @@
 <template>
   <tr>
+    <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
+      {{ invoice.date.replaceAll('/', '-') }}
+    </td>
+    <td class="text-left">
+      {{ invoice.projectName }}
+    </td>
     <td class="text-left">
       <q-input
         v-if="editing"
@@ -15,13 +21,7 @@
       />
       <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
-    <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
-      {{ invoice.date.replaceAll('/', '-') }}
-    </td>
-    <td class="text-left">
-      {{ invoice.projectName }}
-    </td>
-    <td class="text-left">
+    <td class="text-right">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -57,7 +57,7 @@
           : '_'
       }}</template>
     </td>
-    <td class="text-left" v-if="showCost">
+    <td class="text-right" v-if="showCost">
       <q-input
         v-if="editing"
         label="Cost"

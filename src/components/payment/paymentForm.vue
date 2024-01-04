@@ -39,7 +39,7 @@
       </div>
     </div>
   </q-card-section>
-  <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
+  <q-form @submit="submit" class="q-pa-lg" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
@@ -111,6 +111,18 @@
         :rules="priceRules"
       />
     </div>
+    <div class="row q-mt-xs" v-if="isInvoiceMode">
+      <div class="col-6 col-sm-4 col-lg-3 q-py-sm q-my-sm">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Total Hours</p>
+        <p>
+          {{ (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '') }}
+        </p>
+      </div>
+      <div class="col-6 col-sm-4 col-lg-3 q-py-sm q-my-sm">
+        <p class="q-mt-none q-mb-xs text-weight-medium">Total Cost (USD)</p>
+        <p>${{ inPayment.amount }}</p>
+      </div>
+    </div>
     <q-checkbox
       class="row q-mt-xs"
       v-if="isInvoiceMode"
@@ -173,6 +185,7 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       isInvoiceMode: false,
+      totalHours: 0.0,
     }
   },
   watch: {
@@ -197,6 +210,9 @@ export default {
           this.partner.id = payment.receiverId
         }
         this.isInvoiceMode = payment.details && payment.details.length > 0
+        if (this.isInvoiceMode) {
+          this.setTotalHours(payment.details)
+        }
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
@@ -325,6 +341,17 @@ export default {
         amount += Number(invoice.cost)
       }
       return amount.toFixed(2)
+    },
+    setTotalHours(invoices) {
+      let count = 0
+      if (invoices && invoices.length > 0) {
+        invoices.forEach((detail) => {
+          if (detail.price == 0) {
+            count += detail.quantity
+          }
+        })
+      }
+      this.totalHours = count
     },
   },
   computed: {

@@ -1,7 +1,13 @@
 <template>
   <div class="row q-mt-lg">
     <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
-      <q-checkbox label="Hide Paid" v-model="hidePaid" @click="hidePaidHandler()" />
+      <q-btn
+        :label="hidePaid ? 'Show Paid' : 'Hide paid'"
+        type="button"
+        :color="hidePaid ? 'secondary' : 'primary'"
+        @click="hidePaidHandler()"
+        class="q-mr-sm btn btn-animated"
+      />
     </div>
     <div class="col" align="right">
       <q-btn
@@ -13,7 +19,6 @@
         to="/get-paid/create"
       />
       <template v-if="showBulkPay">
-        <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" class="text-bold text-grey-3" />
         <q-btn
           label="Bulk Pay BTC"
           class="q-mr-sm"
@@ -22,6 +27,14 @@
           v-show="isBulkPay"
           :disable="selected.length == 0"
           style="margin-left: 10px"
+        />
+        <q-btn
+          :label="isBulkPay ? 'Cancel' : 'Show Bulk Pay BTC'"
+          type="button"
+          :text-color="isBulkPay ? 'black' : 'white'"
+          :color="isBulkPay ? 'white' : 'primary'"
+          @click="setIsBulkPay()"
+          class="btn btn-animated"
         />
       </template>
     </div>
@@ -73,24 +86,109 @@
         </template>
       </q-table>
       <q-dialog v-model="detailBulk">
+        <q-card>
+          <q-card-section class="row justify-between">
+            <div class="text-h6">Bulk Pay BTC</div>
+            <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
+              <span>Refresh Exchange Rate</span>
+              <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
+            </q-btn>
+            <q-spinner-oval v-else color="primary" size="sm" />
+          </q-card-section>
+          <q-separator />
+          <q-card-section style="max-height: 60vh" class="scroll q-pt-xs">
+            <q-list>
+              <q-item v-for="(item, index) of selected" :key="item.id" v-ripple :class="getClassItem(index)">
+                <q-item-section>
+                  <q-item-label lines="1" class="q-mt-sm">
+                    <span class="text-weight-medium"
+                      >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }}
+                    </span>
+                  </q-item-label>
+                  <q-item-label class="bulk-item-title" lines="1">
+                    <span>Address: </span>
+                    <u class="text-weight-bold text-blue-8">
+                      <em> {{ item.paymentSettings[0].address }}</em></u
+                    >
+                    <q-btn
+                      v-if="value != ''"
+                      class="q-ml-sm"
+                      round
+                      dense
+                      flat
+                      @click="copy(item.paymentSettings[0].address || '')"
+                    >
+                      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                      <q-tooltip>Copy address</q-tooltip>
+                    </q-btn>
+                  </q-item-label>
+                  <div class="row">
+                    <q-item-label class="col" lines="1">
+                      <span>Amount (USD - BTC):</span>
+                      <span class="text-weight-medium text-size-15"> ${{ item.amount }} </span>&nbsp;-&nbsp;
+                      <span class="text-weight-medium text-blue-8 text-size-15">{{ item.expectedAmount }} BTC</span>
+                      <q-btn
+                        v-if="value != ''"
+                        class="q-ml-sm"
+                        round
+                        dense
+                        flat
+                        @click="copy(item.expectedAmount || '')"
+                      >
+                        <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                        <q-tooltip>Copy BTC Amount</q-tooltip>
+                      </q-btn>
+                    </q-item-label>
+                  </div>
+                  <div class="row q-my-sm">
+                    <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
+                  </div>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+
+          <q-separator />
+          <div class="row q-mt-md q-px-md">
+            <custom-input class="q-px-sm w-100" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
+          </div>
+          <q-card-actions class="q-mt-sm q-pa-sm row justify-between">
+            <p class="text-size-15 q-pt-sm col-7 q-pb-md q-pl-md">
+              <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
+              <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
+            </p>
+            <div class="col-5 q-pb-md q-pr-md" align="right">
+              <q-btn
+                label="Mark Paid"
+                color="primary"
+                class="col-5"
+                @click="handlePaid"
+                :disable="paying || selected.length <= 0"
+                v-close-popup
+              />
+            </div>
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
+      <q-dialog v-model="detailBulk2">
         <q-card :style="'width: ' + getDialogWidth() + 'px; max-width: 80vw'">
           <q-card-section class="row justify-between">
             <div class="text-h6">Bulk Pay BTC</div>
-            <q-btn v-if="!rateLoading" round dense flat @click="refreshExchangeRate">
-              <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
+            <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
+              <span>Refresh Exchange Rate</span>
               <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
             </q-btn>
             <q-spinner-oval v-else color="primary" size="sm" />
           </q-card-section>
           <q-card-section class="q-pt-none" v-if="selected.length > 0">
             <q-scroll-area
-              class="q-mt-md q-px-sm"
+              class="q-px-sm"
               :thumb-style="thumbStyle"
               :bar-style="barStyle"
               :style="'height: ' + getScrollHeight() + 'px; max-width: ' + getDialogWidth() + 'px'"
             >
               <q-list>
-                <q-item v-for="item in selected" :key="item.id" v-ripple class="q-mt-md rounded">
+                <q-item v-for="item in selected" :key="item.id" v-ripple class="rounded bulk-pay-row">
                   <q-item-section>
                     <q-item-label lines="1" class="q-mt-sm">
                       <span class="text-weight-medium"
@@ -241,11 +339,9 @@ export default {
     }
   },
   created() {
-    this.hidePaid = this.user.hidePaid
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
-    this.hidePaidFilter(this.hidePaid)
     this.$api
       .get('/payment/bulk-pay-count')
       .then((count) => {
@@ -476,17 +572,13 @@ export default {
       }
     },
     hidePaidHandler() {
+      this.hidePaid = !this.hidePaid
       this.$api
         .put('/user/hide-paid')
         .then((data) => {
           let newUser = { ...this.user }
           newUser.hidePaid = this.hidePaid
           this.setGlobalUser(newUser)
-          this.$q.notify({
-            message: 'Hide Paid status has been changed',
-            color: 'positive',
-            icon: 'check',
-          })
         })
         .catch((err) => {
           responseError(err)
@@ -499,6 +591,12 @@ export default {
         requestType: this.type,
         hidePaid: value,
       })
+    },
+    setIsBulkPay() {
+      this.isBulkPay = !this.isBulkPay
+    },
+    getClassItem(index) {
+      return index == this.selected.length - 1 ? '' : 'border-bottom'
     },
   },
   watch: {
@@ -520,6 +618,7 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
+        this.hidePaid = this.user.hidePaid
         if (this.isExist) {
           return
         }
