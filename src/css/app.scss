@@ -25,7 +25,7 @@
 }
 
 body {
-  color: $grey-2;
+  color: $grey-3;
 }
 
 p {
@@ -65,6 +65,12 @@ p {
 }
 .text-size-15 {
   font-size: 15px;
+}
+.text-size-16 {
+  font-size: 16px;
+}
+.text-size-18 {
+  font-size: 18px;
 }
 .q-btn {
   padding: 4px 12px;
@@ -601,11 +607,36 @@ a {
 .width-20 {
   width: 20%;
 }
+
+.width-25 {
+  width: 25%;
+}
+
 .width-40 {
   width: 40%;
 }
 .width-auto {
   width: auto;
+}
+
+.width-80 {
+  width: 80px;
+}
+
+.width-70 {
+  width: 70px;
+}
+
+.width-100px {
+  width: 100px;
+}
+
+.width-110px {
+  width: 110px;
+}
+
+.d-flex {
+  display: flex;
 }
 
 .q-drawer--standard .separator-full-display {
@@ -636,9 +667,10 @@ a {
 }
 
 .card-footer {
-  background-color: #e9f0ee;
+  background-color: #ebebeb;
   border-bottom: 1px solid #efefef;
 }
+
 .q-field__marginal {
   height: 40px;
 }
@@ -659,7 +691,7 @@ a {
   border: 1px solid rgba(0, 0, 0, 0.12) !important;
   background-color: #e7faee;
 }
-.report-row-header .q-item{
+.report-row-header .q-item {
   background-color: #f3f3f3;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
@@ -668,4 +700,182 @@ a {
 }
 .padding-30 {
   padding-left: 30px;
+}
+
+.hide-pagination-number .q-pagination {
+  display: none;
+}
+
+.top-total-row {
+  background-color: #cedad7 !important;
+}
+
+.total-bulk-row {
+  padding-top: 20px;
+  padding-left: 10px;
+}
+
+.status-select {
+  width: 150px;
+
+  .q-field__control-container {
+    .q-field__native {
+      span {
+        color: white;
+      }
+    }
+  }
+}
+
+.refresh-btn .q-focus-helper {
+  display: none;
+}
+
+.header-row {
+  background-color: #ebebeb;
+}
+
+.title-row {
+  background-color: #d9d9d9;
+}
+
+.amount-text {
+  font-size: 16px;
+}
+
+.bulk-pay-row {
+  border-radius: 0;
+}
+
+.border-bottom {
+  border-bottom: 1px solid #d9d9d9;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.w-50 {
+  width: 50%;
+}
+
+.fw-600 {
+  font-weight: 600;
+}
+
+.paid-area-label {
+  width: 16%;
+}
+
+.paid-area-value {
+  width: 84%;
+}
+
+.total-separator {
+  width: 80%;
+}
+
+.rate-area {
+  margin-top: 60px;
+}
+
+@media only screen and (max-width: 1735px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 1439px) {
+  .paid-area-label {
+    width: 15%;
+  }
+
+  .paid-area-value {
+    width: 85%;
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 1130px) {
+  .paid-area-label {
+    width: 20%;
+  }
+
+  .paid-area-value {
+    width: 80%;
+  }
+}
+
+@media only screen and (max-width: 1023px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 820px) {
+  .paid-area-label {
+    width: 23%;
+  }
+
+  .paid-area-value {
+    width: 77%;
+  }
+}
+
+@media only screen and (max-width: 715px) {
+  .paid-area-label {
+    width: 28%;
+  }
+
+  .paid-area-value {
+    width: 720%;
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .paid-area-label {
+    width: 20%;
+  }
+
+  .paid-area-value {
+    width: 80%;
+  }
+
+  .rate-area {
+    margin-top: 2px;
+  }
+}
+//Change table size
+.invoice-table th,
+.invoice-table tbody td {
+  font-size: 15px;
+}
+
+.description-field .q-field__native {
+  line-height: 22px;
+}
+
+.border-bottom-grey {
+  border-bottom: 1px solid #e0e9ed;
+}
+
+.q-table__card {
+  color: rgb(73, 73, 73);
 }

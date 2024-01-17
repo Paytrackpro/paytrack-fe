@@ -53,6 +53,10 @@ export default {
       })
   },
 
+  async setGlobalUser({ commit }, newUser) {
+    commit('setUser', newUser)
+  },
+
   async updateUser({ commit }, userData) {
     return api
       .put('/user/info', userData)

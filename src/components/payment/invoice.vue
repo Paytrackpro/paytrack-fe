@@ -1,5 +1,11 @@
 <template>
   <tr>
+    <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
+      {{ invoice.date.replaceAll('/', '-') }}
+    </td>
+    <td class="text-left" v-if="projectDisplay">
+      {{ invoice.projectName }}
+    </td>
     <td class="text-left">
       <q-input
         v-if="editing"
@@ -15,13 +21,7 @@
       />
       <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
-    <td class="invoice-price-detail text-left" v-if="user.showDateOnInvoiceLine">
-      {{ invoice.date.replaceAll('/', '-') }}
-    </td>
-    <td class="text-left">
-      {{ invoice.projectName }}
-    </td>
-    <td class="text-left">
+    <td class="text-right">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -53,11 +53,11 @@
             ? `qty ${invoice.quantity} x $${invoice.price}`
             : `qty ${invoice.quantity}`
           : invoice.quantity
-          ? `${invoice.quantity} hour(s)`
+          ? `${invoice.quantity} hour${invoice.quantity > 1.0 ? 's' : ''}`
           : '_'
       }}</template>
     </td>
-    <td class="text-left" v-if="showCost">
+    <td class="text-right" v-if="showCost">
       <q-input
         v-if="editing"
         label="Cost"
@@ -107,6 +107,8 @@ export default {
     isEdit: Boolean,
     createType: String,
     index: Number,
+    showDateOnInvoiceLine: Boolean,
+    projectDisplay: Boolean,
   },
   emits: ['update:modelValue'],
   data() {

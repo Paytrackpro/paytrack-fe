@@ -75,6 +75,7 @@
         class="shadow-6"
         v-model:pagination="pagination"
         :hide-pagination="pagination.rowsNumber < 10"
+        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
         flat
         separator="none"
         @row-click="(_, row) => editProject(row.projectId)"

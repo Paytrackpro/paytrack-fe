@@ -5,7 +5,7 @@
         <div class="text-h6">{{ isEdit ? 'Edit' : 'Add' }}{{ type === 'labor' ? ' Labor' : ' Material' }}</div>
       </q-card-section>
       <q-card-section class="q-pt-xs q-px-lg">
-        <div class="row items-start" v-if="user.showDateOnInvoiceLine">
+        <div class="row items-start" v-if="showDateOnInvoiceLine">
           <div>
             <p>
               <b class="text-weight-medium title-case">Date </b>
@@ -110,6 +110,7 @@ export default {
     type: String,
     invoiceInput: Object,
     isEdit: Boolean,
+    showDateOnInvoiceLine: Boolean,
   },
   data() {
     return {

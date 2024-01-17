@@ -6,7 +6,7 @@
         <q-input :autofocus="true" v-model="note" type="textarea" autogrow></q-input>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="primary" type="button" @click="closeDialog" :disable="loading" />
+        <q-btn flat label="Cancel" color="primary" type="button" @click="closeDialog(false)" :disable="loading" />
         <q-btn flat label="Ok" color="primary" type="button" @click="doReject" :loading="loading" :disable="loading" />
       </q-card-actions>
     </q-card>
@@ -47,15 +47,15 @@ export default {
           color: 'positive',
           icon: 'check',
         })
-        this.closeDialog()
+        this.closeDialog(true)
         window.location.reload()
       } catch (error) {
         responseError(err)
       }
       this.loading = false
     },
-    closeDialog() {
-      this.$emit('toggle', false)
+    closeDialog(did) {
+      this.$emit('toggle', did, false)
     },
     clearForm() {
       this.note = ''

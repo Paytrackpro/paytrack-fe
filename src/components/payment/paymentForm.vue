@@ -39,7 +39,7 @@
       </div>
     </div>
   </q-card-section>
-  <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
+  <q-form @submit="submit" class="q-pa-lg" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
@@ -84,6 +84,20 @@
               </template>
             </q-input>
           </div>
+          <div class="col-12 col-md-4" v-if="isInvoiceMode">
+            <p class="q-mb-xs">
+              <b>Total Hours:&nbsp;&nbsp;</b>
+              <span class="amount-text">{{
+                (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '')
+              }}</span>
+            </p>
+            <p class="q-mb-xs">
+              <b>Total Cost (USD):&nbsp;&nbsp;</b>
+              <span class="amount-text"
+                >${{ inPayment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
+              >
+            </p>
+          </div>
           <div class="col-12 q-my-lg">
             <custom-input
               :label="'Description'"
@@ -111,6 +125,12 @@
         :rules="priceRules"
       />
     </div>
+    <q-checkbox
+      class="row q-mt-xs"
+      v-if="isInvoiceMode"
+      label="Show Date on Invoice Line"
+      v-model="inPayment.showDateOnInvoiceLine"
+    />
     <div class="row q-py-lg" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
@@ -118,6 +138,7 @@
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
           :amount="inPayment.amount"
+          :showDateOnInvoiceLine="inPayment.showDateOnInvoiceLine"
           v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />
@@ -166,6 +187,7 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       isInvoiceMode: false,
+      totalHours: 0.0,
     }
   },
   watch: {
@@ -308,6 +330,7 @@ export default {
     updateDetail(details) {
       this.inPayment.details = details
       this.inPayment.amount = this.invoicesAmount()
+      this.setTotalHours(details)
     },
     invoicesAmount() {
       if (!this.inPayment.details) {
@@ -318,6 +341,17 @@ export default {
         amount += Number(invoice.cost)
       }
       return amount.toFixed(2)
+    },
+    setTotalHours(invoices) {
+      let count = 0
+      if (invoices && invoices.length > 0) {
+        invoices.forEach((detail) => {
+          if (detail.price == 0) {
+            count += detail.quantity
+          }
+        })
+      }
+      this.totalHours = count
     },
   },
   computed: {

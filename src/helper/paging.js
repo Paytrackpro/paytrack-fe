@@ -11,7 +11,8 @@ const pathParamsToPaging = ({ query }, paging) => {
   paging.sortBy = query.sb
   paging.descending = query.d === '1'
   paging.page = Number(query.p) || 1
-  paging.rowsPerPage = Number(query.r) || 10
+  const defaultRowPerPage = paging.rowsNumber || 10
+  paging.rowsPerPage = Number(query.r) || defaultRowPerPage
   const filter = {
     page: paging.page,
     size: paging.rowsPerPage,
