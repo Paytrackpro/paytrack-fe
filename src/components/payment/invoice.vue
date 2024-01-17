@@ -3,7 +3,7 @@
     <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
-    <td class="text-left">
+    <td class="text-left" v-if="projectDisplay">
       {{ invoice.projectName }}
     </td>
     <td class="text-left">
@@ -108,6 +108,7 @@ export default {
     createType: String,
     index: Number,
     showDateOnInvoiceLine: Boolean,
+    projectDisplay: Boolean,
   },
   emits: ['update:modelValue'],
   data() {

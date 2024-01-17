@@ -23,11 +23,11 @@
       </q-btn>
     </div>
   </div>
-  <q-markup-table flat class="q-mt-md" v-if="invoices.length > 0">
+  <q-markup-table flat class="q-mt-xs invoice-table" v-if="invoices.length > 0">
     <thead>
       <tr class="title-row">
         <th class="text-left" style="width: 15%" v-if="showDateOnInvoiceLine">Date</th>
-        <th class="text-left" style="width: 15%">Project</th>
+        <th class="text-left" v-if="projectDisplay" style="width: 15%">Project</th>
         <th class="text-left" style="width: 25%">Description</th>
         <th class="text-right" style="width: 15%">Amount</th>
         <th class="text-right" style="width: 15%" v-if="showCost">Cost (USD)</th>
@@ -51,23 +51,24 @@
         @delete="deleteInvoice"
         :readonly="readonly"
         :showDateOnInvoiceLine="showDateOnInvoiceLine"
+        :projectDisplay="projectDisplay"
       />
     </tbody>
     <tfoot class="card-footer">
       <tr>
         <td>
-          <p class="text-size-13 text-weight-medium">Total</p>
+          <p class="text-size-15 text-weight-medium">Total</p>
         </td>
         <td v-if="showDateOnInvoiceLine"></td>
-        <td></td>
-        <td class="text-weight-medium text-right text-size-13">
+        <td v-if="projectDisplay"></td>
+        <td class="text-weight-medium text-right text-size-15">
           <span v-if="isDisplayHours()"
             >{{ totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours }}&nbsp;hour{{
               totalHours > 1.0 ? 's' : ''
             }}</span
           >
         </td>
-        <td v-if="showCost" class="text-weight-medium text-size-13 text-right">
+        <td v-if="showCost" class="text-weight-medium text-size-15 text-right">
           $&nbsp;{{ readonly ? amount.toFixed(2) : amount }}
         </td>
         <td v-if="!readonly"></td>
@@ -123,6 +124,7 @@ export default {
       },
       index: -1,
       totalHours: 0,
+      projectDisplay: false,
     }
   },
   methods: {
@@ -247,6 +249,14 @@ export default {
           return
         }
         this.setTotalHours(newVal)
+        let hasProject = false
+        newVal.forEach((invoice) => {
+          if (invoice.projectId && invoice.projectId > 0) {
+            hasProject = true
+            return
+          }
+        })
+        this.projectDisplay = hasProject
       },
     },
   },

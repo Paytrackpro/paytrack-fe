@@ -105,41 +105,55 @@
         <b>Rejected Reason:</b> {{ payment.rejectionReason }}
       </p>
     </q-card-section>
-    <div class="q-ma-lg">
-      <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-sm q-my-sm field-shadow">
+    <div class="q-ma-lg text-size-15">
+      <div class="row q-mb-xs q-col-gutter-md">
+        <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs field-shadow">
           <p class="q-mb-md">
-            <b>{{ isSender ? 'To' : 'From' }}:&nbsp;&nbsp;</b>
+            <span>{{ isSender ? 'To' : 'From' }}:&nbsp;&nbsp;</span>
             {{ isSender ? getRecipientName : getSenderName }}
           </p>
           <p class="q-mb-xs text-size-18" v-if="!isShowInvoice">
-            <b>Amount (USD):&nbsp;&nbsp;</b>
+            <span>Amount (USD):&nbsp;</span>
             <span class="fw-600"
               >${{ (payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
             >
           </p>
+          <p class="q-mb-xs row rate-area" v-if="isShowInvoice && isShowCost">
+            <span class="width-110px">Rate:&nbsp;</span>
+            <span>${{ payment.hourlyRate.toFixed(2) }} USD/h</span>
+          </p>
+          <p class="q-mb-xs row" v-if="isShowInvoice && isShowCost">
+            <span class="width-110px">Hours:&nbsp;</span>
+            <span>{{
+              (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '')
+            }}</span>
+          </p>
+          <q-separator class="total-separator q-my-sm" v-if="isShowInvoice && isShowCost" />
+          <p class="q-mb-xs text-size-18 row" v-if="isShowInvoice && isShowCost">
+            <span class="width-110px">Amount Due:&nbsp;</span>
+            <span class="fw-600">${{ payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }} USD</span>
+          </p>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
-          <div v-if="!isApprover && isPaidStatus">
-            <p class="q-mb-xs">
-              <b class="text-size-15">Paid in</b>
-            </p>
-            <q-field :class="customClass" :style="customStyle" stack-label borderless>
-              <template v-slot:control>
-                <coin-label :type="payment.paymentMethod" hasAddress :address="payment.paymentAddress" />
-              </template>
-            </q-field>
+        <div class="col-12 col-sm-6 col-lg-4 q-py-xs q-my-xs field-shadow">
+          <div class="q-mb-xs row" style="align-items: center" v-if="!isApprover && isPaidStatus">
+            <span class="paid-area-label">Means:</span>
+            <q-chip class="sm-chip q-ml-none" square text-color="white" :color="coinColor(payment.paymentMethod)">
+              {{ selectedCoin(payment.paymentMethod).label }}
+            </q-chip>
+          </div>
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+            <span class="paid-area-label">Address:</span>
+            <p class="paid-area-value">{{ payment.paymentAddress }}</p>
           </div>
           <div v-if="isEditPaymentSetting">
             <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
           </div>
           <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)">
-            <p><b class="text-size-15">Accepted Coins</b></p>
+            <p><span class="text-size-15">Accepted Coins</span></p>
             <q-field stack-label borderless>
               <coin-label v-for="(setting, i) of payment.paymentSettings" :key="i" :type="setting.type" />
             </q-field>
           </div>
-          <q-separator class="w-50 q-my-sm" v-if="isShowExchangeRate || (!isApprover && isPaidStatus)" />
           <PaymentRateInput
             v-if="isShowExchangeRate"
             :readonly="true"
@@ -148,59 +162,50 @@
             v-model:loading="fetchingRate"
             @update:modelValue="updateLocal"
           />
-          <p class="q-mb-xs d-flex" v-if="isShowExchangeRate">
-            <b class="width-110px">Amount </b>
-            {{ payment.expectedAmount }} {{ (payment.paymentMethod || '').toUpperCase() }}
-          </p>
-          <p class="q-mb-xs d-flex" v-if="!isApprover && isPaidStatus">
-            <b class="width-110px">Transaction id</b>
-            {{ payment.txId }}
-          </p>
+          <div class="q-mb-xs row" v-if="isShowExchangeRate">
+            <span class="paid-area-label">Amount:</span>
+            <span class="paid-area-value"
+              >{{ payment.expectedAmount }} {{ (payment.paymentMethod || '').toUpperCase() }}</span
+            >
+          </div>
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+            <span class="paid-area-label">TxId:</span>
+            <p class="paid-area-value">{{ payment.txId }}</p>
+          </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-4 q-py-sm q-my-sm field-shadow">
+        <div class="col-12 col-sm-6 col-lg-4 q-py-xs q-my-xs field-shadow">
           <p class="q-mb-xs d-flex" v-if="!isDraftStatus">
-            <b class="width-80">{{ isSender ? 'Sent' : 'Received' }}</b
-            ><m-time :time="payment.sentAt"></m-time>
+            <span class="width-70">{{ isSender ? 'Sent' : 'Received' }}:</span><m-time :time="payment.sentAt"></m-time>
           </p>
           <p class="q-mb-xs d-flex" v-if="!isDraftStatus">
-            <b class="width-80">Last Edited</b><m-time :time="payment.updatedAt"></m-time>
+            <span class="width-70">Edited:</span><m-time :time="payment.updatedAt"></m-time>
           </p>
           <p class="q-mb-xs d-flex" v-if="!isApprover && isPaidStatus">
-            <b class="width-80">Paid At</b><m-time :time="payment.paidAt"></m-time>
+            <span class="width-70">Paid:</span><m-time :time="payment.paidAt"></m-time>
           </p>
         </div>
       </div>
       <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-12 col-lg-4 q-py-sm q-my-sm field-shadow" v-if="displayApprovers">
+        <div class="col-12 col-sm-12 col-lg-4 q-py-xs q-my-xs field-shadow" v-if="displayApprovers">
           <approver-display :approvers="payment.approvers" />
         </div>
       </div>
-      <div class="row q-mb-xs q-col-gutter-md">
-        <div :class="'col-12 q-py-sm q-my-sm field-shadow'">
-          <custom-field :label="'Description'" :value="payment.description" />
+      <div class="row q-mb-xs q-mt-sm q-col-gutter-md">
+        <div :class="'col-12 q-py-xs q-my-xs field-shadow'">
+          <p class="q-mb-xs">
+            <span class="text-size-15"> Description: </span>
+          </p>
+          <q-field stack-label borderless class="description-field">
+            <template v-slot:control>
+              <span>{{ payment.description }}</span>
+            </template>
+          </q-field>
         </div>
       </div>
-      <div class="q-mb-md">
-        <p class="q-mb-xs" v-if="isShowInvoice && isShowCost">
-          <b>Hourly Rate (USD/h):&nbsp;&nbsp;</b>
-          <span class="amount-text">${{ payment.hourlyRate.toFixed(2) }}</span>
-        </p>
-        <p class="q-mb-xs" v-if="isShowInvoice && isShowCost">
-          <b>Total Hours:&nbsp;&nbsp;</b>
-          <span class="amount-text">{{
-            (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '')
-          }}</span>
-        </p>
-        <q-separator class="width-25 q-my-sm" v-if="isShowInvoice && isShowCost" />
-        <p class="q-mb-xs text-size-18" v-if="isShowInvoice && isShowCost">
-          <b>Total Cost (USD):&nbsp;&nbsp;</b>
-          <span class="fw-600">${{ payment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
-        </p>
-      </div>
-      <div class="row q-mb-xs q-col-gutter-md">
+      <div class="row q-mb-md q-col-gutter-md">
         <div class="col-12 col-sm-6 col-lg-4" v-if="displayAttachReceipt">
           <p class="q-mb-xs">
-            <b class="text-size-15">{{ isSender ? 'Attach Receipt' : 'Receipt' }}</b>
+            <span class="text-size-15">{{ isSender ? 'Attach Receipt' : 'Receipt' }}</span>
           </p>
           <q-field borderless v-if="isSender">
             <template v-slot:control>
@@ -235,7 +240,7 @@
         </div>
       </div>
       <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
-        <div class="col">
+        <div class="col q-pt-xs">
           <invoices-mode
             v-model="payment.details"
             :amount="payment.amount"
@@ -332,12 +337,12 @@ import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
 import ApproverDisplay from 'components/payment/approverDisplay'
 import paymentSettingMethod from 'components/payment/paymentSettingMethod'
-import customField from 'src/components/common/custom_field.vue'
 import coinLabel from '../common/coin_label.vue'
 import PaymentStatus from 'components/payment/paymentStatus'
 import { ref } from 'vue'
 import { api, axios } from 'boot/axios'
 import { STATUS_INFO } from 'src/consts/common'
+import { COINS } from 'src/consts/common'
 
 export default {
   name: 'paymentDetail',
@@ -349,7 +354,6 @@ export default {
     InvoicesMode,
     ApproverDisplay,
     paymentSettingMethod,
-    customField,
     coinLabel,
     PaymentStatus,
   },
@@ -655,6 +659,22 @@ export default {
         })
       }
       this.totalHours = count
+    },
+    selectedCoin(coinType) {
+      for (let coin of COINS) {
+        if (coin.value === coinType) {
+          return coin
+        }
+      }
+      return {}
+    },
+    coinColor(coinType) {
+      for (let coin of COINS) {
+        if (coin.value === coinType) {
+          return coin.color
+        }
+      }
+      return ''
     },
   },
   watch: {

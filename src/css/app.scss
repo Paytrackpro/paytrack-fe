@@ -623,6 +623,10 @@ a {
   width: 80px;
 }
 
+.width-70 {
+  width: 70px;
+}
+
 .width-100px {
   width: 100px;
 }
@@ -737,7 +741,6 @@ a {
 
 .amount-text {
   font-size: 16px;
-  font-weight: 600;
 }
 
 .bulk-pay-row {
@@ -758,4 +761,121 @@ a {
 
 .fw-600 {
   font-weight: 600;
+}
+
+.paid-area-label {
+  width: 16%;
+}
+
+.paid-area-value {
+  width: 84%;
+}
+
+.total-separator {
+  width: 80%;
+}
+
+.rate-area {
+  margin-top: 60px;
+}
+
+@media only screen and (max-width: 1735px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 1439px) {
+  .paid-area-label {
+    width: 15%;
+  }
+
+  .paid-area-value {
+    width: 85%;
+  }
+}
+
+@media only screen and (max-width: 1300px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 1130px) {
+  .paid-area-label {
+    width: 20%;
+  }
+
+  .paid-area-value {
+    width: 80%;
+  }
+}
+
+@media only screen and (max-width: 1023px) {
+  .paid-area-label {
+    width: 18%;
+  }
+
+  .paid-area-value {
+    width: 82%;
+  }
+}
+
+@media only screen and (max-width: 820px) {
+  .paid-area-label {
+    width: 23%;
+  }
+
+  .paid-area-value {
+    width: 77%;
+  }
+}
+
+@media only screen and (max-width: 715px) {
+  .paid-area-label {
+    width: 28%;
+  }
+
+  .paid-area-value {
+    width: 720%;
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .paid-area-label {
+    width: 20%;
+  }
+
+  .paid-area-value {
+    width: 80%;
+  }
+
+  .rate-area {
+    margin-top: 2px;
+  }
+}
+//Change table size
+.invoice-table th,
+.invoice-table tbody td {
+  font-size: 15px;
+}
+
+.description-field .q-field__native {
+  line-height: 22px;
+}
+
+.border-bottom-grey {
+  border-bottom: 1px solid #e0e9ed;
+}
+
+.q-table__card {
+  color: rgb(73, 73, 73);
 }
