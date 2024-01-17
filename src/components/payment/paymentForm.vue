@@ -84,6 +84,20 @@
               </template>
             </q-input>
           </div>
+          <div class="col-12 col-md-4" v-if="isInvoiceMode">
+            <p class="q-mb-xs">
+              <b>Total Hours:&nbsp;&nbsp;</b>
+              <span class="amount-text">{{
+                (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '')
+              }}</span>
+            </p>
+            <p class="q-mb-xs">
+              <b>Total Cost (USD):&nbsp;&nbsp;</b>
+              <span class="amount-text"
+                >${{ inPayment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
+              >
+            </p>
+          </div>
           <div class="col-12 q-my-lg">
             <custom-input
               :label="'Description'"
@@ -110,18 +124,6 @@
         :type="'number'"
         :rules="priceRules"
       />
-    </div>
-    <div class="row q-mt-xs" v-if="isInvoiceMode">
-      <div class="col-6 col-sm-4 col-lg-3 q-py-sm q-my-sm">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Total Hours</p>
-        <p>
-          {{ (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '') }}
-        </p>
-      </div>
-      <div class="col-6 col-sm-4 col-lg-3 q-py-sm q-my-sm">
-        <p class="q-mt-none q-mb-xs text-weight-medium">Total Cost (USD)</p>
-        <p>${{ inPayment.amount }}</p>
-      </div>
     </div>
     <q-checkbox
       class="row q-mt-xs"
@@ -210,9 +212,6 @@ export default {
           this.partner.id = payment.receiverId
         }
         this.isInvoiceMode = payment.details && payment.details.length > 0
-        if (this.isInvoiceMode) {
-          this.setTotalHours(payment.details)
-        }
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
@@ -331,6 +330,7 @@ export default {
     updateDetail(details) {
       this.inPayment.details = details
       this.inPayment.amount = this.invoicesAmount()
+      this.setTotalHours(details)
     },
     invoicesAmount() {
       if (!this.inPayment.details) {

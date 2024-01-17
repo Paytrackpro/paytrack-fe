@@ -1,16 +1,21 @@
 <template>
   <div>
-    <p class="q-mb-xs">
-      <b class="text-weight-medium">Exchange Rate</b>
+    <p class="q-mb-xs d-flex">
+      <b class="text-weight-medium width-110px">Exchange Rate</b>
+      <span v-if="readonly"
+        >${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD/{{
+          (payment.paymentMethod || '').toUpperCase()
+        }}</span
+      >
     </p>
-    <q-field class="justify-start" stack-label borderless>
+    <q-field v-if="!readonly" class="justify-start" stack-label borderless>
       <template v-slot:control>
         <span>${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD</span>
-        <q-btn v-if="!readonly && !loading" class="q-ml-sm" round dense flat @click="fetchRate">
+        <q-btn v-if="!loading" class="q-ml-sm" round dense flat @click="fetchRate">
           <q-tooltip>Refresh Exchange Rate</q-tooltip>
           <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
         </q-btn>
-        <q-spinner-oval v-else-if="!readonly && loading" class="q-ml-sm" size="sm" />
+        <q-spinner-oval v-else class="q-ml-sm" size="sm" />
       </template>
     </q-field>
   </div>
