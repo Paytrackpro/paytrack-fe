@@ -113,21 +113,30 @@
                     <span class="text-weight-medium text-size-15"> ${{ item.amount }} </span>
                   </div>
                   <div class="col-12 col-sm-8">
-                    <u class="text-weight-bold text-blue-8">
-                      <em> {{ item.paymentSettings[0].address }}</em></u
+                    <div class="d-flex">
+                      <p
+                        class="text-weight-bold text-blue-8 q-mb-none custom-link bulk-show-address"
+                        @click="copy(item.paymentSettings[0].address || '')"
+                      >
+                        {{ item.paymentSettings[0].address }}
+                      </p>
+                      <q-btn
+                        v-if="value != ''"
+                        class="copy-width-btn address-copy-btn"
+                        round
+                        dense
+                        flat
+                        @click="copy(item.paymentSettings[0].address || '')"
+                      >
+                        <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                        <q-tooltip>Copy address</q-tooltip>
+                      </q-btn>
+                    </div>
+                    <span
+                      class="text-weight-medium text-blue-8 text-size-15 custom-link"
+                      @click="copy(item.expectedAmount || '')"
+                      >{{ item.expectedAmount }} BTC</span
                     >
-                    <q-btn
-                      v-if="value != ''"
-                      class="q-ml-sm copy-btn"
-                      round
-                      dense
-                      flat
-                      @click="copy(item.paymentSettings[0].address || '')"
-                    >
-                      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                      <q-tooltip>Copy address</q-tooltip> </q-btn
-                    ><br />
-                    <span class="text-weight-medium text-blue-8 text-size-15">{{ item.expectedAmount }} BTC</span>
                     <q-btn
                       v-if="value != ''"
                       class="q-ml-sm copy-btn"
@@ -164,94 +173,6 @@
                 v-close-popup
               />
             </div>
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-      <q-dialog v-model="detailBulk2">
-        <q-card :style="'width: ' + getDialogWidth() + 'px; max-width: 80vw'">
-          <q-card-section class="row justify-between">
-            <div class="text-h6">Bulk Pay BTC</div>
-            <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
-              <span>Refresh Exchange Rate</span>
-              <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
-            </q-btn>
-            <q-spinner-oval v-else color="primary" size="sm" />
-          </q-card-section>
-          <q-card-section class="q-pt-none" v-if="selected.length > 0">
-            <q-scroll-area
-              class="q-px-sm"
-              :thumb-style="thumbStyle"
-              :bar-style="barStyle"
-              :style="'height: ' + getScrollHeight() + 'px; max-width: ' + getDialogWidth() + 'px'"
-            >
-              <q-list>
-                <q-item v-for="item in selected" :key="item.id" v-ripple class="rounded bulk-pay-row">
-                  <q-item-section>
-                    <q-item-label lines="1" class="q-mt-sm">
-                      <span class="text-weight-medium"
-                        >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }}
-                      </span>
-                    </q-item-label>
-                    <q-item-label class="bulk-item-title" lines="1">
-                      <span>Address: </span>
-                      <u class="text-weight-bold text-blue-8">
-                        <em> {{ item.paymentSettings[0].address }}</em></u
-                      >
-                      <q-btn
-                        v-if="value != ''"
-                        class="q-ml-sm"
-                        round
-                        dense
-                        flat
-                        @click="copy(item.paymentSettings[0].address || '')"
-                      >
-                        <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                        <q-tooltip>Copy address</q-tooltip>
-                      </q-btn>
-                    </q-item-label>
-                    <div class="row">
-                      <q-item-label class="col" lines="1">
-                        <span>Amount (USD - BTC):</span>
-                        <span class="text-weight-medium"> ${{ item.amount }} </span>&nbsp;-&nbsp;
-                        <span class="text-weight-medium text-blue-8">{{ item.expectedAmount }} BTC</span>
-                        <q-btn
-                          v-if="value != ''"
-                          class="q-ml-sm"
-                          round
-                          dense
-                          flat
-                          @click="copy(item.expectedAmount || '')"
-                        >
-                          <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                          <q-tooltip>Copy BTC Amount</q-tooltip>
-                        </q-btn>
-                      </q-item-label>
-                    </div>
-                    <div class="row q-my-sm">
-                      <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-            <p class="total-bulk-row text-size-15">
-              <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
-              <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
-            </p>
-            <custom-input class="q-mt-lg q-px-sm" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
-          </q-card-section>
-          <q-card-actions v-else align="center" class="bg-white q-pb-md">
-            <q-icon size="md" name="warning" color="warning"></q-icon>
-            <q-item-label class="text-warning q-ml-sm">No payment to process</q-item-label>
-          </q-card-actions>
-          <q-card-actions align="center" class="bg-white q-pb-md">
-            <q-btn
-              label="Mark Paid"
-              color="primary"
-              @click="handlePaid"
-              :disable="paying || selected.length <= 0"
-              v-close-popup
-            />
           </q-card-actions>
         </q-card>
       </q-dialog>

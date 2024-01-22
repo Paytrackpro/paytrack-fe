@@ -789,6 +789,10 @@ a {
   max-width: 80%;
 }
 
+.bulk-show-address {
+  max-width: 93%;
+}
+
 @media only screen and (max-width: 1735px) {
   .paid-area-label {
     width: 18%;
@@ -918,6 +922,10 @@ a {
   .show-address {
     max-width: 73%;
   }
+
+  .bulk-show-address {
+    max-width: 90%;
+  }
 }
 //Change table size
 .invoice-table th,
@@ -952,6 +960,7 @@ a {
 
 .custom-link:hover {
   color: #2b2ec0 !important;
+  text-decoration: underline;
 }
 
 .custom-link:active {
@@ -974,4 +983,8 @@ a {
 .refresh-rate-btn .q-btn__content {
   align-items: start;
   padding-top: 2px;
+}
+
+.address-copy-btn {
+  min-height: 1em !important;
 }
