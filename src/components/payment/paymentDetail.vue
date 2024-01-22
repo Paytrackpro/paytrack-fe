@@ -269,22 +269,22 @@
 
     <q-dialog v-model="payDialog">
       <q-card style="width: 550px; max-width: 80vw">
-        <q-card-section class="row">
-          <div class="text-h6">Pay For Payment Request</div>
+        <q-card-section class="row q-pb-none">
+          <div class="text-h6">Pay</div>
         </q-card-section>
-        <q-card-section class="q-pt-xs q-px-lg row">
+        <q-card-section class="q-py-none q-px-lg row">
           <div
             v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
-            class="col-12 q-py-md field-shadow"
+            class="col-12 q-py-none field-shadow"
           >
             <payment-setting-method
               :defautMethod="payment.paymentMethod"
               @change="methodChange"
               :modelValue="payment.paymentSettings"
-              label="Accepted payment coins"
+              label="Payment Method"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-6 q-py-xs field-shadow">
             <PaymentRateInput
               ref="rateInput"
               v-model="payment"
@@ -292,23 +292,19 @@
               @update:modelValue="updateLocal"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-6 q-py-xs field-shadow">
             <div>
-              <p class="q-mb-xs">
+              <p class="q-mb-none">
                 <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }}) </b>
               </p>
-              <q-field stack-label borderless>
-                <template v-slot:control>
-                  <span class="text-weight-bolder text-blue-8 text-size-18">{{ payment.expectedAmount }}</span>
-                  <q-btn round dense flat class="q-ml-sm" @click="copy(payment.expectedAmount || '')">
-                    <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
-                    <q-tooltip>Copy Amount (BTC)</q-tooltip>
-                  </q-btn>
-                </template>
-              </q-field>
+              <span class="text-weight-bolder text-blue-8 text-size-18">{{ payment.expectedAmount }}</span>
+              <q-btn round dense flat class="q-ml-sm copy-width-btn" @click="copy(payment.expectedAmount || '')">
+                <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                <q-tooltip>Copy Amount (BTC)</q-tooltip>
+              </q-btn>
             </div>
           </div>
-          <div class="col-12 q-py-md">
+          <div class="col-12 q-py-xs">
             <p class="q-mb-xs">
               <b class="text-weight-medium">Enter transaction ID of sent payment</b>
             </p>

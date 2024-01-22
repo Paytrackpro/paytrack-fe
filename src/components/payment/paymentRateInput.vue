@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p class="q-mb-xs" v-if="!readonly">
+    <p class="q-mb-none" v-if="!readonly">
       <b class="text-weight-medium">Exchange Rate</b>
     </p>
     <div class="q-mb-xs row" v-if="readonly">
@@ -11,16 +11,14 @@
         }}</span
       >
     </div>
-    <q-field v-if="!readonly" class="justify-start" stack-label borderless>
-      <template v-slot:control>
-        <span>${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD</span>
-        <q-btn v-if="!loading" class="q-ml-sm" round dense flat @click="fetchRate">
-          <q-tooltip>Refresh Exchange Rate</q-tooltip>
-          <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
-        </q-btn>
-        <q-spinner-oval v-else class="q-ml-sm" size="sm" />
-      </template>
-    </q-field>
+    <div class="d-flex" v-if="!readonly">
+      <span class="q-pt-xs">${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD</span>
+      <q-btn v-if="!loading" class="q-ml-sm refresh-rate-btn" round dense flat @click="fetchRate">
+        <q-tooltip>Refresh Exchange Rate</q-tooltip>
+        <q-icon size="sm" class="custom-icon" :name="'o_refresh'" />
+      </q-btn>
+      <q-spinner-oval v-else class="q-ml-sm" size="sm" />
+    </div>
   </div>
 </template>
 

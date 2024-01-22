@@ -210,7 +210,7 @@ p {
 }
 
 .btn-animated {
-  animation: moveInBottom 0.5s ease-out;
+  animation: moveInBottom 0.4s ease-out;
   animation-fill-mode: backwards;
 }
 
@@ -271,9 +271,6 @@ p {
   font-size: 12px;
 }
 
-.bulk-item-title {
-  margin-top: 10px !important;
-}
 .tab-active {
   background-color: $cyan-2;
   color: $primary;
@@ -407,8 +404,8 @@ a {
   background: url('assets/login_bg.png') no-repeat center center scroll;
   background-size: cover;
   float: left;
-  -webkit-animation: bgslide 1s forwards;
-  animation: bgslide 1s forwards;
+  -webkit-animation: bgslide 0.5s forwards;
+  animation: bgslide 0.5s forwards;
 }
 
 @-webkit-keyframes bgslide {
@@ -521,8 +518,8 @@ a {
     float: none;
     background: url('https://i.ibb.co/rwncw7s/bg-mobile.png') center center;
     background-size: cover;
-    -webkit-animation: slideIn 0.8s ease-in-out forwards;
-    animation: slideIn 0.8s ease-in-out forwards;
+    -webkit-animation: slideIn 0.4s ease-in-out forwards;
+    animation: slideIn 0.4s ease-in-out forwards;
     width: 100%;
     height: 190px;
     text-align: center;
@@ -533,8 +530,8 @@ a {
     width: 100%;
   }
   .login .container {
-    -webkit-animation: slideIn 0.8s ease-in-out forwards;
-    animation: slideIn 0.8s ease-in-out forwards;
+    -webkit-animation: slideIn 0.4s ease-in-out forwards;
+    animation: slideIn 0.4s ease-in-out forwards;
     width: 85%;
     float: none;
   }
@@ -779,6 +776,19 @@ a {
   margin-top: 60px;
 }
 
+.bulk-pay-dialog {
+  width: 35vw;
+  max-width: 60vw !important;
+}
+
+.address-label {
+  width: 12%;
+}
+
+.show-address {
+  max-width: 80%;
+}
+
 @media only screen and (max-width: 1735px) {
   .paid-area-label {
     width: 18%;
@@ -786,6 +796,10 @@ a {
 
   .paid-area-value {
     width: 82%;
+  }
+
+  .bulk-pay-dialog {
+    width: 37vw;
   }
 }
 
@@ -797,6 +811,11 @@ a {
   .paid-area-value {
     width: 85%;
   }
+
+  .bulk-pay-dialog {
+    width: 45vw;
+    max-width: 70vw !important;
+  }
 }
 
 @media only screen and (max-width: 1300px) {
@@ -806,6 +825,10 @@ a {
 
   .paid-area-value {
     width: 82%;
+  }
+
+  .bulk-pay-dialog {
+    width: 47vw;
   }
 }
 
@@ -817,6 +840,10 @@ a {
   .paid-area-value {
     width: 80%;
   }
+
+  .bulk-pay-dialog {
+    width: 50vw;
+  }
 }
 
 @media only screen and (max-width: 1023px) {
@@ -826,6 +853,11 @@ a {
 
   .paid-area-value {
     width: 82%;
+  }
+
+  .bulk-pay-dialog {
+    width: 60vw;
+    max-width: 90vw !important;
   }
 }
 
@@ -837,6 +869,10 @@ a {
   .paid-area-value {
     width: 77%;
   }
+
+  .bulk-pay-dialog {
+    width: 85vw;
+  }
 }
 
 @media only screen and (max-width: 715px) {
@@ -846,6 +882,14 @@ a {
 
   .paid-area-value {
     width: 720%;
+  }
+
+  .address-label {
+    width: 15%;
+  }
+
+  .show-address {
+    max-width: 78%;
   }
 }
 
@@ -860,6 +904,19 @@ a {
 
   .rate-area {
     margin-top: 2px;
+  }
+
+  .bulk-pay-dialog {
+    width: 95vw;
+    max-width: 95vw !important;
+  }
+
+  .address-label {
+    width: 22%;
+  }
+
+  .show-address {
+    max-width: 73%;
   }
 }
 //Change table size
@@ -878,4 +935,43 @@ a {
 
 .q-table__card {
   color: rgb(73, 73, 73);
+}
+
+.copy-btn.q-btn--dense.q-btn--round {
+  min-height: 1.4em;
+  min-width: 1.4em;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.custom-link {
+  cursor: pointer;
+}
+
+.custom-link:hover {
+  color: #2b2ec0 !important;
+}
+
+.custom-link:active {
+  color: #324a5c !important;
+}
+
+.ai-start {
+  align-items: start;
+}
+
+.ai-center {
+  align-items: center;
+}
+
+.copy-width-btn .q-btn__content {
+  align-items: start !important;
+  padding-top: 4px;
+}
+
+.refresh-rate-btn .q-btn__content {
+  align-items: start;
+  padding-top: 2px;
 }

@@ -1,39 +1,39 @@
 <template>
-  <p class="q-mb-xs" v-if="label">
-    <b class="text-weight-medium">{{ label }} </b>
-  </p>
-  <q-field label-slot stack-label borderless>
-    <div class="row">
-      <q-option-group
-        size="xs"
-        :disable="readonly"
-        class="q-mr-md"
-        v-model="value"
-        @update:model-value="udpateValue"
-        :options="paymentMethods"
-        color="primary"
-        inline
-      >
-        <template v-slot:label="payMethod">
-          <div class="row items-center">
-            <coin-label :type="payMethod.value" />
-          </div>
-        </template>
-      </q-option-group>
+  <div class="d-flex">
+    <div class="d-flex q-mb-xs ai-center" v-if="label">
+      <b class="text-weight-medium">{{ label }} </b>
     </div>
-    <br />
-  </q-field>
-  <div class="row q-mt-xs">
-    <q-item-label lines="1">
-      <span>Address: </span><br class="address_breakline" />
-      <u class="text-weight-bold text-blue-8">
-        <em> {{ address }}</em></u
-      >
-      <q-btn v-if="value != ''" class="q-ml-sm" round dense flat @click="copyAddress">
-        <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
-        <q-tooltip>Copy address</q-tooltip>
-      </q-btn>
-    </q-item-label>
+    <q-field class="q-ml-sm" label-slot stack-label borderless>
+      <div class="row">
+        <q-option-group
+          size="xs"
+          :disable="readonly"
+          class="q-mr-md"
+          v-model="value"
+          @update:model-value="udpateValue"
+          :options="paymentMethods"
+          color="primary"
+          inline
+        >
+          <template v-slot:label="payMethod">
+            <div class="row items-center">
+              <coin-label :type="payMethod.value" />
+            </div>
+          </template>
+        </q-option-group>
+      </div>
+      <br />
+    </q-field>
+  </div>
+  <div class="d-flex q-mt-xs">
+    <span class="address-label">Address: </span>
+    <p class="text-weight-bold text-blue-8 custom-link show-address" @click="copyAddress">
+      {{ address }}
+    </p>
+    <q-btn v-if="value != ''" class="copy-width-btn" round dense flat @click="copyAddress">
+      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+      <q-tooltip>Copy address</q-tooltip>
+    </q-btn>
   </div>
 </template>
 

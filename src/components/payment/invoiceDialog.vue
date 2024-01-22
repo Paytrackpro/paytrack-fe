@@ -36,6 +36,7 @@
             :label="type === 'labor' ? 'Hours' : 'Quantity'"
             v-model="invoice.quantity"
             :type="'number'"
+            :minValue="0"
             :customStyle="'width:70%'"
             @update:modelValue="calculateCost"
             :rules="[(val) => !!val || 'Required field']"
@@ -47,6 +48,7 @@
             v-model="hourlyRateInput"
             :type="'number'"
             :customStyle="'width:70%'"
+            :minValue="0"
             @update:modelValue="calculateCost"
             :rules="priceRules"
           />
@@ -56,6 +58,7 @@
             :label="'Price'"
             v-model="invoice.price"
             :type="'number'"
+            :minValue="0"
             :customStyle="'width:70%'"
             @update:modelValue="calculateCost"
             :rules="priceRules"

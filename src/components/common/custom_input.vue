@@ -23,6 +23,7 @@
       :lazy-rules="lazyRules"
       :rules="rules"
       :step="step"
+      :min="minValue"
     >
       <template v-slot:append>
         <slot name="append" />
@@ -51,6 +52,7 @@ export default {
     labelTooltip: String,
     step: String,
     notitleCase: Boolean,
+    minValue: Number,
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {

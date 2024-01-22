@@ -1,5 +1,5 @@
 <template>
-  <div class="row" v-if="!readonly">
+  <div class="row q-mb-sm" v-if="!readonly">
     <div class="col">
       <q-btn
         icon="add"
