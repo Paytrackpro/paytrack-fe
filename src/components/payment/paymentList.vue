@@ -306,13 +306,14 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
-          sortable: false,
+          sortable: true,
         },
         {
           name: 'amount',
           align: 'right',
           label: 'Amount (USD)',
           field: 'amount',
+          sortable: true,
           format: (val) => {
             return val.toFixed(2)
           },
@@ -375,6 +376,7 @@ export default {
               name: 'receiverName',
               align: 'left',
               label: 'Recipient',
+              sortable: true,
               field: (row) => {
                 if (row.receiverDisplayName.length > 0) {
                   return row.receiverDisplayName + ' (' + row.receiverName + ')'
@@ -388,6 +390,7 @@ export default {
               required: true,
               label: 'Sender',
               align: 'left',
+              sortable: true,
               field: (row) => {
                 if (row.senderDisplayName.length > 0) {
                   return row.senderDisplayName + ' (' + row.senderName + ')'
@@ -400,6 +403,14 @@ export default {
       ]
 
       let lastColum = [
+        {
+          name: 'startDate',
+          align: 'center',
+          label: 'Start Date',
+          field: 'startDate',
+          sortable: true,
+          format: (val) => date.formatDate(val, MDateFormat),
+        },
         {
           name: 'updatedAt',
           align: 'center',
@@ -415,6 +426,7 @@ export default {
           name: 'acceptedCoins',
           align: 'center',
           label: 'Accepted Coins',
+          sortable: true,
           field: (row) => {
             return row.paymentSettings
               .map((el) => el.type)
