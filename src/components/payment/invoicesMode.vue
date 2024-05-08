@@ -27,7 +27,9 @@
     <thead>
       <tr class="title-row">
         <th class="text-left" style="width: 15%" v-if="showDateOnInvoiceLine">Date</th>
-        <th class="text-left" v-if="projectDisplay" style="width: 15%">Project</th>
+        <th class="text-left" v-if="readonly || (projectDisplay && !showProjectOnInvoice)" style="width: 15%">
+          Project
+        </th>
         <th class="text-left" style="width: 25%">Description</th>
         <th class="text-right" style="width: 15%">Amount</th>
         <th class="text-right" style="width: 15%" v-if="showCost">Cost (USD)</th>
@@ -51,6 +53,7 @@
         @delete="deleteInvoice"
         :readonly="readonly"
         :showDateOnInvoiceLine="showDateOnInvoiceLine"
+        :showProjectOnInvoice="showProjectOnInvoice"
         :projectDisplay="projectDisplay"
       />
     </tbody>
@@ -60,7 +63,7 @@
           <p class="text-size-15 text-weight-medium">Total</p>
         </td>
         <td v-if="showDateOnInvoiceLine"></td>
-        <td v-if="projectDisplay"></td>
+        <td v-if="readonly || (projectDisplay && !showProjectOnInvoice)"></td>
         <td class="text-weight-medium text-right text-size-15">
           <span v-if="isDisplayHours()"
             >{{ totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours }}&nbsp;hour{{
@@ -83,6 +86,7 @@
     v-model:isEdit="isEdit"
     :type="createType"
     :showDateOnInvoiceLine="showDateOnInvoiceLine"
+    :showProjectOnInvoice="showProjectOnInvoice"
     @updateInvoice="updateInvoice"
     @save="newInvoice"
   />
@@ -103,6 +107,7 @@ export default {
     showCost: Boolean,
     amount: Number,
     showDateOnInvoiceLine: Boolean,
+    showProjectOnInvoice: Boolean,
   },
   emits: ['update:modelValue'],
   data() {

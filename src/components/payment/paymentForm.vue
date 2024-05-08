@@ -125,12 +125,29 @@
         :rules="priceRules"
       />
     </div>
-    <q-checkbox
-      class="row q-mt-xs"
-      v-if="isInvoiceMode"
-      label="Show Date on Invoice Line"
-      v-model="inPayment.showDateOnInvoiceLine"
-    />
+    <div class="row" v-if="isInvoiceMode">
+      <q-checkbox class="row q-mt-xs" label="Show Date on Invoice Line" v-model="inPayment.showDateOnInvoiceLine" />
+      <q-checkbox
+        class="row q-mt-xs"
+        label="Invoice Project"
+        v-model="inPayment.showProjectOnInvoice"
+        v-if="projectList.length > 0"
+      />
+      <q-select
+        class="row q-mt-xs q-ml-sm"
+        v-if="inPayment.showProjectOnInvoice && projectList.length > 0"
+        v-model="inPayment.projectId"
+        :options="projectOption"
+        outlined
+        dense
+        style="min-width: 250px"
+        lazy-rules
+        stack-label
+        emit-value
+        map-options
+        borderless
+      />
+    </div>
     <div class="row q-py-lg" v-if="isInvoiceMode">
       <div class="col">
         <invoices-mode
@@ -139,6 +156,7 @@
           v-model="inPayment.details"
           :amount="inPayment.amount"
           :showDateOnInvoiceLine="inPayment.showDateOnInvoiceLine"
+          :showProjectOnInvoice="inPayment.showProjectOnInvoice"
           v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />
@@ -188,6 +206,31 @@ export default {
       ],
       isInvoiceMode: false,
       totalHours: 0.0,
+      projectList: [],
+      projectOption: [],
+    }
+  },
+  created() {
+    if (this.projectList.length == 0) {
+      //if projectList empty, get projectList
+      this.$api
+        .get(`/project/get-my-project`)
+        .then((data) => {
+          this.projectList = data
+          this.projectList.forEach((project) => {
+            this.projectOption.push({
+              label: project.projectName,
+              value: project.projectId,
+            })
+          })
+          if (!this.edit && !this.inPayment.projectId && this.projectList && this.projectList.length > 0) {
+            this.inPayment.projectId = this.projectList[0].projectId
+          }
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
     }
   },
   watch: {
@@ -302,6 +345,18 @@ export default {
       }
       if (isDraft !== true) {
         successNotify = 'Payment request sent'
+      }
+      if (this.inPayment.showProjectOnInvoice) {
+        this.projectList.find((project) => {
+          if (project.projectId === this.inPayment.projectId) {
+            this.inPayment.projectId = project.projectId
+            this.inPayment.projectName = project.projectName
+          }
+        })
+        payment.details.forEach((detail) => {
+          detail.projectId = this.inPayment.projectId
+          detail.projectName = this.inPayment.projectName
+        })
       }
       if (!this.isInvoiceMode) {
         payment.details = []
