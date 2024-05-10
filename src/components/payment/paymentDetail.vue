@@ -6,7 +6,7 @@
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
           <payment-status
-            v-if="payment.status && (!isReceiver || isPaidStatus)"
+            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus)"
             :paymentModel="payment"
             class="q-ml-md"
             :isShowIcon="true"
@@ -18,6 +18,7 @@
             label="Pay"
             type="button"
             color="primary"
+            :disable="isDraftStatus"
             @click="payDialog = true"
             class="q-mr-sm btn btn-animated"
           />
@@ -70,7 +71,7 @@
         </div>
       </div>
       <q-select
-        v-if="isReceiver && !isPaidStatus"
+        v-if="isReceiver && !isPaidStatus && !isDraftStatus"
         v-model="paymentStatus"
         :options="statusOption"
         dense
