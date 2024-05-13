@@ -39,6 +39,14 @@
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
+            v-if="isSentStatus && editable"
+            label="Unsend"
+            type="button"
+            color="orange"
+            @click="unsentInvoice()"
+            class="q-mr-sm btn btn-animated"
+          />
+          <q-btn
             v-if="isDraftStatus && editable"
             label="Delete Draft"
             type="button"
@@ -595,6 +603,11 @@ export default {
       this.payment.receiptImg = this.imageNewName
       this.update()
     },
+    unsentInvoice() {
+      this.paymentStatus = 'draft'
+      this.payment.status = 'draft'
+      this.update()
+    },
     async uploadImage() {
       let formData = new FormData()
       formData.append('receipt', this.receiptAttachFile)
@@ -812,6 +825,9 @@ export default {
     },
     isDraftStatus() {
       return this.payment.status == 'draft'
+    },
+    isSentStatus() {
+      return this.payment.status == 'sent'
     },
     isConfirmedStatusChange() {
       return this.paymentStatus == 'confirmed'
