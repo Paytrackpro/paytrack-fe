@@ -274,6 +274,7 @@ import { responseError } from 'src/helper/error'
 import MTime from 'components/common/mTime'
 import customPagination from '../common/custom_pagination.vue'
 import customInput from '../common/custom_input.vue'
+import { listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
 export default {
   name: 'paymentList',
@@ -340,6 +341,7 @@ export default {
     }
   },
   created() {
+    listenSocketEvent('reloadList', this.onSocketMessage)
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
@@ -351,6 +353,9 @@ export default {
       .catch((err) => {
         responseError(err)
       })
+  },
+  beforeUnmount() {
+    removeListenSocketEvent('reloadList', this.onSocketMessage)
   },
   components: {
     PaymentStatus,
@@ -460,6 +465,15 @@ export default {
           responseError(err)
           this.loading = false
         })
+    },
+    onSocketMessage(data) {
+      // reload list
+      console.log('reload list')
+      this.getPayments({
+        ...pathParamsToPaging(this.$route, this.pagination),
+        requestType: this.type,
+        hidePaid: this.hidePaid,
+      })
     },
     onBulkPay() {
       this.detailBulk = true

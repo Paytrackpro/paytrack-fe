@@ -108,6 +108,7 @@ import role from 'src/consts/role'
 import { mapGetters } from 'vuex'
 import { ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { isSocketConnected, joinRoom, connectSocket, disconnectSocket } from 'src/helper/socket.js'
 export default {
   data() {
     return {
@@ -181,6 +182,12 @@ export default {
       .catch(() => {
         return
       })
+    if (!isSocketConnected()) {
+      connectSocket(`${this.$store.getters['user/getUser'].id}`)
+    }
+  },
+  beforeUnmount() {
+    disconnectSocket()
   },
   setup() {
     const $q = useQuasar()
@@ -214,6 +221,7 @@ export default {
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
     logOut() {
+      disconnectSocket()
       this.$store.dispatch('user/logOut')
       this.$router.push({ path: '/login' })
     },
