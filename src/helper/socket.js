@@ -21,6 +21,10 @@ const joinRoom = (room) => {
   socket.emit('join', room)
 }
 
+const leftRoom = (room) => {
+  socket.emit('left', room)
+}
+
 const isSocketConnected = () => {
   return state.connected
 }
@@ -39,10 +43,19 @@ const disconnectSocket = () => {
 }
 
 const listenSocketEvent = (eventName, callback) => {
+  socket.off(eventName, callback) // prevent duplicate listener
   socket.on(eventName, callback)
 }
 const removeListenSocketEvent = (eventName, callback) => {
   socket.off(eventName, callback)
 }
 
-export { isSocketConnected, joinRoom, connectSocket, disconnectSocket, listenSocketEvent, removeListenSocketEvent }
+export {
+  isSocketConnected,
+  joinRoom,
+  leftRoom,
+  connectSocket,
+  disconnectSocket,
+  listenSocketEvent,
+  removeListenSocketEvent,
+}

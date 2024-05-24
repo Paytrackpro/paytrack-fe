@@ -468,7 +468,6 @@ export default {
     },
     onSocketMessage(data) {
       // reload list
-      console.log('reload list')
       this.getPayments({
         ...pathParamsToPaging(this.$route, this.pagination),
         requestType: this.type,

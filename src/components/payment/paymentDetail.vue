@@ -19,7 +19,7 @@
             type="button"
             color="primary"
             :disable="isDraftStatus"
-            @click="payDialog = true"
+            @click="showPayDialog()"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -277,7 +277,7 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="payDialog">
+    <q-dialog v-model="payDialog" @update:model-value="disableClose">
       <q-card style="width: 550px; max-width: 80vw">
         <q-card-section class="row">
           <div class="text-h6">Pay For Payment Request</div>
@@ -329,7 +329,7 @@
         </q-card-section>
         <q-card-actions align="center" class="q-pb-md">
           <q-btn color="secondary" label="Mark paid" @click="markAsPaid" :disable="fetchingRate || txId == ''" />
-          <q-btn label="Cancel" type="button" color="white" text-color="black" @click="payDialog = false" />
+          <q-btn label="Cancel" type="button" color="white" text-color="black" @click="hidePayDialog()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -353,6 +353,7 @@ import { ref } from 'vue'
 import { api, axios } from 'boot/axios'
 import { STATUS_INFO } from 'src/consts/common'
 import { COINS } from 'src/consts/common'
+import { joinRoom, leftRoom, listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
 export default {
   name: 'paymentDetail',
@@ -452,7 +453,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
-          this.payDialog = false
+          this.hidePayDialog()
           this.$emit('updateUnpaidCount', this.unpaidCount - 1)
         })
         .catch((err) => {
@@ -513,6 +514,7 @@ export default {
     },
     updateLocal(payment, editing) {
       payment = payment || this.payment
+      listenSocketEvent(this.payment.paymentMethod, this.onSocketMessage)
       this.$emit('update:modelValue', payment)
       if (editing) {
         this.$emit('update:editing', true)
@@ -522,6 +524,8 @@ export default {
       const settings = this.payment.paymentSettings || []
       const setting = settings.find((s) => s.type === method)
       if (setting) {
+        removeListenSocketEvent(this.payment.paymentMethod, this.onSocketMessage)
+        listenSocketEvent(method, this.onSocketMessage)
         this.payment.paymentMethod = method
         this.payment.paymentAddress = setting.address
       }
@@ -588,6 +592,28 @@ export default {
         type: 'negative',
         message: `Image extensions are not allowed`,
       })
+    },
+    disableClose() {
+      this.payDialog = true
+    },
+    showPayDialog() {
+      this.payDialog = true
+      joinRoom('exchangeRate')
+    },
+    hidePayDialog() {
+      this.payDialog = false
+      removeListenSocketEvent('btc', this.onSocketMessage)
+      removeListenSocketEvent('ltc', this.onSocketMessage)
+      removeListenSocketEvent('dcr', this.onSocketMessage)
+      leftRoom('exchangeRate')
+    },
+    onSocketMessage(data) {
+      if (data && this.payment.convertRate != data.rate) {
+        this.payment.convertRate = data.rate
+        this.payment.convertTime = data.convertTime
+        this.payment.expectedAmount = parseFloat(this.payment.amount / data.rate).toFixed(8)
+        this.$emit('update:modelValue', this.payment)
+      }
     },
     uploadReceipt() {
       if (this.receiptAttachFile == null) {
