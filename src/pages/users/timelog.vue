@@ -115,13 +115,44 @@
                         <p v-if="!descEditStatuses[i]">{{ timelog.description }}</p>
                       </div>
                     </div>
+                    <div class="col-12 col-sm-2 col-lg-4 d-flex justify-content-center">
+                      <div>
+                        <q-btn
+                          label="Delete"
+                          type="button"
+                          color="red"
+                          @click="prepareDeleteTimer(i)"
+                          class="q-mr-sm btn btn-animated"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </q-card-section>
               </q-card>
             </q-expansion-item>
           </q-list>
+          <div class="d-flex justify-content-end">
+            <custom-pagination
+              v-if="pagination.rowsNumber > 10"
+              :pagination="pagination"
+              :color="'primary'"
+              class="q-mt-md"
+            />
+          </div>
         </div>
       </div>
+      <q-dialog v-model="confirm" persistent>
+        <q-card>
+          <q-card-section class="row items-center">
+            <q-avatar icon="warning" color="primary" text-color="white" size="md" />
+            <span class="q-ml-sm">Are you sure to delete this working time log?</span>
+          </q-card-section>
+          <q-card-actions align="right">
+            <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteTimeLog()" />
+            <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </q-card-section>
   </q-card>
 </template>
@@ -129,6 +160,7 @@
 <script>
 import reportFilter from 'components/report/reportFilter'
 import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import customPagination from 'src/components/common/custom_pagination.vue'
 import { MDateFormat } from 'src/consts/common'
 import { date } from 'quasar'
 import MTime from 'components/common/mTime'
@@ -137,12 +169,10 @@ export default {
   components: {
     reportFilter,
     MTime,
+    customPagination,
   },
   data() {
     return {
-      loading: false,
-      monthChoose: [],
-      selectedMonth: 1,
       reportFilters: {
         StartDate: null,
         EndDate: null,
@@ -156,6 +186,8 @@ export default {
       projectOption: [],
       descEditStatuses: [],
       descContentTemp: [],
+      confirm: false,
+      deleteIndex: -1,
     }
   },
   created() {
@@ -182,7 +214,8 @@ export default {
           params: this.reportFilters,
         })
         .then((res) => {
-          this.timelogList = res
+          this.timelogList = res.timers
+          this.pagination.rowsNumber = res.count
           this.timelogList.forEach((timelog) => {
             this.descEditStatuses.push(false)
             this.descContentTemp.push(timelog.description)
@@ -271,6 +304,38 @@ export default {
         .catch((err) => {
           responseError(err)
         })
+    },
+    deleteTimeLog() {
+      if (this.deleteIndex < 0) {
+        this.$q.notify({
+          type: 'negative',
+          message: `Delete Timer failed`,
+        })
+        return
+      }
+      //delete handler timer
+      var deleteTimer = this.timelogList[this.deleteIndex]
+      if (!deleteTimer) {
+        return
+      }
+      this.$api
+        .delete(`/user/timer-delete/${deleteTimer.id}`)
+        .then(() => {
+          this.$q.notify({
+            message: 'Working Time log has been deleted',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.initTimeLogList()
+          this.deleteIndex = -1
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    prepareDeleteTimer(index) {
+      this.deleteIndex = index
+      this.confirm = true
     },
   },
   watch: {
