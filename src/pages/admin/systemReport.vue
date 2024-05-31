@@ -77,7 +77,7 @@ import customPagination from 'src/components/common/custom_pagination.vue'
 import reportFilter from 'components/report/reportFilter'
 
 export default {
-  name: 'adminUserList',
+  name: 'systemReport',
   props: {
     type: String,
   },
@@ -189,7 +189,6 @@ export default {
           params: this.reportFilters,
         })
         .then(({ report, count }) => {
-          console.log(JSON.stringify(report))
           this.rows = report.userUsageSummary || []
           this.pagination.rowsNumber = count
           this.loading = false

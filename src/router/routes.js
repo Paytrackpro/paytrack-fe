@@ -101,6 +101,14 @@ const routes = [
         ],
       },
       {
+        path: 'timelog/',
+        name: 'timelog',
+        component: () => import('pages/users/timelog.vue'),
+        meta: {
+          title: 'Time Log',
+        },
+      },
+      {
         path: 'get-paid/',
         name: 'get-paid',
         component: () => import('pages/payments/layout.vue'),

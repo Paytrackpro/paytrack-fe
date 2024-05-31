@@ -169,6 +169,12 @@ export default {
           to: '/get-paid',
         },
         {
+          icon: 'schedule',
+          label: 'Time Log',
+          separator: false,
+          to: '/timelog',
+        },
+        {
           icon: 'summarize',
           label: 'Report',
           separator: false,

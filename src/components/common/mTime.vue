@@ -10,6 +10,7 @@ export default {
   props: {
     time: String,
     format: String,
+    dateTimeOnly: Boolean,
   },
   computed: {
     timeView() {
@@ -19,7 +20,7 @@ export default {
       }
       //if format is empty, display time as full timestamp UTC format
       if (this.time && !this.format) {
-        return d.toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' UTC'
+        return d.toISOString().replace(/T/, ' ').replace(/\..+/, '') + (this.dateTimeOnly ? '' : ' UTC')
       }
       return date.formatDate(this.time, this.format)
     },
