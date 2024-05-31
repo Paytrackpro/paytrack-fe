@@ -1,7 +1,8 @@
 <template>
   <div class="row q-mb-md q-col-gutter-md">
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
-      <p class="q-mt-none q-mb-xs text-weight-medium">Date Range</p>
+    <div :class="getDateRangeColumnClass()">
+      <p class="q-mt-none q-mb-xs text-weight-medium" v-if="!isreport">Date Range</p>
+      <p class="q-mt-none q-mb-xs q-mr-sm text-weight-medium" v-if="isreport">Filter</p>
       <q-field outlined stack-label class="date-range-field">
         <span>{{ `${paymentDateRange.from} - ${paymentDateRange.to}` }}</span>
         <q-popup-proxy transition-show="scale" transition-hide="scale">
@@ -31,7 +32,7 @@
         </q-popup-proxy>
       </q-field>
     </div>
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
+    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow" v-if="!isreport">
       <p class="q-mt-none q-mb-xs text-weight-medium">Members</p>
       <q-select
         v-model="memberModel"
@@ -45,7 +46,7 @@
         @filter="filterMemberFn"
       />
     </div>
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
+    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow" v-if="!isreport">
       <p class="q-mt-none q-mb-xs text-weight-medium">Projects</p>
       <q-select
         v-model="projectModel"
@@ -77,6 +78,7 @@ export default {
   name: 'reportFilter',
   props: {
     tabChange: Boolean,
+    isreport: Boolean,
   },
   setup() {
     const memberModel = ref(null)
@@ -282,6 +284,12 @@ export default {
       const now = new Date()
       now.setDate(now.getDate() - 6)
       return this.getRefDateFormat(now)
+    },
+    getDateRangeColumnClass() {
+      if (this.isreport) {
+        return 'center-row q-py-sm q-my-sm field-shadow'
+      }
+      return 'col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow'
     },
   },
   watch: {

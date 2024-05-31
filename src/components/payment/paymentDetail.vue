@@ -285,7 +285,7 @@
         <q-card-section class="q-pt-xs q-px-lg row">
           <div
             v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
-            class="col-12 q-py-md field-shadow"
+            class="col-12 q-pb-sm field-shadow"
           >
             <payment-setting-method
               :defautMethod="payment.paymentMethod"
@@ -294,15 +294,69 @@
               label="Accepted payment coins"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-6 field-shadow q-py-sm">
+                <b class="text-weight-medium">Exchange</b>
+                <q-select
+                  class="row q-mt-sm"
+                  v-model="exchange"
+                  :options="exchangeOption"
+                  outlined
+                  dense
+                  style="min-width: 40px"
+                  lazy-rules
+                  stack-label
+                  emit-value
+                  map-options
+                  borderless
+                >
+                  <template v-slot:prepend>
+                    <img src="../../assets/binance-icon.png" width="20" height="20" v-if="exchange == 'binance'" />
+                    <img src="../../assets/kucoin-icon.png" width="20" height="20" v-if="exchange == 'kucoin'" />
+                    <img src="../../assets/mexc-icon.png" width="20" height="20" v-if="exchange == 'mexc'" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+                      <q-item-section>
+                        <div>
+                          <img
+                            src="../../assets/binance-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'binance'"
+                          />
+                          <img
+                            src="../../assets/kucoin-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'kucoin'"
+                          />
+                          <img
+                            src="../../assets/mexc-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'mexc'"
+                          />
+                          <span class="q-ml-sm">{{ scope.opt.label }}</span>
+                        </div>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 q-py-sm field-shadow">
             <PaymentRateInput
               ref="rateInput"
               v-model="payment"
               v-model:loading="fetchingRate"
+              v-model:exchange="exchange"
               @update:modelValue="updateLocal"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-6 q-py-sm field-shadow">
             <div>
               <p class="q-mb-xs">
                 <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }}) </b>
@@ -318,7 +372,7 @@
               </q-field>
             </div>
           </div>
-          <div class="col-12 q-py-md">
+          <div class="col-12 q-py-sm">
             <p class="q-mb-xs">
               <b class="text-weight-medium">Enter transaction ID of sent payment</b>
             </p>
@@ -385,6 +439,8 @@ export default {
       imageBase64: '',
       receiptImageDialog: false,
       totalHours: 0.0,
+      exchangeOption: [],
+      exchange: 'binance',
     }
   },
   props: {
@@ -396,6 +452,27 @@ export default {
     processing: Boolean,
     approvalCount: Number,
     unpaidCount: Number,
+  },
+  created() {
+    //if exhchange options empty, initialization
+    if (this.exchangeOption.length == 0) {
+      //if projectList empty, get projectList
+      this.$api
+        .get(`/payment/exchange-list`)
+        .then((data) => {
+          data.forEach((exchange) => {
+            this.exchangeOption.push({
+              label: this.getExchangeName(exchange),
+              value: exchange,
+            })
+          })
+          this.exchange = data[0]
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
+    }
   },
   methods: {
     ...mapActions({
@@ -440,7 +517,7 @@ export default {
         paymentAddress: this.payment.paymentAddress,
         convertRate: this.payment.convertRate,
         convertTime: this.payment.convertTime,
-        expectedAmount: this.payment.expectedAmount,
+        expectedAmount: Number(this.payment.expectedAmount),
       }
       this.$api
         .post('/payment/process', reqData)
@@ -717,6 +794,20 @@ export default {
       }
       return ''
     },
+    getExchangeName(exchange) {
+      switch (exchange) {
+        case 'binance':
+          return 'Binance'
+        case 'kucoin':
+          return 'Kucoin'
+        case 'dex':
+          return 'Dex'
+        case 'mexc':
+          return 'Mexc'
+        default:
+          return ''
+      }
+    },
   },
   watch: {
     modelValue: {
@@ -769,6 +860,12 @@ export default {
         } else {
           this.update()
         }
+      },
+    },
+    exchange: {
+      immediate: true,
+      handler(newExchange) {
+        this.exchange = newExchange
       },
     },
   },

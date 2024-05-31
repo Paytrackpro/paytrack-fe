@@ -49,6 +49,15 @@ const routes = [
         },
       },
       {
+        path: 'system-report/',
+        name: 'system.report',
+        component: () => import('pages/admin/systemReport.vue'),
+        meta: {
+          roles: [ROLE.ADMIN],
+          title: 'System Report',
+        },
+      },
+      {
         path: 'report/',
         name: 'report',
         component: () => import('pages/admin/report.vue'),

@@ -151,6 +151,13 @@ export default {
           role: role.ADMIN,
           to: '/users',
         },
+        {
+          icon: 'contact_page',
+          label: 'System Report',
+          separator: false,
+          role: role.ADMIN,
+          to: '/system-report',
+        },
       ],
       approvalCount: 0,
       unpaidCount: 0,

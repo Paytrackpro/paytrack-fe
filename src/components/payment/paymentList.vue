@@ -431,7 +431,7 @@ export default {
           name: 'acceptedCoins',
           align: 'center',
           label: 'Accepted Coins',
-          sortable: true,
+          sortable: false,
           field: (row) => {
             return row.paymentSettings
               .map((el) => el.type)

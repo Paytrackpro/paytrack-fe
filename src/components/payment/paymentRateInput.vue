@@ -35,12 +35,14 @@ export default {
         convertRate: 0,
       },
       fetchedRate: false,
+      currentExchange: 'binance',
     }
   },
   props: {
     modelValue: Object,
     readonly: Boolean,
     loading: Boolean,
+    exchange: String,
   },
   methods: {
     fetchRate() {
@@ -56,11 +58,15 @@ export default {
         paymentMethod: this.modelValue.paymentMethod,
         paymentAddress: this.modelValue.paymentAddress,
         token: this.$route.params.token,
+        exchange: this.currentExchange,
       }
       this.$emit('update:loading', true)
       this.$api
         .post('/payment/request-rate', reqData)
         .then((data) => {
+          if (data.isPaid) {
+            return
+          }
           let newPayment = { ...this.modelValue }
           newPayment.convertRate = data.rate
           newPayment.convertTime = data.convertTime
@@ -86,6 +92,13 @@ export default {
         if (!this.readonly && !this.fetchedRate) {
           this.fetchRate()
         }
+      },
+    },
+    exchange: {
+      immediate: true,
+      handler(newExchange) {
+        this.currentExchange = newExchange
+        this.fetchRate()
       },
     },
   },
