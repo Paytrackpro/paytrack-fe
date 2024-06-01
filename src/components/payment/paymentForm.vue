@@ -225,6 +225,7 @@ export default {
           })
           if (!this.edit && !this.inPayment.projectId && this.projectList && this.projectList.length > 0) {
             this.inPayment.projectId = this.projectList[0].projectId
+            this.inPayment.projectName = this.projectList[0].projectName
           }
         })
         .catch((err) => {

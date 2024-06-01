@@ -27,7 +27,7 @@
     <thead>
       <tr class="title-row">
         <th class="text-left" style="width: 15%" v-if="showDateOnInvoiceLine">Date</th>
-        <th class="text-left" v-if="readonly || (projectDisplay && !showProjectOnInvoice)" style="width: 15%">
+        <th class="text-left" v-if="!showProjectOnInvoice && (readonly || projectDisplay)" style="width: 15%">
           Project
         </th>
         <th class="text-left" style="width: 25%">Description</th>
@@ -63,7 +63,7 @@
           <p class="text-size-15 text-weight-medium">Total</p>
         </td>
         <td v-if="showDateOnInvoiceLine"></td>
-        <td v-if="readonly || (projectDisplay && !showProjectOnInvoice)"></td>
+        <td v-if="!showProjectOnInvoice && (readonly || projectDisplay)"></td>
         <td class="text-weight-medium text-right text-size-15">
           <span v-if="isDisplayHours()"
             >{{ totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours }}&nbsp;hour{{

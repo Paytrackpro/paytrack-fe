@@ -460,6 +460,33 @@ export default {
           this.loading = false
           this.rows = payments || []
           this.pagination.rowsNumber = count
+          //check view project column
+          var hasProject = false
+          var hasProjectColumnIndex = -1
+          this.rows.forEach((payment) => {
+            if (payment.projectId > 0) {
+              hasProject = true
+              return
+            }
+          })
+          this.fixedColumns.forEach((fixedColumn, index) => {
+            if (fixedColumn.name == 'projectName') {
+              hasProjectColumnIndex = index
+              return
+            }
+          })
+          if (hasProject && hasProjectColumnIndex < 0) {
+            var tempFixedColumn = new Array({
+              name: 'projectName',
+              align: 'center',
+              label: 'Project',
+              field: 'projectName',
+              sortable: true,
+            })
+            this.fixedColumns = tempFixedColumn.concat(this.fixedColumns)
+          } else if (!hasProject && hasProjectColumnIndex >= 0) {
+            this.fixedColumns.splice(hasProjectColumnIndex, 1)
+          }
         })
         .catch((err) => {
           responseError(err)

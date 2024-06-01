@@ -3,7 +3,7 @@
     <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
-    <td class="text-left" v-if="readonly || (projectDisplay && !showProjectOnInvoice)">
+    <td class="text-left" v-if="!showProjectOnInvoice && (readonly || projectDisplay)">
       {{ invoice.projectName }}
     </td>
     <td class="text-left">

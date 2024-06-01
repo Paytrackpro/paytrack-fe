@@ -896,6 +896,10 @@ a {
   justify-content: end;
 }
 
+.justify-content-between {
+  justify-content: space-between;
+}
+
 .width-200 {
   width: 200%;
 }
@@ -907,4 +911,9 @@ a {
 
 .min-width-100 {
   min-width: 100px;
+}
+
+.py-0 {
+  padding-bottom: 0;
+  padding-top: 0;
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="row q-mb-md q-col-gutter-md">
+  <div :class="'row ' + notMargin ? '' : 'q-mb-md' + 'q-col-gutter-md'">
     <div :class="getDateRangeColumnClass()">
       <p class="q-mt-none q-mb-xs text-weight-medium" v-if="!isreport">Date Range</p>
       <p class="q-mt-none q-mb-xs q-mr-sm text-weight-medium" v-if="isreport">Filter</p>
@@ -80,6 +80,7 @@ export default {
   props: {
     tabChange: Boolean,
     isreport: Boolean,
+    notMargin: Boolean,
   },
   setup() {
     const memberModel = ref(null)

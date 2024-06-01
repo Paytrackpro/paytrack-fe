@@ -27,6 +27,26 @@ const pathParamsToPaging = ({ query }, paging) => {
   return filter
 }
 
+const pathParamsToNotUsePaging = ({ query }, paging) => {
+  paging.sortBy = query.sb
+  paging.descending = query.d === '1'
+  paging.page = Number(query.p) || 1
+  const defaultRowPerPage = defaultNotUseSizePaging.defaultRowPerPage || 20
+  paging.rowsPerPage = Number(query.r) || defaultRowPerPage
+  const filter = {
+    page: paging.page,
+    size: paging.rowsPerPage,
+    order: paging.sortBy,
+  }
+  if (paging.sortBy) {
+    filter.order = paging.sortBy
+    if (paging.descending) {
+      filter.order += ' desc'
+    }
+  }
+  return filter
+}
+
 const defaultPaging = {
   sortBy: '',
   descending: false,
@@ -35,4 +55,12 @@ const defaultPaging = {
   rowsNumber: 0,
 }
 
-export { pagingToPathParams, pathParamsToPaging, defaultPaging }
+const defaultNotUseSizePaging = {
+  sortBy: '',
+  descending: false,
+  page: 1,
+  rowsPerPage: 20,
+  rowsNumber: 0,
+}
+
+export { pagingToPathParams, pathParamsToPaging, pathParamsToNotUsePaging, defaultPaging, defaultNotUseSizePaging }

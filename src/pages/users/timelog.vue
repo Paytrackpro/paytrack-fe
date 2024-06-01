@@ -7,10 +7,13 @@
         </div>
       </div>
     </q-card-section>
-    <q-card-section class="q-pt-md q-pb-xs">
-      <report-filter @updateFilter="updateFilter" isreport></report-filter>
-    </q-card-section>
     <q-card-section class="q-pt-xs">
+      <div class="d-flex justify-content-between">
+        <q-card-section class="py-0">
+          <report-filter @updateFilter="updateFilter" isreport notMargin></report-filter>
+        </q-card-section>
+        <custom-pagination v-if="pagination.rowsNumber > 20" :pagination="pagination" :color="'primary'" />
+      </div>
       <div class="row">
         <div class="col-12">
           <q-card class="no-shadow outlined">
@@ -19,6 +22,9 @@
               <span class="col-4 text-center">Working Time</span>
             </div>
           </q-card>
+          <div v-if="timelogList.length <= 0" class="q-mt-sm">
+            <p class="text-center">No valid data</p>
+          </div>
           <q-list bordered class="rounded-borders">
             <q-expansion-item
               expand-separator
@@ -29,7 +35,7 @@
             >
               <template v-slot:header>
                 <q-item-section>
-                  <div class="row">
+                  <div class="row" style="height: 35px">
                     <span class="col-4 text-center">
                       <span class="fw-600">Start:&nbsp;</span><m-time :time="timelog.start" dateTimeOnly></m-time>
                     </span>
@@ -78,7 +84,9 @@
                               color="grey"
                               icon="edit"
                               @click="openEditDesc(i)"
-                            />
+                            >
+                              <q-tooltip> Edit Description </q-tooltip>
+                            </q-btn>
                             <q-btn
                               v-if="descEditStatuses[i]"
                               size="sm"
@@ -87,7 +95,9 @@
                               color="green"
                               icon="check"
                               @click="updateDescription(i)"
-                            />
+                            >
+                              <q-tooltip> Apply </q-tooltip>
+                            </q-btn>
                             <q-btn
                               v-if="descEditStatuses[i]"
                               size="sm"
@@ -96,7 +106,9 @@
                               color="red"
                               icon="close"
                               @click="cancelDescEdit(i)"
-                            />
+                            >
+                              <q-tooltip> Cancel edit </q-tooltip>
+                            </q-btn>
                           </div>
                         </div>
                         <q-input
@@ -123,7 +135,9 @@
                           color="red"
                           @click="prepareDeleteTimer(i)"
                           class="q-mr-sm btn btn-animated"
-                        />
+                        >
+                          <q-tooltip> Delete this time log </q-tooltip>
+                        </q-btn>
                       </div>
                     </div>
                   </div>
@@ -133,7 +147,7 @@
           </q-list>
           <div class="d-flex justify-content-end">
             <custom-pagination
-              v-if="pagination.rowsNumber > 10"
+              v-if="pagination.rowsNumber > 20"
               :pagination="pagination"
               :color="'primary'"
               class="q-mt-md"
@@ -159,7 +173,7 @@
 
 <script>
 import reportFilter from 'components/report/reportFilter'
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToNotUsePaging, defaultNotUseSizePaging } from 'src/helper/paging'
 import customPagination from 'src/components/common/custom_pagination.vue'
 import { MDateFormat } from 'src/consts/common'
 import { date } from 'quasar'
@@ -181,7 +195,7 @@ export default {
         order: null,
       },
       timelogList: [],
-      pagination: { ...defaultPaging },
+      pagination: { ...defaultNotUseSizePaging },
       projectList: [],
       projectOption: [],
       descEditStatuses: [],
@@ -342,7 +356,7 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToNotUsePaging(to, this.pagination)
         this.reportFilters.page = filter.page
         this.reportFilters.size = filter.size
         this.reportFilters.order = filter.order

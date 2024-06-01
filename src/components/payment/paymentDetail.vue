@@ -248,6 +248,14 @@
           />
         </div>
       </div>
+      <div
+        class="row q-mb-xs q-col-gutter-md q-mt-xs"
+        v-if="isShowInvoice && payment.showProjectOnInvoice && payment.projectId > 0"
+      >
+        <p>
+          <span>Invoice Project:</span>&nbsp;<span class="fw-600">{{ payment.projectName }}</span>
+        </p>
+      </div>
       <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
         <div class="col q-pt-xs">
           <invoices-mode

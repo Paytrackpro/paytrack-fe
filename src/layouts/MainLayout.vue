@@ -31,7 +31,9 @@
             color="white"
             icon="play_arrow"
             @click="resumeTime"
-          />
+          >
+            <q-tooltip> Continue </q-tooltip>
+          </q-btn>
           <q-btn
             v-if="!pausing"
             size="sm"
@@ -40,8 +42,12 @@
             color="white"
             icon="pause"
             @click="pauseTime"
-          />
-          <q-btn size="sm" class="timer-btc-icon q-mr-xs" flat color="white" icon="stop" @click="stopTime" />
+          >
+            <q-tooltip> Pause </q-tooltip>
+          </q-btn>
+          <q-btn size="sm" class="timer-btc-icon q-mr-xs" flat color="white" icon="stop" @click="stopTime">
+            <q-tooltip> Stop </q-tooltip>
+          </q-btn>
           <span>{{ timeHour }}</span>
           <span>{{ timeMin }}</span>
           :
