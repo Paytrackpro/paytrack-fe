@@ -258,7 +258,7 @@ export default {
     },
     initProjectList() {
       this.$api
-        .get('/project/get-list', {})
+        .get('/project/get-my-project', {})
         .then((res) => {
           this.projectList = res
           if (this.projectOption.length < 1) {
