@@ -398,7 +398,23 @@ export default {
               name: 'projectName',
               align: 'center',
               label: 'Project',
-              field: 'projectName',
+              field: (row) => {
+                if (row.showProjectOnInvoice) {
+                  return row.projectName
+                } else if (row.details && row.details.length > 0) {
+                  var projectList = []
+                  row.details.forEach((detail) => {
+                    if (detail.projectId > 0 && !projectList.includes(detail.projectName)) {
+                      projectList.push(detail.projectName)
+                    }
+                  })
+                  if (projectList.length == 0) {
+                    return ''
+                  }
+                  return projectList.join(', ')
+                }
+                return ''
+              },
               sortable: true,
             })
             this.fixedColumns = tempFixedColumn.concat(this.fixedColumns)
