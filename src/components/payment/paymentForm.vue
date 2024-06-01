@@ -77,6 +77,7 @@
               dense
               lazy-rules
               stack-label
+              min="0"
               :rules="[(val) => val > 0 || inputAmountMessage]"
             >
               <template v-slot:prepend>
@@ -123,6 +124,7 @@
         v-model="inPayment.hourlyRate"
         :type="'number'"
         :rules="priceRules"
+        :minValue="0"
       />
     </div>
     <div class="row" v-if="isInvoiceMode">
