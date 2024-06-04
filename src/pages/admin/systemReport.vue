@@ -1,73 +1,78 @@
 <template>
   <div class="q-pa-lg">
-    <q-card class="q-pa-md q-mb-lg content-container">
-      <div class="text-h6 title-case">System Report</div>
-      <div class="q-ma-md text-size-15">
-        <div class="row q-mb-xs q-col-gutter-md">
-          <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs">
-            <p class="q-mb-sm">
-              <span class="text-weight-medium">Total Invoices:&nbsp;&nbsp;</span>
-              <span class="text-size-20">{{ totalInvoices }}</span>
-            </p>
-            <p class="q-mb-sm">
-              <span class="text-weight-medium">Total Amount:&nbsp;</span>
-              <span class="text-size-20">${{ totalAmount }}</span>
-            </p>
-          </div>
-          <div class="col-12 col-sm-6 col-lg-7 q-py-xs q-my-xs">
-            <p class="q-mb-sm">
-              <span class="text-weight-medium">Sent Invoices:&nbsp;&nbsp;</span>
-              <span class="text-size-20">{{ sentInvoiceInfo.count }}</span>
-              <span>&nbsp;(</span>
-              <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
-              <span class="text-size-20">${{ sentInvoiceInfo.amount }}</span>
-              <span>)</span>
-            </p>
-            <p class="q-mb-sm">
-              <span class="text-weight-medium">Payable Invoices:&nbsp;&nbsp;</span>
-              <span class="text-size-20">{{ pendingInvoiceInfo.count }}</span>
-              <span>&nbsp;(</span>
-              <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
-              <span class="text-size-20">${{ pendingInvoiceInfo.amount }}</span>
-              <span>)</span>
-            </p>
-            <p class="q-mb-sm">
-              <span class="text-weight-medium">Paid Invoices:&nbsp;&nbsp;</span>
-              <span class="text-size-20">{{ paidInvoiceInfo.count }}</span>
-              <span>&nbsp;(</span>
-              <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
-              <span class="text-size-20">${{ paidInvoiceInfo.amount }}</span>
-              <span>)</span>
-            </p>
+    <div class="row">
+      <q-card class="col-12 col-lg-8 q-pa-md q-mb-lg content-container">
+        <div class="text-h6 title-case">System Report</div>
+        <div class="q-ma-md text-size-15">
+          <div class="row q-mb-xs q-col-gutter-md">
+            <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs">
+              <p class="q-mb-sm">
+                <span class="text-weight-medium">Total Invoices:&nbsp;&nbsp;</span>
+                <span class="text-size-20">{{ totalInvoices }}</span>
+              </p>
+              <p class="q-mb-sm">
+                <span class="text-weight-medium">Total Amount:&nbsp;</span>
+                <span class="text-size-20">${{ totalAmount }}</span>
+              </p>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-7 q-py-xs q-my-xs">
+              <p class="q-mb-sm">
+                <span class="text-weight-medium">Sent Invoices:&nbsp;&nbsp;</span>
+                <span class="text-size-20">{{ sentInvoiceInfo.count }}</span>
+                <span>&nbsp;(</span>
+                <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
+                <span class="text-size-20">${{ sentInvoiceInfo.amount }}</span>
+                <span>)</span>
+              </p>
+              <p class="q-mb-sm">
+                <span class="text-weight-medium">Payable Invoices:&nbsp;&nbsp;</span>
+                <span class="text-size-20">{{ pendingInvoiceInfo.count }}</span>
+                <span>&nbsp;(</span>
+                <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
+                <span class="text-size-20">${{ pendingInvoiceInfo.amount }}</span>
+                <span>)</span>
+              </p>
+              <p class="q-mb-sm">
+                <span class="text-weight-medium">Paid Invoices:&nbsp;&nbsp;</span>
+                <span class="text-size-20">{{ paidInvoiceInfo.count }}</span>
+                <span>&nbsp;(</span>
+                <span class="text-weight-medium">Amount:&nbsp;&nbsp;</span>
+                <span class="text-size-20">${{ paidInvoiceInfo.amount }}</span>
+                <span>)</span>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-    </q-card>
-    <q-table
-      title="Users Usage Detail"
-      :rows="rows"
-      :columns="columns"
-      row-key="name"
-      flat
-      separator="none"
-      v-model:pagination="pagination"
-      :hide-pagination="pagination.rowsNumber < 10"
-      :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
-      :loading="loading"
-      @request="onRequest"
-    >
-      <template v-slot:pagination>
-        <custom-pagination :pagination="pagination" :color="'primary'" />
-      </template>
-      <template v-slot:top-right>
-        <report-filter @updateFilter="updateFilter" isreport></report-filter>
-      </template>
-      <template v-slot:body-cell-online="props">
-        <q-td :props="props">
-          <q-badge rounded :color="props.value ? 'green' : 'grey'" />
-        </q-td>
-      </template>
-    </q-table>
+      </q-card>
+    </div>
+    <div class="row">
+      <q-table
+        title="Users Usage Detail"
+        :rows="rows"
+        :columns="columns"
+        row-key="name"
+        flat
+        class="col-12 col-lg-8"
+        separator="none"
+        v-model:pagination="pagination"
+        :hide-pagination="pagination.rowsNumber < 10"
+        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+        :loading="loading"
+        @request="onRequest"
+      >
+        <template v-slot:pagination>
+          <custom-pagination :pagination="pagination" :color="'primary'" />
+        </template>
+        <template v-slot:top-right>
+          <report-filter @updateFilter="updateFilter" isreport></report-filter>
+        </template>
+        <template v-slot:body-cell-online="props">
+          <q-td :props="props">
+            <q-badge rounded :color="props.value ? 'green' : 'grey'" />
+          </q-td>
+        </template>
+      </q-table>
+    </div>
   </div>
 </template>
 
