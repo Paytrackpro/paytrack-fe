@@ -1,9 +1,11 @@
 <template>
-  <div class="row q-mb-md q-col-gutter-md">
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
-      <p class="q-mt-none q-mb-xs text-weight-medium">Date Range</p>
-      <q-field outlined stack-label class="date-range-field">
-        <span>{{ `${paymentDateRange.from} - ${paymentDateRange.to}` }}</span>
+  <div :class="'row ' + notMargin ? '' : 'q-mb-md' + 'q-col-gutter-md'">
+    <div :class="getDateRangeColumnClass()">
+      <p class="q-mt-none q-mb-xs text-weight-medium" v-if="!isreport">Date Range</p>
+      <p class="q-mt-none q-mb-xs q-mr-sm text-weight-medium" v-if="isreport">Filter</p>
+      <q-field outlined stack-label class="date-range-field min-width-100">
+        <span v-if="!isCustomRange">{{ dateRangeLabel }}</span>
+        <span v-if="isCustomRange">{{ `${paymentDateRange.from} - ${paymentDateRange.to}` }}</span>
         <q-popup-proxy transition-show="scale" transition-hide="scale">
           <q-list style="min-width: 100px" class="cursor-pointer">
             <q-item clickable v-close-popup @click="setRange(0)">
@@ -31,7 +33,7 @@
         </q-popup-proxy>
       </q-field>
     </div>
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
+    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow" v-if="!isreport">
       <p class="q-mt-none q-mb-xs text-weight-medium">Members</p>
       <q-select
         v-model="memberModel"
@@ -45,7 +47,7 @@
         @filter="filterMemberFn"
       />
     </div>
-    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow">
+    <div class="col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow" v-if="!isreport">
       <p class="q-mt-none q-mb-xs text-weight-medium">Projects</p>
       <q-select
         v-model="projectModel"
@@ -77,6 +79,8 @@ export default {
   name: 'reportFilter',
   props: {
     tabChange: Boolean,
+    isreport: Boolean,
+    notMargin: Boolean,
   },
   setup() {
     const memberModel = ref(null)
@@ -157,6 +161,7 @@ export default {
     this.initUserList()
     this.initProjectList()
     this.paymentDateRange = ref({ from: this.getRefDateFormat(new Date(+0)), to: this.getRefDateFormat(new Date()) })
+    this.dateRangeLabel = 'All'
   },
   data() {
     return {
@@ -175,6 +180,7 @@ export default {
         to: this.getRefDateFormat(new Date()),
       }),
       isCustomRange: false,
+      dateRangeLabel: '',
     }
   },
   methods: {
@@ -214,18 +220,22 @@ export default {
       switch (code) {
         case 0:
           start.setDate(start.getDate() - 1)
+          this.dateRangeLabel = 'Last 24h'
           break
         case 1:
           start = new Date(start.getFullYear(), start.getMonth(), 1)
+          this.dateRangeLabel = 'This Month'
           break
         case 2:
           tmpDate = new Date()
           tmpDate.setMonth(tmpDate.getMonth() - 1)
           start = new Date(tmpDate.getFullYear(), tmpDate.getMonth(), 1)
           end = new Date(tmpDate.getFullYear(), tmpDate.getMonth() + 1, 0)
+          this.dateRangeLabel = 'Last Month'
           break
         case 3:
           start = new Date(start.getFullYear(), 0, 1)
+          this.dateRangeLabel = 'Current Year'
           break
         //last year
         case 4:
@@ -233,9 +243,11 @@ export default {
           tmpDate.setFullYear(tmpDate.getFullYear() - 1)
           start = new Date(tmpDate.getFullYear(), 0, 1)
           end = new Date(tmpDate.getFullYear(), 11, 31)
+          this.dateRangeLabel = 'Last Year'
           break
         case 5:
           start = new Date(+0)
+          this.dateRangeLabel = 'All'
           break
       }
 
@@ -282,6 +294,12 @@ export default {
       const now = new Date()
       now.setDate(now.getDate() - 6)
       return this.getRefDateFormat(now)
+    },
+    getDateRangeColumnClass() {
+      if (this.isreport) {
+        return 'center-row q-py-sm q-my-sm field-shadow'
+      }
+      return 'col-12 col-sm-4 col-md-3 q-py-sm q-my-sm field-shadow'
     },
   },
   watch: {

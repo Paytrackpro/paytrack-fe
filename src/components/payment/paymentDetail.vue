@@ -6,7 +6,7 @@
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
           <payment-status
-            v-if="payment.status && (!isReceiver || isPaidStatus)"
+            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus)"
             :paymentModel="payment"
             class="q-ml-md"
             :isShowIcon="true"
@@ -18,7 +18,8 @@
             label="Pay"
             type="button"
             color="primary"
-            @click="payDialog = true"
+            :disable="isDraftStatus"
+            @click="showPayDialog()"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -35,6 +36,14 @@
             type="button"
             color="primary"
             @click="$emit('update:editing', true)"
+            class="q-mr-sm btn btn-animated"
+          />
+          <q-btn
+            v-if="isSentStatus && editable"
+            label="Unsend"
+            type="button"
+            color="orange"
+            @click="unsentInvoice()"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -70,7 +79,7 @@
         </div>
       </div>
       <q-select
-        v-if="isReceiver && !isPaidStatus"
+        v-if="isReceiver && !isPaidStatus && !isDraftStatus"
         v-model="paymentStatus"
         :options="statusOption"
         dense
@@ -239,6 +248,14 @@
           />
         </div>
       </div>
+      <div
+        class="row q-mb-xs q-col-gutter-md q-mt-xs"
+        v-if="isShowInvoice && payment.showProjectOnInvoice && payment.projectId > 0"
+      >
+        <p>
+          <span>Invoice Project:</span>&nbsp;<span class="fw-600">{{ payment.projectName }}</span>
+        </p>
+      </div>
       <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
         <div class="col q-pt-xs">
           <invoices-mode
@@ -247,6 +264,7 @@
             readonly
             v-model:hourlyRate="payment.hourlyRate"
             :showDateOnInvoiceLine="payment.showDateOnInvoiceLine"
+            :showProjectOnInvoice="payment.showProjectOnInvoice"
             :showCost="isShowCost"
           />
         </div>
@@ -267,48 +285,98 @@
       </q-card>
     </q-dialog>
 
-    <q-dialog v-model="payDialog">
+    <q-dialog v-model="payDialog" @update:model-value="disableClose">
       <q-card style="width: 550px; max-width: 80vw">
-        <q-card-section class="row">
-          <div class="text-h6">Pay For Payment Request</div>
+        <q-card-section class="row q-pb-none">
+          <div class="text-h6">Pay</div>
         </q-card-section>
-        <q-card-section class="q-pt-xs q-px-lg row">
+        <q-card-section class="q-py-none q-px-lg row">
           <div
             v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
-            class="col-12 q-py-md field-shadow"
+            class="col-12 q-pb-none field-shadow"
           >
             <payment-setting-method
               :defautMethod="payment.paymentMethod"
               @change="methodChange"
               :modelValue="payment.paymentSettings"
-              label="Accepted payment coins"
+              label="Payment Method"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-12">
+            <div class="row">
+              <div class="col-6 field-shadow q-py-sm">
+                <b class="text-weight-medium">Exchange</b>
+                <q-select
+                  class="row q-mt-sm"
+                  v-model="exchange"
+                  :options="exchangeOption"
+                  outlined
+                  dense
+                  style="min-width: 40px"
+                  lazy-rules
+                  stack-label
+                  emit-value
+                  map-options
+                  borderless
+                >
+                  <template v-slot:prepend>
+                    <img src="../../assets/binance-icon.png" width="20" height="20" v-if="exchange == 'binance'" />
+                    <img src="../../assets/kucoin-icon.png" width="20" height="20" v-if="exchange == 'kucoin'" />
+                    <img src="../../assets/mexc-icon.png" width="20" height="20" v-if="exchange == 'mexc'" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+                      <q-item-section>
+                        <div>
+                          <img
+                            src="../../assets/binance-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'binance'"
+                          />
+                          <img
+                            src="../../assets/kucoin-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'kucoin'"
+                          />
+                          <img
+                            src="../../assets/mexc-icon.png"
+                            width="20"
+                            height="20"
+                            v-if="scope.opt.value == 'mexc'"
+                          />
+                          <span class="q-ml-sm">{{ scope.opt.label }}</span>
+                        </div>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </div>
+            </div>
+          </div>
+          <div class="col-6 q-py-sm field-shadow">
             <PaymentRateInput
               ref="rateInput"
               v-model="payment"
               v-model:loading="fetchingRate"
+              v-model:exchange="exchange"
               @update:modelValue="updateLocal"
             />
           </div>
-          <div class="col-6 q-py-md field-shadow">
+          <div class="col-6 q-py-sm field-shadow">
             <div>
               <p class="q-mb-xs">
                 <b class="text-weight-medium">Amount to send ({{ (payment.paymentMethod || '').toUpperCase() }}) </b>
               </p>
-              <q-field stack-label borderless>
-                <template v-slot:control>
-                  <span class="text-weight-bolder text-blue-8 text-size-18">{{ payment.expectedAmount }}</span>
-                  <q-btn round dense flat class="q-ml-sm" @click="copy(payment.expectedAmount || '')">
-                    <q-icon size="sm" class="custom-icon" :name="'o_content_copy'" />
-                    <q-tooltip>Copy Amount (BTC)</q-tooltip>
-                  </q-btn>
-                </template>
-              </q-field>
+              <span class="text-weight-bolder text-blue-8 text-size-18">{{ payment.expectedAmount }}</span>
+              <q-btn round dense flat class="q-ml-sm copy-width-btn" @click="copy(payment.expectedAmount || '')">
+                <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                <q-tooltip>Copy Amount (BTC)</q-tooltip>
+              </q-btn>
             </div>
           </div>
-          <div class="col-12 q-py-md">
+          <div class="col-12 q-py-sm">
             <p class="q-mb-xs">
               <b class="text-weight-medium">Enter transaction ID of sent payment</b>
             </p>
@@ -319,7 +387,7 @@
         </q-card-section>
         <q-card-actions align="center" class="q-pb-md">
           <q-btn color="secondary" label="Mark paid" @click="markAsPaid" :disable="fetchingRate || txId == ''" />
-          <q-btn label="Cancel" type="button" color="white" text-color="black" @click="payDialog = false" />
+          <q-btn label="Cancel" type="button" color="white" text-color="black" @click="hidePayDialog()" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -343,6 +411,7 @@ import { ref } from 'vue'
 import { api, axios } from 'boot/axios'
 import { STATUS_INFO } from 'src/consts/common'
 import { COINS } from 'src/consts/common'
+import { joinRoom, leftRoom, listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
 export default {
   name: 'paymentDetail',
@@ -374,6 +443,8 @@ export default {
       imageBase64: '',
       receiptImageDialog: false,
       totalHours: 0.0,
+      exchangeOption: [],
+      exchange: 'binance',
     }
   },
   props: {
@@ -385,6 +456,27 @@ export default {
     processing: Boolean,
     approvalCount: Number,
     unpaidCount: Number,
+  },
+  created() {
+    //if exhchange options empty, initialization
+    if (this.exchangeOption.length == 0) {
+      //if projectList empty, get projectList
+      this.$api
+        .get(`/payment/exchange-list`)
+        .then((data) => {
+          data.forEach((exchange) => {
+            this.exchangeOption.push({
+              label: this.getExchangeName(exchange),
+              value: exchange,
+            })
+          })
+          this.exchange = data[0]
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
+    }
   },
   methods: {
     ...mapActions({
@@ -429,7 +521,7 @@ export default {
         paymentAddress: this.payment.paymentAddress,
         convertRate: this.payment.convertRate,
         convertTime: this.payment.convertTime,
-        expectedAmount: this.payment.expectedAmount,
+        expectedAmount: Number(this.payment.expectedAmount),
       }
       this.$api
         .post('/payment/process', reqData)
@@ -442,7 +534,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
-          this.payDialog = false
+          this.hidePayDialog()
           this.$emit('updateUnpaidCount', this.unpaidCount - 1)
         })
         .catch((err) => {
@@ -503,6 +595,7 @@ export default {
     },
     updateLocal(payment, editing) {
       payment = payment || this.payment
+      listenSocketEvent(this.payment.paymentMethod, this.onSocketMessage)
       this.$emit('update:modelValue', payment)
       if (editing) {
         this.$emit('update:editing', true)
@@ -512,6 +605,8 @@ export default {
       const settings = this.payment.paymentSettings || []
       const setting = settings.find((s) => s.type === method)
       if (setting) {
+        removeListenSocketEvent(this.payment.paymentMethod, this.onSocketMessage)
+        listenSocketEvent(method, this.onSocketMessage)
         this.payment.paymentMethod = method
         this.payment.paymentAddress = setting.address
       }
@@ -579,6 +674,28 @@ export default {
         message: `Image extensions are not allowed`,
       })
     },
+    disableClose() {
+      this.payDialog = true
+    },
+    showPayDialog() {
+      this.payDialog = true
+      joinRoom('exchangeRate')
+    },
+    hidePayDialog() {
+      this.payDialog = false
+      removeListenSocketEvent('btc', this.onSocketMessage)
+      removeListenSocketEvent('ltc', this.onSocketMessage)
+      removeListenSocketEvent('dcr', this.onSocketMessage)
+      leftRoom('exchangeRate')
+    },
+    onSocketMessage(data) {
+      if (data && this.payment.convertRate != data.rate) {
+        this.payment.convertRate = data.rate
+        this.payment.convertTime = data.convertTime
+        this.payment.expectedAmount = parseFloat(this.payment.amount / data.rate).toFixed(8)
+        this.$emit('update:modelValue', this.payment)
+      }
+    },
     uploadReceipt() {
       if (this.receiptAttachFile == null) {
         this.$q.notify({
@@ -591,6 +708,11 @@ export default {
       this.uploadImage()
       //create receipt upload handler
       this.payment.receiptImg = this.imageNewName
+      this.update()
+    },
+    unsentInvoice() {
+      this.paymentStatus = 'draft'
+      this.payment.status = 'draft'
       this.update()
     },
     async uploadImage() {
@@ -676,6 +798,20 @@ export default {
       }
       return ''
     },
+    getExchangeName(exchange) {
+      switch (exchange) {
+        case 'binance':
+          return 'Binance'
+        case 'kucoin':
+          return 'Kucoin'
+        case 'dex':
+          return 'Dex'
+        case 'mexc':
+          return 'Mexc'
+        default:
+          return ''
+      }
+    },
   },
   watch: {
     modelValue: {
@@ -728,6 +864,12 @@ export default {
         } else {
           this.update()
         }
+      },
+    },
+    exchange: {
+      immediate: true,
+      handler(newExchange) {
+        this.exchange = newExchange
       },
     },
   },
@@ -810,6 +952,9 @@ export default {
     },
     isDraftStatus() {
       return this.payment.status == 'draft'
+    },
+    isSentStatus() {
+      return this.payment.status == 'sent'
     },
     isConfirmedStatusChange() {
       return this.paymentStatus == 'confirmed'

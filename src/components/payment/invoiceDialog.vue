@@ -36,6 +36,7 @@
             :label="type === 'labor' ? 'Hours' : 'Quantity'"
             v-model="invoice.quantity"
             :type="'number'"
+            :minValue="0"
             :customStyle="'width:70%'"
             @update:modelValue="calculateCost"
             :rules="[(val) => !!val || 'Required field']"
@@ -46,6 +47,7 @@
             :label="'Hourly Rate (USD/h)'"
             v-model="hourlyRateInput"
             :type="'number'"
+            :minValue="0"
             :customStyle="'width:70%'"
             @update:modelValue="calculateCost"
             :rules="priceRules"
@@ -56,13 +58,14 @@
             :label="'Price'"
             v-model="invoice.price"
             :type="'number'"
+            :minValue="0"
             :customStyle="'width:70%'"
             @update:modelValue="calculateCost"
             :rules="priceRules"
           />
           <custom-field :label="'Total Cost (USD)'" class="col-3" :value="'$ ' + cost" />
         </div>
-        <div class="items-start" v-if="projectList.length > 0">
+        <div class="items-start" v-if="!showProjectOnInvoice && projectList.length > 0">
           <p class="q-mt-lg text-weight-medium title-case">Project</p>
           <q-select
             v-model="invoice.projectId"
@@ -111,6 +114,7 @@ export default {
     invoiceInput: Object,
     isEdit: Boolean,
     showDateOnInvoiceLine: Boolean,
+    showProjectOnInvoice: Boolean,
   },
   data() {
     return {

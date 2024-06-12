@@ -34,6 +34,7 @@ export default {
         paymentSettings: [],
         details: [],
         showDateOnInvoiceLine: false,
+        showProjectOnInvoice: true,
       },
     }
   },

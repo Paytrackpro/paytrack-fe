@@ -86,8 +86,8 @@
         </template>
       </q-table>
       <q-dialog v-model="detailBulk">
-        <q-card>
-          <q-card-section class="row justify-between">
+        <q-card class="bulk-pay-dialog">
+          <q-card-section class="row justify-between q-py-sm">
             <div class="text-h6">Bulk Pay BTC</div>
             <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
               <span>Refresh Exchange Rate</span>
@@ -96,68 +96,74 @@
             <q-spinner-oval v-else color="primary" size="sm" />
           </q-card-section>
           <q-separator />
-          <q-card-section style="max-height: 60vh" class="scroll q-pt-xs">
+          <q-card-section style="max-height: 60vh" class="scroll q-py-xs">
             <q-list>
-              <q-item v-for="(item, index) of selected" :key="item.id" v-ripple :class="getClassItem(index)">
-                <q-item-section>
-                  <q-item-label lines="1" class="q-mt-sm">
+              <q-item
+                v-for="(item, index) of selected"
+                :key="item.id"
+                v-ripple
+                :class="getClassItem(index) + ' q-py-xs'"
+              >
+                <div class="row w-100">
+                  <div class="col-12 col-sm-4">
                     <span class="text-weight-medium"
-                      >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }}
-                    </span>
-                  </q-item-label>
-                  <q-item-label class="bulk-item-title" lines="1">
-                    <span>Address: </span>
-                    <u class="text-weight-bold text-blue-8">
-                      <em> {{ item.paymentSettings[0].address }}</em></u
-                    >
-                    <q-btn
-                      v-if="value != ''"
-                      class="q-ml-sm"
-                      round
-                      dense
-                      flat
-                      @click="copy(item.paymentSettings[0].address || '')"
-                    >
-                      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                      <q-tooltip>Copy address</q-tooltip>
-                    </q-btn>
-                  </q-item-label>
-                  <div class="row">
-                    <q-item-label class="col" lines="1">
-                      <span>Amount (USD - BTC):</span>
-                      <span class="text-weight-medium text-size-15"> ${{ item.amount }} </span>&nbsp;-&nbsp;
-                      <span class="text-weight-medium text-blue-8 text-size-15">{{ item.expectedAmount }} BTC</span>
+                      >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }} </span
+                    ><br />
+                    <span>Amount :</span>
+                    <span class="text-weight-medium text-size-15"> ${{ item.amount }} </span>
+                  </div>
+                  <div class="col-12 col-sm-8">
+                    <div class="center-row">
+                      <p
+                        class="bulk-address-area text-weight-bold text-blue-8 custom-link"
+                        @click="copy(item.paymentSettings[0].address || '')"
+                      >
+                        {{ item.paymentSettings[0].address }}
+                      </p>
                       <q-btn
                         v-if="value != ''"
-                        class="q-ml-sm"
+                        class="q-ml-sm copy-btn"
                         round
                         dense
                         flat
-                        @click="copy(item.expectedAmount || '')"
+                        @click="copy(item.paymentSettings[0].address || '')"
                       >
                         <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                        <q-tooltip>Copy BTC Amount</q-tooltip>
+                        <q-tooltip>Copy address</q-tooltip>
                       </q-btn>
-                    </q-item-label>
+                    </div>
+                    <span
+                      class="text-weight-medium text-blue-8 text-size-15 custom-link"
+                      @click="copy(item.expectedAmount || '')"
+                      >{{ item.expectedAmount }} BTC</span
+                    >
+                    <q-btn
+                      v-if="value != ''"
+                      class="q-ml-sm copy-btn"
+                      round
+                      dense
+                      flat
+                      @click="copy(item.expectedAmount || '')"
+                    >
+                      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                      <q-tooltip>Copy BTC Amount</q-tooltip>
+                    </q-btn>
                   </div>
-                  <div class="row q-my-sm">
-                    <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
-                  </div>
-                </q-item-section>
+                </div>
               </q-item>
             </q-list>
           </q-card-section>
 
           <q-separator />
-          <div class="row q-mt-md q-px-md">
+          <div class="row q-mt-sm q-px-md">
             <custom-input class="q-px-sm w-100" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
           </div>
-          <q-card-actions class="q-mt-sm q-pa-sm row justify-between">
-            <p class="text-size-15 q-pt-sm col-7 q-pb-md q-pl-md">
+          <q-card-actions class="q-pa-sm row justify-between">
+            <p class="text-size-15 q-pt-none col-7 q-pb-xs q-pl-md">
               <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
               <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
             </p>
-            <div class="col-5 q-pb-md q-pr-md" align="right">
+            <div class="col-5 q-pb-xs q-pr-md" align="right">
               <q-btn
                 label="Mark Paid"
                 color="primary"
@@ -167,94 +173,6 @@
                 v-close-popup
               />
             </div>
-          </q-card-actions>
-        </q-card>
-      </q-dialog>
-      <q-dialog v-model="detailBulk2">
-        <q-card :style="'width: ' + getDialogWidth() + 'px; max-width: 80vw'">
-          <q-card-section class="row justify-between">
-            <div class="text-h6">Bulk Pay BTC</div>
-            <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
-              <span>Refresh Exchange Rate</span>
-              <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
-            </q-btn>
-            <q-spinner-oval v-else color="primary" size="sm" />
-          </q-card-section>
-          <q-card-section class="q-pt-none" v-if="selected.length > 0">
-            <q-scroll-area
-              class="q-px-sm"
-              :thumb-style="thumbStyle"
-              :bar-style="barStyle"
-              :style="'height: ' + getScrollHeight() + 'px; max-width: ' + getDialogWidth() + 'px'"
-            >
-              <q-list>
-                <q-item v-for="item in selected" :key="item.id" v-ripple class="rounded bulk-pay-row">
-                  <q-item-section>
-                    <q-item-label lines="1" class="q-mt-sm">
-                      <span class="text-weight-medium"
-                        >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }}
-                      </span>
-                    </q-item-label>
-                    <q-item-label class="bulk-item-title" lines="1">
-                      <span>Address: </span>
-                      <u class="text-weight-bold text-blue-8">
-                        <em> {{ item.paymentSettings[0].address }}</em></u
-                      >
-                      <q-btn
-                        v-if="value != ''"
-                        class="q-ml-sm"
-                        round
-                        dense
-                        flat
-                        @click="copy(item.paymentSettings[0].address || '')"
-                      >
-                        <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                        <q-tooltip>Copy address</q-tooltip>
-                      </q-btn>
-                    </q-item-label>
-                    <div class="row">
-                      <q-item-label class="col" lines="1">
-                        <span>Amount (USD - BTC):</span>
-                        <span class="text-weight-medium"> ${{ item.amount }} </span>&nbsp;-&nbsp;
-                        <span class="text-weight-medium text-blue-8">{{ item.expectedAmount }} BTC</span>
-                        <q-btn
-                          v-if="value != ''"
-                          class="q-ml-sm"
-                          round
-                          dense
-                          flat
-                          @click="copy(item.expectedAmount || '')"
-                        >
-                          <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                          <q-tooltip>Copy BTC Amount</q-tooltip>
-                        </q-btn>
-                      </q-item-label>
-                    </div>
-                    <div class="row q-my-sm">
-                      <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-            <p class="total-bulk-row text-size-15">
-              <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
-              <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
-            </p>
-            <custom-input class="q-mt-lg q-px-sm" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
-          </q-card-section>
-          <q-card-actions v-else align="center" class="bg-white q-pb-md">
-            <q-icon size="md" name="warning" color="warning"></q-icon>
-            <q-item-label class="text-warning q-ml-sm">No payment to process</q-item-label>
-          </q-card-actions>
-          <q-card-actions align="center" class="bg-white q-pb-md">
-            <q-btn
-              label="Mark Paid"
-              color="primary"
-              @click="handlePaid"
-              :disable="paying || selected.length <= 0"
-              v-close-popup
-            />
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -274,6 +192,7 @@ import { responseError } from 'src/helper/error'
 import MTime from 'components/common/mTime'
 import customPagination from '../common/custom_pagination.vue'
 import customInput from '../common/custom_input.vue'
+import { listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
 export default {
   name: 'paymentList',
@@ -306,13 +225,14 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
-          sortable: false,
+          sortable: true,
         },
         {
           name: 'amount',
           align: 'right',
           label: 'Amount (USD)',
           field: 'amount',
+          sortable: true,
           format: (val) => {
             return val.toFixed(2)
           },
@@ -339,6 +259,7 @@ export default {
     }
   },
   created() {
+    listenSocketEvent('reloadList', this.onSocketMessage)
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
@@ -350,6 +271,9 @@ export default {
       .catch((err) => {
         responseError(err)
       })
+  },
+  beforeUnmount() {
+    removeListenSocketEvent('reloadList', this.onSocketMessage)
   },
   components: {
     PaymentStatus,
@@ -375,6 +299,7 @@ export default {
               name: 'receiverName',
               align: 'left',
               label: 'Recipient',
+              sortable: true,
               field: (row) => {
                 if (row.receiverDisplayName.length > 0) {
                   return row.receiverDisplayName + ' (' + row.receiverName + ')'
@@ -388,6 +313,7 @@ export default {
               required: true,
               label: 'Sender',
               align: 'left',
+              sortable: true,
               field: (row) => {
                 if (row.senderDisplayName.length > 0) {
                   return row.senderDisplayName + ' (' + row.senderName + ')'
@@ -400,6 +326,14 @@ export default {
       ]
 
       let lastColum = [
+        {
+          name: 'startDate',
+          align: 'center',
+          label: 'Start Date',
+          field: 'startDate',
+          sortable: true,
+          format: (val) => date.formatDate(val, MDateFormat),
+        },
         {
           name: 'updatedAt',
           align: 'center',
@@ -415,6 +349,7 @@ export default {
           name: 'acceptedCoins',
           align: 'center',
           label: 'Accepted Coins',
+          sortable: false,
           field: (row) => {
             return row.paymentSettings
               .map((el) => el.type)
@@ -443,11 +378,62 @@ export default {
           this.loading = false
           this.rows = payments || []
           this.pagination.rowsNumber = count
+          //check view project column
+          var hasProject = false
+          var hasProjectColumnIndex = -1
+          this.rows.forEach((payment) => {
+            if (payment.projectId > 0) {
+              hasProject = true
+              return
+            }
+          })
+          this.fixedColumns.forEach((fixedColumn, index) => {
+            if (fixedColumn.name == 'projectName') {
+              hasProjectColumnIndex = index
+              return
+            }
+          })
+          if (hasProject && hasProjectColumnIndex < 0) {
+            var tempFixedColumn = new Array({
+              name: 'projectName',
+              align: 'center',
+              label: 'Project',
+              field: (row) => {
+                if (row.showProjectOnInvoice) {
+                  return row.projectName
+                } else if (row.details && row.details.length > 0) {
+                  var projectList = []
+                  row.details.forEach((detail) => {
+                    if (detail.projectId > 0 && !projectList.includes(detail.projectName)) {
+                      projectList.push(detail.projectName)
+                    }
+                  })
+                  if (projectList.length == 0) {
+                    return ''
+                  }
+                  return projectList.join(', ')
+                }
+                return ''
+              },
+              sortable: true,
+            })
+            this.fixedColumns = tempFixedColumn.concat(this.fixedColumns)
+          } else if (!hasProject && hasProjectColumnIndex >= 0) {
+            this.fixedColumns.splice(hasProjectColumnIndex, 1)
+          }
         })
         .catch((err) => {
           responseError(err)
           this.loading = false
         })
+    },
+    onSocketMessage(data) {
+      // reload list
+      this.getPayments({
+        ...pathParamsToPaging(this.$route, this.pagination),
+        requestType: this.type,
+        hidePaid: this.hidePaid,
+      })
     },
     onBulkPay() {
       this.detailBulk = true
