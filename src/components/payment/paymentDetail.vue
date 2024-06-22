@@ -206,7 +206,7 @@
           </p>
           <q-field stack-label borderless class="description-field">
             <template v-slot:control>
-              <span>{{ payment.description }}</span>
+              <span class="content-wrap">{{ payment.description }}</span>
             </template>
           </q-field>
         </div>
