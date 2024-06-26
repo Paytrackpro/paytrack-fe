@@ -33,7 +33,7 @@ export default {
         convertRate: 0,
       },
       fetchedRate: false,
-      currentExchange: 'binance',
+      currentExchange: '',
     }
   },
   props: {
@@ -49,6 +49,9 @@ export default {
           message: 'Please choose the payment request',
           type: 'negative',
         })
+        return
+      }
+      if (!this.currentExchange) {
         return
       }
       const reqData = {
