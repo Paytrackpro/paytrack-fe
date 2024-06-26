@@ -817,7 +817,6 @@ export default {
     modelValue: {
       immediate: true,
       handler(newPayment) {
-        this.txId = newPayment.txId
         let settings = newPayment.paymentSettings || []
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
@@ -869,6 +868,9 @@ export default {
     exchange: {
       immediate: true,
       handler(newExchange) {
+        this.payment.convertRate = 0
+        this.payment.expectedAmount = 0
+        this.$emit('update:modelValue', this.payment)
         this.exchange = newExchange
       },
     },
