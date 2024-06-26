@@ -11,7 +11,7 @@
         }}</span
       >
     </div>
-    <div class="center-row" v-if="!readonly">
+    <div class="row" v-if="!readonly">
       <span class="q-pt-xs">${{ payment.convertRate.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') }} USD</span>
       <q-btn v-if="!loading" class="q-ml-sm refresh-rate-btn" round dense flat @click="fetchRate">
         <q-tooltip>Refresh Exchange Rate</q-tooltip>
