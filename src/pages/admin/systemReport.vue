@@ -138,6 +138,23 @@ export default {
             return '$ ' + val.toFixed(2)
           },
         },
+        {
+          name: 'paid',
+          align: 'center',
+          label: 'Paid Invoices',
+          field: 'paidNum',
+          sortable: true,
+        },
+        {
+          name: 'paidusd',
+          align: 'center',
+          label: 'Paid Amount',
+          field: 'paidUsd',
+          sortable: true,
+          format: (val) => {
+            return '$ ' + val.toFixed(2)
+          },
+        },
       ],
       reportFilters: {
         StartDate: null,
