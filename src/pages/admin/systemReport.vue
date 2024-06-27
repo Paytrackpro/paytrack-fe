@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-lg">
     <div class="row">
-      <q-card class="col-12 col-lg-8 q-pa-md q-mb-lg content-container">
+      <q-card class="col-12 col-lg-12 q-pa-md q-mb-lg content-container">
         <div class="text-h6 title-case">System Report</div>
         <div class="q-ma-md text-size-15">
           <div class="row q-mb-xs q-col-gutter-md">
@@ -52,7 +52,7 @@
         :columns="columns"
         row-key="name"
         flat
-        class="col-12 col-lg-8"
+        class="col-12 col-lg-12"
         separator="none"
         v-model:pagination="pagination"
         :hide-pagination="pagination.rowsNumber < 10"

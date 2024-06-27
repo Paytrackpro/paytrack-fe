@@ -10,19 +10,24 @@
       />
     </div>
     <div class="col row text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
-      <p class="q-mt-none q-mb-xs q-mr-sm text-weight-medium">
-        {{ type === 'reminder' ? 'Filter by Sender:' : 'Filter by Recipient:' }}
-      </p>
       <q-select
         v-model="memberModel"
+        placeholder="Search by user"
+        multiple
+        clearable
+        filled
         use-input
         use-chips
-        multiple
         outlined
         input-debounce="0"
         :options="memberFilterOptions"
         @filter="filterMemberFn"
-      />
+        @clear="handleClear"
+      >
+        <template v-slot:prepend>
+          <q-icon name="search" />
+        </template>
+      </q-select>
     </div>
     <div class="col" align="right">
       <q-btn
@@ -228,9 +233,12 @@ export default {
             memberFilterOptions.value = memberStringOptions
           } else {
             const needle = val.toLowerCase()
-            memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
+            memberFilterOptions.value = memberStringOptions.filter((v) => v.label.toLowerCase().indexOf(needle) > -1)
           }
         })
+      },
+      handleClear() {
+        memberModel.value = []
       },
     }
   },
