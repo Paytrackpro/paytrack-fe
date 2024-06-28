@@ -13,6 +13,7 @@
       <q-select
         v-model="memberModel"
         placeholder="Search by user"
+        class="search-user-select"
         multiple
         clearable
         filled
@@ -24,7 +25,7 @@
         @filter="filterMemberFn"
         @clear="handleClear"
       >
-        <template v-slot:prepend>
+        <template v-slot:append>
           <q-icon name="search" />
         </template>
       </q-select>

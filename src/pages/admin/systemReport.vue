@@ -112,6 +112,20 @@ export default {
           sortable: true,
         },
         {
+          name: 'receive',
+          align: 'center',
+          label: 'Receive Invoices',
+          field: 'receiveNum',
+          sortable: true,
+        },
+        {
+          name: 'paid',
+          align: 'center',
+          label: 'Paid Invoices',
+          field: 'paidNum',
+          sortable: true,
+        },
+        {
           name: 'sendusd',
           align: 'center',
           label: 'Send Amount',
@@ -122,13 +136,6 @@ export default {
           },
         },
         {
-          name: 'receive',
-          align: 'center',
-          label: 'Receive Invoices',
-          field: 'receiveNum',
-          sortable: true,
-        },
-        {
           name: 'receiveusd',
           align: 'center',
           label: 'Receive Amount',
@@ -137,13 +144,6 @@ export default {
           format: (val) => {
             return '$ ' + val.toFixed(2)
           },
-        },
-        {
-          name: 'paid',
-          align: 'center',
-          label: 'Paid Invoices',
-          field: 'paidNum',
-          sortable: true,
         },
         {
           name: 'paidusd',
