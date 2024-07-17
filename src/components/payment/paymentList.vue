@@ -501,7 +501,7 @@ export default {
     },
     onBulkPay() {
       this.detailBulk = true
-      this.getRate({ symbol: 'btc' })
+      this.getBulkBTCRate()
     },
     handlePaid() {
       const txId = this.txId.trim()
@@ -558,12 +558,10 @@ export default {
     prepareToExit: function () {
       this.isExist = true
     },
-    getRate(p) {
+    getBulkBTCRate() {
       this.rateLoading = true
       this.$api
-        .get('/payment/rate', {
-          params: p,
-        })
+        .get('/payment/btc-bulk-rate')
         .then((data) => {
           //calc total of btc and usd for display on dialog
           let totalBTC = 0.0
@@ -595,7 +593,7 @@ export default {
       })
     },
     refreshExchangeRate() {
-      this.getRate({ symbol: 'btc' })
+      this.getBulkBTCRate()
     },
     getScrollHeight() {
       switch (this.selected.length) {
