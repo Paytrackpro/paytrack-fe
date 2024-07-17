@@ -605,9 +605,10 @@ export default {
       const settings = this.payment.paymentSettings || []
       const setting = settings.find((s) => s.type === method)
       if (setting) {
-        removeListenSocketEvent(this.payment.paymentMethod, this.onSocketMessage)
-        listenSocketEvent(method, this.onSocketMessage)
+        const oldMethod = this.payment.paymentMethod
+        removeListenSocketEvent(oldMethod, this.onSocketMessage)
         this.payment.paymentMethod = method
+        listenSocketEvent(method, this.onSocketMessage)
         this.payment.paymentAddress = setting.address
         this.payment.convertRate = 0
         this.payment.expectedAmount = 0
@@ -692,11 +693,14 @@ export default {
       leftRoom('exchangeRate')
     },
     onSocketMessage(data) {
-      if (data && this.payment.convertRate != data.rate) {
-        this.payment.convertRate = data.rate
-        this.payment.convertTime = data.convertTime
-        this.payment.expectedAmount = parseFloat(this.payment.amount / data.rate).toFixed(8)
-        this.$emit('update:modelValue', this.payment)
+      if (data && data[this.exchange]) {
+        const rateData = data[this.exchange]
+        if (this.payment.convertRate != rateData.rate) {
+          this.payment.convertRate = rateData.rate
+          this.payment.convertTime = rateData.convertTime
+          this.payment.expectedAmount = parseFloat(this.payment.amount / rateData.rate).toFixed(8)
+          this.$emit('update:modelValue', this.payment)
+        }
       }
     },
     uploadReceipt() {
