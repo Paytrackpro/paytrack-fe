@@ -1,7 +1,7 @@
 <template>
   <div class="q-pa-lg">
     <div class="row">
-      <q-card class="col-12 col-lg-8 q-pa-md q-mb-lg content-container">
+      <q-card class="col-12 col-lg-12 q-pa-md q-mb-lg content-container">
         <div class="text-h6 title-case">System Report</div>
         <div class="q-ma-md text-size-15">
           <div class="row q-mb-xs q-col-gutter-md">
@@ -52,7 +52,7 @@
         :columns="columns"
         row-key="name"
         flat
-        class="col-12 col-lg-8"
+        class="col-12 col-lg-12"
         separator="none"
         v-model:pagination="pagination"
         :hide-pagination="pagination.rowsNumber < 10"
@@ -112,6 +112,20 @@ export default {
           sortable: true,
         },
         {
+          name: 'receive',
+          align: 'center',
+          label: 'Receive Invoices',
+          field: 'receiveNum',
+          sortable: true,
+        },
+        {
+          name: 'paid',
+          align: 'center',
+          label: 'Paid Invoices',
+          field: 'paidNum',
+          sortable: true,
+        },
+        {
           name: 'sendusd',
           align: 'center',
           label: 'Send Amount',
@@ -122,17 +136,20 @@ export default {
           },
         },
         {
-          name: 'receive',
-          align: 'center',
-          label: 'Receive Invoices',
-          field: 'receiveNum',
-          sortable: true,
-        },
-        {
           name: 'receiveusd',
           align: 'center',
           label: 'Receive Amount',
           field: 'receiveUsd',
+          sortable: true,
+          format: (val) => {
+            return '$ ' + val.toFixed(2)
+          },
+        },
+        {
+          name: 'paidusd',
+          align: 'center',
+          label: 'Paid Amount',
+          field: 'paidUsd',
           sortable: true,
           format: (val) => {
             return '$ ' + val.toFixed(2)

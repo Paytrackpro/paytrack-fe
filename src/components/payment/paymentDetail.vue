@@ -206,7 +206,7 @@
           </p>
           <q-field stack-label borderless class="description-field">
             <template v-slot:control>
-              <span>{{ payment.description }}</span>
+              <span class="content-wrap">{{ payment.description }}</span>
             </template>
           </q-field>
         </div>
@@ -609,6 +609,9 @@ export default {
         listenSocketEvent(method, this.onSocketMessage)
         this.payment.paymentMethod = method
         this.payment.paymentAddress = setting.address
+        this.payment.convertRate = 0
+        this.payment.expectedAmount = 0
+        this.$emit('update:modelValue', this.payment)
       }
       this.$refs.rateInput.fetchRate()
     },
@@ -817,7 +820,6 @@ export default {
     modelValue: {
       immediate: true,
       handler(newPayment) {
-        this.txId = newPayment.txId
         let settings = newPayment.paymentSettings || []
         this.methods = settings.map((s) => s.type)
         this.payment = { ...newPayment }
@@ -869,6 +871,9 @@ export default {
     exchange: {
       immediate: true,
       handler(newExchange) {
+        this.payment.convertRate = 0
+        this.payment.expectedAmount = 0
+        this.$emit('update:modelValue', this.payment)
         this.exchange = newExchange
       },
     },

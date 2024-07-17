@@ -1,6 +1,6 @@
 <template>
   <div class="row q-mt-lg">
-    <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
+    <div class="text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
       <q-btn
         :label="hidePaid ? 'Show Paid' : 'Hide paid'"
         type="button"
@@ -8,6 +8,27 @@
         @click="hidePaidHandler()"
         class="q-mr-sm btn btn-animated"
       />
+    </div>
+    <div class="col row text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
+      <q-select
+        v-model="memberModel"
+        placeholder="Search by user"
+        class="search-user-select"
+        multiple
+        clearable
+        filled
+        use-input
+        use-chips
+        outlined
+        input-debounce="0"
+        :options="memberFilterOptions"
+        @filter="filterMemberFn"
+        @clear="handleClear"
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-select>
     </div>
     <div class="col" align="right">
       <q-btn
@@ -186,6 +207,7 @@ import PaymentStatus from 'components/payment/paymentStatus'
 import { date } from 'quasar'
 import { MDateFormat } from 'src/consts/common'
 import { mapGetters, mapActions } from 'vuex'
+import { ref } from 'vue'
 import role from 'src/consts/role'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
@@ -194,10 +216,36 @@ import customPagination from '../common/custom_pagination.vue'
 import customInput from '../common/custom_input.vue'
 import { listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
+let memberStringOptions = []
+
 export default {
   name: 'paymentList',
+  setup() {
+    const memberModel = ref(null)
+    const memberFilterOptions = ref(memberStringOptions)
+    return {
+      memberModel,
+      memberFilterOptions,
+      memberStringOptions,
+
+      filterMemberFn(val, update) {
+        update(() => {
+          if (val === '') {
+            memberFilterOptions.value = memberStringOptions
+          } else {
+            const needle = val.toLowerCase()
+            memberFilterOptions.value = memberStringOptions.filter((v) => v.label.toLowerCase().indexOf(needle) > -1)
+          }
+        })
+      },
+      handleClear() {
+        memberModel.value = []
+      },
+    }
+  },
   data() {
     return {
+      userSelection: [],
       isShowList: true,
       loading: false,
       rateLoading: false,
@@ -259,6 +307,21 @@ export default {
     }
   },
   created() {
+    this.$api
+      .get('/user/get-user-list', {})
+      .then((res) => {
+        this.userSelection = res
+        memberStringOptions = []
+        this.userSelection.forEach((userInfo) => {
+          memberStringOptions.push({
+            label: userInfo.userName,
+            value: userInfo.id,
+          })
+        })
+      })
+      .catch((err) => {
+        responseError(err)
+      })
     listenSocketEvent('reloadList', this.onSocketMessage)
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
@@ -433,6 +496,7 @@ export default {
         ...pathParamsToPaging(this.$route, this.pagination),
         requestType: this.type,
         hidePaid: this.hidePaid,
+        userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
       })
     },
     onBulkPay() {
@@ -576,6 +640,7 @@ export default {
         ...filter,
         requestType: this.type,
         hidePaid: value,
+        userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
       })
     },
     setIsBulkPay() {
@@ -592,12 +657,14 @@ export default {
         this.getPayments({
           ...filter,
           requestType: 'bulk_btc',
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       } else {
         this.getPayments({
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       }
     },
@@ -613,11 +680,25 @@ export default {
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       },
     },
     hidePaid(value) {
       this.hidePaidFilter(value)
+    },
+    memberModel: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.getPayments({
+            ...pathParamsToPaging(this.$route, this.pagination),
+            requestType: this.type,
+            hidePaid: this.hidePaid,
+            userIds: newVal.map((user) => user.value).join(','), // filter by user
+          })
+        }
+      },
     },
   },
 }
