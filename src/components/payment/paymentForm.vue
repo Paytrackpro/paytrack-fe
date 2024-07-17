@@ -352,8 +352,8 @@ export default {
       if (this.inPayment.showProjectOnInvoice) {
         this.projectList.find((project) => {
           if (project.projectId === this.inPayment.projectId) {
-            this.inPayment.projectId = project.projectId
             this.inPayment.projectName = project.projectName
+            payment.projectName = project.projectName
           }
         })
         payment.details.forEach((detail) => {
