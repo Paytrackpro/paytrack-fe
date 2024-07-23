@@ -1023,3 +1023,11 @@ a {
 .search-user-select .q-select__dropdown-icon{
   display: none;
 }
+
+.q-menu .q-item--active {
+  background-color: #e6e6e6;
+}
+
+.q-menu .q-item--active .q-item__label {
+  color: black;
+}
