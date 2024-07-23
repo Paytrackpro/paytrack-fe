@@ -76,7 +76,10 @@
         "
         :hide-pagination="pagination.rowsNumber < 10"
         separator="none"
-        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+        :class="
+          pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
+        "
+        :rows-per-page-options="rppOptions"
         flat
         @row-click="(_, row) => goToDetail(row.id)"
         @request="onRequest"
@@ -202,7 +205,7 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import PaymentStatus from 'components/payment/paymentStatus'
 import { date } from 'quasar'
 import { MDateFormat } from 'src/consts/common'
@@ -304,6 +307,8 @@ export default {
       showBulkPay: false,
       totalBulkBTC: '',
       totalBulkUSD: '',
+      rppDefaultOptions: [0, 5, 10, 15, 30, 50],
+      rppOptions: [0, 5, 10, 15, 20],
     }
   },
   created() {
@@ -441,6 +446,7 @@ export default {
           this.loading = false
           this.rows = payments || []
           this.pagination.rowsNumber = count
+          this.rppOptions = getRppOps(this.rppDefaultOptions, count)
           //check view project column
           var hasProject = false
           var hasProjectColumnIndex = -1
@@ -493,7 +499,7 @@ export default {
     onSocketMessage(data) {
       // reload list
       this.getPayments({
-        ...pathParamsToPaging(this.$route, this.pagination),
+        ...pathParamsToPaging(this.$route, this.pagination, true),
         requestType: this.type,
         hidePaid: this.hidePaid,
         userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
@@ -633,7 +639,7 @@ export default {
         })
     },
     hidePaidFilter(value) {
-      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
       this.getPayments({
         ...filter,
         requestType: this.type,
@@ -650,7 +656,7 @@ export default {
   },
   watch: {
     isBulkPay(newVal) {
-      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
       if (newVal) {
         this.getPayments({
           ...filter,
@@ -673,7 +679,7 @@ export default {
         if (this.isExist) {
           return
         }
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination, true)
         this.getPayments({
           ...filter,
           requestType: this.type,
@@ -690,7 +696,7 @@ export default {
       handler(newVal) {
         if (newVal) {
           this.getPayments({
-            ...pathParamsToPaging(this.$route, this.pagination),
+            ...pathParamsToPaging(this.$route, this.pagination, true),
             requestType: this.type,
             hidePaid: this.hidePaid,
             userIds: newVal.map((user) => user.value).join(','), // filter by user

@@ -7,12 +7,13 @@ const pagingToPathParams = ({ filter, getCellValue, pagination }) => {
   }
 }
 
-const pathParamsToPaging = ({ query }, paging) => {
+const pathParamsToPaging = ({ query }, paging, useAll) => {
   paging.sortBy = query.sb
   paging.descending = query.d === '1'
   paging.page = Number(query.p) || 1
   const defaultRowPerPage = defaultPaging.defaultRowPerPage || 10
-  paging.rowsPerPage = Number(query.r) || defaultRowPerPage
+  const rpp = Number(query.r)
+  paging.rowsPerPage = rpp || (rpp == 0 && useAll) ? rpp : defaultRowPerPage
   const filter = {
     page: paging.page,
     size: paging.rowsPerPage,
@@ -63,4 +64,22 @@ const defaultNotUseSizePaging = {
   rowsNumber: 0,
 }
 
-export { pagingToPathParams, pathParamsToPaging, pathParamsToNotUsePaging, defaultPaging, defaultNotUseSizePaging }
+const getRppOps = (rppDefaultOps, count) => {
+  let rppOptions = []
+  //init row per page options
+  rppDefaultOps.forEach((op) => {
+    if (op < count) {
+      rppOptions.push(op)
+    }
+  })
+  return rppOptions
+}
+
+export {
+  pagingToPathParams,
+  pathParamsToPaging,
+  pathParamsToNotUsePaging,
+  getRppOps,
+  defaultPaging,
+  defaultNotUseSizePaging,
+}

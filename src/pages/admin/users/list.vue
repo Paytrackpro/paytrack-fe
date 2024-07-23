@@ -9,7 +9,10 @@
       separator="none"
       v-model:pagination="pagination"
       :hide-pagination="pagination.rowsNumber < 10"
-      :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+      :class="
+        pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
+      "
+      :rows-per-page-options="rppOptions"
       :loading="loading"
       :filter="KeySearch"
       @request="onRequest"
@@ -66,7 +69,7 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import { PAYMENT_TYPES } from '../../../consts/paymentType'
 import { date } from 'quasar'
 import customPagination from 'src/components/common/custom_pagination.vue'
@@ -147,13 +150,15 @@ export default {
         },
       ],
       rows: [],
+      rppDefaultOptions: [0, 5, 10, 15, 30, 50],
+      rppOptions: [0, 5, 10, 15, 20],
     }
   },
   watch: {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination, true)
         filter.KeySearch = this.KeySearch
         this.getUserList({
           ...filter,
@@ -173,6 +178,7 @@ export default {
           this.rows = users || []
           this.pagination.rowsNumber = count
           this.loading = false
+          this.rppOptions = getRppOps(this.rppDefaultOptions, count)
         })
         .catch((err) => {
           this.loading = false

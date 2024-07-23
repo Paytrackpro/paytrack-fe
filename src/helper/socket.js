@@ -13,7 +13,6 @@ const socket = io('http://localhost:6789', {
 })
 
 socket.on('disconnect', () => {
-  console.log('socket disconnected')
   state.connected = false
 })
 
@@ -31,7 +30,6 @@ const isSocketConnected = () => {
 
 const connectSocket = (userId) => {
   socket.on('connect', async () => {
-    console.log('socket connected')
     socket.emit('join', userId)
     state.connected = true
   })

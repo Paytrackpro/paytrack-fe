@@ -56,8 +56,11 @@
         separator="none"
         v-model:pagination="pagination"
         :hide-pagination="pagination.rowsNumber < 10"
-        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+        :class="
+          pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
+        "
         :loading="loading"
+        :rows-per-page-options="rppOptions"
         @request="onRequest"
       >
         <template v-slot:pagination>
@@ -77,7 +80,7 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import customPagination from 'src/components/common/custom_pagination.vue'
 import reportFilter from 'components/report/reportFilter'
 
@@ -178,6 +181,8 @@ export default {
         count: 0,
         amount: 0,
       },
+      rppDefaultOptions: [0, 5, 10, 15, 30, 50],
+      rppOptions: [0, 5, 10, 15, 20],
     }
   },
   created() {
@@ -189,7 +194,7 @@ export default {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination, true)
         this.reportFilters.page = filter.page
         this.reportFilters.size = filter.size
         this.reportFilters.order = filter.order
@@ -222,6 +227,7 @@ export default {
           this.pendingInvoiceInfo.amount = report.payableInvoices.amount
           this.paidInvoiceInfo.count = report.paidInvoices.invoiceNum
           this.paidInvoiceInfo.amount = report.paidInvoices.amount
+          this.rppOptions = getRppOps(this.rppDefaultOptions, count)
         })
         .catch((err) => {
           this.loading = false
