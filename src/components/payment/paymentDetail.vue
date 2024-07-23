@@ -459,7 +459,7 @@ export default {
   },
   created() {
     //if exhchange options empty, initialization
-    if (this.exchangeOption.length == 0) {
+    if (this.exchangeOption.length == 0 && !this.isPaidStatus) {
       //if projectList empty, get projectList
       this.$api
         .get(`/payment/exchange-list`)
@@ -875,6 +875,9 @@ export default {
     exchange: {
       immediate: true,
       handler(newExchange) {
+        if (this.isPaidStatus) {
+          return
+        }
         this.payment.convertRate = 0
         this.payment.expectedAmount = 0
         this.$emit('update:modelValue', this.payment)
