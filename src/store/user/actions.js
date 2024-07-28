@@ -18,6 +18,11 @@ export default {
     }
   },
 
+  async setLogin({ commit }, data) {
+    localStorage.setItem('token', data.token)
+    commit('setUser', data.userInfo)
+    commit('setAuthenticated', true)
+  },
   async register({ commit }, user) {
     return api.post('/auth/register', user)
   },

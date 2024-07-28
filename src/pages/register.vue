@@ -26,6 +26,7 @@
                           type="text"
                           class="input"
                           placeholder="Username"
+                          @blur="checkingDestination"
                           required
                         />
                         <label for="username_id" class="label">
@@ -72,7 +73,7 @@
                       </div>
                       <!-- end email input -->
                       <!-- begin password input -->
-                      <div class="inputContainer" align="right">
+                      <div class="inputContainer" align="right" v-if="authType == 0">
                         <input
                           id="password_id"
                           v-model="password"
@@ -91,12 +92,12 @@
                           @click="isPwd = !isPwd"
                         />
                       </div>
-                      <div class="between-area">
+                      <div class="between-area" v-if="authType == 0">
                         <span class="text-accent msg-error" v-if="msg.password">{{ msg.password }}</span>
                       </div>
                       <!-- end password input -->
                       <!-- begin password Confirmation input -->
-                      <div class="inputContainer" align="right">
+                      <div class="inputContainer" align="right" v-if="authType == 0">
                         <input
                           id="password_cfm_id"
                           v-model="passwordCfm"
@@ -116,12 +117,12 @@
                           @click="isPwd = !isPwd"
                         />
                       </div>
-                      <div class="between-area">
+                      <div class="between-area" v-if="authType == 0">
                         <span class="text-accent msg-error" v-if="msg.passwordCfm">{{ msg.passwordCfm }}</span>
                       </div>
                       <!-- end password Confirmation input -->
                       <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
-                      <q-btn label="Create" type="submit" color="primary" :loading="loading" />
+                      <q-btn label="Create" type="submit" color="primary" :loading="loading" :disable="!allowCreate" />
                     </q-form>
                     <q-card class="col" flat bordered> </q-card>
                     <div class="text-grey-3 q-mt-md row justify-between">
@@ -140,6 +141,12 @@
 </template>
 
 <script>
+import { startRegistration } from '@simplewebauthn/browser'
+import { responseError } from 'src/helper/error'
+import { mapActions } from 'vuex'
+const DESTINATION_CHECK_CHECKING = 1
+const DESTINATION_CHECK_FAIL = 2
+const DESTINATION_CHECK_DONE = 3
 export default {
   name: 'pageRegister',
   data() {
@@ -153,16 +160,72 @@ export default {
       loading: false,
       error: null,
       msg: [],
+      authType: 0,
+      allowCreate: false,
     }
   },
+  created() {
+    this.$api
+      .get(`/auth/auth-method`)
+      .then((data) => {
+        this.authType = data
+      })
+      .catch((err) => {
+        responseError(err)
+      })
+  },
   methods: {
+    ...mapActions({
+      setLogin: 'user/setLogin',
+    }),
+    async handlerFinishRegistration(options, sessionKey) {
+      let asseResp
+      try {
+        asseResp = await startRegistration(options.publicKey)
+      } catch (error) {
+        this.loading = false
+        console.log('Conditional UI request was aborted')
+        this.cancelRegisterUser(sessionKey)
+        return
+      }
+      this.$api
+        .post(
+          '/auth/register-finish?sessionKey=' + sessionKey + '&dispName=' + this.displayName + '&email=' + this.email,
+          asseResp
+        )
+        .then((res) => {
+          this.setLogin(res)
+          this.$router.push({ path: '/approvals' })
+        })
+        .catch((err) => {
+          this.loading = false
+          this.cancelRegisterUser(sessionKey)
+          responseError(err)
+        })
+    },
+    registerUserPasskey() {
+      this.loading = true
+      this.$api
+        .post('/auth/register-start?username=' + this.username, {})
+        .then((resultData) => {
+          const opts = resultData.options
+          const sessionKey = resultData.sessionkey
+          this.handlerFinishRegistration(opts, sessionKey)
+        })
+        .catch((err) => {
+          this.loading = false
+          responseError(err)
+        })
+    },
     register() {
-      if (
-        !this.isValidUsername(this.username) ||
-        !this.isValidPassword(this.password) ||
-        !this.isValidEmail(this.email) ||
-        !this.isValidPasswordCfm(this.passwordCfm)
-      ) {
+      if (!this.isValidUsername(this.username) || !this.isValidEmail(this.email)) {
+        return
+      }
+      if (this.authType == 1) {
+        this.registerUserPasskey()
+        return
+      }
+      if (!this.isValidPassword(this.password) || !this.isValidPasswordCfm(this.passwordCfm)) {
         return
       }
       this.$store
@@ -182,6 +245,37 @@ export default {
         })
         .catch((error) => {
           this.error = error.response ? error.response.data.message : error.message
+        })
+    },
+    checkingDestination($e) {
+      // checking
+      let status = DESTINATION_CHECK_CHECKING
+      this.$api
+        .get(`/auth/username-checking?userName=` + this.username)
+        .then(({ found, id, userName, message }) => {
+          status = DESTINATION_CHECK_DONE
+          if (found) {
+            this.msg['username'] = 'Username already exists'
+            this.allowCreate = false
+          } else {
+            this.msg['username'] = ''
+            this.allowCreate = true
+          }
+        })
+        .catch(() => {
+          this.status = DESTINATION_CHECK_FAIL
+          this.msg['username'] = 'Check username failed'
+          this.allowCreate = false
+        })
+    },
+    cancelRegisterUser(sessionKey) {
+      this.$api
+        .post('/auth/cancel-register?sessionKey=' + sessionKey)
+        .then((res) => {
+          console.log('cancel register successfully')
+        })
+        .catch((err) => {
+          responseError(err)
         })
     },
     validateUsername(value) {
