@@ -9,13 +9,38 @@
       separator="none"
       v-model:pagination="pagination"
       :hide-pagination="pagination.rowsNumber < 10"
+      :class="
+        pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
+      "
+      :rows-per-page-options="rppOptions"
       :loading="loading"
       :filter="KeySearch"
       @request="onRequest"
       @row-click="(_, row) => goToDetail(row.id)"
     >
+      <template v-slot:top-left>
+        <div class="center-row">
+          <div class="text-h6 title-case">User List</div>
+          <q-icon size="xs" color="green" class="q-ml-md" name="fiber_manual_record" />
+          <span>Working</span>
+          <q-icon size="xs" color="orange" class="q-ml-sm" name="fiber_manual_record" />
+          <span>Pausing</span>
+        </div>
+      </template>
       <template v-slot:pagination>
         <custom-pagination :pagination="pagination" :color="'primary'" />
+      </template>
+      <template v-slot:body-cell-userName="props">
+        <q-td :props="props">
+          <span class="q-pl-sm text-size-15">{{ props.row.userName }}</span>
+          <q-icon
+            v-if="props.row.working"
+            size="xs"
+            :color="props.row.pausing ? 'orange' : 'green'"
+            class="q-ml-sm"
+            name="fiber_manual_record"
+          />
+        </q-td>
       </template>
       <template v-slot:body-cell-createdAt="props">
         <q-td :props="props">
@@ -44,11 +69,12 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import { PAYMENT_TYPES } from '../../../consts/paymentType'
 import { date } from 'quasar'
 import customPagination from 'src/components/common/custom_pagination.vue'
 import MTime from 'components/common/mTime'
+import { listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
 
 export default {
   name: 'adminUserList',
@@ -58,6 +84,12 @@ export default {
   components: {
     customPagination,
     MTime,
+  },
+  created() {
+    listenSocketEvent('reloadUserList', this.onSocketMessage)
+  },
+  beforeUnmount() {
+    removeListenSocketEvent('reloadUserList', this.onSocketMessage)
   },
   data() {
     return {
@@ -69,7 +101,7 @@ export default {
           name: 'userName',
           required: true,
           label: 'User Name',
-          align: 'center',
+          align: 'left',
           field: (row) => row.userName,
           format: (val) => `${val}`,
           sortable: true,
@@ -125,13 +157,15 @@ export default {
         },
       ],
       rows: [],
+      rppDefaultOptions: [0, 5, 10, 15, 30, 50],
+      rppOptions: [0, 5, 10, 15, 20],
     }
   },
   watch: {
     $route: {
       immediate: true,
       handler(to) {
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination, true)
         filter.KeySearch = this.KeySearch
         this.getUserList({
           ...filter,
@@ -151,6 +185,7 @@ export default {
           this.rows = users || []
           this.pagination.rowsNumber = count
           this.loading = false
+          this.rppOptions = getRppOps(this.rppDefaultOptions, count)
         })
         .catch((err) => {
           this.loading = false
@@ -166,6 +201,27 @@ export default {
         path: this.$route.fullPath,
         query,
       })
+    },
+    onSocketMessage(data) {
+      const userId = data.UserId
+      const working = data.Working
+      const pausing = data.Pausing
+      if (!userId || userId < 1) {
+        return
+      }
+      var existUser
+      var existIndex
+      this.rows.forEach((user, index) => {
+        if (user.id == userId) {
+          existUser = user
+          existIndex = index
+        }
+      })
+      if (existUser) {
+        existUser.working = working
+        existUser.pausing = pausing
+        this.rows[existIndex] = existUser
+      }
     },
   },
 }

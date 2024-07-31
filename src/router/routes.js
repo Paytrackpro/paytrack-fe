@@ -128,6 +128,23 @@ const routes = [
         ],
       },
       {
+        path: 'system-report/',
+        name: 'system.report',
+        component: () => import('pages/admin/systemReport.vue'),
+        meta: {
+          roles: [ROLE.ADMIN],
+          title: 'System Report',
+        },
+      },
+      {
+        path: 'report/',
+        name: 'report',
+        component: () => import('pages/admin/report.vue'),
+        meta: {
+          title: 'Report',
+        },
+      },
+      {
         path: 'pay/',
         name: 'pay',
         component: () => import('pages/payments/layout.vue'),
@@ -152,6 +169,14 @@ const routes = [
             },
           },
         ],
+      },
+      {
+        path: 'timelog/',
+        name: 'timelog',
+        component: () => import('pages/users/timelog.vue'),
+        meta: {
+          title: 'Time Log',
+        },
       },
       {
         path: 'get-paid/',

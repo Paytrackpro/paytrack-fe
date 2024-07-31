@@ -1,7 +1,7 @@
 <template>
   <div>
     <p class="q-mb-xs" v-if="label">
-      <b class="text-weight-medium">{{ label }} </b>
+      <b class="text-size-15">{{ label }} </b>
     </p>
     <q-field :class="customClass" :style="customStyle" stack-label borderless>
       <template v-slot:control>

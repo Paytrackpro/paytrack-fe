@@ -1,9 +1,27 @@
 <template>
   <tr>
-    <td class="invoice-price-detail text-left" v-if="user.showDateOnInvoiceLine">
+    <td class="invoice-price-detail text-left" v-if="showDateOnInvoiceLine">
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
+    <td class="text-left" v-if="!showProjectOnInvoice && (readonly || projectDisplay)">
+      {{ invoice.projectName }}
+    </td>
     <td class="text-left">
+      <q-input
+        v-if="editing"
+        label="Description"
+        v-model="invoice.description"
+        autogrow
+        dense
+        stack-label
+        hide-bottom-space
+        rows="1"
+        type="textarea"
+        :error="submitted && !invoice.description"
+      />
+      <span class="content-wrap" v-else>{{ modelValue.description }}</span>
+    </td>
+    <td class="text-right">
       <div v-if="editing" class="row items-start">
         <q-input
           class="col"
@@ -35,11 +53,11 @@
             ? `qty ${invoice.quantity} x $${invoice.price}`
             : `qty ${invoice.quantity}`
           : invoice.quantity
-          ? `${invoice.quantity} hour(s)`
+          ? `${invoice.quantity} hour${invoice.quantity > 1.0 ? 's' : ''}`
           : '_'
       }}</template>
     </td>
-    <td class="text-left" v-if="showCost">
+    <td class="text-right" v-if="showCost">
       <q-input
         v-if="editing"
         label="Cost"
@@ -52,21 +70,6 @@
         :error="submitted && invoice.cost <= 0"
       />
       <span v-else>$ {{ cost }}</span>
-    </td>
-    <td class="text-left">
-      <q-input
-        v-if="editing"
-        label="Description"
-        v-model="invoice.description"
-        autogrow
-        dense
-        stack-label
-        hide-bottom-space
-        rows="1"
-        type="textarea"
-        :error="submitted && !invoice.description"
-      />
-      <span class="content-wrap" v-else>{{ modelValue.description }}</span>
     </td>
     <td class="text-center" v-if="!readonly">
       <q-btn v-if="!editing" size="sm" label="Edit" color="info" @click="edit" />
@@ -104,6 +107,9 @@ export default {
     isEdit: Boolean,
     createType: String,
     index: Number,
+    showDateOnInvoiceLine: Boolean,
+    showProjectOnInvoice: Boolean,
+    projectDisplay: Boolean,
   },
   emits: ['update:modelValue'],
   data() {
@@ -116,6 +122,8 @@ export default {
         cost: 0,
         description: '',
         date: '',
+        projectId: 0,
+        projectName: '',
       },
       type: 'labor',
       confirm: false,
@@ -141,6 +149,8 @@ export default {
         cost: Number(this.invoice.cost),
         description: this.invoice.description,
         date: this.invoice.date,
+        projectId: this.invoice.projectId,
+        projectName: this.invoice.projectName,
       })
       this.editing = false
     },
@@ -176,6 +186,8 @@ export default {
             cost: Number(this.modelValue.quantity) * Number(newHR),
             description: this.modelValue.description,
             date: this.modelValue.date,
+            projectId: this.modelValue.projectId,
+            projectName: this.modelValue.projectName,
           })
         }
       },

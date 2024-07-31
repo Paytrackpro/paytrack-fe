@@ -5,6 +5,7 @@
         <div>
           <p class="q-mt-none q-mb-xs text-weight-medium">OTP</p>
           <q-input
+            class="otpInput"
             v-model="otp"
             outlined
             dense
@@ -12,6 +13,7 @@
             lazy-rules
             stack-label
             hide-bottom-space
+            autofocus
             :rules="[(val) => (val && val.length > 0) || 'Please enter your otp']"
           />
         </div>
@@ -28,6 +30,7 @@ export default {
   props: {
     login: Function,
     error: String,
+    isOtp: Boolean,
   },
   data() {
     return {
@@ -37,6 +40,16 @@ export default {
   methods: {
     loginOtp() {
       this.$emit('login', this.otp)
+    },
+  },
+  watch: {
+    isOtp: {
+      immediate: true,
+      handler(newFlag) {
+        this.$nextTick(() => {
+          document.getElementsByClassName('otpInput')[0].querySelector('input').focus()
+        })
+      },
     },
   },
 }

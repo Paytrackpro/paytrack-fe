@@ -39,7 +39,7 @@
       </div>
     </div>
   </q-card-section>
-  <q-form @submit="submit" class="q-pa-md" ref="paymentForm">
+  <q-form @submit="submit" class="q-pa-lg" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
@@ -65,7 +65,7 @@
             />
           </div>
           <div class="col-12 col-md-1"></div>
-          <div class="col-12 col-md-4">
+          <div class="col-12 col-md-4" v-if="!isInvoiceMode">
             <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
             <q-input
               class="no-control-button"
@@ -77,12 +77,27 @@
               dense
               lazy-rules
               stack-label
+              min="0"
               :rules="[(val) => val > 0 || inputAmountMessage]"
             >
               <template v-slot:prepend>
                 <q-icon name="attach_money" />
               </template>
             </q-input>
+          </div>
+          <div class="col-12 col-md-4" v-if="isInvoiceMode">
+            <p class="q-mb-xs">
+              <b>Total Hours:&nbsp;&nbsp;</b>
+              <span class="amount-text">{{
+                (totalHours % 1 != 0 ? totalHours.toFixed(2) : totalHours) + ' hour' + (totalHours > 1.0 ? 's' : '')
+              }}</span>
+            </p>
+            <p class="q-mb-xs">
+              <b>Total Cost (USD):&nbsp;&nbsp;</b>
+              <span class="amount-text"
+                >${{ inPayment.amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
+              >
+            </p>
           </div>
           <div class="col-12 q-my-lg">
             <custom-input
@@ -109,6 +124,30 @@
         v-model="inPayment.hourlyRate"
         :type="'number'"
         :rules="priceRules"
+        :minValue="0"
+      />
+    </div>
+    <div class="row" v-if="isInvoiceMode">
+      <q-checkbox class="row q-mt-xs" label="Show Date on Invoice Line" v-model="inPayment.showDateOnInvoiceLine" />
+      <q-checkbox
+        class="row q-mt-xs"
+        label="Invoice Project"
+        v-model="inPayment.showProjectOnInvoice"
+        v-if="projectList.length > 0"
+      />
+      <q-select
+        class="row q-mt-xs q-ml-sm"
+        v-if="inPayment.showProjectOnInvoice && projectList.length > 0"
+        v-model="inPayment.projectId"
+        :options="projectOption"
+        outlined
+        dense
+        style="min-width: 250px"
+        lazy-rules
+        stack-label
+        emit-value
+        map-options
+        borderless
       />
     </div>
     <div class="row q-py-lg" v-if="isInvoiceMode">
@@ -117,6 +156,9 @@
           ref="invoiceMode"
           @update:modelValue="updateDetail"
           v-model="inPayment.details"
+          :amount="inPayment.amount"
+          :showDateOnInvoiceLine="inPayment.showDateOnInvoiceLine"
+          :showProjectOnInvoice="inPayment.showProjectOnInvoice"
           v-model:hourlyRate="inPayment.hourlyRate"
           :showCost="true"
         />
@@ -165,6 +207,33 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       isInvoiceMode: false,
+      totalHours: 0.0,
+      projectList: [],
+      projectOption: [],
+    }
+  },
+  created() {
+    if (this.projectList.length == 0) {
+      //if projectList empty, get projectList
+      this.$api
+        .get(`/project/get-my-project`)
+        .then((data) => {
+          this.projectList = data
+          this.projectList.forEach((project) => {
+            this.projectOption.push({
+              label: project.projectName,
+              value: project.projectId,
+            })
+          })
+          if (!this.edit && !this.inPayment.projectId && this.projectList && this.projectList.length > 0) {
+            this.inPayment.projectId = this.projectList[0].projectId
+            this.inPayment.projectName = this.projectList[0].projectName
+          }
+        })
+        .catch((err) => {
+          responseError(err)
+          return { error: err }
+        })
     }
   },
   watch: {
@@ -188,7 +257,7 @@ export default {
           this.partner.value = payment.receiverName
           this.partner.id = payment.receiverId
         }
-        this.isInvoiceMode = payment.details.length > 0
+        this.isInvoiceMode = payment.details && payment.details.length > 0
         this.inPayment = payment
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
@@ -280,6 +349,18 @@ export default {
       if (isDraft !== true) {
         successNotify = 'Payment request sent'
       }
+      if (this.inPayment.showProjectOnInvoice) {
+        this.projectList.find((project) => {
+          if (project.projectId === this.inPayment.projectId) {
+            this.inPayment.projectName = project.projectName
+            payment.projectName = project.projectName
+          }
+        })
+        payment.details.forEach((detail) => {
+          detail.projectId = this.inPayment.projectId
+          detail.projectName = this.inPayment.projectName
+        })
+      }
       if (!this.isInvoiceMode) {
         payment.details = []
       }
@@ -307,6 +388,7 @@ export default {
     updateDetail(details) {
       this.inPayment.details = details
       this.inPayment.amount = this.invoicesAmount()
+      this.setTotalHours(details)
     },
     invoicesAmount() {
       if (!this.inPayment.details) {
@@ -317,6 +399,17 @@ export default {
         amount += Number(invoice.cost)
       }
       return amount.toFixed(2)
+    },
+    setTotalHours(invoices) {
+      let count = 0
+      if (invoices && invoices.length > 0) {
+        invoices.forEach((detail) => {
+          if (detail.price == 0) {
+            count += detail.quantity
+          }
+        })
+      }
+      this.totalHours = count
     },
   },
   computed: {

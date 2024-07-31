@@ -2,7 +2,7 @@
   <q-chip class="sm-chip" square text-color="white" :color="coinColor">
     {{ selectedCoin.label }}
   </q-chip>
-  <p class="text-caption q-ml-md" v-if="hasAddress">
+  <p class="text-caption q-ml-sm" v-if="hasAddress">
     <b>{{ address }}</b>
   </p>
 </template>

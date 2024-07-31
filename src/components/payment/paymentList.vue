@@ -1,7 +1,34 @@
 <template>
   <div class="row q-mt-lg">
-    <div class="col text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
-      <q-checkbox label="Hide Paid" v-model="hidePaid" />
+    <div class="text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
+      <q-btn
+        :label="hidePaid ? 'Show Paid' : 'Hide paid'"
+        type="button"
+        :color="hidePaid ? 'secondary' : 'primary'"
+        @click="hidePaidHandler()"
+        class="q-mr-sm btn btn-animated"
+      />
+    </div>
+    <div class="col row text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
+      <q-select
+        v-model="memberModel"
+        placeholder="Search by user"
+        class="search-user-select"
+        multiple
+        clearable
+        filled
+        use-input
+        use-chips
+        outlined
+        input-debounce="0"
+        :options="memberFilterOptions"
+        @filter="filterMemberFn"
+        @clear="handleClear"
+      >
+        <template v-slot:append>
+          <q-icon name="search" />
+        </template>
+      </q-select>
     </div>
     <div class="col" align="right">
       <q-btn
@@ -13,7 +40,6 @@
         to="/get-paid/create"
       />
       <template v-if="showBulkPay">
-        <q-checkbox label="Bulk Pay BTC" v-model="isBulkPay" class="text-bold text-grey-3" />
         <q-btn
           label="Bulk Pay BTC"
           class="q-mr-sm"
@@ -22,6 +48,14 @@
           v-show="isBulkPay"
           :disable="selected.length == 0"
           style="margin-left: 10px"
+        />
+        <q-btn
+          :label="isBulkPay ? 'Cancel' : 'Show Bulk Pay BTC'"
+          type="button"
+          :text-color="isBulkPay ? 'black' : 'white'"
+          :color="isBulkPay ? 'white' : 'primary'"
+          @click="setIsBulkPay()"
+          class="btn btn-animated"
         />
       </template>
     </div>
@@ -42,6 +76,10 @@
         "
         :hide-pagination="pagination.rowsNumber < 10"
         separator="none"
+        :class="
+          pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
+        "
+        :rows-per-page-options="rppOptions"
         flat
         @row-click="(_, row) => goToDetail(row.id)"
         @request="onRequest"
@@ -55,9 +93,9 @@
             <payment-status :paymentModel="props.row" isShowApprover :isShowIcon="false" />
           </q-td>
         </template>
-        <template v-slot:body-cell-createdAt="props">
+        <template v-slot:body-cell-updatedAt="props">
           <q-td :props="props">
-            <m-time :time="props.row.createdAt"></m-time>
+            <m-time :time="props.row.updatedAt"></m-time>
           </q-td>
         </template>
         <template v-slot:no-data="{ message }">
@@ -72,38 +110,43 @@
         </template>
       </q-table>
       <q-dialog v-model="detailBulk">
-        <q-card style="width: 800px; max-width: 80vw">
-          <q-card-section class="row justify-between">
+        <q-card class="bulk-pay-dialog">
+          <q-card-section class="row justify-between q-py-sm">
             <div class="text-h6">Bulk Pay BTC</div>
-            <q-btn v-if="!rateLoading" round dense flat @click="refreshExchangeRate">
-              <q-tooltip class="bg-primary">Refresh Exchange Rate</q-tooltip>
+            <q-btn v-if="!rateLoading" class="refresh-btn" round dense flat @click="refreshExchangeRate">
+              <span>Refresh Exchange Rate</span>
               <q-icon size="md" class="custom-icon" :name="'o_refresh'" />
             </q-btn>
             <q-spinner-oval v-else color="primary" size="sm" />
           </q-card-section>
-          <q-card-section class="q-pt-none" v-if="selected.length > 0">
-            <q-scroll-area
-              class="q-mt-md q-px-sm"
-              :thumb-style="thumbStyle"
-              :bar-style="barStyle"
-              :style="'height: ' + getScrollHeight() + 'px; max-width: 800px'"
-            >
-              <q-list>
-                <q-item v-for="item in selected" :key="item.id" clickable v-ripple class="q-mt-md bg-grey-8 rounded">
-                  <q-item-section>
-                    <q-item-label lines="1" class="q-mt-sm">
-                      <span class="text-weight-medium"
-                        >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }}
-                      </span>
-                    </q-item-label>
-                    <q-item-label class="bulk-item-title" lines="1">
-                      <span>Address: </span>
-                      <u class="text-weight-bold text-blue-8">
-                        <em> {{ item.paymentSettings[0].address }}</em></u
+          <q-separator />
+          <q-card-section style="max-height: 60vh" class="scroll q-py-xs">
+            <q-list>
+              <q-item
+                v-for="(item, index) of selected"
+                :key="item.id"
+                v-ripple
+                :class="getClassItem(index) + ' q-py-xs'"
+              >
+                <div class="row w-100">
+                  <div class="col-12 col-sm-4">
+                    <span class="text-weight-medium"
+                      >{{ item.senderDisplayName ? item.senderDisplayName : item.userName }} </span
+                    ><br />
+                    <span>Amount :</span>
+                    <span class="text-weight-medium text-size-15"> ${{ item.amount }} </span>
+                  </div>
+                  <div class="col-12 col-sm-8">
+                    <div class="center-row">
+                      <p
+                        class="bulk-address-area text-weight-bold text-blue-8 custom-link"
+                        @click="copy(item.paymentSettings[0].address || '')"
                       >
+                        {{ item.paymentSettings[0].address }}
+                      </p>
                       <q-btn
                         v-if="value != ''"
-                        class="q-ml-sm"
+                        class="q-ml-sm copy-btn"
                         round
                         dense
                         flat
@@ -112,46 +155,48 @@
                         <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
                         <q-tooltip>Copy address</q-tooltip>
                       </q-btn>
-                    </q-item-label>
-                    <div class="row">
-                      <q-item-label class="col" lines="1">
-                        <span>Amount (USD - BTC):</span>
-                        <span class="text-weight-medium"> ${{ item.amount }} </span>&nbsp;-&nbsp;
-                        <span class="text-weight-medium text-blue-8">{{ item.expectedAmount }} BTC</span>
-                        <q-btn
-                          v-if="value != ''"
-                          class="q-ml-sm"
-                          round
-                          dense
-                          flat
-                          @click="copy(item.expectedAmount || '')"
-                        >
-                          <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-                          <q-tooltip>Copy BTC Amount</q-tooltip>
-                        </q-btn>
-                      </q-item-label>
                     </div>
-                    <div class="row q-my-sm">
-                      <q-item-label lines="5">Description: {{ item.description }}</q-item-label>
-                    </div>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-scroll-area>
-            <custom-input class="q-mt-lg q-px-sm" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
+                    <span
+                      class="text-weight-medium text-blue-8 text-size-15 custom-link"
+                      @click="copy(item.expectedAmount || '')"
+                      >{{ item.expectedAmount }} BTC</span
+                    >
+                    <q-btn
+                      v-if="value != ''"
+                      class="q-ml-sm copy-btn"
+                      round
+                      dense
+                      flat
+                      @click="copy(item.expectedAmount || '')"
+                    >
+                      <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                      <q-tooltip>Copy BTC Amount</q-tooltip>
+                    </q-btn>
+                  </div>
+                </div>
+              </q-item>
+            </q-list>
           </q-card-section>
-          <q-card-actions v-else align="center" class="bg-white q-pb-md">
-            <q-icon size="md" name="warning" color="warning"></q-icon>
-            <q-item-label class="text-warning q-ml-sm">No payment to process</q-item-label>
-          </q-card-actions>
-          <q-card-actions align="center" class="bg-white q-pb-md">
-            <q-btn
-              label="Mark Paid"
-              color="primary"
-              @click="handlePaid"
-              :disable="paying || selected.length <= 0"
-              v-close-popup
-            />
+
+          <q-separator />
+          <div class="row q-mt-sm q-px-md">
+            <custom-input class="q-px-sm w-100" :label="'Enter transaction ID for bulk BTC payment'" v-model="txId" />
+          </div>
+          <q-card-actions class="q-pa-sm row justify-between">
+            <p class="text-size-15 q-pt-none col-7 q-pb-xs q-pl-md">
+              <span class="text-weight-medium">Total: ${{ totalBulkUSD }}</span> -
+              <span class="text-blue-8 text-weight-medium">{{ totalBulkBTC }}&nbsp;BTC</span>
+            </p>
+            <div class="col-5 q-pb-xs q-pr-md" align="right">
+              <q-btn
+                label="Mark Paid"
+                color="primary"
+                class="col-5"
+                @click="handlePaid"
+                :disable="paying || selected.length <= 0"
+                v-close-popup
+              />
+            </div>
           </q-card-actions>
         </q-card>
       </q-dialog>
@@ -160,22 +205,50 @@
 </template>
 
 <script>
-import { pathParamsToPaging, pagingToPathParams, defaultPaging } from 'src/helper/paging'
+import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import PaymentStatus from 'components/payment/paymentStatus'
 import { date } from 'quasar'
 import { MDateFormat } from 'src/consts/common'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
+import { ref } from 'vue'
 import role from 'src/consts/role'
 import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import MTime from 'components/common/mTime'
 import customPagination from '../common/custom_pagination.vue'
 import customInput from '../common/custom_input.vue'
+import { listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
+
+let memberStringOptions = []
 
 export default {
   name: 'paymentList',
+  setup() {
+    const memberModel = ref(null)
+    const memberFilterOptions = ref(memberStringOptions)
+    return {
+      memberModel,
+      memberFilterOptions,
+      memberStringOptions,
+
+      filterMemberFn(val, update) {
+        update(() => {
+          if (val === '') {
+            memberFilterOptions.value = memberStringOptions
+          } else {
+            const needle = val.toLowerCase()
+            memberFilterOptions.value = memberStringOptions.filter((v) => v.label.toLowerCase().indexOf(needle) > -1)
+          }
+        })
+      },
+      handleClear() {
+        memberModel.value = []
+      },
+    }
+  },
   data() {
     return {
+      userSelection: [],
       isShowList: true,
       loading: false,
       rateLoading: false,
@@ -203,13 +276,14 @@ export default {
           align: 'center',
           label: 'Status',
           field: 'status',
-          sortable: false,
+          sortable: true,
         },
         {
           name: 'amount',
           align: 'right',
           label: 'Amount (USD)',
           field: 'amount',
+          sortable: true,
           format: (val) => {
             return val.toFixed(2)
           },
@@ -231,9 +305,29 @@ export default {
         opacity: 0.2,
       },
       showBulkPay: false,
+      totalBulkBTC: '',
+      totalBulkUSD: '',
+      rppDefaultOptions: [0, 5, 10, 15, 30, 50],
+      rppOptions: [0, 5, 10, 15, 20],
     }
   },
   created() {
+    this.$api
+      .get('/user/get-user-list', {})
+      .then((res) => {
+        this.userSelection = res
+        memberStringOptions = []
+        this.userSelection.forEach((userInfo) => {
+          memberStringOptions.push({
+            label: userInfo.userName,
+            value: userInfo.id,
+          })
+        })
+      })
+      .catch((err) => {
+        responseError(err)
+      })
+    listenSocketEvent('reloadList', this.onSocketMessage)
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
@@ -245,6 +339,9 @@ export default {
       .catch((err) => {
         responseError(err)
       })
+  },
+  beforeUnmount() {
+    removeListenSocketEvent('reloadList', this.onSocketMessage)
   },
   components: {
     PaymentStatus,
@@ -270,6 +367,7 @@ export default {
               name: 'receiverName',
               align: 'left',
               label: 'Recipient',
+              sortable: true,
               field: (row) => {
                 if (row.receiverDisplayName.length > 0) {
                   return row.receiverDisplayName + ' (' + row.receiverName + ')'
@@ -283,6 +381,7 @@ export default {
               required: true,
               label: 'Sender',
               align: 'left',
+              sortable: true,
               field: (row) => {
                 if (row.senderDisplayName.length > 0) {
                   return row.senderDisplayName + ' (' + row.senderName + ')'
@@ -296,10 +395,18 @@ export default {
 
       let lastColum = [
         {
-          name: 'createdAt',
+          name: 'startDate',
           align: 'center',
-          label: 'Created At',
-          field: 'createdAt',
+          label: 'Start Date',
+          field: 'startDate',
+          sortable: true,
+          format: (val) => date.formatDate(val, MDateFormat),
+        },
+        {
+          name: 'updatedAt',
+          align: 'center',
+          label: 'Last Edited',
+          field: 'updatedAt',
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
         },
@@ -310,6 +417,7 @@ export default {
           name: 'acceptedCoins',
           align: 'center',
           label: 'Accepted Coins',
+          sortable: false,
           field: (row) => {
             return row.paymentSettings
               .map((el) => el.type)
@@ -322,6 +430,9 @@ export default {
     },
   },
   methods: {
+    ...mapActions({
+      setGlobalUser: 'user/setGlobalUser',
+    }),
     async getPayments(f) {
       this.loading = true
       this.$api
@@ -335,15 +446,68 @@ export default {
           this.loading = false
           this.rows = payments || []
           this.pagination.rowsNumber = count
+          this.rppOptions = getRppOps(this.rppDefaultOptions, count)
+          //check view project column
+          var hasProject = false
+          var hasProjectColumnIndex = -1
+          this.rows.forEach((payment) => {
+            if (payment.projectId > 0) {
+              hasProject = true
+              return
+            }
+          })
+          this.fixedColumns.forEach((fixedColumn, index) => {
+            if (fixedColumn.name == 'projectName') {
+              hasProjectColumnIndex = index
+              return
+            }
+          })
+          if (hasProject && hasProjectColumnIndex < 0) {
+            var tempFixedColumn = new Array({
+              name: 'projectName',
+              align: 'center',
+              label: 'Project',
+              field: (row) => {
+                if (row.showProjectOnInvoice) {
+                  return row.projectName
+                } else if (row.details && row.details.length > 0) {
+                  var projectList = []
+                  row.details.forEach((detail) => {
+                    if (detail.projectId > 0 && !projectList.includes(detail.projectName)) {
+                      projectList.push(detail.projectName)
+                    }
+                  })
+                  if (projectList.length == 0) {
+                    return ''
+                  }
+                  return projectList.join(', ')
+                }
+                return ''
+              },
+              sortable: true,
+            })
+            this.fixedColumns = tempFixedColumn.concat(this.fixedColumns)
+          } else if (!hasProject && hasProjectColumnIndex >= 0) {
+            this.fixedColumns.splice(hasProjectColumnIndex, 1)
+          }
         })
         .catch((err) => {
           responseError(err)
           this.loading = false
         })
     },
+    onSocketMessage(data) {
+      // reload list
+      this.getPayments({
+        ...pathParamsToPaging(this.$route, this.pagination, true),
+        requestType: this.type,
+        hidePaid: this.hidePaid,
+        userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
+      })
+    },
     onBulkPay() {
       this.detailBulk = true
-      this.getRate({ symbol: 'btc' })
+      this.getBulkBTCRate()
     },
     handlePaid() {
       const txId = this.txId.trim()
@@ -400,18 +564,24 @@ export default {
     prepareToExit: function () {
       this.isExist = true
     },
-    getRate(p) {
+    getBulkBTCRate() {
       this.rateLoading = true
       this.$api
-        .get('/payment/rate', {
-          params: p,
-        })
+        .get('/payment/btc-bulk-rate')
         .then((data) => {
+          //calc total of btc and usd for display on dialog
+          let totalBTC = 0.0
+          let totalUSD = 0.0
           this.selected.forEach((ele) => {
-            ele.expectedAmount = (ele.amount / data.rate).toFixed(8)
+            const exAmount = ele.amount / data.rate
+            ele.expectedAmount = exAmount.toFixed(8)
             ele.convertRate = data.rate
             ele.convertTime = data.convertTime
+            totalBTC += exAmount
+            totalUSD += ele.amount
           })
+          this.totalBulkBTC = totalBTC.toFixed(8)
+          this.totalBulkUSD = totalUSD.toFixed(2)
         })
         .catch((err) => {
           responseError(err)
@@ -429,56 +599,110 @@ export default {
       })
     },
     refreshExchangeRate() {
-      this.getRate({ symbol: 'btc' })
+      this.getBulkBTCRate()
     },
     getScrollHeight() {
       switch (this.selected.length) {
         case 1:
           return 200
         case 2:
-          return 300
+          return 350
+        case 3:
+          return 500
         default:
-          return 400
+          return 600
       }
+    },
+    getDialogWidth() {
+      switch (this.selected.length) {
+        case 1:
+          return 750
+        case 2:
+          return 800
+        case 3:
+          return 850
+        default:
+          return 900
+      }
+    },
+    hidePaidHandler() {
+      this.hidePaid = !this.hidePaid
+      this.$api
+        .put('/user/hide-paid')
+        .then((data) => {
+          let newUser = { ...this.user }
+          newUser.hidePaid = this.hidePaid
+          this.setGlobalUser(newUser)
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    hidePaidFilter(value) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
+      this.getPayments({
+        ...filter,
+        requestType: this.type,
+        hidePaid: value,
+        userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
+      })
+    },
+    setIsBulkPay() {
+      this.isBulkPay = !this.isBulkPay
+    },
+    getClassItem(index) {
+      return index == this.selected.length - 1 ? '' : 'border-bottom'
     },
   },
   watch: {
     isBulkPay(newVal) {
-      const filter = pathParamsToPaging({ query: {} }, this.pagination)
+      const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
       if (newVal) {
         this.getPayments({
           ...filter,
           requestType: 'bulk_btc',
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       } else {
         this.getPayments({
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       }
     },
     $route: {
       immediate: true,
       handler(to) {
+        this.hidePaid = this.user.hidePaid
         if (this.isExist) {
           return
         }
-        const filter = pathParamsToPaging(to, this.pagination)
+        const filter = pathParamsToPaging(to, this.pagination, true)
         this.getPayments({
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       },
     },
     hidePaid(value) {
-      const filter = pathParamsToPaging({ query: {} }, this.pagination)
-      this.getPayments({
-        ...filter,
-        requestType: this.type,
-        hidePaid: value,
-      })
+      this.hidePaidFilter(value)
+    },
+    memberModel: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.getPayments({
+            ...pathParamsToPaging(this.$route, this.pagination, true),
+            requestType: this.type,
+            hidePaid: this.hidePaid,
+            userIds: newVal.map((user) => user.value).join(','), // filter by user
+          })
+        }
+      },
     },
   },
 }

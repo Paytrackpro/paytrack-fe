@@ -12,13 +12,52 @@
           icon="menu"
           class="q-mr-sm"
         />
-        <q-toolbar-title class="row">
-          <p class="site-title col-8 col-sm-3 col-md-1" @click="goHome()">Paytrack.pro</p>
-        </q-toolbar-title>
+        <q-toolbar-title> Paytrack.pro </q-toolbar-title>
         <q-btn dense color="cyan-10" round icon="shopping_cart" class="q-mr-sm" @click="toCartPage()" v-if="!drawer">
           <q-badge color="red" floating>{{ cartCount }}</q-badge>
           <q-tooltip>Go to your cart</q-tooltip>
         </q-btn>
+        <q-btn
+          size="md"
+          label="Start Work"
+          icon="timer"
+          type="button"
+          color="primary"
+          class="q-mr-sm btn btn-animated"
+          v-if="!working"
+          @click="startWorking(false)"
+        />
+        <q-card-section v-if="working">
+          <q-btn
+            v-if="pausing"
+            size="sm"
+            class="timer-btc-icon"
+            flat
+            color="white"
+            icon="play_arrow"
+            @click="resumeTime"
+          >
+            <q-tooltip> Continue </q-tooltip>
+          </q-btn>
+          <q-btn
+            v-if="!pausing"
+            size="sm"
+            class="timer-btc-icon q-mr-xs"
+            flat
+            color="white"
+            icon="pause"
+            @click="pauseTime"
+          >
+            <q-tooltip> Pause </q-tooltip>
+          </q-btn>
+          <q-btn size="sm" class="timer-btc-icon q-mr-xs" flat color="white" icon="stop" @click="stopTime">
+            <q-tooltip> Stop </q-tooltip>
+          </q-btn>
+          <span>{{ timeHour }}</span>
+          <span>{{ timeMin }}</span>
+          :
+          <span>{{ timeSecond }}</span>
+        </q-card-section>
         <q-btn flat no-caps>
           <q-item class="q-pa-none">
             <q-item-section avatar>
@@ -125,10 +164,12 @@
 </template>
 
 <script>
-import role from 'src/consts/role'
-import { mapGetters } from 'vuex'
-import { ref } from 'vue'
 import { useQuasar } from 'quasar'
+import role from 'src/consts/role'
+import { connectSocket, disconnectSocket, isSocketConnected } from 'src/helper/socket.js'
+import { ref } from 'vue'
+import { mapGetters } from 'vuex'
+import { api, axios } from 'boot/axios'
 export default {
   data() {
     return {
@@ -158,6 +199,13 @@ export default {
           separator: false,
           to: '/my-shop',
         },
+        { icon: 'schedule', label: 'Time Log', separator: false, to: '/timelog' },
+        {
+          icon: 'summarize',
+          label: 'Report',
+          separator: false,
+          to: '/report',
+        },
         {
           icon: 'settings',
           label: 'Settings',
@@ -171,11 +219,27 @@ export default {
           role: role.ADMIN,
           to: '/users',
         },
+        {
+          icon: 'contact_page',
+          label: 'System Report',
+          separator: false,
+          role: role.ADMIN,
+          to: '/system-report',
+        },
       ],
+      working: false,
+      pausing: true,
       approvalCount: 0,
       unpaidCount: 0,
       displayAdminSeparator: true,
       cartCount: 0,
+      displayReport: true,
+      totalTimeSeconds: 0,
+      interval: null,
+      timeHour: '',
+      timeMin: '00',
+      timeSecond: '00',
+      runningTimer: {},
     }
   },
   async created() {
@@ -196,6 +260,45 @@ export default {
         return
       })
     this.getCartCount()
+    this.$api
+      .get(`/payment/has-report`)
+      .then((data) => {
+        this.displayReport = data
+      })
+      .catch(() => {
+        return
+      })
+    if (!isSocketConnected()) {
+      connectSocket(`${this.$store.getters['user/getUser'].id}`)
+    }
+    //Get running timer (if have)
+    this.$api
+      .get(`/user/get-running-timer`)
+      .then((data) => {
+        if (!data.exist) {
+          this.working = false
+          return
+        }
+        this.runningTimer = data.runningTimer
+        if (!this.runningTimer) {
+          this.working = false
+          return
+        }
+        this.working = true
+        this.pausing = this.runningTimer.pausing
+        //calculate sum of total of seconds
+        this.totalTimeSeconds = data.totalSeconds
+        if (this.working && this.pausing) {
+          this.displayInitTimer()
+        }
+        this.handlerStartTimer()
+      })
+      .catch(() => {
+        return
+      })
+  },
+  beforeUnmount() {
+    disconnectSocket()
   },
   setup() {
     const $q = useQuasar()
@@ -226,9 +329,13 @@ export default {
       this.$router.push({ path: '/' })
     },
     shouldDisplayRoute(menuItem) {
+      if (menuItem.to == '/report') {
+        return this.displayReport
+      }
       return !menuItem.role || (menuItem.role === role.ADMIN && this.isAdmin)
     },
     logOut() {
+      disconnectSocket()
       this.$store.dispatch('user/logOut')
       this.$router.push({ path: '/login' })
     },
@@ -281,6 +388,127 @@ export default {
       } else {
         this.$router.push({ path: '/pay' })
       }
+    },
+    async startWorking(fromPause) {
+      var self = this
+      //Create user timer
+      if (!fromPause) {
+        this.$api
+          .post(`/user/start_timer`)
+          .then((data) => {
+            this.working = true
+            this.pausing = false
+            self.handlerStartTimer()
+          })
+          .catch(() => {
+            this.$q.notify({
+              type: 'negative',
+              message: `Another timer is running or has an error. Please try again!`,
+            })
+            return
+          })
+      }
+    },
+    handlerStartTimer() {
+      if (!this.interval && !this.pausing) {
+        var self = this
+        this.interval = setInterval(function () {
+          self.totalTimeSeconds += 1
+          var hour = Math.floor(self.totalTimeSeconds / 3600)
+          self.timeHour = ''
+          if (hour > 0) {
+            self.timeHour = self.pad(hour) + ' : '
+          }
+          self.timeMin = self.pad(Math.floor((self.totalTimeSeconds / 60) % 60))
+          self.timeSecond = self.pad(parseInt(self.totalTimeSeconds % 60))
+        }, 1000)
+      }
+    },
+    displayInitTimer() {
+      var hour = Math.floor(this.totalTimeSeconds / 3600)
+      self.timeHour = ''
+      if (hour > 0) {
+        this.timeHour = this.pad(hour) + ' : '
+      }
+      this.timeMin = this.pad(Math.floor((this.totalTimeSeconds / 60) % 60))
+      this.timeSecond = this.pad(parseInt(this.totalTimeSeconds % 60))
+    },
+    pad(val) {
+      return val > 9 ? val : '0' + val
+    },
+    pauseTime() {
+      //handler pausing on backend
+      this.$api
+        .post(`/user/pause_timer`)
+        .then((data) => {
+          if (data.error) {
+            this.$q.notify({
+              type: 'negative',
+              message: data.msg,
+            })
+            return
+          }
+          clearInterval(this.interval)
+          this.interval = null
+          this.pausing = true
+        })
+        .catch(() => {
+          this.$q.notify({
+            type: 'negative',
+            message: `Execution of pause timer failed`,
+          })
+          return
+        })
+    },
+    resumeTime() {
+      this.$api
+        .post(`/user/resume_timer`)
+        .then((data) => {
+          if (data.error) {
+            this.$q.notify({
+              type: 'negative',
+              message: data.msg,
+            })
+            return
+          }
+          this.pausing = false
+          this.handlerStartTimer()
+        })
+        .catch(() => {
+          this.$q.notify({
+            type: 'negative',
+            message: `Resume timer failed`,
+          })
+          return
+        })
+    },
+    stopTime() {
+      this.$api
+        .post(`/user/stop_timer`)
+        .then((data) => {
+          if (data.error) {
+            this.$q.notify({
+              type: 'negative',
+              message: data.msg,
+            })
+            return
+          }
+          this.totalTimeSeconds = 0
+          clearInterval(this.interval)
+          this.timeMin = '00'
+          this.timeSecond = '00'
+          this.timeHour = ''
+          this.interval = null
+          this.working = false
+          this.pausing = false
+        })
+        .catch(() => {
+          this.$q.notify({
+            type: 'negative',
+            message: `Stop timer failed`,
+          })
+          return
+        })
     },
   },
   watch: {

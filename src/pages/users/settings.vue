@@ -7,6 +7,7 @@
         <q-tab label="Invoice" icon="receipt_long" name="invoice" no-caps class="tab-item" />
         <q-tab label="Security" icon="security" name="security" no-caps class="tab-item" />
         <q-tab label="Approvals" icon="verified_user" name="approval" no-caps class="tab-item" />
+        <q-tab label="Projects" icon="fact_check" name="project" no-caps class="tab-item" />
       </q-tabs>
       <q-separator />
     </q-card-section>
@@ -37,6 +38,9 @@
         <q-tab-panel class="q-px-none" name="approval">
           <approval-method v-model="user" />
         </q-tab-panel>
+        <q-tab-panel class="q-px-none" name="project">
+          <project-form v-model="user" />
+        </q-tab-panel>
       </q-tab-panels>
     </q-card-section>
   </q-card>
@@ -44,7 +48,14 @@
 
 <script>
 import { mapActions } from 'vuex'
-import { ProfileForm, PaymentMethods, SecurityForm, ApprovalMethod, InvoiceForm } from 'components/settings'
+import {
+  ProfileForm,
+  PaymentMethods,
+  SecurityForm,
+  ApprovalMethod,
+  InvoiceForm,
+  ProjectForm,
+} from 'components/settings'
 export default {
   name: 'userProfile',
   components: {
@@ -53,6 +64,7 @@ export default {
     SecurityForm,
     ApprovalMethod,
     InvoiceForm,
+    ProjectForm,
   },
   data() {
     return {

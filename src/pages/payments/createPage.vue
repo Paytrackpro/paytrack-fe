@@ -1,5 +1,5 @@
 <template>
-  <q-card flat class="q-pa-md content-container">
+  <q-card flat class="content-container">
     <payment-form :payment="payment" :payment-type="paymentType" :user="user" @saved="saved" @cancel="cancel" />
   </q-card>
 </template>
@@ -33,6 +33,8 @@ export default {
         txId: '',
         paymentSettings: [],
         details: [],
+        showDateOnInvoiceLine: false,
+        showProjectOnInvoice: true,
       },
     }
   },
@@ -60,6 +62,7 @@ export default {
       immediate: true,
       handler(user) {
         this.payment.paymentSettings = user.paymentSettings || []
+        this.payment.showDateOnInvoiceLine = user.showDateOnInvoiceLine
       },
     },
     paymentType: {

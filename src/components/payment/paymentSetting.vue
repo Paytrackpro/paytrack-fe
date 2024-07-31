@@ -1,7 +1,7 @@
 <template>
   <div class="row q-mb-md q-col-gutter-sm">
     <div v-if="label" class="col-12">
-      <p class="q-mt-none q-mb-xs text-weight-medium">{{ label }}</p>
+      <p class="q-mt-none q-mb-xs">{{ label }}</p>
     </div>
     <div v-if="!readonly" class="col-12">
       <q-field

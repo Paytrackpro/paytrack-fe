@@ -2,7 +2,6 @@
   <q-form @submit="submit">
     <div class="row"><q-checkbox label="Show Draft for Recipient" v-model="user.showDraftForRecipient" /></div>
     <div class="row"><q-checkbox label="Show Date on Invoice Line" v-model="user.showDateOnInvoiceLine" /></div>
-    <div class="row"><q-checkbox label="Show Monthly Report" v-model="user.showMonthlyReport" /></div>
     <div class="q-mt-lg">
       <q-btn label="Save" class="q-mr-xs btn-animated btn" :disable="loading" type="submit" color="primary" />
     </div>

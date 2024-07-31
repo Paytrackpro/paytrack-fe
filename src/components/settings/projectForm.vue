@@ -1,0 +1,445 @@
+<template>
+  <q-form @submit="submit">
+    <div class="row">
+      <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
+        <div class="q-table__title title-case">Add Project</div>
+        <div class="row q-mt-sm q-col-gutter-md profile-padding">
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Name</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              @blur="checkValidProjectName"
+              :error="projectNameError"
+              :error-message="project.error"
+              @focus="projectNameFocus = true"
+              hide-bottom-space
+              v-model="project.name"
+              placeholder="Project Name"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members Select</p>
+            <q-select
+              v-model="memberModel"
+              use-input
+              use-chips
+              multiple
+              outlined
+              input-debounce="0"
+              @new-value="createValue"
+              :options="memberFilterOptions"
+              @filter="filterFn"
+              @update:model-value="modelValueChange()"
+            />
+          </div>
+        </div>
+        <div class="row q-col-gutter-md profile-padding">
+          <div class="col-12">
+            <div class="row justify-between">
+              <div></div>
+              <div>
+                <q-btn
+                  :label="isEdit ? 'Update Project' : 'Create Project'"
+                  class="q-mr-xs q-mt-lg"
+                  :disable="projectNameError"
+                  style="height: 40px"
+                  type="submit"
+                  color="primary"
+                />
+                <q-btn
+                  v-if="isEdit"
+                  label="Cancel Update"
+                  class="q-ml-xs q-mt-lg"
+                  style="height: 40px"
+                  type="button"
+                  color="white"
+                  text-color="black"
+                  @click="cancelEdit()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-card>
+    </div>
+    <div class="q-mt-md">
+      <q-table
+        title="Project List"
+        :loading="loading"
+        :rows="rows"
+        :columns="columns"
+        row-key="name"
+        class="shadow-6"
+        v-model:pagination="pagination"
+        :hide-pagination="pagination.rowsNumber < 10"
+        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+        flat
+        separator="none"
+        @row-click="(_, row) => editProject(row.projectId)"
+      >
+        <template v-slot:body-cell-action="props">
+          <q-td :props="props">
+            <q-btn
+              :props="props"
+              dense
+              round
+              flat
+              color="grey"
+              @click="setDeleteProject(props.row.projectId)"
+              icon="delete"
+            ></q-btn>
+          </q-td>
+        </template>
+      </q-table>
+    </div>
+    <q-dialog v-model="deleteConfirm" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="warning" color="primary" text-color="white" size="md" />
+          <span class="q-ml-sm">Are you sure to delete the project?</span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteProject()" />
+          <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-form>
+</template>
+
+<script>
+import { defaultPaging } from 'src/helper/paging'
+import { responseError } from 'src/helper/error'
+import { ref } from 'vue'
+import {
+  DESTINATION_CHECK_NONE,
+  DESTINATION_CHECK_DONE,
+  DESTINATION_CHECK_CHECKING,
+  DESTINATION_CHECK_FAIL,
+} from 'src/consts/common'
+
+let memberStringOptions = []
+
+export default {
+  setup() {
+    const memberModel = ref(null)
+    const memberFilterOptions = ref(memberStringOptions)
+
+    return {
+      memberModel,
+      memberFilterOptions,
+
+      createValue(val, done) {
+        if (val.length > 0) {
+          const modelValue = (memberModel.value || []).slice()
+
+          val
+            .split(/[,;|]+/)
+            .map((v) => v.trim())
+            .filter((v) => v.length > 0)
+            .forEach((v) => {
+              if (memberStringOptions.includes(v) === false) {
+                memberStringOptions.push(v)
+              }
+              if (modelValue.includes(v) === false) {
+                modelValue.push(v)
+              }
+            })
+          done(null)
+          memberModel.value = modelValue
+        }
+      },
+
+      filterFn(val, update) {
+        update(() => {
+          if (val === '') {
+            memberFilterOptions.value = memberStringOptions
+          } else {
+            const needle = val.toLowerCase()
+            memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
+          }
+        })
+      },
+    }
+  },
+  data() {
+    return {
+      user: {},
+      project: {
+        name: '',
+        members: [],
+        error: '',
+        status: DESTINATION_CHECK_NONE,
+      },
+      projectNameFocus: false,
+      loading: false,
+      pagination: {
+        ...defaultPaging,
+      },
+      columns: [
+        {
+          name: 'projectName',
+          required: true,
+          label: 'Project Name',
+          align: 'center',
+          field: (row) => {
+            return row.projectName
+          },
+          format: (val) => {
+            return val
+          },
+        },
+        {
+          name: 'members',
+          align: 'center',
+          label: 'Members',
+          field: (row) => {
+            if (row.members && row.members.length > 0) {
+              return row.members.map((item) => item.userName).join(',')
+            } else {
+              return ''
+            }
+          },
+        },
+        {
+          name: 'action',
+          align: 'center',
+          label: 'Action',
+          field: '',
+        },
+      ],
+      rows: [],
+      userSelection: [],
+      currentEditProject: {},
+      isEdit: false,
+      deleteConfirm: false,
+      deleteId: 0,
+    }
+  },
+  name: 'projectForm',
+  props: {
+    modelValue: Object,
+  },
+  emits: ['update:modelValue'],
+  watch: {
+    modelValue(val) {
+      this.user = { ...val }
+    },
+  },
+  methods: {
+    modelValueChange() {
+      this.project.members = []
+      if (this.memberModel == null) {
+        return
+      }
+      let newSelectedUsers = String(this.memberModel)
+      this.project.members = []
+      newSelectedUsers
+        .split(/[,;|]+/)
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0)
+        .forEach((v) => {
+          let userInfo = this.getUserInfo(v)
+          if (userInfo == null) {
+            return
+          }
+          this.project.members.push({
+            MemberId: userInfo.id,
+            UserName: userInfo.userName,
+            DisplayName: userInfo.displayName,
+            Role: 1,
+          })
+        })
+    },
+    getUserInfo(userName) {
+      let result = null
+      this.userSelection.forEach((userInfo) => {
+        if (userInfo.userName == userName) {
+          result = userInfo
+          return
+        }
+      })
+      return result
+    },
+    async submit() {
+      if (!this.checkDestinationDone()) {
+        if (this.projectNameFocus) {
+          this.checkValidProjectNameSubmit()
+        }
+        return
+      }
+      this.submitHandler()
+    },
+    submitHandler() {
+      let params = { ProjectName: this.project.name, Members: this.project.members }
+      if (this.isEdit) {
+        params.ProjectId = this.currentEditProject.projectId
+        this.$api
+          .put('project/edit', params)
+          .then((res) => {
+            this.resetProject()
+            this.getList()
+            this.$q.notify({
+              type: 'positive',
+              message: 'Project has been updated',
+              position: 'bottom',
+            })
+          })
+          .catch((err) => {
+            responseError(err)
+          })
+      } else {
+        this.$api
+          .post('project/create', params)
+          .then((res) => {
+            this.resetProject()
+            this.getList()
+            this.$q.notify({
+              type: 'positive',
+              message: 'Project has been created',
+              position: 'bottom',
+            })
+          })
+          .catch((err) => {
+            responseError(err)
+          })
+      }
+    },
+    resetProject() {
+      this.project = {
+        name: '',
+        members: [],
+        status: DESTINATION_CHECK_DONE,
+        error: '',
+      }
+      this.memberModel = ref(null)
+      this.isEdit = false
+    },
+    checkDestinationDone: function () {
+      return !this.projectNameFocus && this.project.status === DESTINATION_CHECK_DONE
+    },
+    getList() {
+      this.loading = true
+      this.$api
+        .get('/project/get-list', {})
+        .then((res) => {
+          this.loading = false
+          this.rows = res
+          this.pagination.rowsNumber = res.length
+        })
+        .catch((err) => {
+          responseError(err)
+          this.loading = false
+        })
+    },
+    initUserList() {
+      this.$api
+        .get('/user/get-user-list', {})
+        .then((res) => {
+          this.userSelection = res
+          memberStringOptions = []
+          this.userSelection.forEach((userInfo) => {
+            memberStringOptions.push(userInfo.userName)
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+          this.loading = false
+        })
+    },
+    handlerValidProjectName(isSubmit) {
+      if (this.project.name == '') {
+        this.project.status = DESTINATION_CHECK_FAIL
+        this.project.error = 'Project name is required'
+        return
+      }
+      this.project.status = DESTINATION_CHECK_CHECKING
+      let isExist = false
+      if (!this.isEdit || (this.isEdit && this.currentEditProject.projectName != this.project.name)) {
+        this.rows.forEach((tmpProject) => {
+          if (tmpProject.projectName == this.project.name.trim()) {
+            isExist = true
+            return
+          }
+        })
+      }
+      if (isExist) {
+        this.project.status = DESTINATION_CHECK_FAIL
+        this.project.error = 'Project name already exists'
+      } else {
+        this.project.status = DESTINATION_CHECK_DONE
+        if (isSubmit) {
+          this.submitHandler()
+        }
+      }
+    },
+    checkValidProjectName() {
+      this.handlerValidProjectName(false)
+    },
+    checkValidProjectNameSubmit() {
+      this.handlerValidProjectName(true)
+    },
+    editProject(projectId) {
+      this.rows.forEach((tmpProject) => {
+        if (tmpProject.projectId == projectId) {
+          this.currentEditProject = tmpProject
+          this.project = {
+            name: tmpProject.projectName,
+            members: tmpProject.members,
+            status: DESTINATION_CHECK_DONE,
+            error: '',
+          }
+          this.isEdit = true
+          let memberArr = []
+          if (this.project.members) {
+            this.project.members.forEach((member) => {
+              memberArr.push(member.userName)
+            })
+          }
+          this.memberModel = ref(memberArr)
+          return
+        }
+      })
+    },
+    deleteProject() {
+      this.$api
+        .delete(`/project/delete/${this.deleteId}`)
+        .then(() => {
+          this.$q.notify({
+            message: 'Project has been deleted',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.getList()
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    setDeleteProject(projectId) {
+      this.deleteConfirm = true
+      this.deleteId = projectId
+    },
+    cancelEdit() {
+      this.isEdit = false
+      this.resetProject()
+    },
+  },
+
+  computed: {
+    projectNameError: function () {
+      return this.project.status === DESTINATION_CHECK_FAIL
+    },
+  },
+  created() {
+    this.getList()
+    this.user = { ...this.modelValue }
+    this.initUserList()
+  },
+}
+</script>
+
+<style scoped></style>
