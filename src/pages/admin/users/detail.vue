@@ -19,6 +19,7 @@
                 v-model="userName"
                 :placeholder="'Username'"
                 lazyRules
+                :readonly="true"
                 :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
               />
             </div>
