@@ -23,6 +23,15 @@
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
+            v-if="processable && !isRejectedStatus"
+            label="Pay With BTCPay"
+            type="button"
+            color="primary"
+            :disable="isDraftStatus"
+            @click="showPayDialog()"
+            class="q-mr-sm btn btn-animated"
+          />
+          <q-btn
             v-if="isUploadDisplay"
             label="Upload"
             type="button"

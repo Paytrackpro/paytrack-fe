@@ -1,5 +1,5 @@
 <template>
-  <div class="row q-mb-md q-col-gutter-sm">
+  <div class="row q-col-gutter-sm">
     <div v-if="label" class="col-12">
       <p class="q-mt-none q-mb-xs">{{ label }}</p>
     </div>
