@@ -17,17 +17,20 @@
       </div>
     </div>
     <div class="row q-mb-md">
-      <q-toggle v-model="useBtcpay" @update:model-value="onUseBtcPayUpdate" color="primary" label="Use BTCPay" />
-      <input
-        type="text"
-        ref="preventToggleEnterEvt"
-        v-bind:style="{
-          maxWidth: '0px',
-          maxHeight: '0px',
-          opacity: 0,
-          position: 'absolute',
-        }"
-      />
+      <div>
+        <p class="text-weight-medium">Settings for Shop</p>
+        <q-toggle v-model="useBtcpay" @update:model-value="onUseBtcPayUpdate" color="primary" label="Use BTCPay" />
+        <input
+          type="text"
+          ref="preventToggleEnterEvt"
+          v-bind:style="{
+            maxWidth: '0px',
+            maxHeight: '0px',
+            opacity: 0,
+            position: 'absolute',
+          }"
+        />
+      </div>
     </div>
     <div>
       <q-btn label="Save" class="q-mr-xs btn-animated btn" :disable="loading" type="submit" color="primary" />

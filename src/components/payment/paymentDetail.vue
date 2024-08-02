@@ -26,9 +26,9 @@
             v-if="processable && !isRejectedStatus"
             label="Pay With BTCPay"
             type="button"
-            color="primary"
+            color="secondary"
             :disable="isDraftStatus"
-            @click="showPayDialog()"
+            @click="prepareForBtcpay()"
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
@@ -890,6 +890,20 @@ export default {
       //create receipt upload handler
       this.payment.receiptImg = this.imageNewName
       this.update()
+    },
+    prepareForBtcpay() {
+      //create invoice on btcpay
+      this.$api
+        .post('/btcpay/create-invoice', {
+          id: this.payment.id,
+        })
+        .then((data) => {
+          console.log(JSON.stringify(data))
+          window.btcpay.showInvoice(data.invoiceID)
+        })
+        .catch((err) => {
+          responseError(err)
+        })
     },
     unsentInvoice() {
       this.paymentStatus = 'draft'
