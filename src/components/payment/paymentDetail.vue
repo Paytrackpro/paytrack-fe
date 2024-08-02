@@ -27,6 +27,7 @@
             label="Pay With BTCPay"
             type="button"
             color="secondary"
+            v-model:loading="payingBTCpay"
             :disable="isDraftStatus"
             @click="prepareForBtcpay()"
             class="q-mr-sm btn btn-animated"
@@ -155,11 +156,28 @@
         <div class="col-12 col-sm-6 col-lg-4 q-py-xs q-my-xs field-shadow">
           <div class="q-mb-xs row" style="align-items: center" v-if="!isApprover && isPaidStatus">
             <span class="paid-area-label">Means:</span>
-            <q-chip class="sm-chip q-ml-none" square text-color="white" :color="coinColor(payment.paymentMethod)">
+            <q-chip
+              class="sm-chip q-ml-none"
+              square
+              text-color="white"
+              :color="coinColor(payment.paymentMethod)"
+              v-if="isPaidByPaymentsSettings"
+            >
               {{ selectedCoin(payment.paymentMethod).label }}
             </q-chip>
+            <q-chip class="sm-chip q-ml-none" square text-color="white" color="green-10" v-if="isPaidByBTCPay"
+              >BTCPay</q-chip
+            >
           </div>
-          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus && isPaidByBTCPay">
+            <span class="paid-area-label">Invoice ID:</span>
+            <p class="paid-area-value">{{ payment.btcPayInvoiceId }}</p>
+          </div>
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus && isPaidByBTCPay">
+            <span class="paid-area-label">Reference:</span>
+            <a class="paid-area-value custom-link" target="_blank" :href="getCheckoutLink">Checkout Link</a>
+          </div>
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus && isPaidByPaymentsSettings">
             <span class="paid-area-label">Address:</span>
             <p class="paid-area-value">{{ payment.paymentAddress }}</p>
           </div>
@@ -173,20 +191,20 @@
             </q-field>
           </div>
           <PaymentRateInput
-            v-if="isShowExchangeRate"
+            v-if="isShowExchangeRate && isPaidByPaymentsSettings"
             :readonly="true"
             ref="rateInput"
             v-model="payment"
             v-model:loading="fetchingRate"
             @update:modelValue="updateLocal"
           />
-          <div class="q-mb-xs row" v-if="isShowExchangeRate">
+          <div class="q-mb-xs row" v-if="isShowExchangeRate && isPaidByPaymentsSettings">
             <span class="paid-area-label">Amount:</span>
             <span class="paid-area-value"
               >{{ payment.expectedAmount }} {{ (payment.paymentMethod || '').toUpperCase() }}</span
             >
           </div>
-          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus && isPaidByPaymentsSettings">
             <span class="paid-area-label">TxId:</span>
             <p class="paid-area-value">{{ payment.txId }}</p>
           </div>
@@ -528,6 +546,7 @@ export default {
       methods: [],
       expanded: false,
       fetchingRate: false,
+      payingBTCpay: false,
       paying: false,
       payment: {},
       paymentRejectDialog: false,
@@ -545,6 +564,7 @@ export default {
       totalHours: 0.0,
       exchangeOption: [],
       exchange: 'binance',
+      invoicePaid: false,
     }
   },
   props: {
@@ -891,15 +911,67 @@ export default {
       this.payment.receiptImg = this.imageNewName
       this.update()
     },
+    isObject(obj) {
+      return Object.prototype.toString.call(obj) === '[object Object]'
+    },
     prepareForBtcpay() {
+      this.invoicePaid = false
+      this.payingBTCpay = true
       //create invoice on btcpay
       this.$api
         .post('/btcpay/create-invoice', {
           id: this.payment.id,
         })
         .then((data) => {
-          console.log(JSON.stringify(data))
+          const _this = this
           window.btcpay.showInvoice(data.invoiceID)
+          window.btcpay.onModalReceiveMessage(function (event) {
+            if (_this.isObject(event.data)) {
+              if (event.data.status) {
+                switch (event.data.status) {
+                  case 'complete':
+                  case 'paid':
+                    _this.invoicePaid = true
+                    //mark paid of invoice
+                    _this.markPaidForBtcpayInvoice()
+                    break
+                  case 'expired':
+                    window.btcpay.hideFrame()
+                    // Show some error to the user.
+                    break
+                }
+              }
+            } else {
+              // handle event.data "loaded" "closed"
+              if (event.data === 'close') {
+                if (this.invoicePaid) {
+                  _this.markPaidForBtcpayInvoice()
+                }
+                // Show some error to the user, user closed the modal by clicking the X.
+              }
+            }
+          })
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    markPaidForBtcpayInvoice() {
+      this.$api
+        .post('/btcpay/mark-payment-paid', {
+          id: this.payment.id,
+        })
+        .then((data) => {
+          this.paying = false
+          this.$emit('update:modelValue', data)
+          this.$emit('update:processing', false)
+          this.$q.notify({
+            message: 'Request marked as paid',
+            color: 'positive',
+            icon: 'check',
+          })
+          this.$emit('updateUnpaidCount', this.unpaidCount - 1)
+          this.payingBTCpay = false
         })
         .catch((err) => {
           responseError(err)
@@ -1134,6 +1206,9 @@ export default {
       }
       return this.payment.details.length > 0
     },
+    getCheckoutLink() {
+      return this.payment.checkoutLink ? this.payment.checkoutLink : '#'
+    },
     isReceiver() {
       return this.user.id == this.payment.receiverId
     },
@@ -1146,6 +1221,12 @@ export default {
     },
     isPaidStatus() {
       return this.payment.status == 'paid'
+    },
+    isPaidByPaymentsSettings() {
+      return this.payment.paidBy == 0
+    },
+    isPaidByBTCPay() {
+      return this.payment.paidBy == 1
     },
     isRejectedStatus() {
       return this.payment.status == 'rejected'

@@ -57,24 +57,6 @@ export default {
     commit('setUser', newUser)
   },
 
-  async updateUseBtcpay({ commit }, useBTCPay) {
-    return api
-      .put('/user/use-btcpay', { useBtcPay: useBTCPay })
-      .then((newUser) => {
-        Notify.create({
-          message: 'Updated use BTCPay flag successfully',
-          color: 'positive',
-          icon: 'done',
-        })
-        commit('setUser', newUser)
-        return newUser
-      })
-      .catch((err) => {
-        responseError(err)
-        return false
-      })
-  },
-
   async updateUser({ commit }, userData) {
     return api
       .put('/user/info', userData)

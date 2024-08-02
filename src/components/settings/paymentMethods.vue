@@ -32,6 +32,34 @@
         />
       </div>
     </div>
+    <div class="row w-50 q-mb-md q-col-gutter-md profile-padding" v-if="useBtcpay">
+      <div class="col-12 q-pt-none col-sm-6">
+        <p class="q-mt-none q-mb-xs text-weight-medium col-4">BTCPay API Key</p>
+        <q-input
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
+          v-model="btcKey"
+          placeholder="API Key"
+          :rules="[(val) => !!val || 'Required field']"
+        />
+      </div>
+      <div class="col-12 q-pt-none col-sm-6">
+        <p class="q-mt-none q-mb-xs text-weight-medium col-4">Store ID</p>
+        <q-input
+          outlined
+          dense
+          lazy-rules
+          stack-label
+          hide-bottom-space
+          v-model="storeId"
+          placeholder="Store ID"
+          :rules="[(val) => !!val || 'Required field']"
+        />
+      </div>
+    </div>
     <div>
       <q-btn label="Save" class="q-mr-xs btn-animated btn" :disable="loading" type="submit" color="primary" />
     </div>
@@ -62,6 +90,8 @@ export default {
           'No more than 2 digits after the decimal point',
       ],
       useBtcpay: false,
+      storeId: '',
+      btcKey: '',
     }
   },
   emits: ['update:modelValue'],
@@ -81,20 +111,36 @@ export default {
       handler(newVal) {
         this.user = { ...newVal }
         this.useBtcpay = this.user.useBtcPay ? this.user.useBtcPay : false
+        this.storeId = this.user.storeId ? this.user.storeId : ''
+        this.btcKey = this.user.btcKey ? this.user.btcKey : ''
+      },
+    },
+    storeId: {
+      immediate: true,
+      handler(newVal) {
+        this.user.storeId = newVal
+      },
+    },
+    btcKey: {
+      immediate: true,
+      handler(newVal) {
+        this.user.btcKey = newVal
       },
     },
   },
   methods: {
     ...mapActions({
       updateUser: 'user/updateUser',
-      updateUseBtcpay: 'user/updateUseBtcpay',
     }),
     onUseBtcPayUpdate(value) {
-      this.updateUseBtcpay(value)
       this.user.useBtcPay = value
     },
     async submit() {
       this.loading = true
+      if (!this.user.useBtcPay) {
+        this.user.storeId = ''
+        this.user.btcKey = ''
+      }
       const newUser = await this.updateUser(this.user)
       if (newUser) {
         this.$emit('update:modelValue', newUser)
