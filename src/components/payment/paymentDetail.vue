@@ -305,6 +305,12 @@
           <div class="col-12">
             <div class="row">
               <div class="col-6 field-shadow q-py-sm">
+                <p class="q-mb-xs" v-if="!isShowInvoice">
+                  <span>Amount (USD):&nbsp;</span>
+                  <span class="fw-600"
+                    >${{ (payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
+                  >
+                </p>
                 <b class="text-weight-medium">Exchange</b>
                 <q-select
                   class="row q-mt-sm"
