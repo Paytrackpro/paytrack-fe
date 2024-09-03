@@ -1,6 +1,56 @@
 <template>
   <q-form @submit="submit">
     <div class="row">
+      <q-btn
+        :label="'Create Project'"
+        class="q-mr-xs q-mt-lg"
+        style="height: 40px"
+        @click="showCreateDialog()"
+        color="primary"
+      />
+    </div>
+    <div class="q-mt-md">
+      <q-table
+        title="Project List"
+        :loading="loading"
+        :rows="rows"
+        :columns="columns"
+        row-key="name"
+        class="shadow-6"
+        v-model:pagination="pagination"
+        :hide-pagination="pagination.rowsNumber < 10"
+        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
+        flat
+        separator="none"
+        @row-click="(_, row) => editProject(row.projectId)"
+      >
+        <template v-slot:body-cell-action="props">
+          <q-td :props="props">
+            <q-btn :props="props" dense round flat color="grey" icon="sync"></q-btn>
+            <q-btn
+              :props="props"
+              dense
+              round
+              flat
+              color="grey"
+              @click="setEditProject(props.row.projectId)"
+              icon="edit"
+            ></q-btn>
+            <q-btn
+              :props="props"
+              dense
+              round
+              flat
+              color="grey"
+              @click="setDeleteProject(props.row.projectId)"
+              icon="delete"
+            ></q-btn>
+          </q-td>
+        </template>
+      </q-table>
+    </div>
+
+    <q-dialog v-model="createDialog" persistent>
       <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
         <div class="q-table__title title-case">Add Project</div>
         <div class="row q-mt-sm q-col-gutter-md profile-padding">
@@ -35,6 +85,130 @@
               @update:model-value="modelValueChange()"
             />
           </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers:</p>
+            <q-select
+              v-model="memberApproveModel"
+              use-input
+              use-chips
+              multiple
+              outlined
+              input-debounce="0"
+              @new-value="createValue"
+              :options="memberFilterOptions"
+              @filter="filterFn"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description:</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              hide-bottom-space
+              v-model="project.description"
+              placeholder="Description"
+              type="textarea"
+            />
+          </div>
+        </div>
+        <div class="row q-col-gutter-md profile-padding">
+          <div class="col-12">
+            <div class="row justify-between">
+              <div></div>
+              <div>
+                <q-btn
+                  :label="isEdit ? 'Update Project' : 'Create Project'"
+                  class="q-mr-xs q-mt-lg"
+                  :disable="projectNameError"
+                  style="height: 40px"
+                  type="submit"
+                  color="primary"
+                />
+                <q-btn
+                  label="Cancel"
+                  class="q-ml-xs q-mt-lg"
+                  style="height: 40px"
+                  type="button"
+                  color="white"
+                  text-color="black"
+                  @click="hideCreateDialog()"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </q-card>
+    </q-dialog>
+
+    <q-dialog v-model="updateDialog" persistent>
+      <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
+        <div class="q-table__title title-case">Add Project</div>
+        <div class="row q-mt-sm q-col-gutter-md profile-padding">
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Name</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              @blur="checkValidProjectName"
+              :error="projectNameError"
+              :error-message="project.error"
+              @focus="projectNameFocus = true"
+              hide-bottom-space
+              v-model="project.name"
+              placeholder="Project Name"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members Select</p>
+            <q-select
+              v-model="memberModel"
+              use-input
+              use-chips
+              multiple
+              outlined
+              input-debounce="0"
+              @new-value="createValue"
+              :options="memberFilterOptions"
+              @filter="filterFn"
+              @update:model-value="modelValueChange()"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers:</p>
+            <q-select
+              v-model="memberModel"
+              use-input
+              use-chips
+              multiple
+              outlined
+              input-debounce="0"
+              @new-value="createValue"
+              :options="memberFilterOptions"
+              @filter="filterFn"
+              @update:model-value="modelValueChange()"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description:</p>
+            <q-input
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              @blur="checkValidProjectName"
+              :error="projectNameError"
+              :error-message="project.error"
+              @focus="projectNameFocus = true"
+              hide-bottom-space
+              v-model="project.name"
+              placeholder="Description"
+              type="textarea"
+            />
+          </div>
         </div>
         <div class="row q-col-gutter-md profile-padding">
           <div class="col-12">
@@ -64,37 +238,7 @@
           </div>
         </div>
       </q-card>
-    </div>
-    <div class="q-mt-md">
-      <q-table
-        title="Project List"
-        :loading="loading"
-        :rows="rows"
-        :columns="columns"
-        row-key="name"
-        class="shadow-6"
-        v-model:pagination="pagination"
-        :hide-pagination="pagination.rowsNumber < 10"
-        :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
-        flat
-        separator="none"
-        @row-click="(_, row) => editProject(row.projectId)"
-      >
-        <template v-slot:body-cell-action="props">
-          <q-td :props="props">
-            <q-btn
-              :props="props"
-              dense
-              round
-              flat
-              color="grey"
-              @click="setDeleteProject(props.row.projectId)"
-              icon="delete"
-            ></q-btn>
-          </q-td>
-        </template>
-      </q-table>
-    </div>
+    </q-dialog>
     <q-dialog v-model="deleteConfirm" persistent>
       <q-card>
         <q-card-section class="row items-center">
@@ -126,6 +270,7 @@ let memberStringOptions = []
 export default {
   setup() {
     const memberModel = ref(null)
+    const memberApproveModel = ref(null)
     const memberFilterOptions = ref(memberStringOptions)
 
     return {
@@ -170,6 +315,7 @@ export default {
       user: {},
       project: {
         name: '',
+        description: '',
         members: [],
         error: '',
         status: DESTINATION_CHECK_NONE,
@@ -216,6 +362,8 @@ export default {
       currentEditProject: {},
       isEdit: false,
       deleteConfirm: false,
+      createDialog: false,
+      updateDialog: false,
       deleteId: 0,
     }
   },
@@ -419,13 +567,26 @@ export default {
           responseError(err)
         })
     },
+    setEditProject(projectId) {
+      this.updateDialog = true
+      this.updateId = projectId
+    },
     setDeleteProject(projectId) {
       this.deleteConfirm = true
       this.deleteId = projectId
     },
+    showCreateDialog() {
+      this.createDialog = true
+    },
+    hideCreateDialog() {
+      this.createDialog = false
+    },
     cancelEdit() {
       this.isEdit = false
       this.resetProject()
+      this.deleteConfirm = false
+      this.createDialog = false
+      this.updateDialog = false
     },
   },
 
