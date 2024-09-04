@@ -6,7 +6,7 @@
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
           <payment-status
-            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus)"
+            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus || !isApprovedPayment())"
             :paymentModel="payment"
             class="q-ml-md"
             :isShowIcon="true"
@@ -14,7 +14,7 @@
         </div>
         <div class="row justify-end">
           <q-btn
-            v-if="processable && !isRejectedStatus"
+            v-if="processable && !isRejectedStatus && isApprovedPayment()"
             label="Pay"
             type="button"
             color="primary"
@@ -79,7 +79,7 @@
         </div>
       </div>
       <q-select
-        v-if="isReceiver && !isPaidStatus && !isDraftStatus"
+        v-if="isReceiver && isApprovedPayment() && !isPaidStatus && !isDraftStatus"
         v-model="paymentStatus"
         :options="statusOption"
         dense
@@ -834,6 +834,17 @@ export default {
         default:
           return ''
       }
+    },
+    isApprovedPayment() {
+      let isAllApproved = true
+      if (this.payment.approvers !== null && this.payment.approvers.length > 0) {
+        this.payment.approvers.forEach((el) => {
+          if (!el.isApproved) {
+            isAllApproved = false
+          }
+        })
+      }
+      return isAllApproved
     },
   },
   watch: {
