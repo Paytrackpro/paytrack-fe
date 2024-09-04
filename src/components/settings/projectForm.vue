@@ -4,9 +4,14 @@
       <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
         <div class="q-table__title title-case q-pt-sm">{{ this.isEdit ? 'Edit Project' : 'Add Project' }}</div>
         <div class="row q-mt-sm q-col-gutter-md profile-padding">
+          <div class="col-12 col-sm-6" v-if="!isCreator">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Owner</p>
+            <p>{{ project.creatorName }}</p>
+          </div>
           <div class="col-12 col-sm-6">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Name</p>
             <q-input
+              v-if="isCreator"
               outlined
               dense
               lazy-rules
@@ -19,9 +24,10 @@
               v-model="project.name"
               placeholder="Project Name"
             />
+            <p v-if="!isCreator">{{ project.name }}</p>
           </div>
           <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members Select</p>
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">{{ isCreator ? 'Members Select' : 'Members' }}</p>
             <q-select
               v-model="memberModel"
               v-if="isCreator"
@@ -37,7 +43,7 @@
             />
             <p v-if="!isCreator">{{ membersDisplay }}</p>
           </div>
-          <div class="col-12 col-sm-6">
+          <div class="col-12 col-sm-6" v-if="!isApproverEmpty">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers</p>
             <q-select
               v-model="approverModel"
@@ -57,6 +63,7 @@
           <div class="col-12 col-sm-6">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description</p>
             <q-input
+              v-if="isCreator"
               v-model="project.description"
               dense
               outlined
@@ -66,6 +73,7 @@
               hide-bottom-space
               type="textarea"
             />
+            <p v-if="!isCreator">{{ project.description }}</p>
           </div>
         </div>
         <div class="row q-col-gutter-md profile-padding">
@@ -74,6 +82,7 @@
               <div></div>
               <div>
                 <q-btn
+                  v-if="isCreator"
                   :label="isEdit ? 'Update Project' : 'Create Project'"
                   class="q-mr-xs q-mt-lg"
                   :disable="projectNameError"
@@ -83,7 +92,7 @@
                 />
                 <q-btn
                   v-if="isEdit"
-                  label="Cancel Update"
+                  :label="isCreator ? 'Cancel Update' : 'Cancel'"
                   class="q-ml-xs q-mt-lg"
                   style="height: 40px"
                   type="button"
@@ -116,6 +125,7 @@
           <q-td :props="props">
             <q-btn
               :props="props"
+              v-if="isCreatorUser(props.row)"
               dense
               round
               flat
@@ -240,6 +250,7 @@ export default {
         approvers: [],
         error: '',
         description: '',
+        creatorName: '',
         status: DESTINATION_CHECK_NONE,
       },
       projectNameFocus: false,
@@ -309,7 +320,6 @@ export default {
       isEdit: false,
       deleteConfirm: false,
       deleteId: 0,
-      isCreator: true,
     }
   },
   name: 'projectForm',
@@ -436,6 +446,7 @@ export default {
         members: [],
         approvers: [],
         description: '',
+        creatorName: '',
         status: DESTINATION_CHECK_DONE,
         error: '',
       }
@@ -520,6 +531,7 @@ export default {
             members: tmpProject.members,
             approvers: tmpProject.approvers,
             description: tmpProject.description,
+            creatorName: tmpProject.creatorName,
             status: DESTINATION_CHECK_DONE,
             error: '',
           }
@@ -567,6 +579,9 @@ export default {
       this.isEdit = false
       this.resetProject()
     },
+    isCreatorUser(project) {
+      return this.user.id == project.creatorId
+    },
   },
 
   computed: {
@@ -577,20 +592,26 @@ export default {
       return this.project.status === DESTINATION_CHECK_FAIL
     },
     membersDisplay: function () {
+      if (this.currentEditProject.projectId < 1 || !this.currentEditProject.members) {
+        return ''
+      }
       var memberNames = []
-      this.project.members.forEach((member) => {
+      this.currentEditProject.members.forEach((member) => {
         memberNames.push(member.displayName && member.displayName !== '' ? member.displayName : member.userName)
       })
-      return memberNames.join(',')
+      return memberNames.join(', ')
     },
     approversDisplay: function () {
+      if (this.currentEditProject.projectId < 1 || !this.currentEditProject.approvers) {
+        return ''
+      }
       var approverNames = []
-      this.project.approvers.forEach((approver) => {
+      this.currentEditProject.approvers.forEach((approver) => {
         approverNames.push(
           approver.displayName && approver.displayName !== '' ? approver.displayName : approver.userName
         )
       })
-      return approverNames.join(',')
+      return approverNames.join(', ')
     },
     hasApprovers: function () {
       let hasApprover = false
@@ -613,6 +634,18 @@ export default {
         }
       })
       return tempColumns
+    },
+    isCreator: function () {
+      if (!this.isEdit) {
+        return true
+      }
+      return this.currentEditProject.projectId > 0 && this.currentEditProject.creatorId == this.user.id
+    },
+    isApproverEmpty: function () {
+      if (!this.isEdit || this.isCreator) {
+        return false
+      }
+      return !this.currentEditProject.approvers || this.currentEditProject.approvers.length < 1
     },
   },
   created() {
