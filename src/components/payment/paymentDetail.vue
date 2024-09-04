@@ -994,7 +994,11 @@ export default {
       return !this.isApprover && this.payment.status == 'paid'
     },
     displayApprovers() {
-      return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
+      return (
+        (this.payment.receiverId === this.user.id || this.payment.senderId === this.user.id) &&
+        this.payment.approvers &&
+        this.payment.approvers.length > 0
+      )
     },
     isShowCost() {
       var isShowCost = true
