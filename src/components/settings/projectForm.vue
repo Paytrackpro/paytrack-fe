@@ -35,6 +35,34 @@
               @update:model-value="modelValueChange()"
             />
           </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers</p>
+            <q-select
+              v-model="approverModel"
+              use-input
+              use-chips
+              multiple
+              outlined
+              input-debounce="0"
+              @new-value="createApproverValue"
+              :options="approverFilterOptions"
+              @filter="approverFilterFn"
+              @update:model-value="approverModelValueChange()"
+            />
+          </div>
+          <div class="col-12 col-sm-6">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description</p>
+            <q-input
+              v-model="project.description"
+              dense
+              outlined
+              stack-label
+              auto
+              rows="3"
+              hide-bottom-space
+              type="textarea"
+            />
+          </div>
         </div>
         <div class="row q-col-gutter-md profile-padding">
           <div class="col-12">
@@ -122,15 +150,20 @@ import {
 } from 'src/consts/common'
 
 let memberStringOptions = []
+let approverStringOptions = []
 
 export default {
   setup() {
     const memberModel = ref(null)
     const memberFilterOptions = ref(memberStringOptions)
+    const approverModel = ref(null)
+    const approverFilterOptions = ref(approverStringOptions)
 
     return {
       memberModel,
+      approverModel,
       memberFilterOptions,
+      approverFilterOptions,
 
       createValue(val, done) {
         if (val.length > 0) {
@@ -152,7 +185,25 @@ export default {
           memberModel.value = modelValue
         }
       },
-
+      createApproverValue(val, done) {
+        if (val.length > 0) {
+          const approverModelValue = (approverModel.value || []).slice()
+          val
+            .split(/[,;|]+/)
+            .map((v) => v.trim())
+            .filter((v) => v.length > 0)
+            .forEach((v) => {
+              if (approverStringOptions.includes(v) === false) {
+                approverStringOptions.push(v)
+              }
+              if (approverModelValue.includes(v) === false) {
+                approverModelValue.push(v)
+              }
+            })
+          done(null)
+          approverModel.value = approverModelValue
+        }
+      },
       filterFn(val, update) {
         update(() => {
           if (val === '') {
@@ -160,6 +211,16 @@ export default {
           } else {
             const needle = val.toLowerCase()
             memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
+          }
+        })
+      },
+      approverFilterFn(val, update) {
+        update(() => {
+          if (val === '') {
+            approverFilterOptions.value = approverStringOptions
+          } else {
+            const needle = val.toLowerCase()
+            approverFilterOptions.value = approverStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
           }
         })
       },
@@ -171,7 +232,9 @@ export default {
       project: {
         name: '',
         members: [],
+        approvers: [],
         error: '',
+        description: '',
         status: DESTINATION_CHECK_NONE,
       },
       projectNameFocus: false,
@@ -254,6 +317,30 @@ export default {
           })
         })
     },
+    approverModelValueChange() {
+      this.project.approvers = []
+      if (this.approverModel == null) {
+        return
+      }
+      let newSelectedUsers = String(this.approverModel)
+      this.project.approvers = []
+      newSelectedUsers
+        .split(/[,;|]+/)
+        .map((v) => v.trim())
+        .filter((v) => v.length > 0)
+        .forEach((v) => {
+          let userInfo = this.getUserInfo(v)
+          if (userInfo == null) {
+            return
+          }
+          this.project.approvers.push({
+            MemberId: userInfo.id,
+            UserName: userInfo.userName,
+            DisplayName: userInfo.displayName,
+            Role: 1,
+          })
+        })
+    },
     getUserInfo(userName) {
       let result = null
       this.userSelection.forEach((userInfo) => {
@@ -274,7 +361,12 @@ export default {
       this.submitHandler()
     },
     submitHandler() {
-      let params = { ProjectName: this.project.name, Members: this.project.members }
+      let params = {
+        ProjectName: this.project.name,
+        Members: this.project.members,
+        Approvers: this.project.approvers,
+        Description: this.project.description,
+      }
       if (this.isEdit) {
         params.ProjectId = this.currentEditProject.projectId
         this.$api
@@ -312,10 +404,13 @@ export default {
       this.project = {
         name: '',
         members: [],
+        approvers: [],
+        description: '',
         status: DESTINATION_CHECK_DONE,
         error: '',
       }
       this.memberModel = ref(null)
+      this.approverModel = ref(null)
       this.isEdit = false
     },
     checkDestinationDone: function () {
@@ -341,8 +436,10 @@ export default {
         .then((res) => {
           this.userSelection = res
           memberStringOptions = []
+          approverStringOptions = []
           this.userSelection.forEach((userInfo) => {
             memberStringOptions.push(userInfo.userName)
+            approverStringOptions.push(userInfo.userName)
           })
         })
         .catch((err) => {
@@ -389,17 +486,26 @@ export default {
           this.project = {
             name: tmpProject.projectName,
             members: tmpProject.members,
+            approvers: tmpProject.approvers,
+            description: tmpProject.description,
             status: DESTINATION_CHECK_DONE,
             error: '',
           }
           this.isEdit = true
           let memberArr = []
+          let approverArr = []
           if (this.project.members) {
             this.project.members.forEach((member) => {
               memberArr.push(member.userName)
             })
           }
           this.memberModel = ref(memberArr)
+          if (this.project.approvers) {
+            this.project.approvers.forEach((approver) => {
+              approverArr.push(approver.userName)
+            })
+          }
+          this.approverModel = ref(approverArr)
           return
         }
       })
