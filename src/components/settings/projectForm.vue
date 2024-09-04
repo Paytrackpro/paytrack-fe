@@ -141,6 +141,7 @@
 <script>
 import { defaultPaging } from 'src/helper/paging'
 import { responseError } from 'src/helper/error'
+import { mapGetters } from 'vuex'
 import { ref } from 'vue'
 import {
   DESTINATION_CHECK_NONE,
@@ -438,7 +439,9 @@ export default {
           memberStringOptions = []
           approverStringOptions = []
           this.userSelection.forEach((userInfo) => {
-            memberStringOptions.push(userInfo.userName)
+            if (this.user.id !== userInfo.id) {
+              memberStringOptions.push(userInfo.userName)
+            }
             approverStringOptions.push(userInfo.userName)
           })
         })
@@ -536,6 +539,9 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      user: 'user/getUser',
+    }),
     projectNameError: function () {
       return this.project.status === DESTINATION_CHECK_FAIL
     },
