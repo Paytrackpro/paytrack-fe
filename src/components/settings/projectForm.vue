@@ -2,7 +2,7 @@
   <q-form @submit="submit">
     <div class="row">
       <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
-        <div class="q-table__title title-case">Add Project</div>
+        <div class="q-table__title title-case q-pt-sm">{{ this.isEdit ? 'Edit Project' : 'Add Project' }}</div>
         <div class="row q-mt-sm q-col-gutter-md profile-padding">
           <div class="col-12 col-sm-6">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Name</p>
