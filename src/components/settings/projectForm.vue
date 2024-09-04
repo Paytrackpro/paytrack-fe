@@ -102,7 +102,7 @@
         title="Project List"
         :loading="loading"
         :rows="rows"
-        :columns="columns"
+        :columns="getColumn"
         row-key="name"
         class="shadow-6"
         v-model:pagination="pagination"
@@ -270,6 +270,30 @@ export default {
             } else {
               return ''
             }
+          },
+        },
+        {
+          name: 'approvers',
+          align: 'center',
+          label: 'Approvers',
+          field: (row) => {
+            if (row.approvers && row.approvers.length > 0) {
+              return row.approvers.map((item) => item.userName).join(',')
+            } else {
+              return ''
+            }
+          },
+        },
+        {
+          name: 'description',
+          required: true,
+          label: 'Description',
+          align: 'center',
+          field: (row) => {
+            return row.description
+          },
+          format: (val) => {
+            return val
           },
         },
         {
@@ -567,6 +591,28 @@ export default {
         )
       })
       return approverNames.join(',')
+    },
+    hasApprovers: function () {
+      let hasApprover = false
+      this.rows.forEach((tmpProject) => {
+        if (tmpProject.approvers && tmpProject.approvers.length > 0) {
+          hasApprover = true
+          return
+        }
+      })
+      return hasApprover
+    },
+    getColumn: function () {
+      if (this.hasApprovers) {
+        return this.columns
+      }
+      const tempColumns = []
+      this.columns.forEach((column) => {
+        if (column.name !== 'approvers') {
+          tempColumns.push(column)
+        }
+      })
+      return tempColumns
     },
   },
   created() {
