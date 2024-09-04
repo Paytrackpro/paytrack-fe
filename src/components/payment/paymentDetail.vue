@@ -117,9 +117,17 @@
     <div class="q-ma-lg text-size-15">
       <div class="row q-mb-xs q-col-gutter-md">
         <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs field-shadow">
-          <p class="q-mb-md">
+          <p class="q-mb-md" v-if="!approvalable">
             <span>{{ isSender ? 'To' : 'From' }}:&nbsp;&nbsp;</span>
             {{ isSender ? getRecipientName : getSenderName }}
+          </p>
+          <p class="q-mb-xs d-flex" v-if="approvalable">
+            <span style="width: 40px">From</span>
+            :&nbsp;&nbsp;{{ getSenderName }}
+          </p>
+          <p class="q-mb-md d-flex" v-if="approvalable">
+            <span style="width: 40px">To</span>
+            :&nbsp;&nbsp;{{ getRecipientName }}
           </p>
           <p class="q-mb-xs text-size-18" v-if="!isShowInvoice">
             <span>Amount (USD):&nbsp;</span>
