@@ -35,7 +35,7 @@
           <security-form v-model="user" />
         </q-tab-panel>
         <q-tab-panel class="q-px-none" name="project">
-          <project-form v-model="user" />
+          <project-form v-model="user" :projectId="projectId" />
         </q-tab-panel>
       </q-tab-panels>
     </q-card-section>
@@ -59,6 +59,7 @@ export default {
       tab: 'profile',
       loading: false,
       user: {},
+      projectId: 0,
     }
   },
   methods: {
@@ -76,6 +77,9 @@ export default {
     const currentTab = this.$route.params.settingTab
     if (currentTab) {
       this.tab = currentTab
+      if (currentTab == 'project' && this.$route.params.project) {
+        this.projectId = Number(this.$route.params.project)
+      }
     } else {
       this.$router.push({ path: '/settings/profile' })
     }

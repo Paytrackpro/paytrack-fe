@@ -325,6 +325,7 @@ export default {
   name: 'projectForm',
   props: {
     modelValue: Object,
+    projectId: Number,
   },
   emits: ['update:modelValue'],
   watch: {
@@ -413,7 +414,7 @@ export default {
           .put('project/edit', params)
           .then((res) => {
             this.resetProject()
-            this.getList()
+            this.getList(false)
             this.$q.notify({
               type: 'positive',
               message: 'Project has been updated',
@@ -428,7 +429,7 @@ export default {
           .post('project/create', params)
           .then((res) => {
             this.resetProject()
-            this.getList()
+            this.getList(false)
             this.$q.notify({
               type: 'positive',
               message: 'Project has been created',
@@ -457,7 +458,7 @@ export default {
     checkDestinationDone: function () {
       return !this.projectNameFocus && this.project.status === DESTINATION_CHECK_DONE
     },
-    getList() {
+    getList(isCreated) {
       this.loading = true
       this.$api
         .get('/project/get-list', {})
@@ -465,6 +466,16 @@ export default {
           this.loading = false
           this.rows = res
           this.pagination.rowsNumber = res.length
+          const hasProject = this.projectId > 0
+          //check and active project
+          if (this.rows && this.rows.length > 0 && isCreated && hasProject) {
+            this.rows.forEach((row) => {
+              if (row.projectId == this.projectId) {
+                this.editProject(this.projectId)
+                return
+              }
+            })
+          }
         })
         .catch((err) => {
           responseError(err)
@@ -565,7 +576,7 @@ export default {
             color: 'positive',
             icon: 'check',
           })
-          this.getList()
+          this.getList(false)
         })
         .catch((err) => {
           responseError(err)
@@ -649,7 +660,7 @@ export default {
     },
   },
   created() {
-    this.getList()
+    this.getList(true)
     this.user = { ...this.modelValue }
     this.initUserList()
   },
