@@ -24,6 +24,7 @@
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Members Select</p>
             <q-select
               v-model="memberModel"
+              v-if="isCreator"
               use-input
               use-chips
               multiple
@@ -34,11 +35,13 @@
               @filter="filterFn"
               @update:model-value="modelValueChange()"
             />
+            <p v-if="!isCreator">{{ membersDisplay }}</p>
           </div>
           <div class="col-12 col-sm-6">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers</p>
             <q-select
               v-model="approverModel"
+              v-if="isCreator"
               use-input
               use-chips
               multiple
@@ -49,6 +52,7 @@
               @filter="approverFilterFn"
               @update:model-value="approverModelValueChange()"
             />
+            <p v-if="!isCreator">{{ approversDisplay }}</p>
           </div>
           <div class="col-12 col-sm-6">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description</p>
@@ -281,6 +285,7 @@ export default {
       isEdit: false,
       deleteConfirm: false,
       deleteId: 0,
+      isCreator: true,
     }
   },
   name: 'projectForm',
@@ -499,7 +504,9 @@ export default {
           let approverArr = []
           if (this.project.members) {
             this.project.members.forEach((member) => {
-              memberArr.push(member.userName)
+              if (member.userName !== this.user.userName) {
+                memberArr.push(member.userName)
+              }
             })
           }
           this.memberModel = ref(memberArr)
@@ -544,6 +551,22 @@ export default {
     }),
     projectNameError: function () {
       return this.project.status === DESTINATION_CHECK_FAIL
+    },
+    membersDisplay: function () {
+      var memberNames = []
+      this.project.members.forEach((member) => {
+        memberNames.push(member.displayName && member.displayName !== '' ? member.displayName : member.userName)
+      })
+      return memberNames.join(',')
+    },
+    approversDisplay: function () {
+      var approverNames = []
+      this.project.approvers.forEach((approver) => {
+        approverNames.push(
+          approver.displayName && approver.displayName !== '' ? approver.displayName : approver.userName
+        )
+      })
+      return approverNames.join(',')
     },
   },
   created() {
