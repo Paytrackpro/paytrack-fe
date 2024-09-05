@@ -38,7 +38,10 @@
               input-debounce="0"
               @new-value="createValue"
               :options="memberFilterOptions"
+              @blur="selectBlur"
               @filter="filterFn"
+              :error="memberSelectError"
+              :error-message="memberError"
               @update:model-value="modelValueChange()"
             />
             <p v-if="!isCreator">{{ membersDisplay }}</p>
@@ -56,6 +59,9 @@
               @new-value="createApproverValue"
               :options="approverFilterOptions"
               @filter="approverFilterFn"
+              @blur="approverSelectBlur"
+              :error="approverSelectError"
+              :error-message="approverError"
               @update:model-value="approverModelValueChange()"
             />
             <p v-if="!isCreator">{{ approversDisplay }}</p>
@@ -166,6 +172,8 @@ import {
 
 let memberStringOptions = []
 let approverStringOptions = []
+let memberTyping = ''
+let approverTyping = ''
 
 export default {
   setup() {
@@ -183,7 +191,6 @@ export default {
       createValue(val, done) {
         if (val.length > 0) {
           const modelValue = (memberModel.value || []).slice()
-
           val
             .split(/[,;|]+/)
             .map((v) => v.trim())
@@ -220,21 +227,25 @@ export default {
         }
       },
       filterFn(val, update) {
+        const _this = this
         update(() => {
           if (val === '') {
             memberFilterOptions.value = memberStringOptions
           } else {
             const needle = val.toLowerCase()
+            memberTyping = needle
             memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
           }
         })
       },
       approverFilterFn(val, update) {
+        const _this = this
         update(() => {
           if (val === '') {
             approverFilterOptions.value = approverStringOptions
           } else {
             const needle = val.toLowerCase()
+            approverTyping = needle
             approverFilterOptions.value = approverStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
           }
         })
@@ -258,6 +269,10 @@ export default {
       pagination: {
         ...defaultPaging,
       },
+      memberCheckStatus: DESTINATION_CHECK_NONE,
+      approverCheckStatus: DESTINATION_CHECK_NONE,
+      memberError: '',
+      approverError: '',
       columns: [
         {
           name: 'projectName',
@@ -334,6 +349,107 @@ export default {
     },
   },
   methods: {
+    selectBlur() {
+      this.memberCheckStatus = DESTINATION_CHECK_NONE
+      let existOnOptions = false
+      if (memberTyping == '') {
+        this.memberCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      memberStringOptions.forEach((option) => {
+        if (option === memberTyping) {
+          existOnOptions = true
+          memberTyping = ''
+          this.memberCheckStatus = DESTINATION_CHECK_DONE
+          return
+        }
+      })
+      if (!existOnOptions) {
+        //check current typing user
+        this.$api
+          .get(`/user/exist-checking?userName=${memberTyping}`)
+          .then(({ found, id, userName, paymentSettings, message }) => {
+            if (found) {
+              this.memberCheckStatus = DESTINATION_CHECK_DONE
+              this.project.members.push({
+                memberId: id,
+                userName: userName,
+                displayName: userName,
+                role: 1,
+              })
+              let memberArr = []
+              if (this.project.members) {
+                this.project.members.forEach((member) => {
+                  if (member.userName !== this.user.userName) {
+                    memberArr.push(member.userName)
+                  }
+                })
+              }
+              this.memberModel = ref(memberArr)
+            } else {
+              this.memberCheckStatus = DESTINATION_CHECK_FAIL
+              this.memberError = message
+            }
+          })
+          .catch(() => {
+            this.memberCheckStatus = DESTINATION_CHECK_FAIL
+            this.memberError = 'the user name is not found'
+          })
+          .finally(() => {
+            memberTyping = ''
+          })
+      } else {
+      }
+    },
+    approverSelectBlur() {
+      this.approverCheckStatus = DESTINATION_CHECK_NONE
+      let existOnOptions = false
+      if (approverTyping == '') {
+        this.approverCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      approverStringOptions.forEach((option) => {
+        if (option === approverTyping) {
+          existOnOptions = true
+          approverTyping = ''
+          this.approverCheckStatus = DESTINATION_CHECK_DONE
+          return
+        }
+      })
+      if (!existOnOptions) {
+        //check current typing user
+        this.$api
+          .get(`/user/exist-checking?userName=${approverTyping}`)
+          .then(({ found, id, userName, paymentSettings, message }) => {
+            if (found) {
+              this.approverCheckStatus = DESTINATION_CHECK_DONE
+              this.project.approvers.push({
+                memberId: id,
+                userName: userName,
+                displayName: userName,
+                role: 1,
+              })
+              let approverArr = []
+              if (this.project.approvers) {
+                this.project.approvers.forEach((approver) => {
+                  approverArr.push(approver.userName)
+                })
+              }
+              this.approverModel = ref(approverArr)
+            } else {
+              this.approverCheckStatus = DESTINATION_CHECK_FAIL
+              this.approverError = message
+            }
+          })
+          .catch(() => {
+            this.approverCheckStatus = DESTINATION_CHECK_FAIL
+            this.approverError = 'the user name is not found'
+          })
+          .finally(() => {
+            approverTyping = ''
+          })
+      }
+    },
     modelValueChange() {
       this.project.members = []
       if (this.memberModel == null) {
@@ -351,10 +467,10 @@ export default {
             return
           }
           this.project.members.push({
-            MemberId: userInfo.id,
-            UserName: userInfo.userName,
-            DisplayName: userInfo.displayName,
-            Role: 1,
+            memberId: userInfo.id,
+            userName: userInfo.userName,
+            displayName: userInfo.displayName,
+            role: 1,
           })
         })
     },
@@ -375,10 +491,10 @@ export default {
             return
           }
           this.project.approvers.push({
-            MemberId: userInfo.id,
-            UserName: userInfo.userName,
-            DisplayName: userInfo.displayName,
-            Role: 1,
+            memberId: userInfo.id,
+            userName: userInfo.userName,
+            displayName: userInfo.displayName,
+            role: 1,
           })
         })
     },
@@ -484,7 +600,7 @@ export default {
     },
     initUserList() {
       this.$api
-        .get('/user/get-user-list', {})
+        .get('/payment/get-payment-users', {})
         .then((res) => {
           this.userSelection = res
           memberStringOptions = []
@@ -657,6 +773,12 @@ export default {
         return false
       }
       return !this.currentEditProject.approvers || this.currentEditProject.approvers.length < 1
+    },
+    memberSelectError: function () {
+      return this.memberCheckStatus === DESTINATION_CHECK_FAIL
+    },
+    approverSelectError: function () {
+      return this.approverCheckStatus === DESTINATION_CHECK_FAIL
     },
   },
   created() {
