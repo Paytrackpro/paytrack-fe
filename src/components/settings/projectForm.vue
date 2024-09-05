@@ -2,16 +2,27 @@
   <q-form @submit="submit">
     <div class="row">
       <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
-        <div class="q-table__title title-case q-pt-sm">{{ this.isEdit ? 'Edit Project' : 'Add Project' }}</div>
+        <div class="q-table__title title-case q-pt-sm">
+          {{ merging ? 'Merging' : isEdit ? 'Edit Project' : 'Add Project' }}
+        </div>
         <div class="row q-mt-sm q-col-gutter-md profile-padding">
           <div class="col-12 col-sm-6" v-if="!isCreator">
             <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Owner</p>
             <p>{{ project.creatorName }}</p>
           </div>
           <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Name</p>
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">
+              {{ merging ? 'New Project Name' : 'Project Name' }}
+              <q-checkbox
+                size="sm"
+                class="fw-400"
+                label="Use Old Project Name"
+                v-if="merging"
+                v-model="useOldProjectName"
+              />
+            </p>
             <q-input
-              v-if="isCreator"
+              v-if="(isCreator && !merging) || (merging && !useOldProjectName)"
               outlined
               dense
               lazy-rules
@@ -23,6 +34,18 @@
               hide-bottom-space
               v-model="project.name"
               placeholder="Project Name"
+            />
+            <q-select
+              v-if="merging && useOldProjectName"
+              v-model="project.name"
+              :options="oldProjectNameOptions"
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              emit-value
+              map-options
+              borderless
             />
             <p v-if="!isCreator">{{ project.name }}</p>
           </div>
@@ -81,7 +104,7 @@
             />
             <p v-if="!isCreator">{{ project.description }}</p>
           </div>
-          <div class="col-12" v-if="isEdit && isCreator">
+          <div class="col-12" v-if="isEdit && isCreator && !merging">
             <q-checkbox class="row q-mt-xs" label="Change Owner" v-model="changeOwnerFlg" />
           </div>
           <div class="col-12 col-sm-6" v-if="isEdit && isCreator && changeOwnerFlg">
@@ -107,7 +130,7 @@
               <div>
                 <q-btn
                   v-if="isCreator"
-                  :label="isEdit ? 'Update Project' : 'Create Project'"
+                  :label="merging ? 'Finish Merge' : isEdit ? 'Update Project' : 'Create Project'"
                   class="q-mr-xs q-mt-lg"
                   :disable="projectNameError"
                   style="height: 40px"
@@ -115,8 +138,8 @@
                   color="primary"
                 />
                 <q-btn
-                  v-if="isEdit"
-                  :label="isCreator ? 'Cancel Update' : 'Cancel'"
+                  v-if="isEdit || merging"
+                  :label="isCreator && !merging ? 'Cancel Update' : 'Cancel'"
                   class="q-ml-xs q-mt-lg"
                   style="height: 40px"
                   type="button"
@@ -134,12 +157,14 @@
       <q-table
         title="Project List"
         :loading="loading"
-        :rows="rows"
+        :rows="displayRows"
         :columns="getColumn"
-        row-key="name"
+        row-key="projectName"
         class="shadow-6"
+        :selection="mergeMode ? 'multiple' : 'none'"
+        v-model:selected="selected"
         v-model:pagination="pagination"
-        :hide-pagination="pagination.rowsNumber < 10"
+        :hide-pagination="mergeMode || pagination.rowsNumber < 10"
         :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
         flat
         separator="none"
@@ -158,6 +183,32 @@
               icon="delete"
             ></q-btn>
           </q-td>
+        </template>
+        <template v-slot:top-right>
+          <q-btn
+            label="Merge Project"
+            class="q-mr-sm"
+            color="primary"
+            v-if="!mergeMode && showMergeButton"
+            @click="setMergeMode()"
+          />
+          <q-btn
+            label="Merge"
+            class="q-mr-sm"
+            color="primary"
+            v-if="mergeMode"
+            :disable="!canMerge"
+            @click="mergeProject()"
+          />
+          <q-btn
+            label="Cancel"
+            type="button"
+            text-color="black"
+            color="white"
+            class="btn btn-animated"
+            @click="setMergeMode()"
+            v-if="mergeMode"
+          />
         </template>
       </q-table>
     </div>
@@ -355,6 +406,12 @@ export default {
       deleteId: 0,
       changeOwnerFlg: false,
       targetChangeOwner: 0,
+      mergeMode: false,
+      merging: false,
+      displayRows: [],
+      selected: [],
+      showMergeButton: false,
+      useOldProjectName: false,
     }
   },
   name: 'projectForm',
@@ -383,8 +440,49 @@ export default {
         }
       },
     },
+    mergeMode: {
+      immediate: true,
+      handler(isMerge) {
+        this.updateDisplayList(isMerge)
+      },
+    },
+    useOldProjectName: {
+      immediate: true,
+      handler(useFlg) {
+        if (useFlg) {
+          if (this.selected) {
+            let exist = false
+            this.selected.forEach((selectedItem) => {
+              if (this.project.name == selectedItem.projectName) {
+                exist = true
+                return
+              }
+            })
+            if (!exist) {
+              this.project.name = this.selected[0].projectName
+            }
+          }
+        } else {
+          this.project.name = ''
+        }
+      },
+    },
   },
   methods: {
+    updateDisplayList(isMerge) {
+      if (isMerge) {
+        this.displayRows = []
+        if (this.rows) {
+          this.rows.forEach((row) => {
+            if (row.creatorId == this.user.id) {
+              this.displayRows.push(row)
+            }
+          })
+        }
+      } else {
+        this.displayRows = this.rows
+      }
+    },
     selectBlur() {
       this.memberCheckStatus = DESTINATION_CHECK_NONE
       let existOnOptions = false
@@ -561,6 +659,29 @@ export default {
         description: this.project.description,
         targetOwnerId: this.isCreator && this.isEdit && this.changeOwnerFlg ? this.targetChangeOwner : 0,
       }
+      if (this.isCreator && this.merging) {
+        const targetMergeIds = []
+        this.selected.forEach((selectedItem) => {
+          targetMergeIds.push(selectedItem.projectId)
+        })
+        params.projectId = this.selected[0].projectId
+        params.targetMergeIds = targetMergeIds.join(',')
+        this.$api
+          .put('project/edit', params)
+          .then((res) => {
+            this.resetProject()
+            this.getList(false)
+            this.$q.notify({
+              type: 'positive',
+              message: 'Project has been merged',
+              position: 'bottom',
+            })
+          })
+          .catch((err) => {
+            responseError(err)
+          })
+        return
+      }
       if (this.isEdit) {
         params.projectId = this.currentEditProject.projectId
         this.$api
@@ -607,6 +728,8 @@ export default {
       this.memberModel = ref(null)
       this.approverModel = ref(null)
       this.isEdit = false
+      this.mergeMode = false
+      this.merging = false
     },
     checkDestinationDone: function () {
       return !this.projectNameFocus && this.project.status === DESTINATION_CHECK_DONE
@@ -618,6 +741,16 @@ export default {
         .then((res) => {
           this.loading = false
           this.rows = res
+          if (this.rows) {
+            let canMergeCount = 0
+            this.rows.forEach((row) => {
+              if (row.creatorId == this.user.id) {
+                canMergeCount++
+              }
+            })
+            this.showMergeButton = canMergeCount >= 2
+          }
+          this.updateDisplayList(this.mergeMode)
           this.pagination.rowsNumber = res.length
           const hasProject = this.projectId > 0
           //check and active project
@@ -755,10 +888,95 @@ export default {
     },
     cancelEdit() {
       this.isEdit = false
+      this.merging = false
+      this.mergeMode = false
+      this.selected = []
       this.resetProject()
     },
     isCreatorUser(project) {
       return this.user.id == project.creatorId
+    },
+    setMergeMode() {
+      this.mergeMode = !this.mergeMode
+      if (!this.mergeMode) {
+        this.merging = false
+        this.resetProject()
+      }
+    },
+    mergeProject() {
+      this.merging = true
+      //TODO. edit project name
+      if (!this.selected || this.selected.length < 2) {
+        return
+      }
+      const newMembers = []
+      const newApprovers = []
+      const projectName = ''
+      let description = ''
+      let num = 0
+      this.selected.forEach((selectedItem) => {
+        num++
+        //check and insert members
+        if (selectedItem.members) {
+          selectedItem.members.forEach((member) => {
+            let exist = false
+            newMembers.forEach((newMember) => {
+              if (newMember.memberId == member.memberId) {
+                exist = true
+                return
+              }
+            })
+            if (!exist) {
+              newMembers.push(member)
+            }
+          })
+        }
+        //check and insert approvers
+        if (selectedItem.approvers) {
+          selectedItem.approvers.forEach((approver) => {
+            let exist = false
+            newApprovers.forEach((newApprover) => {
+              if (newApprover.memberId == approver.memberId) {
+                exist = true
+                return
+              }
+            })
+            if (!exist) {
+              newApprovers.push(approver)
+            }
+          })
+        }
+
+        if (selectedItem.description && selectedItem.description !== '') {
+          description += `(${selectedItem.projectName}): ${selectedItem.description}\n`
+        }
+      })
+      this.project = {
+        name: '',
+        members: newMembers,
+        approvers: newApprovers,
+        description: description,
+        creatorName: this.user.userName,
+        status: DESTINATION_CHECK_DONE,
+        error: '',
+      }
+      this.changeOwnerFlg = false
+      let memberArr = []
+      let approverArr = []
+      if (this.project.members) {
+        this.project.members.forEach((member) => {
+          if (member.userName !== this.user.userName) {
+            memberArr.push(member.userName)
+          }
+        })
+      }
+      this.memberModel = ref(memberArr)
+      if (this.project.approvers) {
+        this.project.approvers.forEach((approver) => {
+          approverArr.push(approver.userName)
+        })
+      }
+      this.approverModel = ref(approverArr)
     },
   },
 
@@ -843,8 +1061,23 @@ export default {
       })
       return options
     },
+    oldProjectNameOptions: function () {
+      const options = []
+      if (this.selected && this.selected.length > 0) {
+        this.selected.forEach((selectedItem) => {
+          options.push({
+            label: selectedItem.projectName,
+            value: selectedItem.projectName,
+          })
+        })
+      }
+      return options
+    },
     membersSize: function () {
       return this.project.members.length
+    },
+    canMerge: function () {
+      return this.selected.length > 1
     },
   },
   created() {
