@@ -403,7 +403,7 @@ export default {
       if (!existOnOptions) {
         //check current typing user
         this.$api
-          .get(`/user/exist-checking?userName=${memberTyping}`)
+          .get(`/user/member-exist-checking?userName=${memberTyping}`)
           .then(({ found, id, userName, paymentSettings, message }) => {
             if (found) {
               this.memberCheckStatus = DESTINATION_CHECK_DONE
@@ -455,7 +455,7 @@ export default {
       if (!existOnOptions) {
         //check current typing user
         this.$api
-          .get(`/user/exist-checking?userName=${approverTyping}`)
+          .get(`/user/member-exist-checking?userName=${approverTyping}`)
           .then(({ found, id, userName, paymentSettings, message }) => {
             if (found) {
               this.approverCheckStatus = DESTINATION_CHECK_DONE
