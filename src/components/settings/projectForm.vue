@@ -81,6 +81,24 @@
             />
             <p v-if="!isCreator">{{ project.description }}</p>
           </div>
+          <div class="col-12" v-if="isEdit && isCreator">
+            <q-checkbox class="row q-mt-xs" label="Change Owner" v-model="changeOwnerFlg" />
+          </div>
+          <div class="col-12 col-sm-6" v-if="isEdit && isCreator && changeOwnerFlg">
+            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Select New Owner</p>
+            <span class="text-size-13 q-mb-xs">* Can choose another member to be the new Owner of the project.</span>
+            <q-select
+              v-model="targetChangeOwner"
+              :options="ownerTargetOptions"
+              outlined
+              dense
+              lazy-rules
+              stack-label
+              emit-value
+              map-options
+              borderless
+            />
+          </div>
         </div>
         <div class="row q-col-gutter-md profile-padding">
           <div class="col-12">
@@ -335,6 +353,8 @@ export default {
       isEdit: false,
       deleteConfirm: false,
       deleteId: 0,
+      changeOwnerFlg: false,
+      targetChangeOwner: 0,
     }
   },
   name: 'projectForm',
@@ -346,6 +366,22 @@ export default {
   watch: {
     modelValue(val) {
       this.user = { ...val }
+    },
+    membersSize: {
+      immediate: true,
+      handler(size) {
+        if (this.targetChangeOwner == 0 && this.project.members.length > 0) {
+          let setted = false
+          this.project.members.forEach((member) => {
+            if (!setted) {
+              if (member.memberId != this.user.id) {
+                setted = true
+                this.targetChangeOwner = member.memberId
+              }
+            }
+          })
+        }
+      },
     },
   },
   methods: {
@@ -519,13 +555,14 @@ export default {
     },
     submitHandler() {
       let params = {
-        ProjectName: this.project.name,
-        Members: this.project.members,
-        Approvers: this.project.approvers,
-        Description: this.project.description,
+        projectName: this.project.name,
+        members: this.project.members,
+        approvers: this.project.approvers,
+        description: this.project.description,
+        targetOwnerId: this.isCreator && this.isEdit && this.changeOwnerFlg ? this.targetChangeOwner : 0,
       }
       if (this.isEdit) {
-        params.ProjectId = this.currentEditProject.projectId
+        params.projectId = this.currentEditProject.projectId
         this.$api
           .put('project/edit', params)
           .then((res) => {
@@ -662,6 +699,20 @@ export default {
             status: DESTINATION_CHECK_DONE,
             error: '',
           }
+          if (this.project.members.length > 0) {
+            let setted = false
+            this.project.members.forEach((member) => {
+              if (!setted) {
+                if (member.memberId != this.user.id) {
+                  setted = true
+                  this.targetChangeOwner = member.memberId
+                }
+              }
+            })
+          } else {
+            this.targetChangeOwner = 0
+          }
+          this.changeOwnerFlg = false
           this.isEdit = true
           let memberArr = []
           let approverArr = []
@@ -779,6 +830,21 @@ export default {
     },
     approverSelectError: function () {
       return this.approverCheckStatus === DESTINATION_CHECK_FAIL
+    },
+    ownerTargetOptions: function () {
+      const options = []
+      this.project.members.forEach((member) => {
+        if (member.memberId != this.user.id) {
+          options.push({
+            label: member.userName,
+            value: member.memberId,
+          })
+        }
+      })
+      return options
+    },
+    membersSize: function () {
+      return this.project.members.length
     },
   },
   created() {
