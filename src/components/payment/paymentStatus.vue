@@ -97,21 +97,21 @@ export default {
         if (this.payment.approvers === null || this.payment.approvers.length == 0) {
           return this.user.id == this.payment.receiverId ? STATUS_INFO.received : STATUS_INFO.sent
         }
-        let userWaitApproval = this.payment.approvers
-          .map((el) => {
-            if (!el.isApproved) {
-              return el.approverName
-            }
-          })
-          .join(',')
+        const approverArr = []
+        this.payment.approvers.forEach((approver) => {
+          if (approver.approverName && !approver.isApproved) {
+            approverArr.push(approver.approverName)
+          }
+        })
+        let userWaitApproval = approverArr.join(',')
         if (isAllApproved) {
           return STATUS_INFO.approved
         } else if (this.isShowApprover) {
           var approversStatus = {}
           // if have comma at begin of string, remove comma
-          if (userWaitApproval.startsWith(',')) {
-            userWaitApproval = userWaitApproval.replace(',', '')
-          }
+          // if (userWaitApproval.startsWith(',')) {
+          //   userWaitApproval = userWaitApproval.replace(',', '')
+          // }
           approversStatus.statusShow = STATUS_INFO.waiting_approval.statusShow + ': ' + userWaitApproval
           approversStatus.statusColor = STATUS_INFO.waiting_approval.statusColor
           approversStatus.statusIcon = STATUS_INFO.waiting_approval.statusIcon
