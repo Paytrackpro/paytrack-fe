@@ -207,10 +207,22 @@ export default {
       this.loading = true
       this.$api
         .post('/auth/register-start?username=' + this.username, {})
-        .then((resultData) => {
-          const opts = resultData.options
-          const sessionKey = resultData.sessionkey
-          this.handlerFinishRegistration(opts, sessionKey)
+        .then((res) => {
+          const resultData = JSON.parse(res)
+          let sessionKey
+          let options
+          if (resultData) {
+            options = resultData.options
+            sessionKey = resultData.sessionkey
+          }
+          if (!options) {
+            if (sessionKey && sessionKey != '') {
+              this.cancelRegisterUser(sessionKey)
+            }
+            this.loading = false
+            return
+          }
+          this.handlerFinishRegistration(options, sessionKey)
         })
         .catch((err) => {
           this.loading = false

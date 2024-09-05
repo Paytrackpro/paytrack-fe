@@ -166,7 +166,10 @@ export default {
         .post('/auth/assertion-options', {})
         .then((res) => {
           if (!res.error) {
-            const resultData = res.data
+            const resultData = JSON.parse(res.data)
+            if (!resultData || !resultData.options) {
+              return
+            }
             const opts = resultData.options
             const sessionKey = resultData.sessionkey
             this.handlerLoginFinish(opts, sessionKey, false)
