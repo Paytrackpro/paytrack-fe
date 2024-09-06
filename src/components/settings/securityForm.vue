@@ -178,8 +178,15 @@ export default {
       this.passkeyDialog = false
       this.$api
         .post('/auth/update-passkey-start', {})
-        .then((resultData) => {
-          this.handlerFinishUpdatePasskey(resultData.options, resultData.sessionkey)
+        .then((res) => {
+          const resultData = JSON.parse(res)
+          let sessionKey
+          let options
+          if (resultData) {
+            options = resultData.options
+            sessionKey = resultData.sessionkey
+          }
+          this.handlerFinishUpdatePasskey(options, sessionKey)
         })
         .catch((err) => {
           responseError(err)
