@@ -993,6 +993,10 @@ a {
   cursor: pointer;
 }
 
+.underline-link {
+  text-decoration: underline !important;
+}
+
 .custom-link:hover {
   color: #1ea0d3 !important;
   text-decoration: underline;

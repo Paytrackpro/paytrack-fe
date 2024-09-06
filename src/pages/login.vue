@@ -17,13 +17,13 @@
                   <div v-show="!isOtp">
                     <q-card-section class="q-pa-lg login-form">
                       <p class="text-h5 text-primary text-center"><b>Sign In</b></p>
-                      <p class="login-subtitle text-primary" v-if="authType == 0">
+                      <p class="login-subtitle text-center text-primary" v-if="loginType == 0">
                         Please fill login information below
                       </p>
-                      <p class="login-subtitle text-primary text-center q-mt-sm" v-if="authType == 1">
+                      <p class="login-subtitle text-primary text-center q-mt-sm" v-if="loginType == 1">
                         Sign in with passkey
                       </p>
-                      <q-form class="form-area" @submit="goLogin()" v-if="authType == 0">
+                      <q-form class="form-area" @submit="goLogin()" v-if="loginType == 0">
                         <div class="inputContainer">
                           <input
                             id="user_name_id"
@@ -66,7 +66,7 @@
                         <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
                         <q-btn label="Sign in" type="submit" color="primary" />
                       </q-form>
-                      <div class="d-flex justify-content-center q-mb-md q-mt-sm" v-if="authType == 1">
+                      <div class="d-flex justify-content-center q-mb-md q-mt-sm" v-if="loginType == 1">
                         <q-btn
                           label="Sign in"
                           color="primary"
@@ -77,8 +77,17 @@
                       </div>
                       <q-card class="col" flat bordered> </q-card>
                       <div class="text-grey-3 q-mt-md row justify-between">
-                        <p>Don't have an account yet?</p>
-                        <router-link class="link text-primary" to="/register">Create Account</router-link>
+                        <p v-if="authType == 0">Don't have an account yet?</p>
+                        <p
+                          class="cursor-pointer underline-link text-primary"
+                          v-if="authType == 1"
+                          @click="loginWithOldAccount"
+                        >
+                          {{ loginType == 0 ? 'Log in with passkey' : 'Log in with old account' }}
+                        </p>
+                        <router-link class="link text-primary underline-link" to="/register"
+                          >Create Account</router-link
+                        >
                       </div>
                     </q-card-section>
                   </div>
@@ -113,6 +122,7 @@ export default {
       otp: '',
       msg: [],
       authType: 0,
+      loginType: 0,
       signBtnLoading: false,
     }
   },
@@ -121,6 +131,7 @@ export default {
       .get(`/auth/auth-method`)
       .then((data) => {
         this.authType = data
+        this.loginType = data
       })
       .catch((err) => {
         responseError(err)
@@ -140,6 +151,7 @@ export default {
       const { error, data } = await this.login({
         username: this.username,
         password: this.password,
+        loginType: this.loginType,
         isOtp: this.isOtp,
         otp: otpString,
       })
@@ -185,6 +197,13 @@ export default {
           this.signBtnLoading = false
           responseError(err)
         })
+    },
+    loginWithOldAccount() {
+      if (this.loginType == 0) {
+        this.loginType = 1
+      } else {
+        this.loginType = 0
+      }
     },
     async handlerLoginFinish(opts, sessionKey, startConditionalUI) {
       let asseResp
