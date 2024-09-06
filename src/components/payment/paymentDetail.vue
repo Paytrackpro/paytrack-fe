@@ -365,12 +365,10 @@
               </div>
             </div>
           </div>
-          <div class="col-12 q-py-sm">
+          <div class="col-12 q-pt-sm">
             <p>
-              <span>Amount (USD):&nbsp;</span>
-              <span class="fw-600"
-                >${{ (payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span
-              >
+              <b class="text-weight-medium">Amount (USD):&nbsp;</b>
+              <span>${{ (payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
             </p>
           </div>
           <div class="col-6 q-py-sm field-shadow">
