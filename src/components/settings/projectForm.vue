@@ -63,6 +63,7 @@
               :options="memberFilterOptions"
               @blur="selectBlur"
               @filter="filterFn"
+              @keyup.enter="memberEnterType"
               :error="memberSelectError"
               :error-message="memberError"
               @update:model-value="modelValueChange()"
@@ -83,6 +84,7 @@
               :options="approverFilterOptions"
               @filter="approverFilterFn"
               @blur="approverSelectBlur"
+              @keyup.enter="approverEnterType"
               :error="approverSelectError"
               :error-message="approverError"
               @update:model-value="approverModelValueChange()"
@@ -265,10 +267,10 @@ export default {
             .map((v) => v.trim())
             .filter((v) => v.length > 0)
             .forEach((v) => {
-              if (memberStringOptions.includes(v) === false) {
+              if (!memberStringOptions.includes(v)) {
                 memberStringOptions.push(v)
               }
-              if (modelValue.includes(v) === false) {
+              if (!modelValue.includes(v)) {
                 modelValue.push(v)
               }
             })
@@ -284,10 +286,10 @@ export default {
             .map((v) => v.trim())
             .filter((v) => v.length > 0)
             .forEach((v) => {
-              if (approverStringOptions.includes(v) === false) {
+              if (!approverStringOptions.includes(v)) {
                 approverStringOptions.push(v)
               }
-              if (approverModelValue.includes(v) === false) {
+              if (!approverModelValue.includes(v)) {
                 approverModelValue.push(v)
               }
             })
@@ -296,7 +298,6 @@ export default {
         }
       },
       filterFn(val, update) {
-        const _this = this
         update(() => {
           if (val === '') {
             memberFilterOptions.value = memberStringOptions
@@ -308,7 +309,6 @@ export default {
         })
       },
       approverFilterFn(val, update) {
-        const _this = this
         update(() => {
           if (val === '') {
             approverFilterOptions.value = approverStringOptions
@@ -340,6 +340,8 @@ export default {
       },
       memberCheckStatus: DESTINATION_CHECK_NONE,
       approverCheckStatus: DESTINATION_CHECK_NONE,
+      memberHandling: '',
+      approverHandling: '',
       memberError: '',
       approverError: '',
       columns: [
@@ -484,17 +486,29 @@ export default {
       }
     },
     selectBlur() {
-      this.memberCheckStatus = DESTINATION_CHECK_NONE
+      this.memberCheckStatus = DESTINATION_CHECK_CHECKING
       let existOnOptions = false
       if (memberTyping == '') {
         this.memberCheckStatus = DESTINATION_CHECK_DONE
         return
       }
+      let existOnProjectMembers = false
+      this.project.members.forEach((member) => {
+        if (member.userName == memberTyping) {
+          existOnProjectMembers = true
+          return
+        }
+      })
+      if (existOnProjectMembers) {
+        this.memberCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      let existOption
       memberStringOptions.forEach((option) => {
         if (option === memberTyping) {
           existOnOptions = true
+          existOption = option
           memberTyping = ''
-          this.memberCheckStatus = DESTINATION_CHECK_DONE
           return
         }
       })
@@ -502,24 +516,25 @@ export default {
         //check current typing user
         this.$api
           .get(`/user/member-exist-checking?userName=${memberTyping}`)
-          .then(({ found, id, userName, paymentSettings, message }) => {
+          .then(({ found, id, userName, displayName, paymentSettings, message }) => {
             if (found) {
-              this.memberCheckStatus = DESTINATION_CHECK_DONE
               this.project.members.push({
                 memberId: id,
                 userName: userName,
-                displayName: userName,
+                displayName: displayName,
                 role: 1,
               })
               let memberArr = []
               if (this.project.members) {
                 this.project.members.forEach((member) => {
-                  if (member.userName !== this.user.userName) {
+                  if (member.memberId != this.user.id) {
                     memberArr.push(member.userName)
                   }
                 })
               }
+              this.memberHandling = userName
               this.memberModel = ref(memberArr)
+              this.memberCheckStatus = DESTINATION_CHECK_DONE
             } else {
               this.memberCheckStatus = DESTINATION_CHECK_FAIL
               this.memberError = message
@@ -533,7 +548,223 @@ export default {
             memberTyping = ''
           })
       } else {
+        //get userinfo by username
+        const userInfo = this.getUserInfo(existOption)
+        if (userInfo == null) {
+          this.memberCheckStatus = DESTINATION_CHECK_FAIL
+          this.memberError = 'the user info is not found'
+          return
+        }
+        this.project.members.push({
+          memberId: userInfo.id,
+          userName: userInfo.userName,
+          displayName: userInfo.displayName,
+          role: 1,
+        })
+        let memberArr = []
+        if (this.project.members) {
+          this.project.members.forEach((member) => {
+            if (member.memberId != this.user.id) {
+              memberArr.push(member.userName)
+            }
+          })
+        }
+        this.memberHandling = userInfo.userName
+        this.memberModel = ref(memberArr)
+        this.memberCheckStatus = DESTINATION_CHECK_DONE
       }
+    },
+    memberEnterType() {
+      if (this.memberCheckStatus == DESTINATION_CHECK_CHECKING) {
+        return
+      }
+      this.memberCheckStatus = DESTINATION_CHECK_CHECKING
+      if (memberTyping == '') {
+        this.memberCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      this.$api
+        .get(`/user/member-exist-checking?userName=${memberTyping}`)
+        .then(({ found, id, userName, displayName, paymentSettings, message }) => {
+          if (!found) {
+            let removeIndex = -1
+            for (let i = 0; i < memberStringOptions.length; i++) {
+              const option = memberStringOptions[i]
+              if (option === memberTyping) {
+                removeIndex = i
+                break
+              }
+            }
+            //remove typing option
+            if (removeIndex >= 0) {
+              memberStringOptions.splice(removeIndex, 1)
+              this.memberFilterOptions.value = memberStringOptions
+            }
+            let memberArr = []
+            let modelIndex = -1
+            if (this.project.members) {
+              for (let i = 0; i < this.project.members.length; i++) {
+                const member = this.project.members[i]
+                if (member.userName == memberTyping) {
+                  modelIndex = i
+                }
+              }
+              if (modelIndex >= 0) {
+                this.project.members.splice(modelIndex, 1)
+              }
+              this.project.members.forEach((member) => {
+                if (member.memberId != this.user.id) {
+                  memberArr.push(member.userName)
+                }
+              })
+            }
+            this.memberCheckStatus = DESTINATION_CHECK_FAIL
+            this.memberModel = ref(memberArr)
+            return
+          } else {
+            let existProject = false
+            this.project.members.forEach((member) => {
+              if (member.userName == memberTyping) {
+                existProject = true
+              }
+            })
+            if (!existProject) {
+              this.project.members.push({
+                memberId: id,
+                userName: userName,
+                displayName: userName,
+                role: 1,
+              })
+              let userExist = false
+              this.userSelection.forEach((user) => {
+                if (user.userName == userName) {
+                  userExist = true
+                  return
+                }
+              })
+              if (!userExist) {
+                this.userSelection.push({
+                  id: id,
+                  userName: userName,
+                  displayName: displayName,
+                  role: 1,
+                })
+              }
+            }
+            let memberArr = []
+            if (this.project.members) {
+              this.project.members.forEach((member) => {
+                if (member.memberId != this.user.id) {
+                  memberArr.push(member.userName)
+                }
+              })
+            }
+            this.memberHandling = userName
+            this.memberModel = ref(memberArr)
+            this.memberCheckStatus = DESTINATION_CHECK_DONE
+          }
+        })
+        .catch(() => {
+          this.memberCheckStatus = DESTINATION_CHECK_FAIL
+          this.memberError = 'the user name is not found'
+        })
+        .finally(() => {
+          memberTyping = ''
+        })
+    },
+    approverEnterType() {
+      if (this.approverCheckStatus == DESTINATION_CHECK_CHECKING) {
+        return
+      }
+      this.approverCheckStatus = DESTINATION_CHECK_CHECKING
+      if (approverTyping == '') {
+        this.approverCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      this.$api
+        .get(`/user/member-exist-checking?userName=${approverTyping}`)
+        .then(({ found, id, userName, displayName, paymentSettings, message }) => {
+          if (!found) {
+            let removeIndex = -1
+            for (let i = 0; i < approverStringOptions.length; i++) {
+              const option = approverStringOptions[i]
+              if (option === approverTyping) {
+                removeIndex = i
+                break
+              }
+            }
+            //remove typing option
+            if (removeIndex >= 0) {
+              approverStringOptions.splice(removeIndex, 1)
+              this.approverFilterOptions.value = approverStringOptions
+            }
+            let approverArr = []
+            let modelIndex = -1
+            if (this.project.approvers) {
+              for (let i = 0; i < this.project.approvers.length; i++) {
+                const approver = this.project.approvers[i]
+                if (approver.userName == approverTyping) {
+                  modelIndex = i
+                }
+              }
+              if (modelIndex >= 0) {
+                this.project.approvers.splice(modelIndex, 1)
+              }
+              this.project.approvers.forEach((approver) => {
+                approverArr.push(approver.userName)
+              })
+            }
+            this.approverCheckStatus = DESTINATION_CHECK_FAIL
+            this.approverModel = ref(approverArr)
+            return
+          } else {
+            let existProject = false
+            this.project.approvers.forEach((approver) => {
+              if (approver.userName == approverTyping) {
+                existProject = true
+              }
+            })
+            if (!existProject) {
+              this.project.approvers.push({
+                memberId: id,
+                userName: userName,
+                displayName: userName,
+                role: 1,
+              })
+              let userExist = false
+              this.userSelection.forEach((user) => {
+                if (user.userName == userName) {
+                  userExist = true
+                  return
+                }
+              })
+              if (!userExist) {
+                this.userSelection.push({
+                  id: id,
+                  userName: userName,
+                  displayName: displayName,
+                  role: 1,
+                })
+              }
+            }
+            let approverArr = []
+            if (this.project.approvers) {
+              this.project.approvers.forEach((approver) => {
+                approverArr.push(approver.userName)
+              })
+            }
+            this.approverHandling = userName
+            this.approverModel = ref(approverArr)
+            this.approverCheckStatus = DESTINATION_CHECK_DONE
+          }
+        })
+        .catch(() => {
+          this.approverCheckStatus = DESTINATION_CHECK_FAIL
+          this.approverError = 'the user name is not found'
+        })
+        .finally(() => {
+          approverTyping = ''
+        })
     },
     approverSelectBlur() {
       this.approverCheckStatus = DESTINATION_CHECK_NONE
@@ -542,11 +773,23 @@ export default {
         this.approverCheckStatus = DESTINATION_CHECK_DONE
         return
       }
+      let existOnProjectApprovers = false
+      this.project.approvers.forEach((approver) => {
+        if (approver.userName == approverTyping) {
+          existOnProjectApprovers = true
+          return
+        }
+      })
+      if (existOnProjectApprovers) {
+        this.approverCheckStatus = DESTINATION_CHECK_DONE
+        return
+      }
+      let existOption
       approverStringOptions.forEach((option) => {
         if (option === approverTyping) {
           existOnOptions = true
+          existOption = option
           approverTyping = ''
-          this.approverCheckStatus = DESTINATION_CHECK_DONE
           return
         }
       })
@@ -554,13 +797,12 @@ export default {
         //check current typing user
         this.$api
           .get(`/user/member-exist-checking?userName=${approverTyping}`)
-          .then(({ found, id, userName, paymentSettings, message }) => {
+          .then(({ found, id, userName, displayName, paymentSettings, message }) => {
             if (found) {
-              this.approverCheckStatus = DESTINATION_CHECK_DONE
               this.project.approvers.push({
                 memberId: id,
                 userName: userName,
-                displayName: userName,
+                displayName: displayName,
                 role: 1,
               })
               let approverArr = []
@@ -569,6 +811,8 @@ export default {
                   approverArr.push(approver.userName)
                 })
               }
+              this.approverHandling = userName
+              this.approverCheckStatus = DESTINATION_CHECK_DONE
               this.approverModel = ref(approverArr)
             } else {
               this.approverCheckStatus = DESTINATION_CHECK_FAIL
@@ -582,9 +826,32 @@ export default {
           .finally(() => {
             approverTyping = ''
           })
+      } else {
+        //get userinfo by username
+        const userInfo = this.getUserInfo(existOption)
+        if (userInfo == null) {
+          this.approverCheckStatus = DESTINATION_CHECK_FAIL
+          this.approverError = 'the user info is not found'
+          return
+        }
+        this.project.approvers.push({
+          memberId: userInfo.id,
+          userName: userInfo.userName,
+          displayName: userInfo.displayName,
+          role: 1,
+        })
+        let approverArr = []
+        if (this.project.approvers) {
+          this.project.approvers.forEach((approver) => {
+            approverArr.push(approver.userName)
+          })
+        }
+        this.approverHandling = userInfo.userName
+        this.approverModel = ref(approverArr)
+        this.approverCheckStatus = DESTINATION_CHECK_DONE
       }
     },
-    modelValueChange() {
+    async modelValueChange() {
       this.project.members = []
       if (this.memberModel == null) {
         return
@@ -596,7 +863,7 @@ export default {
         .map((v) => v.trim())
         .filter((v) => v.length > 0)
         .forEach((v) => {
-          let userInfo = this.getUserInfo(v)
+          const userInfo = this.getUserInfo(v)
           if (userInfo == null) {
             return
           }
@@ -620,7 +887,7 @@ export default {
         .map((v) => v.trim())
         .filter((v) => v.length > 0)
         .forEach((v) => {
-          let userInfo = this.getUserInfo(v)
+          const userInfo = this.getUserInfo(v)
           if (userInfo == null) {
             return
           }
@@ -634,12 +901,13 @@ export default {
     },
     getUserInfo(userName) {
       let result = null
-      this.userSelection.forEach((userInfo) => {
+      for (let i = 0; i < this.userSelection.length; i++) {
+        const userInfo = this.userSelection[i]
         if (userInfo.userName == userName) {
           result = userInfo
-          return
+          break
         }
-      })
+      }
       return result
     },
     async submit() {
