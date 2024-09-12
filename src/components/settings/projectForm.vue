@@ -1,159 +1,13 @@
 <template>
-  <q-form @submit="submit">
+  <q-form>
     <div class="row">
-      <q-card class="col-12 col-sm-8 q-px-lg q-pb-lg shadow-primary">
-        <div class="q-table__title title-case q-pt-sm">
-          {{ merging ? 'Merging' : isEdit ? 'Edit Project' : 'Add Project' }}
-        </div>
-        <div class="row q-mt-sm q-col-gutter-md profile-padding">
-          <div class="col-12 col-sm-6" v-if="!isCreator">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Owner</p>
-            <p>{{ project.creatorName }}</p>
-          </div>
-          <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">
-              {{ merging ? 'New Project Name' : 'Project Name' }}
-              <q-checkbox
-                size="sm"
-                class="fw-400"
-                label="Use Old Project Name"
-                v-if="merging"
-                v-model="useOldProjectName"
-              />
-            </p>
-            <q-input
-              v-if="(isCreator && !merging) || (merging && !useOldProjectName)"
-              outlined
-              dense
-              lazy-rules
-              stack-label
-              @blur="checkValidProjectName"
-              :error="projectNameError"
-              :error-message="project.error"
-              @focus="projectNameFocus = true"
-              hide-bottom-space
-              v-model="project.name"
-              placeholder="Project Name"
-            />
-            <q-select
-              v-if="merging && useOldProjectName"
-              v-model="project.name"
-              :options="oldProjectNameOptions"
-              outlined
-              dense
-              lazy-rules
-              stack-label
-              emit-value
-              map-options
-              borderless
-            />
-            <p v-if="!isCreator">{{ project.name }}</p>
-          </div>
-          <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">{{ isCreator ? 'Members Select' : 'Members' }}</p>
-            <q-select
-              v-model="memberModel"
-              v-if="isCreator"
-              use-input
-              use-chips
-              multiple
-              outlined
-              input-debounce="0"
-              @new-value="createValue"
-              :options="memberFilterOptions"
-              @blur="selectBlur"
-              @filter="filterFn"
-              @keyup.enter="memberEnterType"
-              :error="memberSelectError"
-              :error-message="memberError"
-              @update:model-value="modelValueChange()"
-            />
-            <p v-if="!isCreator">{{ membersDisplay }}</p>
-          </div>
-          <div class="col-12 col-sm-6" v-if="!isApproverEmpty">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers</p>
-            <q-select
-              v-model="approverModel"
-              v-if="isCreator"
-              use-input
-              use-chips
-              multiple
-              outlined
-              input-debounce="0"
-              @new-value="createApproverValue"
-              :options="approverFilterOptions"
-              @filter="approverFilterFn"
-              @blur="approverSelectBlur"
-              @keyup.enter="approverEnterType"
-              :error="approverSelectError"
-              :error-message="approverError"
-              @update:model-value="approverModelValueChange()"
-            />
-            <p v-if="!isCreator">{{ approversDisplay }}</p>
-          </div>
-          <div class="col-12 col-sm-6">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description</p>
-            <q-input
-              v-if="isCreator"
-              v-model="project.description"
-              dense
-              outlined
-              stack-label
-              auto
-              rows="3"
-              hide-bottom-space
-              type="textarea"
-            />
-            <p v-if="!isCreator">{{ project.description }}</p>
-          </div>
-          <div class="col-12" v-if="isEdit && isCreator && !merging">
-            <q-checkbox class="row q-mt-xs" label="Change Owner" v-model="changeOwnerFlg" />
-          </div>
-          <div class="col-12 col-sm-6" v-if="isEdit && isCreator && changeOwnerFlg">
-            <p class="q-mt-none q-mb-xs text-weight-medium col-4">Select New Owner</p>
-            <span class="text-size-13 q-mb-xs">* Can choose another member to be the new Owner of the project.</span>
-            <q-select
-              v-model="targetChangeOwner"
-              :options="ownerTargetOptions"
-              outlined
-              dense
-              lazy-rules
-              stack-label
-              emit-value
-              map-options
-              borderless
-            />
-          </div>
-        </div>
-        <div class="row q-col-gutter-md profile-padding">
-          <div class="col-12">
-            <div class="row justify-between">
-              <div></div>
-              <div>
-                <q-btn
-                  v-if="isCreator"
-                  :label="merging ? 'Finish Merge' : isEdit ? 'Update Project' : 'Create Project'"
-                  class="q-mr-xs q-mt-lg"
-                  :disable="!useOldProjectName && projectNameError"
-                  style="height: 40px"
-                  type="submit"
-                  color="primary"
-                />
-                <q-btn
-                  v-if="isEdit || merging"
-                  :label="isCreator && !merging ? 'Cancel Update' : 'Cancel'"
-                  class="q-ml-xs q-mt-lg"
-                  style="height: 40px"
-                  type="button"
-                  color="white"
-                  text-color="black"
-                  @click="cancelEdit()"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </q-card>
+      <q-btn
+        label="Create Project"
+        @click="projectDialog = true"
+        class="q-mr-xs q-mt-lg"
+        style="height: 40px"
+        color="primary"
+      />
     </div>
     <div class="q-mt-md">
       <q-table
@@ -170,7 +24,7 @@
         :class="pagination.rowsNumber <= pagination.rowsPerPage ? 'hide-pagination-number' : ''"
         flat
         separator="none"
-        @row-click="(_, row) => editProject(row.projectId)"
+        @row-click="(_, row) => (!mergeMode ? editProject(row.projectId) : selectRow(row))"
       >
         <template v-slot:body-cell-action="props">
           <q-td :props="props">
@@ -181,7 +35,7 @@
               round
               flat
               color="grey"
-              @click="setDeleteProject(props.row.projectId)"
+              @click.stop="setDeleteProject(props.row.projectId)"
               icon="delete"
             ></q-btn>
           </q-td>
@@ -223,6 +77,160 @@
         <q-card-actions align="right">
           <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteProject()" />
           <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="projectDialog" persistent>
+      <q-card style="width: 700px; max-width: 80vw">
+        <q-card-section class="row q-pb-none">
+          <div class="text-h6">{{ merging ? 'Merging' : isEdit ? 'Edit Project' : 'Add Project' }}</div>
+        </q-card-section>
+        <q-card-section class="q-py-none q-px-lg row">
+          <div class="col-12 q-py-sm">
+            <div class="row q-mt-sm q-col-gutter-md profile-padding">
+              <div class="col-12 col-sm-6" v-if="!isCreator">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">Project Owner</p>
+                <p>{{ project.creatorName }}</p>
+              </div>
+              <div class="col-12 col-sm-6">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">
+                  {{ merging ? 'New Project Name' : 'Project Name' }}
+                  <q-checkbox
+                    size="sm"
+                    class="fw-400"
+                    label="Use Old Project Name"
+                    v-if="merging"
+                    v-model="useOldProjectName"
+                  />
+                </p>
+                <q-input
+                  v-if="(isCreator && !merging) || (merging && !useOldProjectName)"
+                  outlined
+                  dense
+                  lazy-rules
+                  stack-label
+                  @blur="checkValidProjectName"
+                  :error="projectNameError"
+                  :error-message="project.error"
+                  @focus="projectNameFocus = true"
+                  hide-bottom-space
+                  v-model="project.name"
+                  placeholder="Project Name"
+                />
+                <q-select
+                  v-if="merging && useOldProjectName"
+                  v-model="project.name"
+                  :options="oldProjectNameOptions"
+                  outlined
+                  dense
+                  lazy-rules
+                  stack-label
+                  emit-value
+                  map-options
+                  borderless
+                />
+                <p v-if="!isCreator">{{ project.name }}</p>
+              </div>
+              <div class="col-12 col-sm-6">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">{{ isCreator ? 'Members Select' : 'Members' }}</p>
+                <q-select
+                  v-model="memberModel"
+                  v-if="isCreator"
+                  use-input
+                  use-chips
+                  multiple
+                  outlined
+                  input-debounce="0"
+                  @new-value="createValue"
+                  :options="memberFilterOptions"
+                  @blur="selectBlur"
+                  @filter="filterFn"
+                  @keyup.enter="memberEnterType"
+                  :error="memberSelectError"
+                  :error-message="memberError"
+                  @update:model-value="modelValueChange()"
+                />
+                <p v-if="!isCreator">{{ membersDisplay }}</p>
+              </div>
+              <div class="col-12 col-sm-6" v-if="!isApproverEmpty">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">Approvers</p>
+                <q-select
+                  v-model="approverModel"
+                  v-if="isCreator"
+                  use-input
+                  use-chips
+                  multiple
+                  outlined
+                  input-debounce="0"
+                  @new-value="createApproverValue"
+                  :options="approverFilterOptions"
+                  @filter="approverFilterFn"
+                  @blur="approverSelectBlur"
+                  @keyup.enter="approverEnterType"
+                  :error="approverSelectError"
+                  :error-message="approverError"
+                  @update:model-value="approverModelValueChange()"
+                />
+                <p v-if="!isCreator">{{ approversDisplay }}</p>
+              </div>
+              <div class="col-12 col-sm-6">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">Description</p>
+                <q-input
+                  v-if="isCreator"
+                  v-model="project.description"
+                  dense
+                  outlined
+                  stack-label
+                  auto
+                  rows="3"
+                  hide-bottom-space
+                  type="textarea"
+                />
+                <p v-if="!isCreator">{{ project.description }}</p>
+              </div>
+              <div class="col-12" v-if="isEdit && isCreator && !merging">
+                <q-checkbox class="row q-mt-xs" label="Change Owner" v-model="changeOwnerFlg" />
+              </div>
+              <div class="col-12 col-sm-6" v-if="isEdit && isCreator && changeOwnerFlg">
+                <p class="q-mt-none q-mb-xs text-weight-medium col-4">Select New Owner</p>
+                <span class="text-size-13 q-mb-xs"
+                  >* Can choose another member to be the new Owner of the project.</span
+                >
+                <q-select
+                  v-model="targetChangeOwner"
+                  :options="ownerTargetOptions"
+                  outlined
+                  dense
+                  lazy-rules
+                  stack-label
+                  emit-value
+                  map-options
+                  borderless
+                />
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="center" class="q-pb-md">
+          <q-btn
+            v-if="isCreator"
+            :label="merging ? 'Finish Merge' : isEdit ? 'Update Project' : 'Create Project'"
+            class="q-mr-xs q-mt-lg"
+            :disable="!useOldProjectName && projectNameError"
+            style="height: 40px"
+            type="button"
+            color="primary"
+            @click="submit"
+          />
+          <q-btn
+            :label="isEdit && isCreator && !merging ? 'Cancel Update' : 'Cancel'"
+            class="q-ml-xs q-mt-lg"
+            style="height: 40px"
+            type="button"
+            color="white"
+            text-color="black"
+            @click="cancelEdit()"
+          />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -420,6 +428,7 @@ export default {
       selected: [],
       showMergeButton: false,
       useOldProjectName: false,
+      projectDialog: false,
     }
   },
   name: 'projectForm',
@@ -955,6 +964,7 @@ export default {
               message: 'Project has been merged',
               position: 'bottom',
             })
+            this.projectDialog = false
           })
           .catch((err) => {
             responseError(err)
@@ -973,6 +983,7 @@ export default {
               message: 'Project has been updated',
               position: 'bottom',
             })
+            this.projectDialog = false
           })
           .catch((err) => {
             responseError(err)
@@ -988,6 +999,7 @@ export default {
               message: 'Project has been created',
               position: 'bottom',
             })
+            this.projectDialog = false
           })
           .catch((err) => {
             responseError(err)
@@ -1098,6 +1110,23 @@ export default {
     checkValidProjectNameSubmit() {
       this.handlerValidProjectName(true)
     },
+    selectRow(project) {
+      let exist = false
+      let index = -1
+      for (let i = 0; i < this.selected.length; i++) {
+        const selectedItem = this.selected[i]
+        if (selectedItem.projectId == project.projectId) {
+          exist = true
+          index = i
+          break
+        }
+      }
+      if (exist) {
+        this.selected.splice(index, 1)
+      } else {
+        this.selected.push(project)
+      }
+    },
     editProject(projectId) {
       this.rows.forEach((tmpProject) => {
         if (tmpProject.projectId == projectId) {
@@ -1142,6 +1171,7 @@ export default {
             })
           }
           this.approverModel = ref(approverArr)
+          this.projectDialog = true
           return
         }
       })
@@ -1169,6 +1199,7 @@ export default {
       this.isEdit = false
       this.merging = false
       this.mergeMode = false
+      this.projectDialog = false
       this.selected = []
       this.resetProject()
     },
@@ -1179,6 +1210,7 @@ export default {
       this.mergeMode = !this.mergeMode
       if (!this.mergeMode) {
         this.merging = false
+        this.selected = []
         this.resetProject()
       }
     },
@@ -1256,6 +1288,7 @@ export default {
         })
       }
       this.approverModel = ref(approverArr)
+      this.projectDialog = true
     },
   },
 
