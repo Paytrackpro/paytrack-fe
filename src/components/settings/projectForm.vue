@@ -134,7 +134,7 @@
                   v-if="isCreator"
                   :label="merging ? 'Finish Merge' : isEdit ? 'Update Project' : 'Create Project'"
                   class="q-mr-xs q-mt-lg"
-                  :disable="projectNameError"
+                  :disable="!useOldProjectName && projectNameError"
                   style="height: 40px"
                   type="submit"
                   color="primary"
@@ -244,7 +244,9 @@ import {
 let memberStringOptions = []
 let approverStringOptions = []
 let memberTyping = ''
+let blurTyping = ''
 let approverTyping = ''
+let approverBlurTyping = ''
 
 export default {
   setup() {
@@ -301,9 +303,11 @@ export default {
         update(() => {
           if (val === '') {
             memberFilterOptions.value = memberStringOptions
+            blurTyping = ''
           } else {
             const needle = val.toLowerCase()
             memberTyping = needle
+            blurTyping = needle
             memberFilterOptions.value = memberStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
           }
         })
@@ -312,9 +316,11 @@ export default {
         update(() => {
           if (val === '') {
             approverFilterOptions.value = approverStringOptions
+            approverBlurTyping = ''
           } else {
             const needle = val.toLowerCase()
             approverTyping = needle
+            approverBlurTyping = needle
             approverFilterOptions.value = approverStringOptions.filter((v) => v.toLowerCase().indexOf(needle) > -1)
           }
         })
@@ -488,13 +494,14 @@ export default {
     selectBlur() {
       this.memberCheckStatus = DESTINATION_CHECK_CHECKING
       let existOnOptions = false
-      if (memberTyping == '') {
+      if (blurTyping == '') {
         this.memberCheckStatus = DESTINATION_CHECK_DONE
         return
       }
       let existOnProjectMembers = false
       this.project.members.forEach((member) => {
-        if (member.userName == memberTyping) {
+        //check on member
+        if (member.userName == blurTyping) {
           existOnProjectMembers = true
           return
         }
@@ -505,17 +512,18 @@ export default {
       }
       let existOption
       memberStringOptions.forEach((option) => {
-        if (option === memberTyping) {
+        if (option === blurTyping) {
           existOnOptions = true
           existOption = option
           memberTyping = ''
+          blurTyping = ''
           return
         }
       })
       if (!existOnOptions) {
         //check current typing user
         this.$api
-          .get(`/user/member-exist-checking?userName=${memberTyping}`)
+          .get(`/user/member-exist-checking?userName=${blurTyping}`)
           .then(({ found, id, userName, displayName, paymentSettings, message }) => {
             if (found) {
               this.project.members.push({
@@ -546,6 +554,7 @@ export default {
           })
           .finally(() => {
             memberTyping = ''
+            blurTyping = ''
           })
       } else {
         //get userinfo by username
@@ -769,13 +778,13 @@ export default {
     approverSelectBlur() {
       this.approverCheckStatus = DESTINATION_CHECK_NONE
       let existOnOptions = false
-      if (approverTyping == '') {
+      if (approverBlurTyping == '') {
         this.approverCheckStatus = DESTINATION_CHECK_DONE
         return
       }
       let existOnProjectApprovers = false
       this.project.approvers.forEach((approver) => {
-        if (approver.userName == approverTyping) {
+        if (approver.userName == approverBlurTyping) {
           existOnProjectApprovers = true
           return
         }
@@ -786,17 +795,18 @@ export default {
       }
       let existOption
       approverStringOptions.forEach((option) => {
-        if (option === approverTyping) {
+        if (option === approverBlurTyping) {
           existOnOptions = true
           existOption = option
           approverTyping = ''
+          approverBlurTyping = ''
           return
         }
       })
       if (!existOnOptions) {
         //check current typing user
         this.$api
-          .get(`/user/member-exist-checking?userName=${approverTyping}`)
+          .get(`/user/member-exist-checking?userName=${approverBlurTyping}`)
           .then(({ found, id, userName, displayName, paymentSettings, message }) => {
             if (found) {
               this.project.approvers.push({
@@ -825,6 +835,7 @@ export default {
           })
           .finally(() => {
             approverTyping = ''
+            approverBlurTyping = ''
           })
       } else {
         //get userinfo by username
@@ -911,7 +922,7 @@ export default {
       return result
     },
     async submit() {
-      if (!this.checkDestinationDone()) {
+      if (!(this.merging && this.useOldProjectName) && !this.checkDestinationDone()) {
         if (this.projectNameFocus) {
           this.checkValidProjectNameSubmit()
         }
