@@ -200,7 +200,7 @@ export default {
     },
     initProjectList() {
       this.$api
-        .get('/project/get-list', {})
+        .get('/project/get-all-list', {})
         .then((res) => {
           this.projectSelection = res
           projectStringOptions = []

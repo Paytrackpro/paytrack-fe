@@ -4,7 +4,7 @@
       <q-btn
         label="Create Project"
         @click="projectDialog = true"
-        class="q-mr-xs q-mt-lg"
+        class="q-mr-xs"
         style="height: 40px"
         color="primary"
       />
@@ -30,7 +30,7 @@
           <q-td :props="props">
             <q-btn
               :props="props"
-              v-if="isCreatorUser(props.row)"
+              v-if="isCreatorUser(props.row) && !props.row.cannotArchived"
               dense
               round
               flat
@@ -402,6 +402,18 @@ export default {
           align: 'center',
           field: (row) => {
             return row.description
+          },
+          format: (val) => {
+            return val
+          },
+        },
+        {
+          name: 'linkedProjectNum',
+          required: true,
+          label: 'Linked Projects Num',
+          align: 'center',
+          field: (row) => {
+            return row.linkedProjectNum
           },
           format: (val) => {
             return val
@@ -1332,12 +1344,20 @@ export default {
       return hasApprover
     },
     getColumn: function () {
-      if (this.hasApprovers) {
-        return this.columns
-      }
       const tempColumns = []
+      let hasAction = false
+      this.rows.forEach((row) => {
+        if (!row.cannotArchived && this.isCreatorUser(row)) {
+          hasAction = true
+          return
+        }
+      })
       this.columns.forEach((column) => {
-        if (column.name !== 'approvers') {
+        if (
+          (column.name === 'approvers' && this.hasApprovers) ||
+          (column.name !== 'approvers' && column.name !== 'action') ||
+          (column.name === 'action' && hasAction)
+        ) {
           tempColumns.push(column)
         }
       })
