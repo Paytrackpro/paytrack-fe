@@ -1044,8 +1044,10 @@ export default {
         .then((res) => {
           this.loading = false
           this.rows = res
-          if (this.rows) {
+          let length = 0
+          if (this.rows && this.rows.length > 0) {
             let canMergeCount = 0
+            length = this.rows.length
             this.rows.forEach((row) => {
               if (row.creatorId == this.user.id) {
                 canMergeCount++
@@ -1054,7 +1056,7 @@ export default {
             this.showMergeButton = canMergeCount >= 2
           }
           this.updateDisplayList(this.mergeMode)
-          this.pagination.rowsNumber = res.length
+          this.pagination.rowsNumber = length
           const hasProject = this.projectId > 0
           //check and active project
           if (this.rows && this.rows.length > 0 && isCreated && hasProject) {
@@ -1075,15 +1077,17 @@ export default {
       this.$api
         .get('/payment/get-payment-users', {})
         .then((res) => {
-          this.userSelection = res
+          this.userSelection = res || []
           memberStringOptions = []
           approverStringOptions = []
-          this.userSelection.forEach((userInfo) => {
-            if (this.user.id !== userInfo.id) {
-              memberStringOptions.push(userInfo.userName)
-            }
-            approverStringOptions.push(userInfo.userName)
-          })
+          if (this.userSelection && this.userSelection.length > 0) {
+            this.userSelection.forEach((userInfo) => {
+              if (this.user.id !== userInfo.id) {
+                memberStringOptions.push(userInfo.userName)
+              }
+              approverStringOptions.push(userInfo.userName)
+            })
+          }
         })
         .catch((err) => {
           responseError(err)
