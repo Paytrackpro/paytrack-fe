@@ -16,9 +16,14 @@
                 <div class="container justify-center">
                   <div v-show="!isOtp">
                     <q-card-section class="q-pa-lg login-form">
-                      <p class="text-h5 text-primary"><b>Sign In</b></p>
-                      <p class="login-subtitle text-primary">Please fill login information below</p>
-                      <q-form class="form-area" @submit="goLogin()">
+                      <p class="text-h5 text-primary text-center"><b>Sign In</b></p>
+                      <p class="login-subtitle text-center text-primary" v-if="loginType == 0">
+                        Please fill login information below
+                      </p>
+                      <p class="login-subtitle text-primary text-center q-mt-sm" v-if="loginType == 1">
+                        Sign in with passkey
+                      </p>
+                      <q-form class="form-area" @submit="goLogin()" v-if="loginType == 0">
                         <div class="inputContainer">
                           <input
                             id="user_name_id"
@@ -61,10 +66,28 @@
                         <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
                         <q-btn label="Sign in" type="submit" color="primary" />
                       </q-form>
+                      <div class="d-flex justify-content-center q-mb-md q-mt-sm" v-if="loginType == 1">
+                        <q-btn
+                          label="Sign in"
+                          color="primary"
+                          class="text-center"
+                          :loading="signBtnLoading"
+                          @click="openPasskeyMgr()"
+                        />
+                      </div>
                       <q-card class="col" flat bordered> </q-card>
                       <div class="text-grey-3 q-mt-md row justify-between">
-                        <p>Don't have an account yet?</p>
-                        <router-link class="link text-primary" to="/register">Create Account</router-link>
+                        <p v-if="authType == 0">Don't have an account yet?</p>
+                        <p
+                          class="cursor-pointer underline-link text-primary"
+                          v-if="authType == 1"
+                          @click="loginWithOldAccount"
+                        >
+                          {{ loginType == 0 ? 'Log in with passkey' : 'Log in with old account' }}
+                        </p>
+                        <router-link class="link text-primary underline-link" to="/register"
+                          >Create Account</router-link
+                        >
                       </div>
                     </q-card-section>
                   </div>
@@ -81,7 +104,10 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { responseError } from 'src/helper/error'
 import Otp from 'src/components/otp.vue'
+import { Notify } from 'quasar'
+import { startAuthentication } from '@simplewebauthn/browser'
 
 export default {
   components: { Otp },
@@ -95,7 +121,21 @@ export default {
       isOtp: false,
       otp: '',
       msg: [],
+      authType: 0,
+      loginType: 0,
+      signBtnLoading: false,
     }
+  },
+  created() {
+    this.$api
+      .get(`/auth/auth-method`)
+      .then((data) => {
+        this.authType = data
+        this.loginType = data
+      })
+      .catch((err) => {
+        responseError(err)
+      })
   },
   computed: {
     ...mapGetters({
@@ -105,11 +145,13 @@ export default {
   methods: {
     ...mapActions({
       login: 'user/login',
+      setLogin: 'user/setLogin',
     }),
     async goLogin(otpString) {
       const { error, data } = await this.login({
         username: this.username,
         password: this.password,
+        loginType: this.loginType,
         isOtp: this.isOtp,
         otp: otpString,
       })
@@ -129,6 +171,59 @@ export default {
         return
       }
       this.msg[name] = 'Please enter your ' + name
+    },
+    openPasskeyMgr() {
+      this.signBtnLoading = true
+      this.$api
+        .post('/auth/assertion-options', {})
+        .then((res) => {
+          if (!res.error) {
+            const resultData = JSON.parse(res.data)
+            if (!resultData || !resultData.options) {
+              return
+            }
+            const opts = resultData.options
+            const sessionKey = resultData.sessionkey
+            this.handlerLoginFinish(opts, sessionKey, false)
+          } else {
+            Notify.create({
+              type: 'negative',
+              message: res.msg,
+            })
+            this.signBtnLoading = false
+          }
+        })
+        .catch((err) => {
+          this.signBtnLoading = false
+          responseError(err)
+        })
+    },
+    loginWithOldAccount() {
+      if (this.loginType == 0) {
+        this.loginType = 1
+      } else {
+        this.loginType = 0
+      }
+    },
+    async handlerLoginFinish(opts, sessionKey, startConditionalUI) {
+      let asseResp
+      try {
+        asseResp = await startAuthentication(opts.publicKey, startConditionalUI)
+      } catch (error) {
+        this.signBtnLoading = false
+        console.log('Conditional UI request was aborted')
+        return
+      }
+      this.$api
+        .post('/auth/assertion-result?sessionKey=' + sessionKey, asseResp)
+        .then((res) => {
+          this.setLogin(res)
+          this.$router.push({ path: '/approvals' })
+        })
+        .catch((err) => {
+          this.signBtnLoading = false
+          responseError(err)
+        })
     },
   },
   watch: {

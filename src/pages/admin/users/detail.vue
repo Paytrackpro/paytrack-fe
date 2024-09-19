@@ -19,6 +19,7 @@
                 v-model="userName"
                 :placeholder="'Username'"
                 lazyRules
+                :readonly="true"
                 :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
               />
             </div>
@@ -33,25 +34,6 @@
                 lazyRules
                 :rules="[(val, rules) => !val || (val && rules.email(val)) || 'Please enter a valid email address']"
               />
-            </div>
-            <div class="col-12 col-sm-6 col-lg-4">
-              <custom-input
-                :label="'Password'"
-                v-model="password"
-                :type="isPwd ? 'password' : 'text'"
-                :placeholder="'Password'"
-                lazyRules
-                :rules="[(val) => !val || val.length == 0 || (val && val.length >= 6) || 'Please use a valid password']"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    v-if="password && password.length > 0"
-                    :name="isPwd ? 'visibility_off' : 'visibility'"
-                    class="cursor-pointer"
-                    @click="isPwd = !isPwd"
-                  />
-                </template>
-              </custom-input>
             </div>
           </div>
           <div class="row">
@@ -77,10 +59,8 @@ export default {
   data() {
     return {
       userName: '',
-      password: '',
       email: '',
       displayName: '',
-      isPwd: true,
       setAsAdmin: false,
       resetTOTP: false,
       lockUser: false,
@@ -107,7 +87,6 @@ export default {
         .put(`admin/user/info`, {
           userId: parseInt(this.$route.params.id),
           userName: this.userName,
-          password: this.password,
           email: this.email,
           displayName: this.displayName,
           otp: this.resetTOTP,
