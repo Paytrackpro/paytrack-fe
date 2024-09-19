@@ -98,7 +98,9 @@
                           invoiceKey.split(';')[1] == '' ? '#' : invoiceKey.split(';')[1]
                         }}</span>
                         <span class="col-4 text-center padding-30">{{ invoiceKey.split(';')[0] }}</span>
-                        <span class="col-4 text-center padding-80">{{ getTotalHours(invoiceKey) }} hour(s)</span>
+                        <span class="col-4 text-center padding-80"
+                          >{{ getTotalHours(invoiceKey).toFixed(2) }} hour(s)</span
+                        >
                       </div>
                     </q-item-section>
                   </template>
@@ -108,7 +110,7 @@
                       <div class="row q-mt-lg" v-for="(invoiceUnit, j) of invoiceReportList[invoiceKey]" :key="j">
                         <span class="col-4 text-center">{{ invoiceUnit.date }}</span>
                         <span class="col-4 text-center">{{ invoiceUnit.description }}</span>
-                        <span class="col-4 text-center">{{ invoiceUnit.hours }}&nbsp;hour(s)</span>
+                        <span class="col-4 text-center">{{ invoiceUnit.hours.toFixed(2) }}&nbsp;hour(s)</span>
                       </div>
                     </q-card-section>
                   </q-card>
