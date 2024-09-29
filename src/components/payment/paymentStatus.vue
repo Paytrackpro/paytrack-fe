@@ -61,9 +61,6 @@ export default {
         case 'draft':
           return STATUS_INFO.draft
         case 'sent':
-          if (this.user.id == this.payment.senderId) {
-            return STATUS_INFO.sent
-          }
           return this.getSentStatus()
         case 'confirmed':
           return this.getConfirmStatus()
@@ -83,52 +80,48 @@ export default {
       }
     },
     getSentStatus() {
-      if (this.user.id == this.payment.senderId) {
-        return STATUS_INFO.sent
-      } else {
-        let isAllApproved = true
-        let isUserApproved = false
-        if (this.payment.approvers !== null) {
-          this.payment.approvers.forEach((el) => {
-            if (el.approverId == this.user.id && el.isApproved) {
-              isUserApproved = true
-            }
-            if (!el.isApproved) {
-              isAllApproved = false
-            }
-          })
+      let isAllApproved = true
+      let isUserApproved = false
+      if (this.payment.approvers !== null) {
+        this.payment.approvers.forEach((el) => {
+          if (el.approverId == this.user.id && el.isApproved) {
+            isUserApproved = true
+          }
+          if (!el.isApproved) {
+            isAllApproved = false
+          }
+        })
+      }
+      // the receiver
+      if (this.user.id == this.payment.receiverId || this.user.id == this.payment.senderId) {
+        if (this.payment.approvers === null || this.payment.approvers.length == 0) {
+          return this.user.id == this.payment.receiverId ? STATUS_INFO.received : STATUS_INFO.sent
         }
-        // the receiver
-        if (this.user.id == this.payment.receiverId) {
-          if (this.payment.approvers === null || this.payment.approvers.length == 0) {
-            return STATUS_INFO.received
+        const approverArr = []
+        this.payment.approvers.forEach((approver) => {
+          if (approver.approverName && !approver.isApproved) {
+            approverArr.push(approver.approverName)
           }
-          let userWaitApproval = this.payment.approvers
-            .map((el) => {
-              if (!el.isApproved) {
-                return el.approverName
-              }
-            })
-            .join(',')
-          if (isAllApproved) {
-            return STATUS_INFO.approved
-          } else if (this.isShowApprover) {
-            var approversStatus = {}
-            // if have comma at begin of string, remove comma
-            if (userWaitApproval.startsWith(',')) {
-              userWaitApproval = userWaitApproval.replace(',', '')
-            }
-            approversStatus.statusShow = STATUS_INFO.waiting_approval.statusShow + ': ' + userWaitApproval
-            approversStatus.statusColor = STATUS_INFO.waiting_approval.statusColor
-            approversStatus.statusIcon = STATUS_INFO.waiting_approval.statusIcon
-            return approversStatus
-          } else {
-            return STATUS_INFO.waiting_approval
-          }
+        })
+        let userWaitApproval = approverArr.join(',')
+        if (isAllApproved) {
+          return STATUS_INFO.approved
+        } else if (this.isShowApprover) {
+          var approversStatus = {}
+          // if have comma at begin of string, remove comma
+          // if (userWaitApproval.startsWith(',')) {
+          //   userWaitApproval = userWaitApproval.replace(',', '')
+          // }
+          approversStatus.statusShow = STATUS_INFO.waiting_approval.statusShow + ': ' + userWaitApproval
+          approversStatus.statusColor = STATUS_INFO.waiting_approval.statusColor
+          approversStatus.statusIcon = STATUS_INFO.waiting_approval.statusIcon
+          return approversStatus
         } else {
-          // for approver
-          return isUserApproved ? STATUS_INFO.approved : STATUS_INFO.waiting_approval
+          return STATUS_INFO.waiting_approval
         }
+      } else {
+        // for approver
+        return isUserApproved ? STATUS_INFO.approved : STATUS_INFO.waiting_approval
       }
     },
   },

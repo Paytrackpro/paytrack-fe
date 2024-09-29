@@ -36,6 +36,16 @@ const routes = [
             meta: {
               title: 'Settings',
             },
+            children: [
+              {
+                path: ':project',
+                name: 'tab.project',
+                component: () => import('pages/users/settings.vue'),
+                meta: {
+                  title: 'Projects',
+                },
+              },
+            ],
           },
         ],
       },

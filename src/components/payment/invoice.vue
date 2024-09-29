@@ -4,7 +4,7 @@
       {{ invoice.date.replaceAll('/', '-') }}
     </td>
     <td class="text-left" v-if="!showProjectOnInvoice && (readonly || projectDisplay)">
-      {{ invoice.projectName }}
+      <a :href="getProjectLink" class="underline-link">{{ invoice.projectName }}</a>
     </td>
     <td class="text-left">
       <q-input
@@ -174,6 +174,9 @@ export default {
     ...mapGetters({
       user: 'user/getUser',
     }),
+    getProjectLink: function () {
+      return '/settings/project/' + this.invoice.projectId
+    },
   },
   watch: {
     hourlyRate: {

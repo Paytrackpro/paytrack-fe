@@ -6,7 +6,7 @@
         <div class="row">
           <div class="text-h6 title-case">Payment request</div>
           <payment-status
-            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus)"
+            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus || !isApprovedPayment())"
             :paymentModel="payment"
             class="q-ml-md"
             :isShowIcon="true"
@@ -14,7 +14,7 @@
         </div>
         <div class="row justify-end">
           <q-btn
-            v-if="processable && !isRejectedStatus"
+            v-if="processable && !isRejectedStatus && isApprovedPayment()"
             label="Pay"
             type="button"
             color="primary"
@@ -79,7 +79,7 @@
         </div>
       </div>
       <q-select
-        v-if="isReceiver && !isPaidStatus && !isDraftStatus"
+        v-if="isReceiver && isApprovedPayment() && !isPaidStatus && !isDraftStatus"
         v-model="paymentStatus"
         :options="statusOption"
         dense
@@ -117,9 +117,17 @@
     <div class="q-ma-lg text-size-15">
       <div class="row q-mb-xs q-col-gutter-md">
         <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs field-shadow">
-          <p class="q-mb-md">
+          <p class="q-mb-md" v-if="!approvalable">
             <span>{{ isSender ? 'To' : 'From' }}:&nbsp;&nbsp;</span>
             {{ isSender ? getRecipientName : getSenderName }}
+          </p>
+          <p class="q-mb-xs d-flex" v-if="approvalable">
+            <span style="width: 40px">From</span>
+            :&nbsp;&nbsp;{{ getSenderName }}
+          </p>
+          <p class="q-mb-md d-flex" v-if="approvalable">
+            <span style="width: 40px">To</span>
+            :&nbsp;&nbsp;{{ getRecipientName }}
           </p>
           <p class="q-mb-xs text-size-18" v-if="!isShowInvoice">
             <span>Amount (USD):&nbsp;</span>
@@ -253,7 +261,9 @@
         v-if="isShowInvoice && payment.showProjectOnInvoice && payment.projectId > 0"
       >
         <p>
-          <span>Invoice Project:</span>&nbsp;<span class="fw-600">{{ payment.projectName }}</span>
+          <span>Invoice Project:</span>&nbsp;<a :href="getProjectLink" class="fw-600 underline-link">{{
+            payment.projectName
+          }}</a>
         </p>
       </div>
       <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isShowInvoice">
@@ -354,6 +364,12 @@
                 </q-select>
               </div>
             </div>
+          </div>
+          <div class="col-12 q-pt-sm">
+            <p>
+              <b class="text-weight-medium">Amount (USD):&nbsp;</b>
+              <span>${{ (payment.amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 }) }}</span>
+            </p>
           </div>
           <div class="col-6 q-py-sm field-shadow">
             <PaymentRateInput
@@ -819,6 +835,17 @@ export default {
           return ''
       }
     },
+    isApprovedPayment() {
+      let isAllApproved = true
+      if (this.payment.approvers !== null && this.payment.approvers.length > 0) {
+        this.payment.approvers.forEach((el) => {
+          if (!el.isApproved) {
+            isAllApproved = false
+          }
+        })
+      }
+      return isAllApproved
+    },
   },
   watch: {
     modelValue: {
@@ -978,7 +1005,11 @@ export default {
       return !this.isApprover && this.payment.status == 'paid'
     },
     displayApprovers() {
-      return this.payment.receiverId === this.user.id && this.payment.approvers && this.payment.approvers.length > 0
+      return (
+        (this.payment.receiverId === this.user.id || this.payment.senderId === this.user.id) &&
+        this.payment.approvers &&
+        this.payment.approvers.length > 0
+      )
     },
     isShowCost() {
       var isShowCost = true
@@ -1008,6 +1039,12 @@ export default {
     },
     isUploadDisplay() {
       return this.isPaidStatus && this.isSender && this.receiptAttachFile != null
+    },
+    getProjectLink: function () {
+      if (!this.payment || this.payment.projectId < 1) {
+        return '#'
+      }
+      return '/settings/project/' + this.payment.projectId
     },
   },
 }

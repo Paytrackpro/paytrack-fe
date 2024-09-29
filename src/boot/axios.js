@@ -16,11 +16,13 @@ export default boot(({ app }) => {
 
 api.interceptors.request.use(function (config) {
   const token = localStorage.getItem('token')
-
+  const loginType = localStorage.getItem('loginType')
   if (token) {
     config.headers['Authorization'] = 'Bearer ' + token
   }
-
+  if (loginType) {
+    config.headers['Logintype'] = '' + loginType
+  }
   return config
 })
 

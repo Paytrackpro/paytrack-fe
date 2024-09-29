@@ -1,11 +1,20 @@
 <template>
   <div class="row q-mt-lg">
-    <div class="text-bold text-grey-3" align="left" v-if="type !== 'approval' && !isBulkPay">
+    <div class="text-bold text-grey-3" align="left" v-if="!isBulkPay">
       <q-btn
         :label="hidePaid ? 'Show Paid' : 'Hide paid'"
         type="button"
+        v-if="type !== 'approval'"
         :color="hidePaid ? 'secondary' : 'primary'"
         @click="hidePaidHandler()"
+        class="q-mr-sm btn btn-animated"
+      />
+      <q-btn
+        :label="showApproved ? 'Hide Approved' : 'Show Approved'"
+        type="button"
+        v-if="type === 'approval'"
+        :color="showApproved ? 'secondary' : 'primary'"
+        @click="showApprovedHandler()"
         class="q-mr-sm btn btn-animated"
       />
     </div>
@@ -212,7 +221,7 @@ import { MDateFormat } from 'src/consts/common'
 import { mapGetters, mapActions } from 'vuex'
 import { ref } from 'vue'
 import role from 'src/consts/role'
-import { PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
+import { PAYMENT_OBJECT_APPROVAL, PAYMENT_OBJECT_REMINDER, PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import MTime from 'components/common/mTime'
 import customPagination from '../common/custom_pagination.vue'
@@ -265,6 +274,7 @@ export default {
       detailBulk: false,
       isExist: false,
       hidePaid: false,
+      showApproved: false,
       rows: [],
       rate: {
         rate: 0,
@@ -361,38 +371,41 @@ export default {
       return this.user.role === role.USER
     },
     columns() {
-      let flexibleCol = [
-        this.type === PAYMENT_OBJECT_REQUEST
-          ? {
-              name: 'receiverName',
-              align: 'left',
-              label: 'Recipient',
-              sortable: true,
-              field: (row) => {
-                if (row.receiverDisplayName.length > 0) {
-                  return row.receiverDisplayName + ' (' + row.receiverName + ')'
-                } else {
-                  return row.receiverName || row.externalEmail
-                }
-              },
-            }
-          : {
-              name: 'senderName',
-              required: true,
-              label: 'Sender',
-              align: 'left',
-              sortable: true,
-              field: (row) => {
-                if (row.senderDisplayName.length > 0) {
-                  return row.senderDisplayName + ' (' + row.senderName + ')'
-                } else {
-                  return row.senderName || row.externalEmail
-                }
-              },
-              format: (val) => `${val}`,
-            },
-      ]
-
+      let flexibleCol = []
+      const receiverCol = {
+        name: 'receiverName',
+        align: 'left',
+        label: 'Recipient',
+        sortable: true,
+        field: (row) => {
+          if (row.receiverDisplayName.length > 0) {
+            return row.receiverDisplayName + ' (' + row.receiverName + ')'
+          } else {
+            return row.receiverName || row.externalEmail
+          }
+        },
+      }
+      const senderCol = {
+        name: 'senderName',
+        required: true,
+        label: 'Sender',
+        align: 'left',
+        sortable: true,
+        field: (row) => {
+          if (row.senderDisplayName.length > 0) {
+            return row.senderDisplayName + ' (' + row.senderName + ')'
+          } else {
+            return row.senderName || row.externalEmail
+          }
+        },
+        format: (val) => `${val}`,
+      }
+      if (this.type !== PAYMENT_OBJECT_REQUEST) {
+        flexibleCol.push(senderCol)
+      }
+      if (this.type === PAYMENT_OBJECT_REQUEST || this.type === PAYMENT_OBJECT_APPROVAL) {
+        flexibleCol.push(receiverCol)
+      }
       let lastColum = [
         {
           name: 'startDate',
@@ -502,6 +515,7 @@ export default {
         ...pathParamsToPaging(this.$route, this.pagination, true),
         requestType: this.type,
         hidePaid: this.hidePaid,
+        showApproved: this.showApproved,
         userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
       })
     },
@@ -638,12 +652,34 @@ export default {
           responseError(err)
         })
     },
+    showApprovedHandler() {
+      this.showApproved = !this.showApproved
+      this.$api
+        .put('/user/show-approved')
+        .then((data) => {
+          let newUser = { ...this.user }
+          newUser.showApproved = this.showApproved
+          this.setGlobalUser(newUser)
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
     hidePaidFilter(value) {
       const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
       this.getPayments({
         ...filter,
         requestType: this.type,
         hidePaid: value,
+        userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
+      })
+    },
+    showApprovedFilter(value) {
+      const filter = pathParamsToPaging({ query: {} }, this.pagination, true)
+      this.getPayments({
+        ...filter,
+        requestType: this.type,
+        showApproved: value,
         userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
       })
     },
@@ -668,6 +704,7 @@ export default {
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          showApproved: this.showApproved,
           userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       }
@@ -676,6 +713,7 @@ export default {
       immediate: true,
       handler(to) {
         this.hidePaid = this.user.hidePaid
+        this.showApproved = this.user.showApproved
         if (this.isExist) {
           return
         }
@@ -684,12 +722,16 @@ export default {
           ...filter,
           requestType: this.type,
           hidePaid: this.hidePaid,
+          showApproved: this.showApproved,
           userIds: this.memberModel?.value.map((user) => user.value).join(',') ?? '', // filter by user
         })
       },
     },
     hidePaid(value) {
       this.hidePaidFilter(value)
+    },
+    showApproved(value) {
+      this.showApprovedFilter(value)
     },
     memberModel: {
       immediate: true,
@@ -699,6 +741,7 @@ export default {
             ...pathParamsToPaging(this.$route, this.pagination, true),
             requestType: this.type,
             hidePaid: this.hidePaid,
+            showApproved: this.showApproved,
             userIds: newVal.map((user) => user.value).join(','), // filter by user
           })
         }

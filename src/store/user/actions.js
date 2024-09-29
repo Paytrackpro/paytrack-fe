@@ -9,6 +9,7 @@ export default {
       const data = await api.post('/auth/login', payload)
       if (!data.otp) {
         localStorage.setItem('token', data.token)
+        localStorage.setItem('loginType', data.loginType)
         commit('setUser', data.userInfo)
         commit('setAuthenticated', true)
       }
@@ -18,6 +19,12 @@ export default {
     }
   },
 
+  async setLogin({ commit }, data) {
+    localStorage.setItem('token', data.token)
+    localStorage.setItem('loginType', data.loginType)
+    commit('setUser', data.userInfo)
+    commit('setAuthenticated', true)
+  },
   async register({ commit }, user) {
     return api.post('/auth/register', user)
   },
