@@ -53,16 +53,33 @@
         </q-td>
       </template>
       <template v-slot:top-right>
-        <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-      <template v-slot:body-cell-online="props">
-        <q-td :props="props">
-          <q-badge rounded :color="props.value ? 'green' : 'grey'" />
-        </q-td>
+        <div class="row q-gutter-sm items-center title-lastSeen hidden-md-down">
+          <span class="last-seen">Last Seen</span>
+        </div>
+        <div class="q-pa-md btn-lastSeen">
+          <q-btn-dropdown :label="lastSeen.name" color="primary">
+            <q-list>
+              <q-item
+                v-for="(item, index) in dayOptions"
+                :key="index"
+                clickable
+                v-close-popup
+                @click="onItemClick(item)"
+              >
+                <q-item-section>
+                  <q-item-label>{{ item.name }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
+        <div class="row q-gutter-sm items-center">
+          <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
       </template>
     </q-table>
   </div>
@@ -93,6 +110,15 @@ export default {
   },
   data() {
     return {
+      menu: true,
+      lastSeen: {
+        name: '3 Month',
+        value: '3MOTH',
+      },
+      dayOptions: [
+        { name: 'All', value: 'ALL' },
+        { name: '3 Month', value: '3MOTH' },
+      ],
       loading: false,
       KeySearch: '',
       pagination: { ...defaultPaging },
@@ -160,6 +186,20 @@ export default {
       handler(to) {
         const filter = pathParamsToPaging(to, this.pagination, true)
         filter.KeySearch = this.KeySearch
+        filter.LastSeen = this.lastSeen.value
+        this.getUserList({
+          ...filter,
+          requestType: this.type,
+        })
+      },
+    },
+    lastSeen: {
+      immediate: true,
+      handler(newValue) {
+        const filter = {
+          KeySearch: this.KeySearch,
+          LastSeen: newValue.value,
+        }
         this.getUserList({
           ...filter,
           requestType: this.type,
@@ -168,6 +208,9 @@ export default {
     },
   },
   methods: {
+    onItemClick(item) {
+      this.lastSeen = item
+    },
     async getUserList(f) {
       this.loading = true
       this.$api

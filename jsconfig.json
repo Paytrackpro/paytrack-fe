@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    "target": "esnext", 
+    "module": "esnext",
+    "strict": true, 
     "baseUrl": ".",
     "paths": {
       "src/*": ["src/*"],
@@ -11,7 +14,12 @@
       "boot/*": ["src/boot/*"],
       "store/*": ["src/store/*"],
       "vue$": ["node_modules/vue/dist/vue.runtime.esm-bundler.js"]
-    }
+    },
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "esModuleInterop": true, 
+    "skipLibCheck": true
   },
   "exclude": ["dist", ".quasar", "node_modules"]
 }
