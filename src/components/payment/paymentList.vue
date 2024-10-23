@@ -96,6 +96,10 @@
         <template v-if="type === 'reminder'" v-slot:top>
           <div class="q-table__title">{{ label || 'Payments' }}</div>
           <q-space />
+          <div class="q-table__title total-unpaid">
+            Total amount unpaid:
+            <span class="total-amount">${{ totalAmountUnpaid }}</span>
+          </div>
         </template>
         <template v-slot:body-cell-status="props">
           <q-td :props="props">
@@ -217,7 +221,7 @@
 import { pathParamsToPaging, pagingToPathParams, defaultPaging, getRppOps } from 'src/helper/paging'
 import PaymentStatus from 'components/payment/paymentStatus'
 import { date } from 'quasar'
-import { MDateFormat } from 'src/consts/common'
+import { MDateFormat, MDateFormat2 } from 'src/consts/common'
 import { mapGetters, mapActions } from 'vuex'
 import { ref } from 'vue'
 import role from 'src/consts/role'
@@ -269,6 +273,7 @@ export default {
       },
       txId: '',
       paying: false,
+      totalAmountUnpaid: 0,
       selected: [],
       isBulkPay: false,
       detailBulk: false,
@@ -287,6 +292,7 @@ export default {
           label: 'Status',
           field: 'status',
           sortable: true,
+          classes: 'status-column',
         },
         {
           name: 'amount',
@@ -338,6 +344,9 @@ export default {
         responseError(err)
       })
     listenSocketEvent('reloadList', this.onSocketMessage)
+    listenSocketEvent('reloadList', (data) => {
+      console.log('Data received from socket:', data)
+    })
     if (this.type !== PAYMENT_OBJECT_REMINDER) {
       return
     }
@@ -410,7 +419,7 @@ export default {
         {
           name: 'startDate',
           align: 'center',
-          label: 'Start Date',
+          label: 'Created Date',
           field: 'startDate',
           sortable: true,
           format: (val) => date.formatDate(val, MDateFormat),
@@ -418,13 +427,12 @@ export default {
         {
           name: 'updatedAt',
           align: 'center',
-          label: 'Last Edited',
+          label: 'Last Edited (UTC)',
           field: 'updatedAt',
           sortable: true,
-          format: (val) => date.formatDate(val, MDateFormat),
+          format: (val) => date.formatDate(val, MDateFormat2),
         },
       ]
-
       if (this.type === PAYMENT_OBJECT_REMINDER) {
         lastColum.unshift({
           name: 'acceptedCoins',
@@ -452,7 +460,7 @@ export default {
         .get('/payment/list', {
           params: f,
         })
-        .then(({ payments, count }) => {
+        .then(({ payments, count, totalUnpaid }) => {
           if (this.type == 'approval' && count == 0) {
             this.isShowList = false
           }
@@ -460,7 +468,14 @@ export default {
           this.rows = payments || []
           this.pagination.rowsNumber = count
           this.rppOptions = getRppOps(this.rppDefaultOptions, count)
-          //check view project column
+          if (count != 0) {
+            this.totalAmountUnpaid = parseFloat(totalUnpaid || 0).toFixed(2)
+          }
+
+          this.rows.sort((a, b) => {
+            return new Date(b.startDate) - new Date(a.startDate)
+          })
+
           var hasProject = false
           var hasProjectColumnIndex = -1
           this.rows.forEach((payment) => {
@@ -509,6 +524,7 @@ export default {
           this.loading = false
         })
     },
+
     onSocketMessage(data) {
       // reload list
       this.getPayments({

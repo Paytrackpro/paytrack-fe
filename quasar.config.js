@@ -11,6 +11,9 @@
 const ESLintPlugin = require('eslint-webpack-plugin')
 
 const { configure } = require('quasar/wrappers')
+const fs = require('fs')
+const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
+
 
 module.exports = configure(function (ctx) {
   return {
@@ -71,7 +74,11 @@ module.exports = configure(function (ctx) {
         chain.plugin('eslint-webpack-plugin').use(ESLintPlugin, [{ extensions: ['js', 'vue'] }])
       },
 
-      env: require('dotenv').config().parsed,
+      // env: require('dotenv').config().parsed,
+      env: {
+        VERSION: JSON.stringify(pkg.version), 
+        ...require('dotenv').config().parsed
+      },
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js#Property%3A-devServer
