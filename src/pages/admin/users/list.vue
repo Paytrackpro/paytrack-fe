@@ -53,16 +53,33 @@
         </q-td>
       </template>
       <template v-slot:top-right>
-        <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
-          <template v-slot:prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
-      </template>
-      <template v-slot:body-cell-online="props">
-        <q-td :props="props">
-          <q-badge rounded :color="props.value ? 'green' : 'grey'" />
-        </q-td>
+        <div class="row q-gutter-sm items-center title-lastSeen hidden-md-down">
+          <span class="last-seen">Last Seen</span>
+        </div>
+        <div class="q-pa-md btn-lastSeen">
+          <q-btn-dropdown :label="lastSeenFrom" color="primary">
+            <q-list>
+              <q-item
+                v-for="(item, index) in dayOptions"
+                :key="index"
+                clickable
+                v-close-popup
+                @click="onItemClick(item)"
+              >
+                <q-item-section>
+                  <q-item-label>{{ item }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
+        <div class="row q-gutter-sm items-center">
+          <q-input outlined dense debounce="300" v-model="KeySearch" placeholder="Search">
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
       </template>
     </q-table>
   </div>
@@ -93,6 +110,9 @@ export default {
   },
   data() {
     return {
+      menu: true,
+      lastSeenFrom: '3 month',
+      dayOptions: ['All day', '3 month'],
       loading: false,
       KeySearch: '',
       pagination: { ...defaultPaging },
@@ -160,6 +180,16 @@ export default {
       handler(to) {
         const filter = pathParamsToPaging(to, this.pagination, true)
         filter.KeySearch = this.KeySearch
+        // Uncomment to using timestamps
+        // if (this.lastSeenFrom === '3 month') {
+        //   const now = new Date()
+        //   const threeMonthsAgo = new Date(now.setMonth(now.getMonth() - 3))
+        //   filter.lastSeenFrom = threeMonthsAgo.toISOString()
+        //   console.log(filter.lastSeenFrom)
+        // } else if (this.lastSeenFrom === 'All day') {
+        //   filter.lastSeenFrom = 0
+        //   console.log(filter.lastSeenFrom)
+        // }
         this.getUserList({
           ...filter,
           requestType: this.type,
@@ -168,6 +198,9 @@ export default {
     },
   },
   methods: {
+    onItemClick(item) {
+      this.lastSeenFrom = item
+    },
     async getUserList(f) {
       this.loading = true
       this.$api

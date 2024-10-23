@@ -1040,3 +1040,83 @@ a {
 .q-menu .q-item--active .q-item__label {
   color: black;
 }
+
+// .version-info {
+//   position: absolute;
+//   top: 85vh; 
+//   left: 10px;
+//   width: calc(100% - 20px);
+// }
+
+
+.version-info {
+  color: #333;
+  font-size: 14px; 
+  padding: 10px 15px;
+  text-align: center; 
+  margin-top: auto;
+}
+.fixed-version {
+  position: fixed; 
+  bottom: 10px;    
+  left: 50px;      
+  z-index: 1000; 
+}
+.status-column {
+  padding-left: 100px;
+}
+.header-container {
+  display: flex;
+  flex-direction: column; 
+  position: relative;
+  
+}
+.total-unpaid {
+  margin-top: 5px;
+  font-size: medium;
+}
+.total-amount{
+  font-weight: bold;
+}
+
+.q-menu-custom{
+  top: -15px;
+  height: 30px;
+  overflow: hidden;
+  margin-right: 20px;
+  box-shadow: none !important;
+}
+.q-menu-card{
+  min-width: 30px; 
+  width: 100px; 
+  max-height: 70px; 
+  overflow: hidden;
+}
+.q-menu-custom .q-menu-card {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.q-menu-card-section{
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+  padding: 4px; 
+  max-height: 50px; 
+  height: 40px;
+  overflow: hidden;
+  box-shadow: none !important;
+}
+.title-lastSeen{
+  font-size: 16px;
+}
+.btn-lastSeen{
+  width: 100px;
+  margin-left: -10px;
+  margin-right: 40px;
+}
+@media (max-width: 959px) {
+  .title-lastSeen {
+    display: none;
+  }
+}
