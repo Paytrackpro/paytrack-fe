@@ -296,7 +296,7 @@
     </q-dialog>
 
     <q-dialog v-model="payDialog" @update:model-value="disableClose">
-      <q-card style="width: 550px; max-width: 80vw">
+      <q-card style="width: 900px; max-width: 80vw">
         <q-card-section class="row q-pb-none">
           <div class="text-h6">Pay</div>
         </q-card-section>
