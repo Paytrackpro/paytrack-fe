@@ -57,7 +57,7 @@
           <span class="last-seen">Last Seen</span>
         </div>
         <div class="q-pa-md btn-lastSeen">
-          <q-btn-dropdown :label="lastSeenFrom" color="primary">
+          <q-btn-dropdown :label="lastSeen.name" color="primary">
             <q-list>
               <q-item
                 v-for="(item, index) in dayOptions"
@@ -67,7 +67,7 @@
                 @click="onItemClick(item)"
               >
                 <q-item-section>
-                  <q-item-label>{{ item }}</q-item-label>
+                  <q-item-label>{{ item.name }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -111,8 +111,14 @@ export default {
   data() {
     return {
       menu: true,
-      lastSeenFrom: '3 month',
-      dayOptions: ['All day', '3 month'],
+      lastSeen: {
+        name: '3 Month',
+        value: '3MOTH',
+      },
+      dayOptions: [
+        { name: 'All', value: 'ALL' },
+        { name: '3 Month', value: '3MOTH' },
+      ],
       loading: false,
       KeySearch: '',
       pagination: { ...defaultPaging },
@@ -180,16 +186,20 @@ export default {
       handler(to) {
         const filter = pathParamsToPaging(to, this.pagination, true)
         filter.KeySearch = this.KeySearch
-        // Uncomment to using timestamps
-        // if (this.lastSeenFrom === '3 month') {
-        //   const now = new Date()
-        //   const threeMonthsAgo = new Date(now.setMonth(now.getMonth() - 3))
-        //   filter.lastSeenFrom = threeMonthsAgo.toISOString()
-        //   console.log(filter.lastSeenFrom)
-        // } else if (this.lastSeenFrom === 'All day') {
-        //   filter.lastSeenFrom = 0
-        //   console.log(filter.lastSeenFrom)
-        // }
+        filter.LastSeen = this.lastSeen.value
+        this.getUserList({
+          ...filter,
+          requestType: this.type,
+        })
+      },
+    },
+    lastSeen: {
+      immediate: true,
+      handler(newValue) {
+        const filter = {
+          KeySearch: this.KeySearch,
+          LastSeen: newValue.value,
+        }
         this.getUserList({
           ...filter,
           requestType: this.type,
@@ -199,7 +209,7 @@ export default {
   },
   methods: {
     onItemClick(item) {
-      this.lastSeenFrom = item
+      this.lastSeen = item
     },
     async getUserList(f) {
       this.loading = true
