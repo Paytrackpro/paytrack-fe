@@ -1,5 +1,16 @@
 <template>
   <q-form @submit="submit">
+    <q-card class="q-ma-md">
+      <q-card-section>
+        <h6 class="q-mb-md">Hour Rate & Payments</h6>
+        <q-paragraph class="q-mb-md">
+          Hourly rate is the rate you charge for each hour of work. It reflects the cost of services based on the time
+          you work.
+        </q-paragraph>
+        <q-paragraph> Payment method is how you receive money for your fees. </q-paragraph>
+      </q-card-section>
+    </q-card>
+
     <div class="row q-mb-md">
       <custom-input
         class="q-mt-md q-px-sm"
