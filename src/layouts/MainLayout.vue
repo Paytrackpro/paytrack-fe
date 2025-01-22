@@ -134,8 +134,6 @@
           </template>
         </q-list>
       </q-scroll-area>
-      <!-- <button @click="disconnectSocketMethod">Disconnect</button>
-      <button @click="connectSocketMethod">Connect</button> -->
     </q-drawer>
     <div v-if="!miniState" class="version-info text-grey-4 q-pa-md fixed-version">Version: {{ version }}</div>
     <q-page-container>
@@ -289,9 +287,6 @@ export default {
       this.showNetworkStatus()
     })
     this.isSocketConnected = isSocketConnected()
-  },
-  mounted() {
-    console.log(`Phiên bản hiện tại là: ${process.env.VERSION}`)
   },
   beforeUnmount() {
     disconnectSocket()
