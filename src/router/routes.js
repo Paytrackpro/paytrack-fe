@@ -68,6 +68,15 @@ const routes = [
         },
       },
       {
+        path: 'system-report/user/:userName',
+        name: 'user.payments.report',
+        component: () => import('pages/admin/users/userPaymentReport.vue'),
+        meta: {
+          roles: [ROLE.ADMIN],
+          title: 'System Report Details',
+        },
+      },
+      {
         path: 'report/',
         name: 'report',
         component: () => import('pages/admin/report.vue'),

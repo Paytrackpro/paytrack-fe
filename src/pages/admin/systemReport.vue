@@ -1,8 +1,15 @@
 <template>
-  <div class="q-pa-lg">
-    <div class="row">
+  <q-page class="content">
+    <q-card class="q-ma-lg content-container">
+      <q-card-section class="card-header">
+        <div class="row justify-between">
+          <div class="text-h6 title-case">System Report</div>
+        </div>
+      </q-card-section>
+    </q-card>
+    <q-card class="q-ma-lg content-container">
       <q-card class="col-12 col-lg-12 q-pa-md q-mb-lg content-container">
-        <div class="text-h6 title-case">System Report</div>
+        <div class="text-h6 title-case">Summary Information</div>
         <div class="q-ma-md text-size-15">
           <div class="row q-mb-xs q-col-gutter-md">
             <div class="col-12 col-sm-6 col-lg-3 col-xl-3 q-py-xs q-my-xs">
@@ -44,8 +51,8 @@
           </div>
         </div>
       </q-card>
-    </div>
-    <div class="row">
+    </q-card>
+    <q-card class="q-ma-lg content-container">
       <q-table
         title="Users Usage Detail"
         :rows="rows"
@@ -62,21 +69,38 @@
         :loading="loading"
         :rows-per-page-options="rppOptions"
         @request="onRequest"
+        @row-click="(_, row) => goToDetail(row)"
       >
         <template v-slot:pagination>
           <custom-pagination :pagination="pagination" :color="'primary'" />
         </template>
         <template v-slot:top-right>
-          <report-filter @updateFilter="updateFilter" isreport></report-filter>
+          <div class="row q-gutter-md items-center justify-between">
+            <report-filter @updateFilter="updateFilter" isreport></report-filter>
+            <q-input
+              outlined
+              dense
+              debounce="300"
+              v-model.lazy="userName"
+              placeholder="Search user"
+              class="q-ml-md"
+              style="max-width: 300px"
+            >
+              <template v-slot:prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+          </div>
         </template>
+
         <template v-slot:body-cell-online="props">
           <q-td :props="props">
             <q-badge rounded :color="props.value ? 'green' : 'grey'" />
           </q-td>
         </template>
       </q-table>
-    </div>
-  </div>
+    </q-card>
+  </q-page>
 </template>
 
 <script>
@@ -129,6 +153,13 @@ export default {
           sortable: true,
         },
         {
+          name: 'paid',
+          align: 'center',
+          label: 'Got Paid Invoices',
+          field: 'gotPaidNum',
+          sortable: true,
+        },
+        {
           name: 'sendusd',
           align: 'center',
           label: 'Send Amount',
@@ -153,6 +184,16 @@ export default {
           align: 'center',
           label: 'Paid Amount',
           field: 'paidUsd',
+          sortable: true,
+          format: (val) => {
+            return '$ ' + val.toFixed(2)
+          },
+        },
+        {
+          name: 'paidusd',
+          align: 'center',
+          label: 'Got Paid Amount',
+          field: 'gotPaidUsd',
           sortable: true,
           format: (val) => {
             return '$ ' + val.toFixed(2)
@@ -183,6 +224,7 @@ export default {
       },
       rppDefaultOptions: [0, 5, 10, 15, 30, 50],
       rppOptions: [0, 5, 10, 15, 20],
+      userName: '',
     }
   },
   created() {
@@ -201,6 +243,16 @@ export default {
         this.getReportSummary()
       },
     },
+    userName: {
+      immediate: false,
+      handler(newValue) {
+        if (newValue) {
+          this.getReportSummary()
+        } else {
+          this.getReportSummary()
+        }
+      },
+    },
   },
   methods: {
     async getReportSummary() {
@@ -211,9 +263,15 @@ export default {
       if (!this.reportFilters.EndDate) {
         this.reportFilters.EndDate = new Date()
       }
+      const params = {
+        ...this.reportFilters,
+      }
+      if (this.userName) {
+        params.UserName = this.userName
+      }
       this.$api
         .get('/admin/report-summary', {
-          params: this.reportFilters,
+          params: params,
         })
         .then(({ report, count }) => {
           this.rows = report.userUsageSummary || []
@@ -245,6 +303,9 @@ export default {
       this.reportFilters.StartDate = data.startDate
       this.reportFilters.EndDate = data.endDate
       this.getReportSummary()
+    },
+    goToDetail(row) {
+      this.$router.push({ name: 'user.payments.report', params: { userName: row.userName } })
     },
   },
 }
