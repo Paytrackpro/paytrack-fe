@@ -14,12 +14,10 @@ const socket = io('http://localhost:6789', {
 
 socket.on('disconnect', () => {
   state.connected = false
-  // console.log('Disconnected')
 })
 
 socket.on('connect', () => {
   state.connected = true
-  // console.log('Connected')
 })
 
 const joinRoom = (room) => {

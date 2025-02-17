@@ -53,6 +53,7 @@ export default {
       isNotfound: false,
       isUnknownError: false,
       payment: {},
+      paymentUrl: '',
       token: '',
       paymentType: PAYMENT_OBJECT_REQUEST,
       processing: false,
@@ -61,7 +62,13 @@ export default {
   },
   created() {
     this.token = this.$route.params.token || ''
+    this.paymentUrl = this.$store.getters['payment/getPaymentUrl']
     this.fetchData()
+  },
+  computed: {
+    ...mapGetters('payment', {
+      paymentUrlStore: 'getPaymentUrl',
+    }),
   },
   methods: {
     back() {
