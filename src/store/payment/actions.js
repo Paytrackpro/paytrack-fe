@@ -9,9 +9,16 @@ export default {
     }
     return api
       .post(url, payment)
-      .then((data) => {
-        return { data }
+      .then((data) => ({ data }))
+      .catch((err) => {
+        responseError(err)
+        return { error: err }
       })
+  },
+  async createPayUrl({ commit }, payment) {
+    return api
+      .post('/payment/create-url', payment)
+      .then((data) => ({ data }))
       .catch((err) => {
         responseError(err)
         return { error: err }

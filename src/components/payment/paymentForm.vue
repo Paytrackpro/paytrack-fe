@@ -8,13 +8,19 @@
       <div class="row q-gutter-sm">
         <q-btn
           v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
-          label="Send"
+          :label="createPayUrlCheck ? 'Create Url' : 'Send'"
           color="primary"
           class="btn btn-animated"
           :disable="submitting"
-          @click="submit(false)"
+          @click="handleAction"
         >
-          <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
+          <q-tooltip>
+            {{
+              createPayUrlCheck
+                ? '"Create Url" will notify the payment to the recipient.'
+                : '"Send" will notify the payment to the recipient.'
+            }}
+          </q-tooltip>
         </q-btn>
         <q-btn
           :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
@@ -39,11 +45,23 @@
       </div>
     </div>
   </q-card-section>
-  <q-form @submit="submit" class="q-pa-lg" ref="paymentForm">
+  <q-card class="q-pa-none q-pl-md q-pr-md" v-if="createPayUrlCheck">
+    <q-card-section class="q-pa-none q-mb-none q-mt-md">
+      <q-paragraph class="q-mb-md">*This URL is unique and anyone who gets this URL can pay the bill.</q-paragraph>
+    </q-card-section>
+  </q-card>
+  <q-form
+    @submit="submit"
+    :class="['q-pr-lg q-pl-lg q-pb-lg', createPayUrlCheck ? 'q-pt-sm' : 'q-pt-lg']"
+    ref="paymentForm"
+  >
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
-          <div class="col-12 col-md-7">
+          <div class="col-12" v-if="createPayUrlCheck">
+            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
+          </div>
+          <div class="col-12 col-md-7" v-if="!createPayUrlCheck">
             <p class="q-mb-xs text-weight-medium">
               Recipient
               <q-icon name="info">
@@ -64,7 +82,7 @@
               hint="Expects a username on mgmt or an email address"
             />
           </div>
-          <div class="col-12 col-md-1"></div>
+          <div class="col-12 col-md-1" v-if="!createPayUrlCheck"></div>
           <div class="col-12 col-md-4" v-if="!isInvoiceMode">
             <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
             <q-input
@@ -84,6 +102,9 @@
                 <q-icon name="attach_money" />
               </template>
             </q-input>
+          </div>
+          <div class="col-12" v-if="!createPayUrlCheck">
+            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
           </div>
           <div class="col-12 col-md-4" v-if="isInvoiceMode">
             <p class="q-mb-xs">
@@ -175,7 +196,6 @@ import InvoicesMode from 'components/payment/invoicesMode'
 import customInput from '../common/custom_input.vue'
 import { mapActions } from 'vuex'
 import PaymentStatus from 'components/payment/paymentStatus'
-
 export default {
   name: 'paymentForm',
   components: { PaymentSetting, QInputSystemUser, InvoicesMode, PaymentStatus, customInput },
@@ -185,6 +205,7 @@ export default {
     token: String,
     paymentType: String,
     isEdit: Boolean,
+    createType: String,
   },
   data() {
     return {
@@ -210,6 +231,7 @@ export default {
       totalHours: 0.0,
       projectList: [],
       projectOption: [],
+      createPayUrlCheck: false,
     }
   },
   created() {
@@ -289,7 +311,15 @@ export default {
   methods: {
     ...mapActions({
       savePayment: 'payment/save',
+      createPayUrl: 'payment/createPayUrl',
     }),
+    handleAction() {
+      if (this.createPayUrlCheck) {
+        this.createPaymentUrl()
+      } else {
+        this.submit(false)
+      }
+    },
     async submit(isDraft) {
       if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
@@ -338,7 +368,7 @@ export default {
         }
         payment.receiverId = inPutObject.id
       }
-      payment.paymentMethod = this.setting.type
+      payment.paymentMethod = this.setting.tytokpe
       payment.paymentAddress = this.setting.address
       payment.token = this.token
       this.submitting = true
@@ -410,6 +440,73 @@ export default {
         })
       }
       this.totalHours = count
+    },
+    async createPaymentUrl() {
+      if (this.submitting || !this.partner.contactMethod) {
+        return
+      }
+
+      if (this.isInvoiceMode) {
+        if (this.$refs.invoiceMode.getState()) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Please complete the invoice',
+            position: 'bottom',
+          })
+          return
+        }
+      }
+      var valid
+      if (this.inPayment.status !== '' && this.inPayment.status !== 'draft') {
+        valid = await this.$refs.paymentForm.validate()
+        if (!valid) {
+          return
+        }
+      }
+
+      if (!this.inPayment.amount > 0) {
+        this.$q.notify({
+          type: 'negative',
+          message:
+            'Amount must greater than 0. Please fill up the invoices and hourly rate or type amount in simple mode',
+        })
+        return
+      }
+      const payment = { ...this.inPayment }
+      payment.hourlyRate = Number(payment.hourlyRate)
+      payment.status = 'sent'
+      payment.paymentMethod = this.setting.type
+      payment.paymentAddress = this.setting.address
+      payment.token = this.token
+      this.submitting = true
+      let successNotify = 'Payment url created'
+
+      if (this.inPayment.showProjectOnInvoice) {
+        this.projectList.find((project) => {
+          if (project.projectId === this.inPayment.projectId) {
+            this.inPayment.projectName = project.projectName
+            payment.projectName = project.projectName
+          }
+        })
+        payment.details.forEach((detail) => {
+          detail.projectId = this.inPayment.projectId
+          detail.projectName = this.inPayment.projectName
+        })
+      }
+      if (!this.isInvoiceMode) {
+        payment.details = []
+      }
+      payment.amount = Number(payment.amount)
+      const { data } = await this.createPayUrl(payment)
+      this.submitting = false
+      if (data) {
+        this.$emit('saved', data.payment)
+        this.$q.notify({
+          message: successNotify,
+          color: 'positive',
+          icon: 'check',
+        })
+      }
     },
   },
   computed: {

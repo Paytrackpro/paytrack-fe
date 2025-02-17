@@ -381,6 +381,16 @@ export default {
     },
     columns() {
       let flexibleCol = []
+      const paymentTypeCol = {
+        name: 'paymentTypeName',
+        align: 'left',
+        label: 'Payment Type',
+        sortable: true,
+        field: 'paymentType',
+        format: (val) => {
+          return val === 1 ? 'URL' : 'Regular'
+        },
+      }
       const receiverCol = {
         name: 'receiverName',
         align: 'left',
@@ -408,6 +418,12 @@ export default {
           }
         },
         format: (val) => `${val}`,
+      }
+      const hasUrlPayment = this.rows.some((row) => row.paymentType === 1)
+
+      // Chỉ thêm cột nếu có ít nhất 1 URL payment
+      if (hasUrlPayment) {
+        flexibleCol.push(paymentTypeCol)
       }
       if (this.type !== PAYMENT_OBJECT_REQUEST) {
         flexibleCol.push(senderCol)
