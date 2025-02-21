@@ -333,12 +333,16 @@ export default {
       .then((res) => {
         this.userSelection = res
         memberStringOptions = []
-        this.userSelection.forEach((userInfo) => {
-          memberStringOptions.push({
-            label: userInfo.userName,
-            value: userInfo.id,
+        if (Array.isArray(this.userSelection)) {
+          this.userSelection.forEach((userInfo) => {
+            if (userInfo && userInfo.userName && userInfo.id) {
+              memberStringOptions.push({
+                label: userInfo.userName,
+                value: userInfo.id,
+              })
+            }
           })
-        })
+        }
       })
       .catch((err) => {
         responseError(err)
