@@ -12,7 +12,7 @@
           color="primary"
           class="btn btn-animated"
           :disable="submitting"
-          @click="handleAction"
+          @click="handleAction(false)"
         >
           <q-tooltip>
             {{
@@ -27,7 +27,7 @@
           type="button"
           color="secondary"
           class="btn btn-animated"
-          @click="submit(true)"
+          @click="handleAction(true)"
           :disable="submitting"
         >
           <q-tooltip v-if="inPayment.status === ''">
@@ -301,14 +301,18 @@ export default {
       savePayment: 'payment/save',
       createPayUrl: 'payment/createPayUrl',
     }),
-    handleAction() {
+    handleAction(isDraft) {
       if (this.createPayUrlCheck) {
-        this.createPaymentUrl()
+        this.createPaymentUrl(isDraft)
       } else {
-        this.submit(false)
+        this.submit(isDraft)
       }
     },
     async submit(isDraft) {
+      console.log('Submit: ', this.submitting)
+      console.log('isDraft: ', isDraft)
+      console.log('partner: ', this.partner.contactMethod)
+      console.log('Partner: ', this.partner)
       if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
       }
@@ -429,7 +433,7 @@ export default {
       }
       this.totalHours = count
     },
-    async createPaymentUrl() {
+    async createPaymentUrl(isDraft) {
       if (this.submitting || !this.partner.contactMethod) {
         return
       }
@@ -445,14 +449,14 @@ export default {
         }
       }
       var valid
-      if (this.inPayment.status !== '' && this.inPayment.status !== 'draft') {
+      if (!isDraft || (isDraft && this.inPayment.status !== '' && this.inPayment.status !== 'draft')) {
         valid = await this.$refs.paymentForm.validate()
         if (!valid) {
           return
         }
       }
 
-      if (!this.inPayment.amount > 0) {
+      if (!isDraft && !this.inPayment.amount > 0) {
         this.$q.notify({
           type: 'negative',
           message:
@@ -462,12 +466,18 @@ export default {
       }
       const payment = { ...this.inPayment }
       payment.hourlyRate = Number(payment.hourlyRate)
-      payment.status = 'sent'
+      if (isDraft !== true) {
+        payment.status = 'sent'
+      }
       payment.paymentMethod = this.setting.type
       payment.paymentAddress = this.setting.address
       payment.token = this.token
       this.submitting = true
-      let successNotify = 'Payment url created'
+      let successNotify = 'Payment request created'
+
+      if (isDraft !== true) {
+        successNotify = 'Payment url created'
+      }
 
       if (this.inPayment.showProjectOnInvoice) {
         this.projectList.find((project) => {
