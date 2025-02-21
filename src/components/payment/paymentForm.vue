@@ -45,30 +45,19 @@
       </div>
     </div>
   </q-card-section>
-  <q-card class="q-pa-none q-pl-md q-pr-md" v-if="createPayUrlCheck">
-    <q-card-section class="q-pa-none q-mb-none q-mt-md">
-      <q-paragraph class="q-mb-md">*This URL is unique and anyone who gets this URL can pay the bill.</q-paragraph>
-    </q-card-section>
-  </q-card>
-  <q-form
-    @submit="submit"
-    :class="['q-pr-lg q-pl-lg q-pb-lg', createPayUrlCheck ? 'q-pt-sm' : 'q-pt-lg']"
-    ref="paymentForm"
-  >
+  <q-form @submit="submit" class="q-pr-lg q-pl-lg q-py-lg" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
-          <div class="col-12" v-if="createPayUrlCheck">
-            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
-          </div>
-          <div class="col-12 col-md-7" v-if="!createPayUrlCheck">
-            <p class="q-mb-xs text-weight-medium">
+          <div class="col-12 col-md-7">
+            <p class="q-mb-xs text-weight-medium" v-if="!createPayUrlCheck">
               Recipient
               <q-icon name="info">
                 <q-tooltip> The user who will be paying the payment request </q-tooltip>
               </q-icon>
             </p>
             <q-input-system-user
+              v-if="!createPayUrlCheck"
               v-model="partner"
               placeholder="Recipient"
               :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
@@ -81,8 +70,10 @@
               :rules="[(val) => !!val || 'Recipient is required']"
               hint="Expects a username on mgmt or an email address"
             />
+            <p v-if="createPayUrlCheck">*This URL is unique and anyone who gets this URL can pay the bill.</p>
+            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
           </div>
-          <div class="col-12 col-md-1" v-if="!createPayUrlCheck"></div>
+          <div class="col-12 col-md-1"></div>
           <div class="col-12 col-md-4" v-if="!isInvoiceMode">
             <p class="q-mt-none q-mb-xs text-weight-medium">Amount (USD)</p>
             <q-input
@@ -102,9 +93,6 @@
                 <q-icon name="attach_money" />
               </template>
             </q-input>
-          </div>
-          <div class="col-12" v-if="!createPayUrlCheck">
-            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
           </div>
           <div class="col-12 col-md-4" v-if="isInvoiceMode">
             <p class="q-mb-xs">
