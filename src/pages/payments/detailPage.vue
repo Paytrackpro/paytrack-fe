@@ -90,7 +90,7 @@ export default {
         .get(`/payment/${this.$route.params.id}?token=${token}`)
         .then((data) => {
           this.loading = false
-          data.paymentUrl = process.env.BASE_URL_PAY + data.paymentUrl
+          data.paymentUrl = window.location.host + '/url-pay' + data.paymentUrl
           this.payment = data
         })
         .catch((err) => {
