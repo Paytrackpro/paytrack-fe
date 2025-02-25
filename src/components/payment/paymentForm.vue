@@ -309,10 +309,6 @@ export default {
       }
     },
     async submit(isDraft) {
-      console.log('Submit: ', this.submitting)
-      console.log('isDraft: ', isDraft)
-      console.log('partner: ', this.partner.contactMethod)
-      console.log('Partner: ', this.partner)
       if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
       }
@@ -434,7 +430,7 @@ export default {
       this.totalHours = count
     },
     async createPaymentUrl(isDraft) {
-      if (this.submitting || !this.partner.contactMethod) {
+      if (this.submitting) {
         return
       }
 
