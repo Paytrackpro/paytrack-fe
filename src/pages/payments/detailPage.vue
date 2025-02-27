@@ -19,7 +19,7 @@
     <payment-form
       v-if="editing"
       :payment="payment"
-      :isEdit="true"
+      :isEdit="editing"
       :payment-type="paymentType"
       :user="user"
       :token="token"
@@ -90,7 +90,7 @@ export default {
         .get(`/payment/${this.$route.params.id}?token=${token}`)
         .then((data) => {
           this.loading = false
-          data.paymentUrl = window.location.host + '/url-pay' + data.paymentUrl
+          data.paymentUrl = window.location.host + data.paymentUrl
           this.payment = data
         })
         .catch((err) => {

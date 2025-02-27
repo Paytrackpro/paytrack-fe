@@ -136,7 +136,7 @@
               dense
               flat
               class="q-ml-sm copy-width-btn"
-              @click="copy(getRecipientName || '')"
+              @click="copy(payment.paymentUrl || '')"
             >
               <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
               <q-tooltip>Copy Payment Url</q-tooltip>
@@ -1057,6 +1057,9 @@ export default {
       }
       if (this.payment.externalEmail) {
         return this.payment.externalEmail
+      }
+      if (this.payment.paymentUrl.length > 30) {
+        return this.payment.paymentUrl.substring(0, 30) + '...'
       }
       return this.payment.paymentUrl || 'URL undefined, please try again later'
     },

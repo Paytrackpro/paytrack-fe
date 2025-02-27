@@ -8,7 +8,7 @@
       <div class="row q-gutter-sm">
         <q-btn
           v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
-          :label="createPayUrlCheck ? 'Create Url' : 'Send'"
+          :label="createPayUrlCheck ? (!isEdit ? 'Create Url' : 'Published') : 'Send'"
           color="primary"
           class="btn btn-animated"
           :disable="submitting"
@@ -70,8 +70,24 @@
               :rules="[(val) => !!val || 'Recipient is required']"
               hint="Expects a username on mgmt or an email address"
             />
-            <p v-if="createPayUrlCheck">*This URL is unique and anyone who gets this URL can pay the bill.</p>
-            <q-checkbox v-model="createPayUrlCheck" label="Create Payment URL" />
+            <p class="q-mb-md" v-if="createPayUrlCheck && isEdit">
+              <span class="text-size-15">To:&nbsp;&nbsp; {{ getRecipientName() }}</span>
+              <q-btn
+                round
+                dense
+                flat
+                class="q-ml-sm copy-width-btn"
+                v-if="createPayUrlCheck"
+                @click="copy(payment.paymentUrl || '')"
+              >
+                <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                <q-tooltip>Copy Payment Url</q-tooltip>
+              </q-btn>
+            </p>
+            <p v-if="createPayUrlCheck && !isEdit">
+              *This URL is unique and anyone who gets this URL can pay the bill.
+            </p>
+            <q-checkbox v-if="!isEdit" v-model="createPayUrlCheck" label="Create Payment URL" />
           </div>
           <div class="col-12 col-md-1"></div>
           <div class="col-12 col-md-4" v-if="!isInvoiceMode">
@@ -244,6 +260,9 @@ export default {
           responseError(err)
           return { error: err }
         })
+    }
+    if (this.payment.paymentType == 1) {
+      this.createPayUrlCheck = true
     }
   },
   watch: {
@@ -493,6 +512,7 @@ export default {
       payment.amount = Number(payment.amount)
       const { data } = await this.createPayUrl(payment)
       this.submitting = false
+      data.payment.paymentUrl = window.location.host + '/url-pay/' + data.payment.id + '/' + data.payment.paymentCode
       if (data) {
         this.$emit('saved', data.payment)
         this.$q.notify({
@@ -501,6 +521,29 @@ export default {
           icon: 'check',
         })
       }
+    },
+    getRecipientName() {
+      if (this.payment.receiverDisplayName && this.payment.receiverDisplayName.length > 0) {
+        return this.payment.receiverDisplayName + ' (' + this.payment.receiverName + ')'
+      }
+      if (this.payment.receiverName) {
+        return this.payment.receiverName
+      }
+      if (this.payment.externalEmail) {
+        return this.payment.externalEmail
+      }
+      if (this.payment.paymentUrl.length > 30) {
+        return this.payment.paymentUrl.substring(0, 30) + '...'
+      }
+      return this.payment.paymentUrl || 'URL undefined, please try again later'
+    },
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
+      this.$q.notify({
+        type: 'positive',
+        message: 'Copied.',
+        position: 'bottom',
+      })
     },
   },
   computed: {

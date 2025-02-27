@@ -16,8 +16,12 @@ export default {
       })
   },
   async createPayUrl({ commit }, payment) {
+    let url = '/payment/create-url'
+    if (payment.id > 0) {
+      url = `/payment/create-url/${payment.id}`
+    }
     return api
-      .post('/payment/create-url', payment)
+      .post(url, payment)
       .then((data) => ({ data }))
       .catch((err) => {
         responseError(err)
