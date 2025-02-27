@@ -4,14 +4,14 @@
       title="User List"
       :rows="rows"
       :columns="columns"
-      row-key="name"
+      row-key="userName"
       flat
       separator="none"
       v-model:pagination="pagination"
       :hide-pagination="pagination.rowsNumber < 10"
-      :class="
-        pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage == 0 ? 'hide-pagination-number' : ''
-      "
+      :class="{
+        'hide-pagination-number': pagination.rowsNumber <= pagination.rowsPerPage || pagination.rowsPerPage === 0,
+      }"
       :rows-per-page-options="rppOptions"
       :loading="loading"
       :filter="KeySearch"
@@ -50,6 +50,11 @@
       <template v-slot:body-cell-lastSeen="props">
         <q-td :props="props">
           <m-time :time="props.row.lastSeen"></m-time>
+        </q-td>
+      </template>
+      <template v-slot:body-cell-action="props">
+        <q-td :props="props">
+          <q-btn color="orange" label="Report" @click="onReportClick(props.row)" />
         </q-td>
       </template>
       <template v-slot:top-right>
@@ -174,6 +179,13 @@ export default {
           sortable: true,
           format: (val) => date.formatDate(val, 'MM/DD/YYYY'),
         },
+        {
+          name: 'action',
+          align: 'center',
+          label: 'Action',
+          field: 'action',
+          sortable: false,
+        },
       ],
       rows: [],
       rppDefaultOptions: [0, 5, 10, 15, 30, 50],
@@ -258,6 +270,9 @@ export default {
         existUser.pausing = pausing
         this.rows[existIndex] = existUser
       }
+    },
+    onReportClick(row) {
+      this.$router.push({ name: 'user.payments.report', params: { userName: row.userName } })
     },
   },
 }
