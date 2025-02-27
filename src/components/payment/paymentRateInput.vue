@@ -41,6 +41,7 @@ export default {
     readonly: Boolean,
     loading: Boolean,
     exchange: String,
+    rateType: String,
   },
   methods: {
     fetchRate() {
@@ -62,8 +63,9 @@ export default {
         exchange: this.currentExchange,
       }
       this.$emit('update:loading', true)
+      const apiUrl = this.rateType === 'rateForPayUrl' ? '/payment-url/request-rate' : '/payment/request-rate'
       this.$api
-        .post('/payment/request-rate', reqData)
+        .post(apiUrl, reqData)
         .then((data) => {
           if (data.isPaid) {
             return

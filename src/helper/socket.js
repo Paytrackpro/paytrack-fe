@@ -16,6 +16,10 @@ socket.on('disconnect', () => {
   state.connected = false
 })
 
+socket.on('connect', () => {
+  state.connected = true
+})
+
 const joinRoom = (room) => {
   socket.emit('join', room)
 }
@@ -47,8 +51,16 @@ const listenSocketEvent = (eventName, callback) => {
 const removeListenSocketEvent = (eventName, callback) => {
   socket.off(eventName, callback)
 }
+function checkConnectionStatus() {
+  if (state.connected) {
+    return true
+  } else {
+    return false
+  }
+}
 
 export {
+  socket,
   isSocketConnected,
   joinRoom,
   leftRoom,
@@ -56,4 +68,5 @@ export {
   disconnectSocket,
   listenSocketEvent,
   removeListenSocketEvent,
+  checkConnectionStatus,
 }

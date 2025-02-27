@@ -135,7 +135,7 @@
         </q-list>
       </q-scroll-area>
     </q-drawer>
-
+    <div v-if="!miniState" class="version-info text-grey-4 q-pa-md fixed-version">Version: {{ version }}</div>
     <q-page-container>
       <q-page>
         <router-view :approvalCount="approvalCount" :unpaidCount="unpaidCount" @updateUnpaidCount="updateUnpaidCount" />
@@ -147,13 +147,17 @@
 <script>
 import { useQuasar } from 'quasar'
 import role from 'src/consts/role'
-import { connectSocket, disconnectSocket, isSocketConnected } from 'src/helper/socket.js'
+import { socket, connectSocket, disconnectSocket, isSocketConnected } from 'src/helper/socket.js'
 import { ref } from 'vue'
 import { mapGetters } from 'vuex'
-import { api, axios } from 'boot/axios'
+import { Notify } from 'quasar'
+import { version } from 'core-js'
+
 export default {
   data() {
     return {
+      version: process.env.VERSION.replace(/"/g, ''),
+      isConnectSocket: false,
       drawer: false,
       menuList: [
         {
@@ -273,6 +277,16 @@ export default {
       .catch(() => {
         return
       })
+    //Check connected socket
+    socket.on('connect', () => {
+      this.isConnectSocket = true
+      this.showNetworkStatus()
+    })
+    socket.on('disconnect', () => {
+      this.isConnectSocket = false
+      this.showNetworkStatus()
+    })
+    this.isSocketConnected = isSocketConnected()
   },
   beforeUnmount() {
     disconnectSocket()
@@ -302,6 +316,28 @@ export default {
     },
   },
   methods: {
+    disconnectSocketMethod() {
+      disconnectSocket()
+    },
+    connectSocketMethod() {
+      connectSocket(`${this.$store.getters['user/getUser'].id}`)
+    },
+    showNetworkStatus() {
+      if (!this.isConnectSocket) {
+        this.notifyInstance = Notify.create({
+          message: 'You are offline. Please check your internet connection!',
+          color: 'red',
+          position: 'bottom',
+          timeout: 0,
+          icon: 'cloud_off',
+          id: 'offline-notification',
+        })
+      } else {
+        if (this.notifyInstance) {
+          this.notifyInstance()
+        }
+      }
+    },
     shouldDisplayRoute(menuItem) {
       if (menuItem.to == '/report') {
         return this.displayReport

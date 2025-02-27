@@ -1,12 +1,13 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <template>
   <q-form @submit="markAsPaid">
+    <!-- Pay Page -->
     <q-card-section class="card-header">
       <div class="row justify-between">
         <div class="row">
-          <div class="text-h6 title-case">Payment request</div>
+          <div class="text-h6 title-case">Payment request by URL</div>
           <payment-status
-            v-if="payment.status && (!isReceiver || isPaidStatus || isDraftStatus || !isApprovedPayment())"
+            v-if="payment.status && (isPaidStatus || isDraftStatus || !isApprovedPayment())"
             :paymentModel="payment"
             class="q-ml-md"
             :isShowIcon="true"
@@ -23,132 +24,30 @@
             class="q-mr-sm btn btn-animated"
           />
           <q-btn
-            v-if="isUploadDisplay"
-            label="Upload"
-            type="button"
-            color="secondary"
-            @click="uploadReceipt()"
-            class="q-mr-sm btn btn-animated"
-          />
-          <q-btn
-            v-if="editable"
-            label="Edit"
+            v-if="processable && !isRejectedStatus && isApprovedPayment()"
+            label="Pay With Account"
             type="button"
             color="primary"
-            @click="$emit('update:editing', true)"
-            class="q-mr-sm btn btn-animated"
-          />
-          <q-btn
-            v-if="isSentStatus && editable"
-            label="Unsend"
-            type="button"
-            color="orange"
-            @click="unsentInvoice()"
-            class="q-mr-sm btn btn-animated"
-          />
-          <q-btn
-            v-if="isDraftStatus && editable"
-            label="Delete Draft"
-            type="button"
-            color="white"
-            text-color="black"
-            @click="confirm = true"
-            class="q-mr-sm btn btn-animated"
-          />
-          <q-dialog v-model="confirm" persistent>
-            <q-card>
-              <q-card-section class="row items-center">
-                <q-avatar icon="warning" color="primary" text-color="white" size="md" />
-                <span class="q-ml-sm">Are you sure to delete this draft payment request?</span>
-              </q-card-section>
-              <q-card-actions align="right">
-                <q-btn flat unelevated rounded label="Delete" color="primary" v-close-popup @click="deleteDraft()" />
-                <q-btn flat unelevated rounded label="Cancel" color="primary" v-close-popup />
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
-          <q-btn
-            label="Approve"
-            type="button"
-            color="teal"
-            text-color="white"
-            v-if="approvalable"
-            @click="handlerApprovalAction()"
+            @click="showPayOptionDialog()"
             class="q-mr-sm btn btn-animated"
           />
         </div>
       </div>
-      <q-select
-        v-if="isReceiver && isApprovedPayment() && !isPaidStatus && !isDraftStatus"
-        v-model="paymentStatus"
-        :options="statusOption"
-        dense
-        style="max-width: 250px"
-        lazy-rules
-        stack-label
-        emit-value
-        map-options
-        borderless
-        :class="'rounded bg-' + getStatusInfoColor(paymentStatus).statusColor + ' status-select'"
-      >
-        <template v-slot:prepend>
-          <q-icon class="text-white q-ml-md" :name="getStatusInfoColor(paymentStatus).statusIcon" />
-        </template>
-        <template v-slot:option="scope">
-          <q-item
-            v-bind="scope.itemProps"
-            v-on="scope.itemEvents"
-            :class="'bg-' + getStatusInfoColor(scope.opt.value).statusColor"
-          >
-            <q-item-section>
-              <q-item-label class="text-white text-size-14" caption>
-                <q-icon size="sm" :name="getStatusInfoColor(scope.opt.value).statusIcon"></q-icon>
-                {{ scope.opt.label }}</q-item-label
-              >
-            </q-item-section>
-          </q-item>
-        </template>
-      </q-select>
-      <p class="text-red" v-if="payment.status === 'rejected'">
-        <q-icon name="info" color="red" />
-        <b>Rejected Reason:</b> {{ payment.rejectionReason }}
-      </p>
     </q-card-section>
+
+    <!-- Payment Details -->
     <div class="q-ma-lg text-size-15">
       <div class="row q-mb-xs q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-lg-5 col-xl-3 q-py-xs q-my-xs field-shadow">
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 q-py-xs q-my-xs field-shadow">
           <p class="q-mb-md" v-if="!approvalable">
             <span v-if="!isPaymentUrl"
               >{{ isSender ? 'To' : 'From' }}:&nbsp;&nbsp; {{ isSender ? getRecipientName : getSenderName }}</span
             >
-            <span v-else>
-              {{
-                isSender
-                  ? !payment.receiverName
-                    ? 'URL: ' + getRecipientName
-                    : 'To: ' + getRecipientName
-                  : 'From: ' + getSenderName
-              }}</span
-            >
-            <q-btn
-              v-if="isPaymentUrl && !payment.receiverName"
-              round
-              dense
-              flat
-              class="q-ml-sm copy-width-btn"
-              @click="copy(payment.paymentUrl || '')"
-            >
-              <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
-              <q-tooltip>Copy Payment Url</q-tooltip>
-            </q-btn>
+            <span v-if="isPaymentUrl"> {{ isSender ? 'URL: ' + getRecipientName : getSenderName }}</span>
           </p>
           <p class="q-mb-xs d-flex" v-if="approvalable">
             <span style="width: 40px">From</span>
             :&nbsp;&nbsp;{{ getSenderName }}
-          </p>
-          <p class="q-mb-md d-flex" v-if="approvalable">
-            <span style="width: 40px">To</span>
-            :&nbsp;&nbsp;{{ getRecipientName }}
           </p>
           <p class="q-mb-xs text-size-18" v-if="!isShowInvoice">
             <span>Amount (USD):&nbsp;</span>
@@ -173,20 +72,17 @@
           </p>
         </div>
         <div class="col-12 col-sm-6 col-lg-4 q-py-xs q-my-xs field-shadow">
-          <div class="q-mb-xs row" style="align-items: center" v-if="!isApprover && isPaidStatus">
+          <div class="q-mb-xs row" style="align-items: center" v-if="isPaidStatus">
             <span class="paid-area-label">Means:</span>
             <q-chip class="sm-chip q-ml-none" square text-color="white" :color="coinColor(payment.paymentMethod)">
               {{ selectedCoin(payment.paymentMethod).label }}
             </q-chip>
           </div>
-          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+          <div class="q-mb-xs row" v-if="isPaidStatus">
             <span class="paid-area-label">Address:</span>
             <p class="paid-area-value">{{ payment.paymentAddress }}</p>
           </div>
-          <div v-if="isEditPaymentSetting">
-            <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
-          </div>
-          <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)">
+          <div v-if="!processing && !isPaidStatus">
             <p><span class="text-size-15">Accepted Coins</span></p>
             <q-field stack-label borderless>
               <coin-label v-for="(setting, i) of payment.paymentSettings" :key="i" :type="setting.type" />
@@ -200,32 +96,21 @@
             v-model:loading="fetchingRate"
             @update:modelValue="updateLocal"
           />
-          <div class="q-mb-xs row" v-if="isShowExchangeRate">
-            <span class="paid-area-label">Amount:</span>
-            <span class="paid-area-value"
-              >{{ payment.expectedAmount }} {{ (payment.paymentMethod || '').toUpperCase() }}</span
-            >
-          </div>
-          <div class="q-mb-xs row" v-if="!isApprover && isPaidStatus">
+          <div class="q-mb-xs row" v-if="isPaidStatus">
             <span class="paid-area-label">TxId:</span>
             <p class="paid-area-value">{{ payment.txId }}</p>
           </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3 q-py-xs q-my-xs field-shadow">
+        <div class="col-12 col-sm-6 col-lg-4 q-py-xs q-my-xs field-shadow">
           <p class="q-mb-xs d-flex" v-if="!isDraftStatus">
             <span class="width-70">{{ isSender ? 'Sent' : 'Received' }}:</span><m-time :time="payment.sentAt"></m-time>
           </p>
           <p class="q-mb-xs d-flex" v-if="!isDraftStatus">
             <span class="width-70">Edited:</span><m-time :time="payment.updatedAt"></m-time>
           </p>
-          <p class="q-mb-xs d-flex" v-if="!isApprover && isPaidStatus">
+          <p class="q-mb-xs d-flex" v-if="isPaidStatus">
             <span class="width-70">Paid:</span><m-time :time="payment.paidAt"></m-time>
           </p>
-        </div>
-      </div>
-      <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-12 col-lg-4 q-py-xs q-my-xs field-shadow" v-if="displayApprovers">
-          <approver-display :approvers="payment.approvers" />
         </div>
       </div>
       <div class="row q-mb-xs q-mt-sm q-col-gutter-md">
@@ -238,43 +123,6 @@
               <span class="content-wrap">{{ payment.description }}</span>
             </template>
           </q-field>
-        </div>
-      </div>
-      <div class="row q-mb-md q-col-gutter-md">
-        <div class="col-12 col-sm-6 col-lg-4" v-if="displayAttachReceipt">
-          <p class="q-mb-xs">
-            <span class="text-size-15">{{ isSender ? 'Attach Receipt' : 'Receipt' }}</span>
-          </p>
-          <q-field borderless v-if="isSender">
-            <template v-slot:control>
-              <q-file
-                v-model="receiptAttachFile"
-                accept=".jpg, .png, image/*"
-                class="receipt-input-file"
-                label="Pick files"
-                filled
-                @rejected="onRejected"
-                style="max-width: 300px"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="attach_file" />
-                </template>
-              </q-file>
-            </template>
-          </q-field>
-          <q-img
-            style="height: 100px; max-width: 100px; justify-content: center; align-items: center"
-            class="q-mt-sm"
-            v-if="receiptAttachFile != null"
-            :src="getImageUrl()"
-          />
-          <q-img
-            style="height: 100px; max-width: 100px; justify-content: center; align-items: center"
-            class="cursor-pointer zoom-hover-1-05 q-mt-sm"
-            v-if="imageBase64 != '' && receiptAttachFile == null"
-            @click="receiptImageDialog = true"
-            :src="imageBase64"
-          />
         </div>
       </div>
       <div
@@ -300,32 +148,15 @@
           />
         </div>
       </div>
-      <div class="row q-mb-md q-col-gutter-md q-mt-xs" v-if="isDraftStatus && editable && payment.receiverId">
-        <q-checkbox label="Show Draft for Recipient" v-model="payment.showDraftRecipient" @click="update" />
-      </div>
-      <PaymentRejectDialog
-        v-model="paymentRejectDialog"
-        @toggle="toggleOnChildRejectDialog"
-        :paymentId="payment.id"
-        :token="token"
-      />
     </div>
-    <q-dialog v-model="receiptImageDialog">
-      <q-card style="width: 550px; max-width: 80vw">
-        <q-img style="justify-content: center; align-items: center" :src="imageBase64" />
-      </q-card>
-    </q-dialog>
-
+    <!-- Pay Dialog -->
     <q-dialog v-model="payDialog" @update:model-value="disableClose">
       <q-card style="width: 900px; max-width: 80vw">
         <q-card-section class="row q-pb-none">
           <div class="text-h6">Pay</div>
         </q-card-section>
         <q-card-section class="q-py-none q-px-lg row">
-          <div
-            v-if="payment.paymentSettings && payment.paymentSettings.length && user.id == payment.receiverId"
-            class="col-12 q-pb-none field-shadow"
-          >
+          <div v-if="payment.paymentSettings && payment.paymentSettings.length" class="col-12 q-pb-none field-shadow">
             <payment-setting-method
               :defautMethod="payment.paymentMethod"
               @change="methodChange"
@@ -429,40 +260,127 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <!-- Pay Option Dialog -->
+    <q-dialog v-model="payOptionDialog">
+      <q-card :style="{ width: selectedOptionPay ? '50%' : 'auto', maxWidth: selectedOptionPay ? '500px' : 'none' }">
+        <q-card-section>
+          <div class="text-h6">Choose an Option</div>
+        </q-card-section>
+
+        <q-card-section class="q-mb-none q-pb-none">
+          <q-radio v-model="selectedOptionPay" label="Login" val="login" :style="{ marginRight: '25px' }" />
+          <q-radio v-model="selectedOptionPay" label="Create New Account" val="register" />
+        </q-card-section>
+
+        <q-card-section class="q-mt-none q-pt-none">
+          <q-form class="form-area" @submit="goLogin()" v-if="loginType == 0">
+            <div class="inputContainer">
+              <input id="user_name_id" v-model="username" type="text" class="input" placeholder="Username" required />
+              <label for="user_name_id" class="label">
+                <q-icon name="person" class="input-icon" />
+                <span class="input-label q-ml-xs">Username</span></label
+              >
+            </div>
+            <div class="between-area">
+              <span class="text-accent msg-error" v-if="msg.username">{{ msg.username }}</span>
+            </div>
+            <div class="inputContainer" align="right">
+              <input
+                id="password_id"
+                v-model="password"
+                :type="isPwd ? 'password' : 'text'"
+                class="input"
+                placeholder="Password"
+                required
+              />
+              <label for="password_id" class="label">
+                <q-icon name="key" class="input-icon" />
+                <span class="input-label q-ml-xs">Password</span>
+              </label>
+              <q-icon
+                :name="isPwd ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer after-input-icon"
+                @click="isPwd = !isPwd"
+              />
+            </div>
+            <div class="between-area" v-if="authType == 0">
+              <span class="text-accent msg-error" v-if="msg.password">{{ msg.password }}</span>
+            </div>
+            <div class="inputContainer" align="right" v-if="methodOptionPay">
+              <input
+                id="password_id"
+                v-model="passwordCfm"
+                :type="isRePwd ? 'password' : 'text'"
+                class="input"
+                placeholder="Password"
+                required
+              />
+              <label for="re_password_id" class="label">
+                <q-icon name="key" class="input-icon" />
+                <span class="input-label q-ml-xs">Re-Password</span>
+              </label>
+              <q-icon
+                :name="isRePwd ? 'visibility_off' : 'visibility'"
+                class="cursor-pointer after-input-icon"
+                @click="isRePwd = !isRePwd"
+              />
+            </div>
+            <div class="between-area" v-if="authType == 0">
+              <span class="text-accent msg-error" v-if="msg.passwordCfm">{{ msg.passwordCfm }}</span>
+            </div>
+            <p v-if="error" class="q-mb-none text-red">{{ error }}</p>
+          </q-form>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="row justify-end">
+            <q-card-actions :style="{ display: 'flex', alignItems: 'center', gap: '12px' }">
+              <q-btn flat label="Cancel" @click="cancel()" />
+              <div v-if="selectedOptionPay" class="d-flex justify-content-center q-ml-2">
+                <q-btn
+                  :label="!methodOptionPay ? 'Sign in' : 'Sign up'"
+                  color="primary"
+                  class="text-center"
+                  :loading="signBtnLoading"
+                  :disable="!username || !password"
+                  @click="!methodOptionPay ? goLogin() : register()"
+                />
+              </div>
+            </q-card-actions>
+          </div>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-form>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import MTime from 'components/common/mTime'
-import PaymentSetting from 'components/payment/paymentSetting'
 import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentRateInput from 'components/payment/paymentRateInput'
-import PaymentRejectDialog from 'components/payment/paymentRejectDialog'
 import InvoicesMode from 'components/payment/invoicesMode'
-import ApproverDisplay from 'components/payment/approverDisplay'
 import paymentSettingMethod from 'components/payment/paymentSettingMethod'
 import coinLabel from '../common/coin_label.vue'
 import PaymentStatus from 'components/payment/paymentStatus'
 import { ref } from 'vue'
-import { api, axios } from 'boot/axios'
+import { api } from 'boot/axios'
 import { STATUS_INFO } from 'src/consts/common'
 import { COINS } from 'src/consts/common'
 import { joinRoom, leftRoom, listenSocketEvent, removeListenSocketEvent } from 'src/helper/socket'
-
 export default {
-  name: 'paymentDetail',
+  name: 'paymentUrlDetail',
   components: {
     MTime,
-    PaymentSetting,
     PaymentRateInput,
-    PaymentRejectDialog,
     InvoicesMode,
-    ApproverDisplay,
     paymentSettingMethod,
     coinLabel,
     PaymentStatus,
+  },
+  props: {
+    modelValue: Object,
   },
   data() {
     return {
@@ -476,6 +394,7 @@ export default {
       paymentStatus: '',
       confirm: false,
       payDialog: false,
+      payOptionDialog: false,
       receiptAttachFile: ref(null),
       imageNewName: '',
       imageBase64: '',
@@ -483,25 +402,29 @@ export default {
       totalHours: 0.0,
       exchangeOption: [],
       exchange: 'binance',
-      rateFor: 'rateForPayLogin',
+      selectedOptionPay: 'login',
+      methodOptionPay: false,
+      rateFor: 'rateForPayUrl',
+      username: '',
+      password: '',
+      passwordCfm: '',
+      error: null,
+      isPwd: true,
+      isRePwd: true,
+      isOtp: false,
+      otp: '',
+      msg: [],
+      authType: 0,
+      loginType: 0,
+      signBtnLoading: false,
+      previousRouter: '',
+      allowCreate: false,
     }
   },
-  props: {
-    modelValue: Object,
-    user: Object,
-    token: String,
-    paymentType: String,
-    editing: Boolean,
-    processing: Boolean,
-    approvalCount: Number,
-    unpaidCount: Number,
-  },
   created() {
-    //if exhchange options empty, initialization
     if (this.exchangeOption.length == 0 && !this.isPaidStatus) {
-      //if projectList empty, get projectList
       this.$api
-        .get(`/payment/exchange-list`)
+        .get(`/payment-url/exchange-list`)
         .then((data) => {
           data.forEach((exchange) => {
             this.exchangeOption.push({
@@ -516,27 +439,169 @@ export default {
           return { error: err }
         })
     }
+    this.$api
+      .get(`/auth/auth-method`)
+      .then((data) => {
+        this.authType = data
+        this.loginType = data
+      })
+      .catch((err) => {
+        responseError(err)
+      })
+  },
+  computed: {
+    ...mapGetters({
+      role: 'user/getRole',
+      user: 'user/getUser',
+    }),
+    isAuthenticated() {
+      return !!(this.user && this.user.id)
+    },
+    statusOption() {
+      let status = []
+      //17/10 - Status changes are not affected by the approver. Always display 3 editing statuses: Received, Rejected, Payable
+      status.push({
+        label: 'Received',
+        value: 'sent',
+      })
+      status.push({
+        label: 'Payable',
+        value: 'confirmed',
+      })
+      status.push({
+        label: 'Rejected',
+        value: 'rejected',
+      })
+      return status
+    },
+    coinsAccepted() {
+      if (this.payment.paymentSettings && this.payment.paymentSettings.length) {
+        return this.payment.paymentSettings
+          .map((el) => el.type)
+          .join(', ')
+          .toUpperCase()
+      }
+      return ''
+    },
+    isApprover() {
+      return this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id
+    },
+    editable() {
+      let isAllowStatus =
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1
+      let isSender = this.payment.senderId === this.user.id
+      return isAllowStatus && isSender
+    },
+    processable() {
+      return (
+        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
+        (this.payment.receiverId === this.user.id || this.payment.receiverId === 0)
+      )
+    },
+    approvalable() {
+      return !this.isUserApproved() && !['rejected', 'paid', 'confirmed'].includes(this.payment.status)
+    },
+    rejectable() {
+      return this.user.id == this.payment.receiverId && ['sent'].includes(this.payment.status)
+    },
+    isShowInvoice() {
+      if (!this.payment.details) {
+        return false
+      }
+      return this.payment.details.length > 0
+    },
+    isReceiver() {
+      return this.user.id == this.payment.receiverId
+    },
+    isSender() {
+      return this.payment.senderId === this.user.id
+    },
+    isEditPaymentSetting() {
+      const isPaymentSettingExist = this.payment.paymentSettings && this.payment.paymentSettings.length
+      return isPaymentSettingExist && !this.isReceiver && !this.isPaidStatus
+    },
+    isPaidStatus() {
+      return this.payment.status == 'paid'
+    },
+    isRejectedStatus() {
+      return this.payment.status == 'rejected'
+    },
+    isDraftStatus() {
+      return this.payment.status == 'draft'
+    },
+    isSentStatus() {
+      return this.payment.status == 'sent'
+    },
+    isConfirmedStatusChange() {
+      return this.paymentStatus == 'confirmed'
+    },
+    isUnavailableMarkPaid() {
+      return this.txId == ''
+    },
+    isShowExchangeRate() {
+      return this.payment.status == 'paid'
+    },
+    displayApprovers() {
+      return (
+        (this.payment.receiverId === this.user.id || this.payment.senderId === this.user.id) &&
+        this.payment.approvers &&
+        this.payment.approvers.length > 0
+      )
+    },
+    isShowCost() {
+      var isShowCost = true
+      let approver = this.payment.approvers || []
+      approver.forEach((el) => {
+        if (el.approverId == this.user.id) {
+          isShowCost = el.showCost
+          return
+        }
+      })
+      return isShowCost
+    },
+    getRecipientName() {
+      if (this.payment.receiverDisplayName && this.payment.receiverDisplayName.length > 0) {
+        return this.payment.receiverDisplayName + ' (' + this.payment.receiverName + ')'
+      }
+      if (this.payment.receiverName) {
+        return this.payment.receiverName
+      }
+      if (this.payment.externalEmail) {
+        return this.payment.externalEmail
+      }
+      return this.payment.paymentUrl || 'URL undefined, please try again later'
+    },
+    getSenderName() {
+      if (this.payment.senderDisplayName && this.payment.senderDisplayName.length > 0) {
+        return this.payment.senderDisplayName + ' (' + this.payment.senderName + ')'
+      }
+      return this.payment.senderName || this.payment.externalEmail
+    },
+    displayAttachReceipt() {
+      return (this.isPaidStatus && this.isSender) || (this.imageBase64 != '' && this.isReceiver)
+    },
+    isUploadDisplay() {
+      return this.isPaidStatus && this.isSender && this.receiptAttachFile != null
+    },
+    getProjectLink: function () {
+      if (!this.payment || this.payment.projectId < 1) {
+        return '#'
+      }
+      return '/settings/project/' + this.payment.projectId
+    },
+    isPaymentUrl() {
+      return !!this.payment?.paymentUrl
+    },
   },
   methods: {
     ...mapActions({
       savePayment: 'payment/save',
+      login: 'user/login',
+      setLogin: 'user/setLogin',
     }),
     cancel() {
-      if (this.processing) {
-        this.$emit('update:processing', false)
-        return
-      }
-      //if is approvals list, back to prev page (dashboard)
-      if (this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id) {
-        if (this.approvalCount < 1) {
-          this.$router.push({ path: `/get-paid` })
-          return
-        }
-        this.$router.back()
-        return
-      }
-      const path = this.paymentType === PAYMENT_OBJECT_REQUEST ? 'get-paid' : 'pay'
-      this.$router.push({ path: `/${path}` })
+      this.selectedOptionPay = 'login'
+      this.payOptionDialog = false
     },
     processPayment() {
       this.$emit('update:processing', true)
@@ -556,6 +621,7 @@ export default {
         id: this.payment.id,
         txId: txId,
         token: this.token,
+        payerId: this.user.id,
         paymentMethod: this.payment.paymentMethod,
         paymentAddress: this.payment.paymentAddress,
         convertRate: this.payment.convertRate,
@@ -563,7 +629,7 @@ export default {
         expectedAmount: Number(this.payment.expectedAmount),
       }
       this.$api
-        .post('/payment/process', reqData)
+        .post('/payment-url/process', reqData)
         .then((data) => {
           this.paying = false
           this.$emit('update:modelValue', data)
@@ -575,11 +641,17 @@ export default {
           })
           this.hidePayDialog()
           this.$emit('updateUnpaidCount', this.unpaidCount - 1)
+          if (this.isAuthenticated) {
+            this.goToDetail(data.id)
+          }
         })
         .catch((err) => {
           this.paying = false
           responseError(err)
         })
+    },
+    goToDetail(id) {
+      this.$router.push({ path: `/pay/${id}` })
     },
     async update() {
       const form = {
@@ -723,6 +795,17 @@ export default {
     showPayDialog() {
       this.payDialog = true
       joinRoom('exchangeRate')
+    },
+    showPayOptionDialog() {
+      this.payOptionDialog = true
+      this.previousRoute = this.$route.fullPath
+    },
+    handleConfirmPayOption() {
+      if (this.selectedOptionPay == 'login') {
+        this.$router.push({ path: '/login' })
+      } else {
+        this.$router.push({ path: '/register' })
+      }
     },
     hidePayDialog() {
       this.payDialog = false
@@ -869,6 +952,244 @@ export default {
       }
       return isAllApproved
     },
+    async goLogin(otpString) {
+      const { error, data } = await this.login({
+        username: this.username,
+        password: this.password,
+        loginType: this.loginType,
+        isOtp: this.isOtp,
+        otp: otpString,
+      })
+      if (error) {
+        this.error = error.message
+        return
+      }
+      if (data.otp) {
+        this.isOtp = true
+        return
+      }
+      this.$q.notify({
+        message: 'Login successful',
+        color: 'positive',
+        icon: 'check',
+      })
+      this.payOptionDialog = false
+      this.payDialog = true
+      this.$router.push({ path: this.previousRoute || '/approvals' })
+    },
+    validateRequiredField(name, value) {
+      if (value && value.length > 0) {
+        this.msg[name] = ''
+        return
+      }
+      this.msg[name] = 'Please enter your ' + name
+    },
+    openPasskeyMgr() {
+      this.signBtnLoading = true
+      this.$api
+        .post('/auth/assertion-options', {})
+        .then((res) => {
+          if (!res.error) {
+            const resultData = JSON.parse(res.data)
+            if (!resultData || !resultData.options) {
+              return
+            }
+            const opts = resultData.options
+            const sessionKey = resultData.sessionkey
+            this.handlerLoginFinish(opts, sessionKey, false)
+          } else {
+            Notify.create({
+              type: 'negative',
+              message: res.msg,
+            })
+            this.signBtnLoading = false
+          }
+        })
+        .catch((err) => {
+          this.signBtnLoading = false
+          responseError(err)
+        })
+    },
+    loginWithOldAccount() {
+      if (this.loginType == 0) {
+        this.loginType = 1
+      } else {
+        this.loginType = 0
+      }
+    },
+    async handlerLoginFinish(opts, sessionKey, startConditionalUI) {
+      let asseResp
+      try {
+        asseResp = await startAuthentication(opts.publicKey, startConditionalUI)
+      } catch (error) {
+        this.signBtnLoading = false
+        console.log('Conditional UI request was aborted')
+        return
+      }
+      this.$api
+        .post('/auth/assertion-result?sessionKey=' + sessionKey, asseResp)
+        .then((res) => {
+          this.setLogin(res)
+          this.$router.push({ path: '/approvals' })
+        })
+        .catch((err) => {
+          this.signBtnLoading = false
+          responseError(err)
+        })
+    },
+    async handlerFinishRegistration(options, sessionKey) {
+      let asseResp
+      try {
+        asseResp = await startRegistration(options.publicKey)
+      } catch (error) {
+        this.loading = false
+        console.log('Conditional UI request was aborted')
+        this.cancelRegisterUser(sessionKey)
+        return
+      }
+      this.$api
+        .post(
+          '/auth/register-finish?sessionKey=' + sessionKey + '&dispName=' + this.displayName + '&email=' + this.email,
+          asseResp
+        )
+        .then((res) => {
+          this.setLogin(res)
+          this.$router.push({ path: '/approvals' })
+        })
+        .catch((err) => {
+          this.loading = false
+          this.cancelRegisterUser(sessionKey)
+          responseError(err)
+        })
+    },
+    registerUserPasskey() {
+      this.loading = true
+      this.$api
+        .post('/auth/register-start?username=' + this.username, {})
+        .then((res) => {
+          const resultData = JSON.parse(res)
+          let sessionKey
+          let options
+          if (resultData) {
+            options = resultData.options
+            sessionKey = resultData.sessionkey
+          }
+          if (!options) {
+            if (sessionKey && sessionKey != '') {
+              this.cancelRegisterUser(sessionKey)
+            }
+            this.loading = false
+            return
+          }
+          this.handlerFinishRegistration(options, sessionKey)
+        })
+        .catch((err) => {
+          this.loading = false
+          responseError(err)
+        })
+    },
+    async register() {
+      if (!this.isValidUsername(this.username) || !this.isValidEmail(this.email)) {
+        return
+      }
+      if (this.authType == 1) {
+        this.registerUserPasskey()
+        return
+      }
+      if (!this.isValidPassword(this.password) || !this.isValidPasswordCfm(this.passwordCfm)) {
+        return
+      }
+
+      try {
+        await this.$store.dispatch('user/register', {
+          username: this.username,
+          password: this.password,
+          ...(this.displayName && { displayName: this.displayName }),
+          ...(this.email && { email: this.email }),
+        })
+
+        this.$q.notify({
+          message: 'Register successful',
+          color: 'positive',
+          icon: 'check',
+        })
+
+        await this.goLogin()
+      } catch (error) {
+        this.error = error.response ? error.response.data.message : error.message
+      }
+    },
+    checkingDestination($e) {
+      // checking
+      let status = DESTINATION_CHECK_CHECKING
+      this.$api
+        .get(`/auth/username-checking?userName=` + this.username)
+        .then(({ found, id, userName, message }) => {
+          status = DESTINATION_CHECK_DONE
+          if (found) {
+            this.msg['username'] = 'Username already exists'
+            this.allowCreate = false
+          } else {
+            this.msg['username'] = ''
+            this.allowCreate = true
+          }
+        })
+        .catch(() => {
+          this.status = DESTINATION_CHECK_FAIL
+          this.msg['username'] = 'Check username failed'
+          this.allowCreate = false
+        })
+    },
+    cancelRegisterUser(sessionKey) {
+      this.$api
+        .post('/auth/cancel-register?sessionKey=' + sessionKey)
+        .then((res) => {
+          console.log('cancel register successfully')
+        })
+        .catch((err) => {
+          responseError(err)
+        })
+    },
+    validateUsername(value) {
+      if (this.isValidUsername(value)) {
+        this.msg['username'] = ''
+        return
+      }
+      this.msg['username'] = 'Please enter your username'
+    },
+    validatePasswordField(value) {
+      if (this.isValidPassword(value)) {
+        this.msg['password'] = ''
+        return
+      }
+      this.msg['password'] = 'Password must be at least 6 characters. Please re-enter your password'
+    },
+    validateEmail(value) {
+      if (this.isValidEmail(value)) {
+        this.msg['email'] = ''
+        return
+      }
+      this.msg['email'] = 'Please enter a valid email address'
+    },
+    validatePasswordConfirm(value) {
+      if (this.isValidPasswordCfm(value)) {
+        this.msg['passwordCfm'] = ''
+        return
+      }
+      this.msg['passwordCfm'] = 'Password confirmation does not match'
+    },
+    isValidEmail(value) {
+      return !value || (value && /^[^@]+@\w+(\.\w+)+\w$/.test(value))
+    },
+    isValidUsername(value) {
+      return value && value.length > 0
+    },
+    isValidPassword(value) {
+      return value && value.length >= 6
+    },
+    isValidPasswordCfm(value) {
+      return !value || (value && value === this.password)
+    },
   },
   watch: {
     modelValue: {
@@ -934,152 +1255,27 @@ export default {
         this.exchange = newExchange
       },
     },
-  },
-  computed: {
-    ...mapGetters({
-      role: 'user/getRole',
-    }),
-    statusOption() {
-      let status = []
-      //17/10 - Status changes are not affected by the approver. Always display 3 editing statuses: Received, Rejected, Payable
-      status.push({
-        label: 'Received',
-        value: 'sent',
-      })
-      status.push({
-        label: 'Payable',
-        value: 'confirmed',
-      })
-      status.push({
-        label: 'Rejected',
-        value: 'rejected',
-      })
-      return status
-    },
-    coinsAccepted() {
-      if (this.payment.paymentSettings && this.payment.paymentSettings.length) {
-        return this.payment.paymentSettings
-          .map((el) => el.type)
-          .join(', ')
-          .toUpperCase()
-      }
-      return ''
-    },
-    isApprover() {
-      return this.payment.receiverId != this.user.id && this.payment.senderId != this.user.id
-    },
-    editable() {
-      let isAllowStatus =
-        ['draft', 'sent', 'confirmed', 'wait approve', 'approved', 'rejected'].indexOf(this.payment.status) !== -1
-      let isSender = this.payment.senderId === this.user.id
-      return isAllowStatus && isSender
-    },
-    processable() {
-      return (
-        ['draft', 'sent', 'confirmed', 'wait approve', 'approved'].indexOf(this.payment.status) !== -1 &&
-        (this.payment.receiverId === this.user.id || (this.token && this.payment.receiverId === 0))
-      )
-    },
-    approvalable() {
-      if (this.user.id != this.payment.receiverId && this.user.id != this.payment.senderId && this.payment.status) {
-        return !this.isUserApproved() && !['rejected', 'paid', 'confirmed'].includes(this.payment.status)
-      } else {
-        return false
-      }
-    },
-    rejectable() {
-      return this.user.id == this.payment.receiverId && ['sent'].includes(this.payment.status)
-    },
-    isShowInvoice() {
-      if (!this.payment.details) {
-        return false
-      }
-      return this.payment.details.length > 0
-    },
-    isReceiver() {
-      return this.user.id == this.payment.receiverId
-    },
-    isSender() {
-      return this.payment.senderId === this.user.id
-    },
-    isEditPaymentSetting() {
-      const isPaymentSettingExist = this.payment.paymentSettings && this.payment.paymentSettings.length
-      return isPaymentSettingExist && !this.isApprover && !this.isReceiver && !this.isPaidStatus
-    },
-    isPaidStatus() {
-      return this.payment.status == 'paid'
-    },
-    isRejectedStatus() {
-      return this.payment.status == 'rejected'
-    },
-    isDraftStatus() {
-      return this.payment.status == 'draft'
-    },
-    isSentStatus() {
-      return this.payment.status == 'sent'
-    },
-    isConfirmedStatusChange() {
-      return this.paymentStatus == 'confirmed'
-    },
-    isUnavailableMarkPaid() {
-      return this.txId == ''
-    },
-    isShowExchangeRate() {
-      return !this.isApprover && this.payment.status == 'paid'
-    },
-    displayApprovers() {
-      return (
-        (this.payment.receiverId === this.user.id || this.payment.senderId === this.user.id) &&
-        this.payment.approvers &&
-        this.payment.approvers.length > 0
-      )
-    },
-    isShowCost() {
-      var isShowCost = true
-      let approver = this.payment.approvers || []
-      approver.forEach((el) => {
-        if (el.approverId == this.user.id) {
-          isShowCost = el.showCost
-          return
+    selectedOptionPay: {
+      immediate: true,
+      handler(newOption) {
+        if (newOption == 'login') {
+          this.methodOptionPay = false
+        } else {
+          this.methodOptionPay = true
         }
-      })
-      return isShowCost
+      },
     },
-    isPaymentUrl() {
-      return !!this.payment?.paymentUrl
+    username(value) {
+      this.username = value
+      this.validateRequiredField('username', value)
     },
-    getRecipientName() {
-      if (this.payment.receiverDisplayName && this.payment.receiverDisplayName.length > 0) {
-        return this.payment.receiverDisplayName + ' (' + this.payment.receiverName + ')'
-      }
-      if (this.payment.receiverName) {
-        return this.payment.receiverName
-      }
-      if (this.payment.externalEmail) {
-        return this.payment.externalEmail
-      }
-      if (this.payment.paymentUrl.length > 30) {
-        return this.payment.paymentUrl.substring(0, 30) + '...'
-      }
-      return this.payment.paymentUrl || 'URL undefined, please try again later'
+    password(value) {
+      this.password = value
+      this.validateRequiredField('password', value)
     },
-    getSenderName() {
-      if (this.payment.senderDisplayName && this.payment.senderDisplayName.length > 0) {
-        return this.payment.senderDisplayName + ' (' + this.payment.senderName + ')'
-      }
-      return this.payment.senderName || this.payment.externalEmail
-    },
-    displayAttachReceipt() {
-      return (this.isPaidStatus && this.isSender) || (this.imageBase64 != '' && this.isReceiver)
-    },
-    isUploadDisplay() {
-      return this.isPaidStatus && this.isSender && this.receiptAttachFile != null
-    },
-    getProjectLink: function () {
-      if (!this.payment || this.payment.projectId < 1) {
-        return '#'
-      }
-      return '/settings/project/' + this.payment.projectId
+    passwordCfm(value) {
+      this.passwordCfm = value
+      this.validatePasswordConfirm(value)
     },
   },
 }
