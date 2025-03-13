@@ -1,6 +1,8 @@
 const MDateFormat = 'YYYY-MM-DD'
 const MDateFormat1 = 'MM/DD/YYYY'
-export { MDateFormat, MDateFormat1 }
+const MDateFormat2 = 'YYYY-MM-DD HH:mm:ss'
+
+export { MDateFormat, MDateFormat1, MDateFormat2 }
 export const DESTINATION_CHECK_NONE = 0
 export const DESTINATION_CHECK_CHECKING = 1
 export const DESTINATION_CHECK_FAIL = 2
