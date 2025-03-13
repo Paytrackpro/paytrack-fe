@@ -290,9 +290,6 @@ export default {
     })
     this.isSocketConnected = isSocketConnected()
   },
-  mounted() {
-    console.log(`Phiên bản hiện tại là: ${process.env.VERSION}`)
-  },
   beforeUnmount() {
     disconnectSocket()
   },

@@ -1,6 +1,13 @@
 <template>
   <q-card flat class="content-container">
-    <payment-form :payment="payment" :payment-type="paymentType" :user="user" @saved="saved" @cancel="cancel" />
+    <payment-form
+      :payment="payment"
+      :payment-type="paymentType"
+      :createType="createType"
+      :user="user"
+      @saved="saved"
+      @cancel="cancel"
+    />
   </q-card>
 </template>
 
@@ -36,6 +43,7 @@ export default {
         showDateOnInvoiceLine: false,
         showProjectOnInvoice: true,
       },
+      createType: 'createPayment',
     }
   },
   computed: {

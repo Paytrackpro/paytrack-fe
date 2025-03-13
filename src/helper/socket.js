@@ -19,7 +19,6 @@ socket.on('disconnect', () => {
 
 socket.on('connect', () => {
   state.connected = true
-  // console.log('Connected')
 })
 
 const joinRoom = (room) => {
