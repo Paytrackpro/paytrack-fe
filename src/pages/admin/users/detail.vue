@@ -1,16 +1,19 @@
 <template>
   <div class="q-ma-lg q-pb-lg q-pr-lg">
     <q-btn flat icon="undo" type="button" color="primary" class="btn-animated btn q-mb-md btn-radius" @click="back">
-      <q-tooltip> Back to list page </q-tooltip>
+      <q-tooltip>Back to list page</q-tooltip>
     </q-btn>
-    <q-card flat class="content-container q-pb-lg q-pr-lg">
-      <q-form @submit="updateUserInfo">
-        <q-card-section class="card-header">
-          <div class="row justify-between">
-            <div class="text-h6 title-case">User Update</div>
-            <q-btn label="Save" class="btn btn-animated" type="submit" color="primary" />
+    <q-card flat class="content-container q-pb-lg">
+      <q-card-section class="card-header w-full">
+        <div class="row justify-between items-center">
+          <div class="text-h6 title-case">User Update</div>
+          <div class="row justify-end">
+            <q-btn label="Save" class="btn btn-animated q-mr-md" type="submit" color="primary" />
+            <q-btn label="Show Report" class="btn btn-animated" type="button" color="orange" @click="goToReport" />
           </div>
-        </q-card-section>
+        </div>
+      </q-card-section>
+      <q-form @submit="updateUserInfo">
         <div class="q-ml-lg q-mt-md">
           <div class="row q-mb-md q-col-gutter-md">
             <div class="col-12 col-sm-6 col-lg-4">
@@ -23,7 +26,9 @@
                 :rules="[(val) => (val && val.length > 0) || 'Please enter username']"
               />
             </div>
-            <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
+            <div class="col-12 col-sm-6 col-lg-4">
+              <custom-input :label="'Display Name'" v-model="displayName" :placeholder="'Display name'" />
+            </div>
           </div>
           <div class="row q-mb-md q-col-gutter-md">
             <div class="col-12 col-sm-6 col-lg-4">
@@ -107,6 +112,9 @@ export default {
     },
     back() {
       this.$router.back()
+    },
+    goToReport() {
+      this.$router.push({ name: 'user.payments.report', params: { userName: this.userName } })
     },
   },
 }

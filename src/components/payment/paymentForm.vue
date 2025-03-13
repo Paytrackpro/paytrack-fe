@@ -8,20 +8,26 @@
       <div class="row q-gutter-sm">
         <q-btn
           v-if="inPayment.status === 'draft' || inPayment.status === 'rejected' || inPayment.status === ''"
-          label="Send"
+          :label="createPayUrlCheck ? (!isEdit ? 'Create Url' : 'Published') : 'Send'"
           color="primary"
           class="btn btn-animated"
           :disable="submitting"
-          @click="submit(false)"
+          @click="handleAction(false)"
         >
-          <q-tooltip> 'Send' will notify the payment to the recipient </q-tooltip>
+          <q-tooltip>
+            {{
+              createPayUrlCheck
+                ? '"Create Url" will notify the payment to the recipient.'
+                : '"Send" will notify the payment to the recipient.'
+            }}
+          </q-tooltip>
         </q-btn>
         <q-btn
           :label="inPayment.status === '' ? 'Save as draft' : 'Update'"
           type="button"
           color="secondary"
           class="btn btn-animated"
-          @click="submit(true)"
+          @click="handleAction(true)"
           :disable="submitting"
         >
           <q-tooltip v-if="inPayment.status === ''">
@@ -39,18 +45,19 @@
       </div>
     </div>
   </q-card-section>
-  <q-form @submit="submit" class="q-pa-lg" ref="paymentForm">
+  <q-form @submit="submit" class="q-pr-lg q-pl-lg q-py-lg" ref="paymentForm">
     <div class="row q-gutter-md">
       <div class="col-12 col-md-6">
         <div class="row">
           <div class="col-12 col-md-7">
-            <p class="q-mb-xs text-weight-medium">
+            <p class="q-mb-xs text-weight-medium" v-if="!createPayUrlCheck">
               Recipient
               <q-icon name="info">
                 <q-tooltip> The user who will be paying the payment request </q-tooltip>
               </q-icon>
             </p>
             <q-input-system-user
+              v-if="!createPayUrlCheck"
               v-model="partner"
               placeholder="Recipient"
               :readonly="user.id !== inPayment.senderId || ['draft', ''].indexOf(inPayment.status) === -1"
@@ -63,6 +70,24 @@
               :rules="[(val) => !!val || 'Recipient is required']"
               hint="Expects a username on mgmt or an email address"
             />
+            <p class="q-mb-md" v-if="createPayUrlCheck && isEdit">
+              <span class="text-size-15">To:&nbsp;&nbsp; {{ getRecipientName() }}</span>
+              <q-btn
+                round
+                dense
+                flat
+                class="q-ml-sm copy-width-btn"
+                v-if="createPayUrlCheck"
+                @click="copy(payment.paymentUrl || '')"
+              >
+                <q-icon size="xs" class="custom-icon" :name="'o_content_copy'" />
+                <q-tooltip>Copy Payment Url</q-tooltip>
+              </q-btn>
+            </p>
+            <p v-if="createPayUrlCheck && !isEdit">
+              *This URL is unique and anyone who gets this URL can pay the bill.
+            </p>
+            <q-checkbox v-if="!isEdit" v-model="createPayUrlCheck" label="Create Payment URL" />
           </div>
           <div class="col-12 col-md-1"></div>
           <div class="col-12 col-md-4" v-if="!isInvoiceMode">
@@ -175,7 +200,6 @@ import InvoicesMode from 'components/payment/invoicesMode'
 import customInput from '../common/custom_input.vue'
 import { mapActions } from 'vuex'
 import PaymentStatus from 'components/payment/paymentStatus'
-
 export default {
   name: 'paymentForm',
   components: { PaymentSetting, QInputSystemUser, InvoicesMode, PaymentStatus, customInput },
@@ -185,6 +209,7 @@ export default {
     token: String,
     paymentType: String,
     isEdit: Boolean,
+    createType: String,
   },
   data() {
     return {
@@ -210,6 +235,7 @@ export default {
       totalHours: 0.0,
       projectList: [],
       projectOption: [],
+      createPayUrlCheck: false,
     }
   },
   created() {
@@ -234,6 +260,9 @@ export default {
           responseError(err)
           return { error: err }
         })
+    }
+    if (this.payment.paymentType == 1) {
+      this.createPayUrlCheck = true
     }
   },
   watch: {
@@ -289,7 +318,15 @@ export default {
   methods: {
     ...mapActions({
       savePayment: 'payment/save',
+      createPayUrl: 'payment/createPayUrl',
     }),
+    handleAction(isDraft) {
+      if (this.createPayUrlCheck) {
+        this.createPaymentUrl(isDraft)
+      } else {
+        this.submit(isDraft)
+      }
+    },
     async submit(isDraft) {
       if (this.submitting || (!isDraft && !this.partner.contactMethod)) {
         return
@@ -338,7 +375,7 @@ export default {
         }
         payment.receiverId = inPutObject.id
       }
-      payment.paymentMethod = this.setting.type
+      payment.paymentMethod = this.setting.tytokpe
       payment.paymentAddress = this.setting.address
       payment.token = this.token
       this.submitting = true
@@ -410,6 +447,103 @@ export default {
         })
       }
       this.totalHours = count
+    },
+    async createPaymentUrl(isDraft) {
+      if (this.submitting) {
+        return
+      }
+
+      if (this.isInvoiceMode) {
+        if (this.$refs.invoiceMode.getState()) {
+          this.$q.notify({
+            type: 'negative',
+            message: 'Please complete the invoice',
+            position: 'bottom',
+          })
+          return
+        }
+      }
+      var valid
+      if (!isDraft || (isDraft && this.inPayment.status !== '' && this.inPayment.status !== 'draft')) {
+        valid = await this.$refs.paymentForm.validate()
+        if (!valid) {
+          return
+        }
+      }
+
+      if (!isDraft && !this.inPayment.amount > 0) {
+        this.$q.notify({
+          type: 'negative',
+          message:
+            'Amount must greater than 0. Please fill up the invoices and hourly rate or type amount in simple mode',
+        })
+        return
+      }
+      const payment = { ...this.inPayment }
+      payment.hourlyRate = Number(payment.hourlyRate)
+      if (isDraft !== true) {
+        payment.status = 'sent'
+      }
+      payment.paymentMethod = this.setting.type
+      payment.paymentAddress = this.setting.address
+      payment.token = this.token
+      this.submitting = true
+      let successNotify = 'Payment request created'
+
+      if (isDraft !== true) {
+        successNotify = 'Payment url created'
+      }
+
+      if (this.inPayment.showProjectOnInvoice) {
+        this.projectList.find((project) => {
+          if (project.projectId === this.inPayment.projectId) {
+            this.inPayment.projectName = project.projectName
+            payment.projectName = project.projectName
+          }
+        })
+        payment.details.forEach((detail) => {
+          detail.projectId = this.inPayment.projectId
+          detail.projectName = this.inPayment.projectName
+        })
+      }
+      if (!this.isInvoiceMode) {
+        payment.details = []
+      }
+      payment.amount = Number(payment.amount)
+      const { data } = await this.createPayUrl(payment)
+      this.submitting = false
+      data.payment.paymentUrl = window.location.host + '/url-pay/' + data.payment.id + '/' + data.payment.paymentCode
+      if (data) {
+        this.$emit('saved', data.payment)
+        this.$q.notify({
+          message: successNotify,
+          color: 'positive',
+          icon: 'check',
+        })
+      }
+    },
+    getRecipientName() {
+      if (this.payment.receiverDisplayName && this.payment.receiverDisplayName.length > 0) {
+        return this.payment.receiverDisplayName + ' (' + this.payment.receiverName + ')'
+      }
+      if (this.payment.receiverName) {
+        return this.payment.receiverName
+      }
+      if (this.payment.externalEmail) {
+        return this.payment.externalEmail
+      }
+      if (this.payment.paymentUrl.length > 30) {
+        return this.payment.paymentUrl.substring(0, 30) + '...'
+      }
+      return this.payment.paymentUrl || 'URL undefined, please try again later'
+    },
+    async copy(text) {
+      await navigator.clipboard.writeText(text)
+      this.$q.notify({
+        type: 'positive',
+        message: 'Copied.',
+        position: 'bottom',
+      })
     },
   },
   computed: {

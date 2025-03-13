@@ -19,7 +19,7 @@
     <payment-form
       v-if="editing"
       :payment="payment"
-      :isEdit="true"
+      :isEdit="editing"
       :payment-type="paymentType"
       :user="user"
       :token="token"
@@ -63,6 +63,9 @@ export default {
     this.token = this.$route.params.token || ''
     this.fetchData()
   },
+  computed: {
+    ...mapGetters('payment', {}),
+  },
   methods: {
     back() {
       //if is approvals list, back to prev page (dashboard)
@@ -87,6 +90,7 @@ export default {
         .get(`/payment/${this.$route.params.id}?token=${token}`)
         .then((data) => {
           this.loading = false
+          data.paymentUrl = window.location.host + data.paymentUrl
           this.payment = data
         })
         .catch((err) => {

@@ -68,6 +68,15 @@ const routes = [
         },
       },
       {
+        path: 'system-report/user/:userName',
+        name: 'user.payments.report',
+        component: () => import('pages/admin/users/userPaymentReport.vue'),
+        meta: {
+          roles: [ROLE.ADMIN],
+          title: 'System Report Details',
+        },
+      },
+      {
         path: 'report/',
         name: 'report',
         component: () => import('pages/admin/report.vue'),
@@ -162,11 +171,20 @@ const routes = [
     component: () => import('src/layouts/PublicLayout.vue'),
     children: [
       {
-        path: '/payment/:id(\\d+)/:token',
+        path: 'payment/:id(\\d+)/:token',
         name: 'payment.detail',
         component: () => import('pages/payments/detailPage.vue'),
         meta: {
           title: 'Payment Detail',
+        },
+      },
+      {
+        path: 'url-pay/:id(\\d+)/:code',
+        name: 'payUrlPage',
+        component: () => import('pages/payments/payUrlPage.vue'),
+        meta: {
+          title: 'Pay URL',
+          public: true,
         },
       },
     ],

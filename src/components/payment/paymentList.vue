@@ -333,12 +333,16 @@ export default {
       .then((res) => {
         this.userSelection = res
         memberStringOptions = []
-        this.userSelection.forEach((userInfo) => {
-          memberStringOptions.push({
-            label: userInfo.userName,
-            value: userInfo.id,
+        if (Array.isArray(this.userSelection)) {
+          this.userSelection.forEach((userInfo) => {
+            if (userInfo && userInfo.userName && userInfo.id) {
+              memberStringOptions.push({
+                label: userInfo.userName,
+                value: userInfo.id,
+              })
+            }
           })
-        })
+        }
       })
       .catch((err) => {
         responseError(err)
@@ -381,6 +385,16 @@ export default {
     },
     columns() {
       let flexibleCol = []
+      const paymentTypeCol = {
+        name: 'paymentTypeName',
+        align: 'left',
+        label: 'Payment Type',
+        sortable: true,
+        field: 'paymentType',
+        format: (val) => {
+          return val === 1 ? 'URL' : 'Regular'
+        },
+      }
       const receiverCol = {
         name: 'receiverName',
         align: 'left',
@@ -408,6 +422,12 @@ export default {
           }
         },
         format: (val) => `${val}`,
+      }
+      const hasUrlPayment = this.rows.some((row) => row.paymentType === 1)
+
+      // Chỉ thêm cột nếu có ít nhất 1 URL payment
+      if (hasUrlPayment) {
+        flexibleCol.push(paymentTypeCol)
       }
       if (this.type !== PAYMENT_OBJECT_REQUEST) {
         flexibleCol.push(senderCol)
@@ -526,7 +546,6 @@ export default {
     },
 
     onSocketMessage(data) {
-      // reload list
       this.getPayments({
         ...pathParamsToPaging(this.$route, this.pagination, true),
         requestType: this.type,
