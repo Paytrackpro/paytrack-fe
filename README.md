@@ -1,45 +1,125 @@
-# [Application Scope](https://code.cryptopower.dev/mgmt-ng/fe/-/wikis/home)
+# 🚀 MGMT Frontend (Quasar Framework)
 
-# Run Project
+> Frontend application for the MGMT system, built with Quasar Framework and Vue.js.
 
-### Config ENV
+---
 
-add `.env` file and update `.env` file with BASE_URL=[server url]
+## 📘 Application Scope
 
-### Run Project
+See full documentation in the [Project Wiki](https://code.cryptopower.dev/mgmt-ng/fe/-/wikis/home)
 
-**install dependencies:**
+---
 
-`npm install`
+## 🛠 Getting Started
 
-**run project:**
+### 1. Clone the Repository
 
-`npm run dev`
+```bash
+git clone https://code.cryptopower.dev/mgmt-ng/fe.git
+cd fe
+```
 
-**Check lint errors:**
+### 2. Configure Environment
 
-`npm run lint`
+Create a `.env` file in the root directory:
 
-**Auto format code to with lint config:**
+```env
+BASE_URL=https://your-api-server.com
+```
 
-`npm run format`
+You can use `.env.example` as a template.
 
-### Deploy to test or production (with webserver)
+---
 
-- Run `npm run build` or `yarn build`
-- After success you will see the path of output folder
+### 3. Install Dependencies
 
+```bash
+npm install
+# or
+yarn install
+```
+
+---
+
+### 4. Run Development Server
+
+```bash
+npm run dev
+# or
+yarn dev
+```
+
+The app will be available at: [http://localhost:9000](http://localhost:9000)
+
+---
+
+### 5. Linting & Formatting
+
+- **Lint code:**
+
+  ```bash
+  npm run lint
   ```
-    Build succeeded
-    Build mode................ spa
-    Pkg quasar................ v2.11.7
-    Pkg @quasar/app-webpack... v3.7.2
-    Pkg webpack............... v5
-    Debugging................. no
-    Publishing................ no
-    Transpiled JS..... yes (Babel)
-    ==========================
-    Output folder............. D:\mgmt-fe\dist\spa  // This line
+
+- **Auto format code:**
+
+  ```bash
+  npm run format
   ```
 
-- copy that folder to your webserver
+---
+
+## 📦 Build & Deployment
+
+### 1. Build Project
+
+```bash
+npm run build
+# or
+yarn build
+```
+
+You will see output like:
+
+```
+Build succeeded
+Build mode................ spa
+Pkg quasar................ v2.11.7
+Pkg @quasar/app-webpack... v3.7.2
+Pkg webpack............... v5
+Debugging................. no
+Publishing................ no
+Transpiled JS............. yes (Babel)
+==========================
+Output folder............. dist/spa
+```
+
+### 2. Deploy to Web Server
+
+Copy the output folder to your web server directory:
+
+```bash
+cp -r dist/spa/* /var/www/your-domain.com/html/
+```
+
+For **Nginx**, an example config:
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    root /var/www/your-domain.com/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+---
+
+## 🧾 License
+
+This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
