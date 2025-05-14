@@ -43,3 +43,4 @@ add `.env` file and update `.env` file with BASE_URL=[server url]
   ```
 
 - copy that folder to your webserver
+END
