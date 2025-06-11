@@ -21,6 +21,10 @@ socket.on('connect', () => {
   state.connected = true
 })
 
+socket.on('connect', () => {
+  state.connected = true
+})
+
 const joinRoom = (room) => {
   socket.emit('join', room)
 }
