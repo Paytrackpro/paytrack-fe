@@ -235,7 +235,8 @@
           </p>
           <q-field stack-label borderless class="description-field">
             <template v-slot:control>
-              <span class="content-wrap">{{ payment.description }}</span>
+              <span v-if="!isEditMode" class="content-wrap" v-html="renderedDescription(payment.description)"></span>
+              <span v-else class="content-wrap">{{ payment.description }}</span>
             </template>
           </q-field>
         </div>
@@ -468,6 +469,7 @@ export default {
     return {
       txId: '',
       methods: [],
+      isEditMode: false,
       expanded: false,
       fetchingRate: false,
       paying: false,
@@ -868,6 +870,18 @@ export default {
         })
       }
       return isAllApproved
+    },
+    renderedDescription(text) {
+      if (!text) return ''
+      const urlRegex = /(https?:\/\/[^\s]+)/g
+      const withLinks = text.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`
+      })
+      return withLinks.replace(/\n/g, '<br>').replace(/  /g, '&nbsp;&nbsp;')
+    },
+    enableEditMode() {
+      this.isEditMode = true
+      this.$emit('update:editing', true)
     },
   },
   watch: {
