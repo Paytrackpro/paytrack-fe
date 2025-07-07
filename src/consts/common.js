@@ -42,7 +42,7 @@ export const STATUS_INFO = Object.freeze({
   },
   approved: {
     statusShow: 'Approved',
-    statusColor: 'info',
+    statusColor: 'cyan-9',
     statusIcon: 'how_to_reg',
   },
   waiting_approval: {
