@@ -61,4 +61,6 @@ export const COINS = [
   { label: 'BTC', value: 'btc', color: 'orange-7' },
   { label: 'LTC', value: 'ltc', color: 'blue-grey-7' },
   { label: 'DCR', value: 'dcr', color: 'cyan-8' },
+  { label: 'ETH', value: 'eth', color: 'blue-6' },
+  { label: 'USDT', value: 'usdt', color: 'green-6' },
 ]

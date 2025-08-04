@@ -8,6 +8,7 @@ import SecurityForm from 'components/settings/securityForm'
 import ApprovalMethod from 'components/settings/approvalMethod'
 import InvoiceForm from 'components/settings/invoiceForm'
 import ProjectForm from 'components/settings/projectForm'
+import AddPaymentMethodDialog from 'components/settings/AddPaymentMethodDialog'
 
 export {
   SwitchButton2FA,
@@ -20,4 +21,5 @@ export {
   ApprovalMethod,
   InvoiceForm,
   ProjectForm,
+  AddPaymentMethodDialog,
 }
