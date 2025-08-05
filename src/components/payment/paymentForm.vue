@@ -136,7 +136,7 @@
         </div>
       </div>
       <div class="col-12 col-md-5 q-ml-lg">
-        <payment-setting v-model="inPayment.paymentSettings" ref="setting" label="Payment Settings" />
+        <payment-setting v-model="settings" ref="setting" label="Payment Settings" />
       </div>
     </div>
     <div class="row">
@@ -195,7 +195,7 @@
 <script>
 import { PAYMENT_TYPE_OPTIONS } from 'src/consts/paymentType'
 import QInputSystemUser from 'components/common/qInputSystemUser'
-import PaymentSetting from 'components/payment/paymentSetting'
+import PaymentSetting from 'components/payment/paymentSettingV2'
 import InvoicesMode from 'components/payment/invoicesMode'
 import customInput from '../common/custom_input.vue'
 import { mapActions } from 'vuex'
@@ -213,10 +213,7 @@ export default {
   },
   data() {
     return {
-      setting: {
-        type: '',
-        address: '',
-      },
+      settings: [],
       partner: {
         id: 0,
         value: '',
@@ -291,26 +288,25 @@ export default {
         if (!this.isEdit) {
           this.inPayment.hourlyRate = this.user.hourlyLaborRate
         }
-        // setup correct payment setting
-        if (payment.paymentMethod && payment.paymentAddress) {
-          this.setting = {
-            type: payment.paymentMethod,
-            address: payment.paymentAddress,
-          }
+        // setup correct payment settings
+        if (payment.paymentSettings && payment.paymentSettings.length > 0) {
+          // Use existing payment settings
+          this.settings = payment.paymentSettings.map((s) => ({
+            type: s.type || s.coin?.toLowerCase(),
+            address: s.address,
+            network: s.network,
+          }))
+        } else if (payment.paymentMethod && payment.paymentAddress) {
+          // Convert single payment method to array format
+          this.settings = [
+            {
+              type: payment.paymentMethod,
+              address: payment.paymentAddress,
+            },
+          ]
         } else {
-          const settings = payment.paymentSettings || []
-          let filled = true
-          for (let setting of settings) {
-            if (setting.isDefault) {
-              this.setting = { ...setting }
-              return
-            }
-          }
-          if (!filled && settings.length > 0) {
-            this.setting = {
-              ...settings[0],
-            }
-          }
+          // Initialize with empty array, the component will handle loading saved methods
+          this.settings = []
         }
       },
     },
@@ -375,8 +371,13 @@ export default {
         }
         payment.receiverId = inPutObject.id
       }
-      payment.paymentMethod = this.setting.tytokpe
-      payment.paymentAddress = this.setting.address
+      // Handle multiple payment settings
+      if (this.settings && this.settings.length > 0) {
+        payment.paymentSettings = this.settings
+        // For backward compatibility, set the first one as primary
+        payment.paymentMethod = this.settings[0].type
+        payment.paymentAddress = this.settings[0].address
+      }
       payment.token = this.token
       this.submitting = true
       let successNotify = 'Payment request created'
@@ -411,15 +412,6 @@ export default {
           color: 'positive',
           icon: 'check',
         })
-      }
-    },
-    changePaymentMethod(val) {
-      const settings = this.inPayment.paymentSettings || []
-      this.setting.address = ''
-      for (let setting of settings) {
-        if (setting.type === this.setting.type) {
-          this.setting.address = setting.address
-        }
       }
     },
     updateDetail(details) {
@@ -484,8 +476,13 @@ export default {
       if (isDraft !== true) {
         payment.status = 'sent'
       }
-      payment.paymentMethod = this.setting.type
-      payment.paymentAddress = this.setting.address
+      // Handle multiple payment settings
+      if (this.settings && this.settings.length > 0) {
+        payment.paymentSettings = this.settings
+        // For backward compatibility, set the first one as primary
+        payment.paymentMethod = this.settings[0].type
+        payment.paymentAddress = this.settings[0].address
+      }
       payment.token = this.token
       this.submitting = true
       let successNotify = 'Payment request created'
