@@ -47,80 +47,115 @@
         </div>
       </q-card-section>
 
-      <q-card-section v-if="paymentMethods.length === 0" class="text-center q-py-lg">
+      <q-card-section v-if="loadingMethods" class="text-center q-py-lg">
+        <q-spinner color="primary" size="50px" />
+        <p class="text-grey-6 q-mt-md">Loading payment methods...</p>
+      </q-card-section>
+
+      <q-card-section v-else-if="paymentMethods.length === 0" class="text-center q-py-lg">
         <q-icon name="wallet" size="60px" color="grey-5" class="q-mb-md" />
         <p class="text-grey-6">No payment methods added yet</p>
         <q-btn color="primary" icon="add" label="Add Your First Wallet" @click="showAddDialog = true" unelevated />
       </q-card-section>
 
-      <q-markup-table v-else flat bordered>
-        <thead>
-          <tr>
-            <th class="text-left">COIN</th>
-            <th class="text-left">NETWORK</th>
-            <th class="text-left">WALLET ADDRESS</th>
-            <th class="text-center">STATUS</th>
-            <th class="text-center">ACTION</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="method in paymentMethods" :key="method.id">
-            <td>
-              <div class="row items-center">
-                <coin-label :type="method.coin.toLowerCase()" />
-                <span class="q-ml-sm">{{ method.coin }}</span>
-              </div>
-            </td>
-            <td>{{ getNetworkDisplayName(method.network) }}</td>
-            <td>
-              <div class="row items-center">
-                <span class="text-monospace">{{ method.address }}</span>
-                <q-btn
-                  icon="content_copy"
-                  flat
-                  dense
-                  size="sm"
-                  class="q-ml-sm"
-                  @click="copyToClipboard(method.address)"
-                >
-                  <q-tooltip>Copy address</q-tooltip>
+      <div class="relative-position">
+        <q-markup-table v-if="!loadingMethods" flat bordered>
+          <thead>
+            <tr>
+              <th class="text-left">COIN</th>
+              <th class="text-left">NETWORK</th>
+              <th class="text-left">WALLET ADDRESS</th>
+              <th class="text-center">STATUS</th>
+              <th class="text-center">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="method in paymentMethods" :key="method.id">
+              <td>
+                <div class="row items-center">
+                  <coin-label :type="method.coin.toLowerCase()" />
+                  <span class="q-ml-sm">{{ method.coin }}</span>
+                </div>
+              </td>
+              <td>{{ getNetworkDisplayName(method.network) }}</td>
+              <td>
+                <div class="row items-center">
+                  <span class="text-monospace">{{ method.address }}</span>
+                  <q-btn
+                    icon="content_copy"
+                    flat
+                    dense
+                    size="sm"
+                    class="q-ml-sm"
+                    @click="copyToClipboard(method.address)"
+                  >
+                    <q-tooltip>Copy address</q-tooltip>
+                  </q-btn>
+                </div>
+              </td>
+              <td class="text-center">
+                <q-toggle v-model="method.enabled" color="primary" @update:model-value="togglePaymentMethod(method)" />
+              </td>
+              <td class="text-center">
+                <q-btn icon="delete" flat dense color="negative" @click="confirmDelete(method)">
+                  <q-tooltip>Delete</q-tooltip>
                 </q-btn>
-              </div>
-            </td>
-            <td class="text-center">
-              <q-toggle v-model="method.enabled" color="primary" @update:model-value="togglePaymentMethod(method)" />
-            </td>
-            <td class="text-center">
-              <q-btn icon="delete" flat dense color="negative" @click="confirmDelete(method)">
-                <q-tooltip>Delete</q-tooltip>
-              </q-btn>
-            </td>
-          </tr>
-        </tbody>
-      </q-markup-table>
+              </td>
+            </tr>
+          </tbody>
+        </q-markup-table>
+      </div>
     </q-card>
 
     <!-- Add Payment Method Dialog -->
     <AddPaymentMethodDialog
       v-model="showAddDialog"
       :supported-networks="supportedNetworks"
-      @added="loadPaymentMethods"
+      @added="onPaymentMethodAdded"
     />
 
     <!-- Delete Confirmation Dialog -->
-    <q-dialog v-model="showDeleteConfirm">
-      <q-card>
-        <q-card-section>
+    <q-dialog v-model="showDeleteConfirm" persistent>
+      <q-card style="min-width: 400px">
+        <q-card-section class="row items-center q-pb-none">
           <div class="text-h6">Delete Payment Method</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup :disable="deletingMethod" />
         </q-card-section>
-        <q-card-section>
-          Are you sure you want to delete this payment method?
-          <br />
-          <strong>{{ selectedMethod?.coin }} - {{ selectedMethod?.address }}</strong>
+
+        <q-separator />
+
+        <q-card-section class="q-pt-lg">
+          <div class="row items-center q-mb-md">
+            <q-icon name="warning" color="negative" size="24px" />
+            <span class="q-ml-sm">Are you sure you want to delete this payment method?</span>
+          </div>
+
+          <q-card flat bordered>
+            <q-card-section>
+              <div class="row items-center q-mb-xs">
+                <coin-label :type="selectedMethod?.coin?.toLowerCase()" />
+                <span class="q-ml-sm text-weight-medium">{{ selectedMethod?.coin }}</span>
+              </div>
+              <div class="text-caption text-grey-7">
+                <strong>Network:</strong> {{ getNetworkDisplayName(selectedMethod?.network) }}
+              </div>
+              <div class="text-caption text-grey-7">
+                <strong>Address:</strong>
+                <span class="text-monospace">{{ selectedMethod?.address }}</span>
+              </div>
+            </q-card-section>
+          </q-card>
+
+          <div class="text-caption text-negative q-mt-md">
+            <q-icon name="info" size="16px" />
+            This action cannot be undone.
+          </div>
         </q-card-section>
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" v-close-popup />
-          <q-btn flat label="Delete" color="negative" @click="deletePaymentMethod" />
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat label="Cancel" color="primary" v-close-popup :disable="deletingMethod" />
+          <q-btn unelevated label="Delete" color="negative" @click="deletePaymentMethod" :loading="deletingMethod" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -148,6 +183,8 @@ export default {
     return {
       user: {},
       loading: false,
+      loadingMethods: false,
+      deletingMethod: false,
       showAddDialog: false,
       showDeleteConfirm: false,
       selectedMethod: null,
@@ -210,6 +247,7 @@ export default {
     },
 
     async loadPaymentMethods() {
+      this.loadingMethods = true
       try {
         const data = await this.$api.get('/user/payment-methods')
         this.paymentMethods = data.map((method) => ({
@@ -222,6 +260,8 @@ export default {
           type: 'negative',
           message: 'Failed to load payment methods',
         })
+      } finally {
+        this.loadingMethods = false
       }
     },
 
@@ -271,22 +311,32 @@ export default {
       this.showDeleteConfirm = true
     },
 
+    onPaymentMethodAdded() {
+      // Small delay to ensure dialog closes smoothly
+      setTimeout(() => {
+        this.loadPaymentMethods()
+      }, 300)
+    },
+
     async deletePaymentMethod() {
+      this.deletingMethod = true
       try {
         await this.$api.delete(`/user/payment-methods/${this.selectedMethod.id}`)
         this.$q.notify({
           type: 'positive',
           message: 'Payment method deleted successfully',
         })
+        this.showDeleteConfirm = false
+        this.selectedMethod = null
         await this.loadPaymentMethods()
       } catch (error) {
         this.$q.notify({
           type: 'negative',
           message: 'Failed to delete payment method',
         })
+      } finally {
+        this.deletingMethod = false
       }
-      this.showDeleteConfirm = false
-      this.selectedMethod = null
     },
   },
 }

@@ -187,10 +187,25 @@
             <payment-setting :modelValue="payment.paymentSettings" readonly label="Accepted Payment Settings" />
           </div>
           <div v-if="isApprover || (user.id == payment.receiverId && !processing && !isPaidStatus)">
-            <p><span class="text-size-15">Accepted Coins</span></p>
-            <q-field stack-label borderless>
-              <coin-label v-for="(setting, i) of payment.paymentSettings" :key="i" :type="setting.type" />
-            </q-field>
+            <p><span class="text-size-15">Accepted Payment Settings</span></p>
+            <div v-for="(setting, i) of payment.paymentSettings" :key="i" class="q-mb-sm">
+              <div class="row items-center">
+                <div class="col-auto">
+                  <coin-label :type="setting.type" />
+                </div>
+                <div class="col q-ml-sm">
+                  <div class="text-weight-medium">{{ setting.type.toUpperCase() }}</div>
+                  <div class="text-caption text-grey-6">
+                    {{ getNetworkName(setting.network) }} • {{ truncateAddress(setting.address) }}
+                  </div>
+                </div>
+                <div class="col-auto">
+                  <q-btn icon="content_copy" flat dense size="sm" @click="copyAddress(setting.address)">
+                    <q-tooltip>Copy address</q-tooltip>
+                  </q-btn>
+                </div>
+              </div>
+            </div>
           </div>
           <PaymentRateInput
             v-if="isShowExchangeRate"
@@ -436,7 +451,7 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import MTime from 'components/common/mTime'
-import PaymentSetting from 'components/payment/paymentSetting'
+import PaymentSetting from 'components/payment/paymentSettingV2'
 import { PAYMENT_OBJECT_REQUEST } from 'src/consts/paymentType'
 import { responseError } from 'src/helper/error'
 import PaymentRateInput from 'components/payment/paymentRateInput'
@@ -523,6 +538,29 @@ export default {
     ...mapActions({
       savePayment: 'payment/save',
     }),
+    getNetworkName(networkCode) {
+      // Map common network codes to display names
+      const networkMap = {
+        btc: 'Bitcoin',
+        eth: 'Ethereum',
+        bsc: 'Binance Smart Chain',
+        polygon: 'Polygon',
+        arbitrum: 'Arbitrum',
+        optimism: 'Optimism',
+        avalanche: 'Avalanche',
+        solana: 'Solana',
+        tron: 'Tron',
+        ERC20: 'Ethereum (ERC20)',
+        BEP20: 'BSC (BEP20)',
+        TRC20: 'Tron (TRC20)',
+      }
+      return networkMap[networkCode] || networkCode || 'Network'
+    },
+    truncateAddress(address) {
+      if (!address) return ''
+      if (address.length <= 20) return address
+      return `${address.slice(0, 10)}...${address.slice(-10)}`
+    },
     cancel() {
       if (this.processing) {
         this.$emit('update:processing', false)
@@ -692,6 +730,15 @@ export default {
         type: 'positive',
         message: 'Copied.',
         position: 'bottom',
+      })
+    },
+    async copyAddress(address) {
+      await navigator.clipboard.writeText(address)
+      this.$q.notify({
+        type: 'positive',
+        message: 'Address copied to clipboard',
+        position: 'bottom',
+        timeout: 1500,
       })
     },
     deleteDraft() {

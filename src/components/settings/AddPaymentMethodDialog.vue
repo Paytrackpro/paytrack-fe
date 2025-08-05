@@ -4,7 +4,7 @@
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Add New Wallet Address</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close" flat round dense @click="closeDialog" />
       </q-card-section>
 
       <q-separator />
@@ -74,7 +74,7 @@
       </q-card-section>
 
       <q-card-actions align="right" class="q-pa-lg q-pt-none">
-        <q-btn flat label="Cancel" color="grey-7" v-close-popup class="q-mr-sm" />
+        <q-btn flat label="Cancel" color="grey-7" @click="closeDialog" class="q-mr-sm" />
         <q-btn
           label="Verify"
           color="positive"
@@ -235,20 +235,32 @@ export default {
           address: this.form.address,
         })
 
+        // Reset loading state first
+        this.loading = false
+
         this.$q.notify({
           type: 'positive',
           message: 'Payment method added successfully',
+          position: 'top',
+          timeout: 2000,
         })
-        this.$emit('added')
+
+        // Reset form for next use
+        this.resetForm()
+
+        // Close dialog and emit event
         this.show = false
+        this.$emit('added')
       } catch (error) {
+        this.loading = false
         console.error('Failed to add payment method:', error)
         this.$q.notify({
           type: 'negative',
-          message: error.message || 'Failed to add payment method',
+          message: error.response?.data?.message || error.message || 'Failed to add payment method',
+          position: 'top',
+          timeout: 3000,
         })
       }
-      this.loading = false
     },
 
     resetForm() {
@@ -261,6 +273,11 @@ export default {
         isValid: null,
         message: '',
       }
+    },
+
+    closeDialog() {
+      this.resetForm()
+      this.show = false
     },
   },
 }
