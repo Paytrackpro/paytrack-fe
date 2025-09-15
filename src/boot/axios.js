@@ -28,7 +28,7 @@ api.interceptors.request.use(function (config) {
 
 api.interceptors.response.use(
   (response) => {
-    if (response.status === 200) {
+    if (response.status >= 200 && response.status < 300) {
       return Promise.resolve(response.data.data)
     }
     return Promise.reject({

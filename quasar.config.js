@@ -14,7 +14,6 @@ const { configure } = require('quasar/wrappers')
 const fs = require('fs')
 const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'))
 
-
 module.exports = configure(function (ctx) {
   return {
     // https://v2.quasar.dev/quasar-cli-webpack/supporting-ts
@@ -76,8 +75,8 @@ module.exports = configure(function (ctx) {
 
       // env: require('dotenv').config().parsed,
       env: {
-        VERSION: JSON.stringify(pkg.version), 
-        ...require('dotenv').config().parsed
+        VERSION: JSON.stringify(pkg.version),
+        ...require('dotenv').config().parsed,
       },
     },
 
